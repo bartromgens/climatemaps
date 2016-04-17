@@ -1,0 +1,31 @@
+html {
+    height:100%;
+}
+
+body {
+    height:100%;
+}
+
+#map-container {
+    position: relative;
+    height:80%;
+}
+
+#map {
+    height: 100%;
+    width: 100%;
+}
+
+.station-name {
+    top: 10px;
+    left: 3em;
+}
+
+#info {
+    position: absolute;
+    border-radius: 5px;
+    background-color: black;
+    color: white;
+    padding: 7px;
+    z-index: 1;
+}
