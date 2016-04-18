@@ -25,9 +25,12 @@ def angle(v1, v2):
 
 
 class ContourPlotConfig(object):
-    def __init__(self):
+    def __init__(self, level_lower=0, level_upper=100, colormap=plt.cm.jet):  # jet, jet_r, YlOrRd, gist_rainbow
         self.n_contours = 11
         self.min_angle_between_segments = 15
+        self.level_lower = level_lower
+        self.level_upper = level_upper
+        self.colormap = colormap
 
 
 class Contour(object):
@@ -42,10 +45,9 @@ class Contour(object):
         figure = plt.figure()
         ax = figure.add_subplot(111)
         # levels = numpy.linspace(10, 90, num=self.config.n_contours)
-        levels = numpy.linspace(0, 100, num=self.config.n_contours)
+        levels = numpy.linspace(self.config.level_lower, self.config.level_upper, num=self.config.n_contours)
         # contours = plt.contourf(lonrange, latrange, Z, levels=levels, cmap=plt.cm.plasma)
-        cmap = plt.cm.jet_r  # jet, jet_r, YlOrRd, gist_rainbow
-        contours = ax.contour(self.lonrange, self.latrange, self.Z, levels=levels, cmap=cmap)
+        contours = ax.contour(self.lonrange, self.latrange, self.Z, levels=levels, cmap=self.config.colormap)
         # cbar = figure.colorbar(contours, format='%.1f')
         plt.savefig('contour_example.png', dpi=150)
         ndigits = 3
