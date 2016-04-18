@@ -35,7 +35,7 @@ addContours(1);  // initial contours of Utrecht Centraal
 
 function addContours(monthNr)
 {
-    $.getJSON(dataDir + "contour_cloud_" + monthNr + ".json", function(json) {
+    $.getJSON(dataDir + "contour_precipitation_" + monthNr + ".json", function(json) {
         var contours = json.contours;
         var contourLayers = createContoursLayer(contours, "Cloud coverage");
         contourMonthsLayers[monthNr] = contourLayers;
@@ -172,17 +172,12 @@ var hideAllContours = function() {
     for (month in contourMonthsLayers) {
         for (var i = 0; i < contourMonthsLayers[month].length; ++i) {
             contourMonthsLayers[month][i].setVisible(false);
-        }
+        };
     };
 };
 
-var sliderChanged = function() {
-    var monthNr = $("#month-slider").slider("value") + 1;
-    if (monthNr == 13) {
-        $("#month-slider").slider("value", 0);
-        return;
-    }
-    console.log("slider changed to: " + monthNr);
+
+var showOrCreateContour = function(monthNr) {
     hideAllContours();
     if (!contourMonthsLayers.hasOwnProperty(monthNr)) {
         addContours(monthNr);
@@ -191,10 +186,48 @@ var sliderChanged = function() {
         var monthLayers = contourMonthsLayers[monthNr];
         for (var i = 0; i < monthLayers.length; ++i) {
             monthLayers[i].setVisible(true);
-        }
-    }
+        };
+    };
 };
 
 
+var sliderChanged = function() {
+    var monthNr = $("#month-slider").slider("value") + 1;
+    if (monthNr == 13) {
+        $("#month-slider").slider("value", 0);
+        return;
+    }
+    console.log("slider changed to: " + monthNr);
+    showOrCreateContour(monthNr);
+};
 
+var intervalID = 0;
+
+var toggleAnimation = function() {
+    playButton = document.getElementById('animate-button');
+    if (playButton.innerHTML == "Animate") {
+        for (var i = 1; i < 13; ++i) {
+            if (!contourMonthsLayers.hasOwnProperty(i)) {
+                addContours(i);
+            };
+        };
+        playButton.innerHTML = "Stop";
+        intervalID = window.setInterval(playAnimation, 500);
+    }
+    else {
+        window.clearInterval(intervalID);
+        playButton.innerHTML = "Animate";
+    };
+};
+
+var stopAnimation = function() {
+    window.clearInterval(intervalID);
+};
+
+var playAnimation = function() {
+    var monthNr = $("#month-slider").slider("value");
+    $("#month-slider").slider("value", monthNr+1);
+};
+
+document.getElementById('animate-button').onclick = toggleAnimation;
 
