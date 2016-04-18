@@ -30,7 +30,7 @@ view.setCenter(ol.proj.fromLonLat([lon, lat]));
 
 var contourMonthsLayers = {};
 
-addContours(1);  // initial contours of Utrecht Centraal
+addContours(1);  // initial contourd of January
 
 
 function addContours(monthNr)
