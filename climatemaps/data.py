@@ -39,7 +39,7 @@ def import_climate_data(filepath, monthnr):
                 value += char
                 if counter % digits == 0:
                     value = float(value)
-                    if value < 0:
+                    if value == -9999:
                         value = numpy.nan
                     Z[i][j] = value
                     value = ''
