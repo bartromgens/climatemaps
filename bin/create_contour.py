@@ -13,6 +13,8 @@ DATA_OUT_DIR = './website/data'
 TYPES = {
     'precipitation': './data/precipitation/cpre6190.dat',
     'cloud': './data/cloud/ccld6190.dat',
+    'mintemp': './data/mintemp/ctmn6190.dat',
+    'maxtemp': './data/maxtemp/ctmx6190.dat',
 }
 
 
