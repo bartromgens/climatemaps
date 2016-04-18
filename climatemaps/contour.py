@@ -3,7 +3,6 @@ import math
 import os
 
 import numpy
-import scipy.ndimage
 import matplotlib.pyplot as plt
 
 from climatemaps.logger import logger
@@ -27,7 +26,7 @@ def angle(v1, v2):
 
 class ContourPlotConfig(object):
     def __init__(self):
-        self.n_contours = 10
+        self.n_contours = 21
         self.min_angle_between_segments = 15
 
 
@@ -37,9 +36,9 @@ class Contour(object):
         self.Z = Z
         self.lonrange = lonrange
         self.latrange = latrange
+        numpy.set_printoptions(3, threshold=100, suppress=True)  # .3f
 
     def create_contour_data(self, filepath):
-        numpy.set_printoptions(3, threshold=100, suppress=True)  # .3f
         figure = plt.figure()
         ax = figure.add_subplot(111)
         levels = numpy.linspace(0, 100, num=self.config.n_contours)
@@ -47,7 +46,7 @@ class Contour(object):
         contours = ax.contour(self.lonrange, self.latrange, self.Z, levels=levels, cmap=plt.cm.jet)
         # cbar = figure.colorbar(contours, format='%.1f')
         plt.savefig('contour_example.png', dpi=150)
-        ndigits = 7
+        ndigits = 4
         contour_to_json(contours, filepath, levels, self.config.min_angle_between_segments, ndigits)
 
 
@@ -91,7 +90,7 @@ def contour_to_json(contour, filename, contour_labels, min_angle=2, ndigits=5):
                     u"x": x,
                     u"y": y,
                     u"linecolor": color[0].tolist(),
-                    u"label": str(int(contour_labels[contour_index])) + ' min'
+                    u"label": str(int(contour_labels[contour_index])) + ' %'
                 })
             contour_index += 1
 
