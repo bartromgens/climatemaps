@@ -1,12 +1,12 @@
 import numpy
 
 
-def import_climate_data(monthnr):
+def import_climate_data(filepath, monthnr):
     ncols = 720
     nrows = 360
     digits = 5
 
-    with open('./data/cloud/ccld6190.dat', 'r') as filein:
+    with open(filepath, 'r') as filein:
         lines = filein.readlines()
         line_n = 0
         grid_size = 0.50
