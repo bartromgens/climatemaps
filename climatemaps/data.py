@@ -6,7 +6,9 @@ def import_climate_data():
     nrows = 360
     digits = 5
 
-    with open('./data/cloud/ccld6190.dat') as filein:
+    monthnr = 3
+
+    with open('./data/cloud/ccld6190.dat', 'r') as filein:
         lines = filein.readlines()
         line_n = 0
         grid_size = 0.50
@@ -22,25 +24,30 @@ def import_climate_data():
         print(len(latrange))
 
         i = 0
+        rown = 0
 
         for line in lines:
             line_n += 1
             if line_n < 3:  # skip header
                 continue
-            if i >= nrows:  # read one month
-                break
+            if rown < (monthnr-1)*nrows or rown >= monthnr*nrows:  # read one month
+                rown += 1
+                continue
+
             value = ''
-            values = []
             counter = 1
             j = 0
             for char in line:
                 value += char
                 if counter % digits == 0:
-                    Z[i][j] = float(value)
-                    values.append(value)
+                    value = float(value)
+                    if value < 0:
+                        value = numpy.nan
+                    Z[i][j] = value
                     value = ''
                     j += 1
                 counter += 1
             i += 1
+            rown += 1
 
     return latrange, lonrange, Z
