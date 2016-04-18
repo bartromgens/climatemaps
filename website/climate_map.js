@@ -16,7 +16,10 @@ map.setView(view);
 
 var osmSource = new ol.source.OSM("OpenCycleMap");
 //osmSource.setUrl("http://a.tile.opencyclemap.org/transport/{z}/{x}/{y}.png");
-osmSource.setUrl("http://a.tile.openstreetmap.org/{z}/{x}/{y}.png");
+//osmSource.setUrl("http://a.tile.openstreetmap.org/{z}/{x}/{y}.png");
+osmSource.setUrl("https://maps.wikimedia.org/osm-intl/{z}/{x}/{y}.png");
+//osmSource.setUrl("http://a.tile.stamen.com/toner/{z}/{x}/{y}.png");
+
 var osmLayer = new ol.layer.Tile({source: osmSource});
 
 map.addLayer(osmLayer);
@@ -56,7 +59,7 @@ function createContoursLayer(contours, name) {
                 markers.push(ol.proj.fromLonLat(lonLat));
             }
 
-            var color = [paths[j].linecolor[0]*255, paths[j].linecolor[1]*255, paths[j].linecolor[2]*255, 1.0];
+            var color = [paths[j].linecolor[0]*255, paths[j].linecolor[1]*255, paths[j].linecolor[2]*255, 0.8];
             var lineWidth = 6;
 //            if ((k+1) % 6 == 0)
 //            {
@@ -86,35 +89,35 @@ function createContoursLayer(contours, name) {
 }
 
 
-//map.addControl(new ol.control.FullScreen());
+map.addControl(new ol.control.FullScreen());
 
 
 // Tooltip
 
-//var info = $('#info');
-//
-//var displayFeatureInfo = function(pixel) {
-//  info.css({
-//    left: (pixel[0] + 10) + 'px',
-//    top: (pixel[1] - 50) + 'px'
-//  });
-//
-//  var feature = map.forEachFeatureAtPixel(pixel, function(feature, layer) {
-//    return feature;
-//  });
-//
-//  if (feature) {
-//    info.text(feature.get('name'));
-//    info.show();
-//  } else {
-//    info.hide();
-//  }
-//};
-//
-//map.on('pointermove', function(evt) {
-//  if (evt.dragging) {
-//    info.hide();
-//    return;
-//  }
-//  displayFeatureInfo(map.getEventPixel(evt.originalEvent));
-//});
+var info = $('#info');
+
+var displayFeatureInfo = function(pixel) {
+  info.css({
+    left: (pixel[0] + 10) + 'px',
+    top: (pixel[1] - 50) + 'px'
+  });
+
+  var feature = map.forEachFeatureAtPixel(pixel, function(feature, layer) {
+    return feature;
+  });
+
+  if (feature) {
+    info.text(feature.get('name'));
+    info.show();
+  } else {
+    info.hide();
+  }
+};
+
+map.on('pointermove', function(evt) {
+  if (evt.dragging) {
+    info.hide();
+    return;
+  }
+  displayFeatureInfo(map.getEventPixel(evt.originalEvent));
+});
