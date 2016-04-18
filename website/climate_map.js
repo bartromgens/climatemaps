@@ -28,14 +28,17 @@ var lon = 360.0;
 var lat = 0.0;
 view.setCenter(ol.proj.fromLonLat([lon, lat]));
 
-addContours();  // initial contours of Utrecht Centraal
+var contourMonthsLayers = {};
+
+addContours(1);  // initial contours of Utrecht Centraal
 
 
-function addContours()
+function addContours(monthNr)
 {
-    $.getJSON(dataDir + "contour_test.json", function(json) {
+    $.getJSON(dataDir + "contour_cloud_" + monthNr + ".json", function(json) {
         var contours = json.contours;
-        createContoursLayer(contours, "Cloud coverage");
+        var contourLayers = createContoursLayer(contours, "Cloud coverage");
+        contourMonthsLayers[monthNr] = contourLayers;
     });
 }
 
@@ -43,6 +46,7 @@ function addContours()
 function createContoursLayer(contours, name) {
     console.log('create new contour layers');
     console.log(contours.length + ' contours');
+    var contourLayers = [];
 
     // each contour can have multiple (including zero) paths.
     for (var k = 0; k < contours.length; ++k)
@@ -60,7 +64,7 @@ function createContoursLayer(contours, name) {
             }
 
             var color = [paths[j].linecolor[0]*255, paths[j].linecolor[1]*255, paths[j].linecolor[2]*255, 0.8];
-            var lineWidth = 6;
+            var lineWidth = 4;
 //            if ((k+1) % 6 == 0)
 //            {
 //                lineWidth = 8;
@@ -83,9 +87,12 @@ function createContoursLayer(contours, name) {
                 style: lineStyle
             });
 
+            contourLayers.push(layerLines);
             map.addLayer(layerLines);
         }
     }
+
+    return contourLayers;
 }
 
 
@@ -121,3 +128,73 @@ map.on('pointermove', function(evt) {
   }
   displayFeatureInfo(map.getEventPixel(evt.originalEvent));
 });
+
+
+// Select features
+
+//var select = new ol.interaction.Select({
+//    condition: ol.events.condition.click
+//});
+//
+//select.on('select', function(evt) {
+//    for (var i = 0; i < contourLayers.length; ++i)
+//    {
+//        var removedLayer = map.removeLayer(contourLayers[i]);
+//    }
+//    contourLayers.length = 0;
+//    addContours(1);
+//});
+
+//map.addInteraction(select);
+
+var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec", "Jan"];
+
+$(function() {
+    $("#month-slider").slider({
+      orientation: "horizontal",
+      range: "min",
+      min: 0,
+      max: 12,
+      value: 0,
+      slide: sliderChanged,
+      change: sliderChanged
+    })
+    .slider("pips", {
+        rest: "label",
+        labels: months
+    })
+//    .slider("float");
+});
+
+
+var hideAllContours = function() {
+    console.log('hide all contours');
+    for (month in contourMonthsLayers) {
+        for (var i = 0; i < contourMonthsLayers[month].length; ++i) {
+            contourMonthsLayers[month][i].setVisible(false);
+        }
+    };
+};
+
+var sliderChanged = function() {
+    var monthNr = $("#month-slider").slider("value") + 1;
+    if (monthNr == 13) {
+        $("#month-slider").slider("value", 0);
+        return;
+    }
+    console.log("slider changed to: " + monthNr);
+    hideAllContours();
+    if (!contourMonthsLayers.hasOwnProperty(monthNr)) {
+        addContours(monthNr);
+    }
+    else {
+        var monthLayers = contourMonthsLayers[monthNr];
+        for (var i = 0; i < monthLayers.length; ++i) {
+            monthLayers[i].setVisible(true);
+        }
+    }
+};
+
+
+
+

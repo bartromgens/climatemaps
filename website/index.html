@@ -4,13 +4,16 @@
 
   <meta charset="UTF-8">
 
+  <link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+  <link rel="stylesheet" href="css/bootstrap_readable.min.css" type="text/css">
   <link rel="stylesheet" href="http://openlayers.org/en/v3.14.1/css/ol.css" type="text/css">
-  <link rel="stylesheet" href="./css/climatemaps.css" type="text/css">
-  <link rel="stylesheet" href="./css/bootstrap_readable.min.css" type="text/css">
+  <link rel="stylesheet" href="lib/slider-pips/jquery-ui-slider-pips.css" type="text/css">
+  <link rel="stylesheet" href="css/climatemaps.css" type="text/css">
 
   <script src="https://code.jquery.com/jquery-2.1.4.min.js" type="text/javascript"></script>
   <script src="https://code.jquery.com/color/jquery.color-2.1.2.min.js" type="text/javascript"></script>
   <script src="https://code.jquery.com/ui/1.11.4/jquery-ui.min.js" type="text/javascript"></script>
+  <script src="lib/slider-pips/jquery-ui-slider-pips.js" type="text/javascript"></script>
 
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha256-KXn5puMvxCw+dAYznun+drMdG1IFl3agK0p/pqT9KAo= sha512-2e8qq0ETcfWRI4HJBzQiA3UoyFk6tbNyG+qSaIBZLyW9Xf3sWZHN/lxe9fTh1U45DpPf07yj94KsUHHWe4Yk1A==" crossorigin="anonymous"></script>
 
@@ -60,13 +63,18 @@
 
   <br/>
 
+  <div class="container">
+    <div id="month-slider"></div>
+  </div>
+  <br/>
+
   <div id="map-container">
     <div id="map">
       <div id="info"></div>
     </div>
   </div>
 
-  <script src="climate_map.js"></script>
+  <script src="climate_map.js" type="text/javascript"></script>
 
 </body>
 
