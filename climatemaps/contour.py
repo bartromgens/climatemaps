@@ -26,7 +26,7 @@ def angle(v1, v2):
 
 class ContourPlotConfig(object):
     def __init__(self):
-        self.n_contours = 21
+        self.n_contours = 11
         self.min_angle_between_segments = 15
 
 
@@ -41,12 +41,14 @@ class Contour(object):
     def create_contour_data(self, filepath):
         figure = plt.figure()
         ax = figure.add_subplot(111)
+        # levels = numpy.linspace(10, 90, num=self.config.n_contours)
         levels = numpy.linspace(0, 100, num=self.config.n_contours)
         # contours = plt.contourf(lonrange, latrange, Z, levels=levels, cmap=plt.cm.plasma)
-        contours = ax.contour(self.lonrange, self.latrange, self.Z, levels=levels, cmap=plt.cm.jet)
+        cmap = plt.cm.jet_r  # jet, jet_r, YlOrRd, gist_rainbow
+        contours = ax.contour(self.lonrange, self.latrange, self.Z, levels=levels, cmap=cmap)
         # cbar = figure.colorbar(contours, format='%.1f')
         plt.savefig('contour_example.png', dpi=150)
-        ndigits = 4
+        ndigits = 3
         contour_to_json(contours, filepath, levels, self.config.min_angle_between_segments, ndigits)
 
 
