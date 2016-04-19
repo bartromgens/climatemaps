@@ -5,6 +5,10 @@ import os
 from mpl_toolkits.basemap import Basemap
 import numpy
 import matplotlib.pyplot as plt
+from matplotlib.colors import LogNorm, SymLogNorm
+
+import scipy.ndimage
+from scipy.ndimage.filters import gaussian_filter
 
 from climatemaps.logger import logger
 
@@ -26,18 +30,67 @@ def angle(v1, v2):
 
 
 class ContourPlotConfig(object):
-    def __init__(self, level_lower=0, level_upper=100, colormap=plt.cm.jet, unit=''):  # jet, jet_r, YlOrRd, gist_rainbow
-        self.n_contours = 16
+    def __init__(self,
+                 level_lower=0,
+                 level_upper=100,
+                 colormap=plt.cm.jet,
+                 unit='',
+                 logscale=False):  # jet, jet_r, YlOrRd, gist_rainbow
+        self.n_contours = 11
         self.min_angle_between_segments = 15
         self.level_lower = level_lower
         self.level_upper = level_upper
         self.colormap = colormap
         self.unit = unit
+        self.norm = None
+
+        if logscale:
+            assert self.level_lower > 0
+            self.norm = SymLogNorm(linthresh=1.0, vmin=self.level_lower, vmax=self.level_upper)
+            self.levels = numpy.logspace(
+                start=self.level_lower,
+                stop=math.log(self.level_upper+1),
+                num=self.n_contours,
+                base=math.e
+            )
+            for i in range(0, len(self.levels)):
+                self.levels[i] -= 1
+        else:
+            self.levels = numpy.linspace(
+                start=self.level_lower,
+                stop=self.level_upper,
+                num=self.n_contours
+            )
+
+        if logscale:
+            assert self.level_lower > 0
+            self.levels_image = numpy.logspace(
+                start=math.log(self.level_lower),
+                stop=math.log(self.level_upper+2),
+                num=self.n_contours*20,
+                base=math.e
+            )
+            for i in range(0, len(self.levels_image)):
+                self.levels_image[i] -= 1
+        else:
+            self.levels_image = numpy.linspace(
+                start=self.level_lower,
+                stop=self.level_upper,
+                num=self.n_contours*20
+            )
+        print(self.levels)
 
 
 class Contour(object):
     def __init__(self, config, lonrange, latrange, Z):
         self.config = config
+        for i in range(0, Z.shape[0]):
+            for j in range(0, Z.shape[1]):
+                if Z[i][j] >= config.level_upper:
+                    Z[i][j] = config.level_upper
+                elif Z[i][j] <= config.level_lower:
+                    Z[i][j] = config.level_lower
+
         self.Z = Z
         self.lonrange = lonrange
         # self.latrange = latrange
@@ -58,28 +111,44 @@ class Contour(object):
             urcrnrlat=85,
         )
         x, y = m(*numpy.meshgrid(self.lonrange, self.latrange))
-        # levels = numpy.linspace(10, 90, num=self.config.n_contours)
-        levels = numpy.linspace(self.config.level_lower, self.config.level_upper, num=self.config.n_contours*10)
-        # contours = plt.contourf(lonrange, latrange, Z, levels=levels, cmap=plt.cm.plasma)
-        m.contourf(x, y, self.Z, levels=levels, cmap=self.config.colormap)
-        m.drawcoastlines(linewidth=0.5)  # draw coastlines
+        contour = m.contourf(x, y, self.Z,
+                             cmap=self.config.colormap,
+                             levels=self.config.levels_image,
+                             norm=self.config.norm
+                             )
+        m.drawcoastlines(linewidth=0.3)  # draw coastlines
         # m.drawmapboundary()  # draw a line around the map region
         # m.drawparallels(numpy.arange(-90., 120., 30.), labels=[1, 0, 0, 0])  # draw parallels
         # m.drawmeridians(numpy.arange(0., 420., 60.), labels=[0, 0, 0, 1])  # draw meridians
-        # cbar = figure.colorbar(contours, format='%.1f')
-        # ax.set_xlim([0, 360e5])
+        # cbar = figure.colorbar(contour, format='%.1f')
         ax.set_axis_off()
-        plt.savefig(filepath + '.png', dpi=200, bbox_inches='tight', pad_inches=0)
+        plt.savefig(filepath + '.png', dpi=400, bbox_inches='tight', pad_inches=0, transparent=True)
 
         self.create_contour_json(filepath)
 
     def create_contour_json(self, filepath):
+        # self.lonrange = gaussian_filter(self.lonrange, sigma=0.5)
+        # self.latrange = gaussian_filter(self.latrange, sigma=0.5)
+        # self.Z = gaussian_filter(self.Z, sigma=3.0, mode='wrap', truncate=10.0)
+        zoomfactor = 2.0
+        self.Z = scipy.ndimage.zoom(self.Z, zoom=zoomfactor, order=1)
+        self.lonrange = scipy.ndimage.zoom(self.lonrange, zoom=zoomfactor, order=1)
+        self.latrange = scipy.ndimage.zoom(self.latrange, zoom=zoomfactor, order=1)
         figure = plt.figure()
-        ax = figure.add_subplot(111)
-        levels = numpy.linspace(self.config.level_lower, self.config.level_upper, num=self.config.n_contours)
-        contours = ax.contour(self.lonrange, self.latrange, self.Z, levels=levels, cmap=self.config.colormap)
+        ax = figure.add_subplot(222)
+
+        for i in range(0, len(self.config.levels)):
+            self.config.levels[i] -= 0.7
+
+        contours = ax.contour(
+            self.lonrange, self.latrange, self.Z,
+            levels=self.config.levels,
+            cmap=self.config.colormap,
+            norm=self.config.norm
+        )
+        # cbar = figure.colorbar(contours, format='%.1f')
         ndigits = 3
-        contour_to_json(contours, filepath, levels, self.config.min_angle_between_segments, ndigits, self.config.unit)
+        contour_to_json(contours, filepath, self.config.levels, self.config.min_angle_between_segments, ndigits, self.config.unit)
 
 
 def contour_to_json(contour, filename, contour_labels, min_angle=2, ndigits=5, unit=''):
@@ -123,7 +192,7 @@ def contour_to_json(contour, filename, contour_labels, min_angle=2, ndigits=5, u
                     u"x": x,
                     u"y": y,
                     u"linecolor": color[0].tolist(),
-                    u"label": str(int(contour_labels[contour_index])) + ' ' + unit
+                    u"label": ('% 12.1f' % contour_labels[contour_index]) + ' ' + unit
                 })
             contour_index += 1
 
