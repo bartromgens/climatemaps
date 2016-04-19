@@ -4,3 +4,6 @@ env/*
 .idea/*
 
 *.log
+
+data/*
+website/data/
