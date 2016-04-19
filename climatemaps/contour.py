@@ -25,12 +25,13 @@ def angle(v1, v2):
 
 
 class ContourPlotConfig(object):
-    def __init__(self, level_lower=0, level_upper=100, colormap=plt.cm.jet):  # jet, jet_r, YlOrRd, gist_rainbow
+    def __init__(self, level_lower=0, level_upper=100, colormap=plt.cm.jet, unit=''):  # jet, jet_r, YlOrRd, gist_rainbow
         self.n_contours = 11
         self.min_angle_between_segments = 15
         self.level_lower = level_lower
         self.level_upper = level_upper
         self.colormap = colormap
+        self.unit = unit
 
 
 class Contour(object):
@@ -51,10 +52,10 @@ class Contour(object):
         # cbar = figure.colorbar(contours, format='%.1f')
         plt.savefig('contour_example.png', dpi=150)
         ndigits = 3
-        contour_to_json(contours, filepath, levels, self.config.min_angle_between_segments, ndigits)
+        contour_to_json(contours, filepath, levels, self.config.min_angle_between_segments, ndigits, self.config.unit)
 
 
-def contour_to_json(contour, filename, contour_labels, min_angle=2, ndigits=5):
+def contour_to_json(contour, filename, contour_labels, min_angle=2, ndigits=5, unit=''):
     # min_angle: only create a new line segment if the angle is larger than this angle, to compress output
     collections = contour.collections
     with open(filename, 'w') as fileout:
@@ -94,7 +95,7 @@ def contour_to_json(contour, filename, contour_labels, min_angle=2, ndigits=5):
                     u"x": x,
                     u"y": y,
                     u"linecolor": color[0].tolist(),
-                    u"label": str(int(contour_labels[contour_index])) + ' %'
+                    u"label": str(int(contour_labels[contour_index])) + ' ' + unit
                 })
             contour_index += 1
 
