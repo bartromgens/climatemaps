@@ -1,7 +1,7 @@
 import numpy
 
 
-def import_climate_data(filepath, monthnr):
+def import_climate_data(filepath, monthnr, factor_to_SI=1):
     ncols = 720
     nrows = 360
     digits = 5
@@ -41,7 +41,7 @@ def import_climate_data(filepath, monthnr):
                     value = float(value)
                     if value == -9999:
                         value = numpy.nan
-                    Z[i][j] = value
+                    Z[i][j] = value*factor_to_SI
                     value = ''
                     j += 1
                 counter += 1
