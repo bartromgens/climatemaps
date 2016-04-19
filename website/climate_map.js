@@ -9,7 +9,7 @@ $.ajaxSetup({beforeSend: function(xhr) {
 });
 
 var dataDir = "./data/";
-var lineScaleFactor = 0.5;
+var lineScaleFactor = 0.3;
 
 var map = new ol.Map({target: 'map'});
 var view = new ol.View( {center: [0, 0], zoom: 3, projection: 'EPSG:3857'} );
@@ -26,42 +26,55 @@ var osmLayer = new ol.layer.Tile({source: osmSource});
 map.addLayer(osmLayer);
 
 var lon = 0.0;
-var lat = 40.0;
+var lat = 10.0;
 view.setCenter(ol.proj.fromLonLat([lon, lat]));
 
 var plotTypesMonthsLayers = {};
+var plotTypesMonthsImages = {};
 
 addContours('precipitation', 1);  // initial contour of January
 
+//
+//var imageLayer = createImageLayer('precipitation', 1);
+//
+//map.addLayer(imageLayer);
 
-var imageLayer = new ol.layer.Image({
-    source: new ol.source.ImageStatic({
-        url: '/climatemaps/website/data/contour_precipitation_1.png',
-        projection: map.getView().getProjection(),
-        imageExtent: ol.extent.applyTransform([-180, -85, 180, 85], ol.proj.getTransform("EPSG:4326", "EPSG:3857")),
-    }),
-    opacity: 0.5,
-});
+function createImageLayer(dataType, monthNr) {
+    var imageLayer = new ol.layer.Image({
+        source: new ol.source.ImageStatic({
+            url: '/climatemaps/website/data/contour_' + dataType + '_' + monthNr + '.png',
+            projection: map.getView().getProjection(),
+            imageExtent: ol.extent.applyTransform([-180, -85, 180, 85], ol.proj.getTransform("EPSG:4326", "EPSG:3857")),
+        }),
+        opacity: getImageOpacity(),
+    });
+    return imageLayer;
+};
 
 
-map.addLayer(imageLayer);
-
-
-function addContours(dateType, monthNr)
+function addContours(dataType, monthNr)
 {
-    $.getJSON(dataDir + "contour_" + dateType + "_" + monthNr + ".json", function(json) {
+    $.getJSON(dataDir + "contour_" + dataType + "_" + monthNr + ".json", function(json) {
         var contours = json.contours;
-        var contourLayers = createContoursLayer(contours, dateType);
-        if ( !(dateType in plotTypesMonthsLayers)) {
-            plotTypesMonthsLayers[dateType] = {};
+        var contourLayers = createContoursLayer(contours, dataType);
+        if ( !(dataType in plotTypesMonthsLayers)) {
+            plotTypesMonthsLayers[dataType] = {};
+            plotTypesMonthsImages[dataType] = {};
         }
-        plotTypesMonthsLayers[dateType][monthNr] = contourLayers;
+        imageLayer = createImageLayer(dataType, monthNr);
+        map.addLayer(imageLayer);
+        plotTypesMonthsImages[dataType][monthNr] = imageLayer;
+        plotTypesMonthsLayers[dataType][monthNr] = contourLayers;
     });
 };
 
 
 function getLineWidth() {
-    return Math.pow(view.getZoom(), 1.2)  * lineScaleFactor;
+    return Math.pow(view.getZoom(), 1.7)  * lineScaleFactor;
+};
+
+function getImageOpacity() {
+    return 0.8-(view.getZoom()/12);
 };
 
 
@@ -105,6 +118,7 @@ function createContoursLayer(contours, name) {
                 style: lineStyle
             });
 
+            layerLines.setZIndex(99);
             contourLayers.push(layerLines);
             map.addLayer(layerLines);
         }
@@ -194,6 +208,12 @@ var hideAllContours = function() {
             }
         }
     }
+
+    for (type in plotTypesMonthsImages) {
+        for (month in plotTypesMonthsImages[type]) {
+            plotTypesMonthsImages[type][month].setVisible(false);
+        }
+    }
 };
 
 
@@ -206,6 +226,8 @@ var showOrCreateContour = function(monthNr) {
     }
     else {
         var monthLayers = plotTypesMonthsLayers[selectedType][monthNr];
+        var monthImage = plotTypesMonthsImages[selectedType][monthNr];
+        monthImage.setVisible(true);
         for (var i = 0; i < monthLayers.length; ++i) {
             monthLayers[i].setVisible(true);
         }
@@ -287,6 +309,11 @@ map.on("moveend", function() {
                 oldStyle.getStroke().setWidth(getLineWidth());
                 plotTypesMonthsLayers[type][month][i].setStyle(oldStyle);
             }
+        }
+    }
+    for (type in plotTypesMonthsImages) {
+        for (month in plotTypesMonthsImages[type]) {
+            plotTypesMonthsImages[type][month].setOpacity( getImageOpacity() );
         }
     }
 });
