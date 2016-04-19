@@ -50,7 +50,7 @@ class Contour(object):
         # contours = plt.contourf(lonrange, latrange, Z, levels=levels, cmap=plt.cm.plasma)
         contours = ax.contour(self.lonrange, self.latrange, self.Z, levels=levels, cmap=self.config.colormap)
         # cbar = figure.colorbar(contours, format='%.1f')
-        plt.savefig('contour_example.png', dpi=150)
+        # plt.savefig('contour_example.png', dpi=150)
         ndigits = 3
         contour_to_json(contours, filepath, levels, self.config.min_angle_between_segments, ndigits, self.config.unit)
 
