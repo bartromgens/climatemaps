@@ -9,16 +9,16 @@ $.ajaxSetup({beforeSend: function(xhr) {
 });
 
 var dataDir = "./data/";
-var lineScaleFactor = 1.2;
+var lineScaleFactor = 0.5;
 
 var map = new ol.Map({target: 'map'});
 var view = new ol.View( {center: [0, 0], zoom: 3, projection: 'EPSG:3857'} );
 map.setView(view);
 
 var osmSource = new ol.source.OSM("OpenCycleMap");
-//osmSource.setUrl("http://a.tile.opencyclemap.org/transport/{z}/{x}/{y}.png");
+osmSource.setUrl("http://a.tile.opencyclemap.org/transport/{z}/{x}/{y}.png");
 //osmSource.setUrl("http://a.tile.openstreetmap.org/{z}/{x}/{y}.png");
-osmSource.setUrl("https://maps.wikimedia.org/osm-intl/{z}/{x}/{y}.png");
+//osmSource.setUrl("https://maps.wikimedia.org/osm-intl/{z}/{x}/{y}.png");
 //osmSource.setUrl("http://a.tile.stamen.com/toner/{z}/{x}/{y}.png");
 
 var osmLayer = new ol.layer.Tile({source: osmSource});
@@ -31,7 +31,7 @@ view.setCenter(ol.proj.fromLonLat([lon, lat]));
 
 var plotTypesMonthsLayers = {};
 
-addContours('cloud', 1);  // initial contourd of January
+addContours('precipitation', 1);  // initial contourd of January
 
 
 function addContours(dateType, monthNr)
@@ -44,13 +44,11 @@ function addContours(dateType, monthNr)
         }
         plotTypesMonthsLayers[dateType][monthNr] = contourLayers;
     });
-}
+};
 
-var getWidth = function() {
-    //I am setting attribute widthInMeters to each feature, and I am using that
-    //for a calculation of line width, where 1m = 100px
-    var r = map.getResolution() * 10000000;
-    return 6;
+
+function getLineWidth() {
+    return Math.pow(view.getZoom(), 1.2)  * lineScaleFactor;
 };
 
 
@@ -74,12 +72,12 @@ function createContoursLayer(contours, name) {
                 markers.push(ol.proj.fromLonLat(lonLat));
             }
 
-            var color = [paths[j].linecolor[0]*255, paths[j].linecolor[1]*255, paths[j].linecolor[2]*255, 1];
+            var color = [paths[j].linecolor[0]*255, paths[j].linecolor[1]*255, paths[j].linecolor[2]*255, 0.8];
 
             var lineStyle = new ol.style.Style({
                 stroke: new ol.style.Stroke({
                     color: color,
-                    width: view.getZoom() * lineScaleFactor
+                    width: getLineWidth()
                 })
             });
 
@@ -272,7 +270,7 @@ map.on("moveend", function() {
         for (month in plotTypesMonthsLayers[type]) {
             for (var i = 0; i < plotTypesMonthsLayers[type][month].length; ++i) {
                 var oldStyle = plotTypesMonthsLayers[type][month][i].getStyle();
-                oldStyle.getStroke().setWidth(view.getZoom() * lineScaleFactor);
+                oldStyle.getStroke().setWidth(getLineWidth());
                 plotTypesMonthsLayers[type][month][i].setStyle(oldStyle);
             }
         }
