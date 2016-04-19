@@ -26,7 +26,7 @@ def angle(v1, v2):
 
 class ContourPlotConfig(object):
     def __init__(self, level_lower=0, level_upper=100, colormap=plt.cm.jet, unit=''):  # jet, jet_r, YlOrRd, gist_rainbow
-        self.n_contours = 11
+        self.n_contours = 16
         self.min_angle_between_segments = 15
         self.level_lower = level_lower
         self.level_upper = level_upper
