@@ -8,7 +8,8 @@ $.ajaxSetup({beforeSend: function(xhr) {
 }
 });
 
-var dataDir = "./data/"
+var dataDir = "./data/";
+var lineScaleFactor = 1.2;
 
 var map = new ol.Map({target: 'map'});
 var view = new ol.View( {center: [0, 0], zoom: 3, projection: 'EPSG:3857'} );
@@ -45,6 +46,13 @@ function addContours(dateType, monthNr)
     });
 }
 
+var getWidth = function() {
+    //I am setting attribute widthInMeters to each feature, and I am using that
+    //for a calculation of line width, where 1m = 100px
+    var r = map.getResolution() * 10000000;
+    return 6;
+};
+
 
 function createContoursLayer(contours, name) {
     console.log('create new contour layers');
@@ -66,13 +74,12 @@ function createContoursLayer(contours, name) {
                 markers.push(ol.proj.fromLonLat(lonLat));
             }
 
-            var color = [paths[j].linecolor[0]*255, paths[j].linecolor[1]*255, paths[j].linecolor[2]*255, 0.8];
-            var lineWidth = 4;
+            var color = [paths[j].linecolor[0]*255, paths[j].linecolor[1]*255, paths[j].linecolor[2]*255, 1];
 
             var lineStyle = new ol.style.Style({
                 stroke: new ol.style.Stroke({
                     color: color,
-                    width: lineWidth
+                    width: view.getZoom() * lineScaleFactor
                 })
             });
 
@@ -258,3 +265,16 @@ var plotExists = function(typeName, monthNr) {
     var exists = (typeName in plotTypesMonthsLayers) && (plotTypesMonthsLayers[typeName].hasOwnProperty(monthNr));
     return exists;
 };
+
+
+map.on("moveend", function() {
+    for (type in plotTypesMonthsLayers) {
+        for (month in plotTypesMonthsLayers[type]) {
+            for (var i = 0; i < plotTypesMonthsLayers[type][month].length; ++i) {
+                var oldStyle = plotTypesMonthsLayers[type][month][i].getStyle();
+                oldStyle.getStroke().setWidth(view.getZoom() * lineScaleFactor);
+                plotTypesMonthsLayers[type][month][i].setStyle(oldStyle);
+            }
+        }
+    }
+});
