@@ -1,4 +1,5 @@
 import numpy
+import math
 
 
 def import_climate_data(filepath, monthnr, factor_to_SI=1):
@@ -10,8 +11,8 @@ def import_climate_data(filepath, monthnr, factor_to_SI=1):
         lines = filein.readlines()
         line_n = 0
         grid_size = 0.50
-        xmin = 0.25
-        xmax = 360.25
+        xmin = 0.25-180
+        xmax = 360.25-180
         ymin = -89.75
         ymax = 90.25
 
@@ -41,11 +42,36 @@ def import_climate_data(filepath, monthnr, factor_to_SI=1):
                     value = float(value)
                     if value == -9999:
                         value = numpy.nan
-                    Z[i][j] = value*factor_to_SI
+                    Z[i][j] = value * factor_to_SI
                     value = ''
                     j += 1
                 counter += 1
             i += 1
             rown += 1
 
-    return latrange, lonrange, Z
+        Z_new = numpy.zeros((int(latrange.shape[0]), int(lonrange.shape[0])))
+        half_size = int(Z.shape[1]/2)
+        for i in range(0, Z.shape[0]):
+            for j in range(0, Z.shape[1]):
+                if (lonrange[j] >= 0.0):
+                    Z_new[i][j-half_size] = Z[i][j]
+                else:
+                    Z_new[i][j+half_size] = Z[i][j]
+
+        # for i in range(0, len(lonrange)):
+        #     if lonrange[i] > 180.0:
+        #         lonrange[i] = -180.0 + (lonrange[i]-180.0)
+
+    return latrange, lonrange, Z_new
+
+
+def geographic_to_web_mercator(x_lon, y_lat):
+    if abs(x_lon) <= 180 and abs(y_lat) < 90:
+        num = x_lon * 0.017453292519943295
+        x = 6378137.0 * num
+        a = y_lat * 0.017453292519943295
+        x_mercator = x
+        y_mercator = 3189068.5 * math.log((1.0 + math.sin(a)) / (1.0 - math.sin(a)))
+        return x_mercator, y_mercator
+    else:
+        print('Invalid coordinate values for conversion')

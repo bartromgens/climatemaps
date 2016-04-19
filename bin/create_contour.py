@@ -18,34 +18,34 @@ TYPES = {
         'conversion_factor': 0.1,  # (millimetres/day) *10
         'config': climatemaps.contour.ContourPlotConfig(0, 12, colormap=plt.cm.jet_r, unit='mm/day')
     },
-    'cloud': {
-        'filepath': 'data/cloud/ccld6190.dat',
-        'conversion_factor': 1,
-        'config': climatemaps.contour.ContourPlotConfig(10, 90, colormap=plt.cm.jet_r, unit='%')
-    },
-    'mintemp': {
-        'filepath': 'data/mintemp/ctmn6190.dat',
-        'conversion_factor': 0.1,
-        'config': climatemaps.contour.ContourPlotConfig(-30, 30, colormap=plt.cm.jet, unit='C')
-    },
-    'maxtemp': {
-        'filepath': 'data/maxtemp/ctmx6190.dat',
-        'conversion_factor': 0.1,
-        'config': climatemaps.contour.ContourPlotConfig(-20, 40, colormap=plt.cm.jet, unit='C')
-    },
-    'wetdays': {
-        'filepath': 'data/wetdays/cwet6190.dat',
-        'conversion_factor': 0.1,
-        'config': climatemaps.contour.ContourPlotConfig(0, 30, colormap=plt.cm.jet_r, unit='days')
-    },
+    # 'cloud': {
+    #     'filepath': 'data/cloud/ccld6190.dat',
+    #     'conversion_factor': 1,
+    #     'config': climatemaps.contour.ContourPlotConfig(10, 90, colormap=plt.cm.jet_r, unit='%')
+    # },
+    # 'mintemp': {
+    #     'filepath': 'data/mintemp/ctmn6190.dat',
+    #     'conversion_factor': 0.1,
+    #     'config': climatemaps.contour.ContourPlotConfig(-30, 30, colormap=plt.cm.jet, unit='C')
+    # },
+    # 'maxtemp': {
+    #     'filepath': 'data/maxtemp/ctmx6190.dat',
+    #     'conversion_factor': 0.1,
+    #     'config': climatemaps.contour.ContourPlotConfig(-20, 40, colormap=plt.cm.jet, unit='C')
+    # },
+    # 'wetdays': {
+    #     'filepath': 'data/wetdays/cwet6190.dat',
+    #     'conversion_factor': 0.1,
+    #     'config': climatemaps.contour.ContourPlotConfig(0, 30, colormap=plt.cm.jet_r, unit='days')
+    # },
 }
 
 
 def main():
     for data_type, settings in TYPES.items():
-        for month in range(1, 13):
+        for month in range(1, 2):
             latrange, lonrange, Z = climatemaps.data.import_climate_data(settings['filepath'], month, settings['conversion_factor'])
-            filepath_out = os.path.join(DATA_OUT_DIR, 'contour_' + data_type +'_' + str(month) + '.json')
+            filepath_out = os.path.join(DATA_OUT_DIR, 'contour_' + data_type +'_' + str(month))
             contourmap = climatemaps.contour.Contour(settings['config'], lonrange, latrange, Z)
             contourmap.create_contour_data(filepath_out)
 

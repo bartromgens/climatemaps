@@ -50,11 +50,11 @@ class Contour(object):
         m = Basemap(
             projection='merc',
             resolution='c',
-            lon_0=-180,
+            lon_0=0,
             ax=ax,
-            llcrnrlon=0,
+            llcrnrlon=-180,
             llcrnrlat=-85,
-            urcrnrlon=360,
+            urcrnrlon=180,
             urcrnrlat=85,
         )
         x, y = m(*numpy.meshgrid(self.lonrange, self.latrange))
