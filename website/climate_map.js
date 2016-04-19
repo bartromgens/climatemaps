@@ -25,13 +25,26 @@ var osmLayer = new ol.layer.Tile({source: osmSource});
 
 map.addLayer(osmLayer);
 
-var lon = 360.0;
-var lat = 0.0;
+var lon = 0.0;
+var lat = 40.0;
 view.setCenter(ol.proj.fromLonLat([lon, lat]));
 
 var plotTypesMonthsLayers = {};
 
-addContours('precipitation', 1);  // initial contourd of January
+addContours('precipitation', 1);  // initial contour of January
+
+
+var imageLayer = new ol.layer.Image({
+    source: new ol.source.ImageStatic({
+        url: '/climatemaps/website/data/contour_precipitation_1.png',
+        projection: map.getView().getProjection(),
+        imageExtent: ol.extent.applyTransform([-180, -85, 180, 85], ol.proj.getTransform("EPSG:4326", "EPSG:3857")),
+    }),
+    opacity: 0.5,
+});
+
+
+map.addLayer(imageLayer);
 
 
 function addContours(dateType, monthNr)
@@ -67,12 +80,12 @@ function createContoursLayer(contours, name) {
             for (var i = 0; i < paths[j].x.length; ++i)
             {
                 var lon = paths[j].x[i];
-                var lat = -paths[j].y[i];
+                var lat = paths[j].y[i];
                 var lonLat = [lon, lat];
                 markers.push(ol.proj.fromLonLat(lonLat));
             }
 
-            var color = [paths[j].linecolor[0]*255, paths[j].linecolor[1]*255, paths[j].linecolor[2]*255, 0.8];
+            var color = [paths[j].linecolor[0]*255, paths[j].linecolor[1]*255, paths[j].linecolor[2]*255, 1.0];
 
             var lineStyle = new ol.style.Style({
                 stroke: new ol.style.Stroke({
@@ -86,7 +99,8 @@ function createContoursLayer(contours, name) {
                     features: [new ol.Feature({
                         geometry: new ol.geom.LineString(markers, 'XY'),
                         name: paths[j].label
-                    })]
+                    })],
+                    wrapX: false
                 }),
                 style: lineStyle
             });
