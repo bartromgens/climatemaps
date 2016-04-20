@@ -20,13 +20,14 @@
   <script src="http://openlayers.org/en/v3.15.1/build/ol.js" type="text/javascript"></script>
   <!--<script src="lib/ol_v3.15.1/ol-debug.js" type="text/javascript"></script>-->
 
-  <title>Climate Maps</title>
+  <title>Climate Maps - Interactive global montly climate maps</title>
 
 </head>
 
 <body>
 
-  <div class="navbar navbar-default navbar-fixed-top navbar-transparent">
+
+  <div class="navbar navbar-default navbar-default navbar-static-top">
     <div class="container">
 
       <div class="navbar-header">
@@ -44,6 +45,7 @@
 
         <ul class="nav navbar-nav navbar-right">
           <!--<li><a href="/about/">About</a></li>-->
+          <li><a href="http://www.ipcc-data.org/obs/get_30yr_means.html" target="_blank">IPCC-Data</a></li>
           <li><a href="https://github.com/bartromgens/climatemaps" target="_blank">Code</a></li>
         </ul>
       </div>
@@ -51,37 +53,27 @@
     </div>
   </div>
 
-  <br/>
-  <br/>
-  <br/>
-  <br/>
+    <div class="container">
+      <span>Map of global montly mean climate data from land observations between 1961 and 1990.</span>
 
-  <div class="container">
-    <p>
-      This map shows mean monthly climate data from land observations between 1961 and 1990. Source: <a href="http://www.ipcc-data.org/obs/get_30yr_means.html">IPCC-Data.</a>
-    </p>
-  </div>
-
-  <div class="container">
-    <div class="row">
-      <div class="col-md-2">
-        <select class="form-control" id="select-type">
-          <option value="precipitation">Precipitation</option>
-          <option value="wetdays">Wet days</option>
-          <option value="cloud">Cloud coverage</option>
-          <option value="maxtemp">Max. temperature</option>
-          <option value="mintemp">Min. temperature</option>
-        </select>
-      </div>
-      <div class="col-md-8">
-        <div id="month-slider"></div>
-      </div>
-      <div class="col-md-2">
-        <button id="animate-button" type="button" class="btn btn-default">Animate</button>
+      <div class="row plot-stettings-input-fields">
+        <div class="col-md-2 plot-stettings-input-fields">
+          <select class="form-control" id="select-type">
+            <option value="precipitation">Precipitation</option>
+            <option value="wetdays">Wet days</option>
+            <option value="cloud">Cloud coverage</option>
+            <option value="maxtemp">Max. temperature</option>
+            <option value="mintemp">Min. temperature</option>
+          </select>
+        </div>
+        <div class="col-xs-8 plot-stettings-input-fields">
+          <div id="month-slider"></div>
+        </div>
+        <div class="col-xs-2 plot-stettings-input-fields">
+          <button id="animate-button" type="button" class="btn btn-default">Animate</button>
+        </div>
       </div>
     </div>
-  </div>
-  <br/>
 
   <div id="map-container">
     <div id="map">

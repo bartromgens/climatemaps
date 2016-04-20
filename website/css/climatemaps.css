@@ -1,14 +1,11 @@
-html {
+html, body {
     height:100%;
-}
-
-body {
-    height:100%;
+    padding: 0;
 }
 
 #map-container {
-    position: relative;
-    height:80%;
+    height: 80%;
+    width: 100%;
 }
 
 #map {
@@ -28,4 +25,9 @@ body {
     color: white;
     padding: 7px;
     z-index: 1;
+}
+
+.plot-stettings-input-fields {
+    /*padding: 0.5em;*/
+    padding: 0.5em;
 }
