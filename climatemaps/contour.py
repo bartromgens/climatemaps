@@ -36,7 +36,7 @@ class ContourPlotConfig(object):
                  colormap=plt.cm.jet,
                  unit='',
                  logscale=False):  # jet, jet_r, YlOrRd, gist_rainbow
-        self.n_contours = 17
+        self.n_contours = 14
         self.min_angle_between_segments = 15
         self.level_lower = level_lower
         self.level_upper = level_upper
@@ -119,7 +119,7 @@ class Contour(object):
         # m.drawcoastlines(linewidth=0.1)  # draw coastlines
         # cbar = figure.colorbar(contour, format='%.1f')
         ax.set_axis_off()
-        plt.savefig(filepath + '.png', dpi=600, bbox_inches='tight', pad_inches=0, transparent=True)
+        plt.savefig(filepath + '.png', dpi=700, bbox_inches='tight', pad_inches=0, transparent=True)
 
         self.create_contour_json(filepath)
 
