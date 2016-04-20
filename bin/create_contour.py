@@ -16,22 +16,22 @@ TYPES = {
     'precipitation': {
         'filepath': 'data/precipitation/cpre6190.dat',
         'conversion_factor': 0.1,  # (millimetres/day) *10
-        'config': climatemaps.contour.ContourPlotConfig(0.01, 14, colormap=plt.cm.jet_r, unit='mm/day', logscale=True)
+        'config': climatemaps.contour.ContourPlotConfig(0.1, 16, colormap=plt.cm.jet_r, unit='mm/day', logscale=True)
     },
     'cloud': {
         'filepath': 'data/cloud/ccld6190.dat',
         'conversion_factor': 1,
-        'config': climatemaps.contour.ContourPlotConfig(10, 90, colormap=plt.cm.jet_r, unit='%')
+        'config': climatemaps.contour.ContourPlotConfig(0, 100, colormap=plt.cm.jet_r, unit='%')
     },
     'mintemp': {
         'filepath': 'data/mintemp/ctmn6190.dat',
         'conversion_factor': 0.1,
-        'config': climatemaps.contour.ContourPlotConfig(-35, 25, colormap=plt.cm.jet, unit='C')
+        'config': climatemaps.contour.ContourPlotConfig(-40, 28, colormap=plt.cm.jet, unit='C')
     },
     'maxtemp': {
         'filepath': 'data/maxtemp/ctmx6190.dat',
         'conversion_factor': 0.1,
-        'config': climatemaps.contour.ContourPlotConfig(-20, 40, colormap=plt.cm.jet, unit='C')
+        'config': climatemaps.contour.ContourPlotConfig(-20, 50, colormap=plt.cm.jet, unit='C')
     },
     'wetdays': {
         'filepath': 'data/wetdays/cwet6190.dat',
