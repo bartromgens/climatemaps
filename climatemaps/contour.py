@@ -36,7 +36,7 @@ class ContourPlotConfig(object):
                  colormap=plt.cm.jet,
                  unit='',
                  logscale=False):  # jet, jet_r, YlOrRd, gist_rainbow
-        self.n_contours = 11
+        self.n_contours = 17
         self.min_angle_between_segments = 15
         self.level_lower = level_lower
         self.level_upper = level_upper
@@ -49,7 +49,7 @@ class ContourPlotConfig(object):
             self.norm = SymLogNorm(linthresh=1.0, vmin=self.level_lower, vmax=self.level_upper)
             self.levels = numpy.logspace(
                 start=self.level_lower,
-                stop=math.log(self.level_upper+1),
+                stop=math.log(self.level_upper+2),
                 num=self.n_contours,
                 base=math.e
             )
@@ -67,7 +67,7 @@ class ContourPlotConfig(object):
             self.levels_image = numpy.logspace(
                 start=math.log(self.level_lower),
                 stop=math.log(self.level_upper+2),
-                num=self.n_contours*20,
+                num=self.n_contours*40,
                 base=math.e
             )
             for i in range(0, len(self.levels_image)):
@@ -76,7 +76,7 @@ class ContourPlotConfig(object):
             self.levels_image = numpy.linspace(
                 start=self.level_lower,
                 stop=self.level_upper,
-                num=self.n_contours*20
+                num=self.n_contours*40
             )
         print(self.levels)
 
@@ -98,11 +98,11 @@ class Contour(object):
         numpy.set_printoptions(3, threshold=100, suppress=True)  # .3f
 
     def create_contour_data(self, filepath):
-        figure = plt.figure(figsize=(10, 10), frameon=False)
+        figure = plt.figure(frameon=False)
         ax = figure.add_subplot(111)
         m = Basemap(
             projection='merc',
-            resolution='c',
+            resolution='l',
             lon_0=0,
             ax=ax,
             llcrnrlon=-180,
@@ -116,13 +116,10 @@ class Contour(object):
                              levels=self.config.levels_image,
                              norm=self.config.norm
                              )
-        m.drawcoastlines(linewidth=0.3)  # draw coastlines
-        # m.drawmapboundary()  # draw a line around the map region
-        # m.drawparallels(numpy.arange(-90., 120., 30.), labels=[1, 0, 0, 0])  # draw parallels
-        # m.drawmeridians(numpy.arange(0., 420., 60.), labels=[0, 0, 0, 1])  # draw meridians
+        # m.drawcoastlines(linewidth=0.1)  # draw coastlines
         # cbar = figure.colorbar(contour, format='%.1f')
         ax.set_axis_off()
-        plt.savefig(filepath + '.png', dpi=400, bbox_inches='tight', pad_inches=0, transparent=True)
+        plt.savefig(filepath + '.png', dpi=600, bbox_inches='tight', pad_inches=0, transparent=True)
 
         self.create_contour_json(filepath)
 
@@ -137,8 +134,8 @@ class Contour(object):
         figure = plt.figure()
         ax = figure.add_subplot(222)
 
-        for i in range(0, len(self.config.levels)):
-            self.config.levels[i] -= 0.7
+        # for i in range(0, len(self.config.levels)):
+        #     self.config.levels[i] -= 0.7
 
         contours = ax.contour(
             self.lonrange, self.latrange, self.Z,
@@ -166,7 +163,7 @@ def contour_to_json(contour, filename, contour_labels, min_angle=2, ndigits=5, u
             paths_json = []
             for path in paths:
                 v = path.vertices
-                if len(v) < 2:
+                if len(v) < 6:
                     continue
                 x = []
                 y = []
