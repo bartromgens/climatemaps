@@ -8,7 +8,7 @@ $.ajaxSetup({beforeSend: function(xhr) {
 }
 });
 
-var dataDir = "./data/";
+var dataDir = "data/";
 var lineScaleFactor = 0.3;
 
 var map = new ol.Map({target: 'map'});
@@ -42,7 +42,7 @@ addContours('precipitation', 1);  // initial contour of January
 function createImageLayer(dataType, monthNr) {
     var imageLayer = new ol.layer.Image({
         source: new ol.source.ImageStatic({
-            url: '/climatemaps/website/data/contour_' + dataType + '_' + monthNr + '.png',
+            url: dataDir + 'contour_' + dataType + '_' + monthNr + '.png',
             projection: map.getView().getProjection(),
             imageExtent: ol.extent.applyTransform([-180, -85, 180, 85], ol.proj.getTransform("EPSG:4326", "EPSG:3857")),
         }),
@@ -70,7 +70,7 @@ function addContours(dataType, monthNr)
 
 
 function getLineWidth() {
-    return Math.pow(view.getZoom(), 1.5)  * lineScaleFactor;
+    return 0.5 + Math.pow(view.getZoom(), 1.5)  * lineScaleFactor;
 };
 
 function getImageOpacity() {
