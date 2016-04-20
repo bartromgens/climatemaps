@@ -4,6 +4,7 @@ html, body {
 }
 
 #map-container {
+    position: absolute;
     height: 80%;
     width: 100%;
 }
@@ -11,11 +12,6 @@ html, body {
 #map {
     height: 100%;
     width: 100%;
-}
-
-.station-name {
-    top: 10px;
-    left: 3em;
 }
 
 #info {
@@ -27,7 +23,21 @@ html, body {
     z-index: 1;
 }
 
+
+#slider-container {
+    position: absolute;
+    top: 0.5em;
+    left: 10%;
+    width: 80%;
+    padding: 0.5em 1em 0.5em 1em;
+    font-weight: bold;
+    background-color: white;
+    border-radius: 5px;
+    z-index: 1;
+    /*font-color: black;*/
+}
+
+
 .plot-stettings-input-fields {
-    /*padding: 0.5em;*/
     padding: 0.5em;
 }
