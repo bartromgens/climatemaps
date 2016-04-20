@@ -70,11 +70,17 @@ function addContours(dataType, monthNr)
 
 
 function getLineWidth() {
-    return Math.pow(view.getZoom(), 1.7)  * lineScaleFactor;
+    return Math.pow(view.getZoom(), 1.5)  * lineScaleFactor;
 };
 
 function getImageOpacity() {
-    return 0.8-(view.getZoom()/12);
+    var zoomedOut = 0.7;
+    var zoomLevelToStart = 5;
+    var zoom = view.getZoom();
+    if (zoom < zoomLevelToStart) {
+        return zoomedOut
+    }
+    return zoomedOut - (view.getZoom()-zoomLevelToStart) / 5.0;
 };
 
 
