@@ -7,3 +7,4 @@ env/*
 
 data/*
 website/data/
+website/lib/
