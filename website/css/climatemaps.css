@@ -7,14 +7,14 @@ body {
 }
 
 #map-container {
+    position: relative;
     padding: 0;
-    /*position: relative;*/
     height: 100%;
     width: 100%;
 }
 
 #map {
-    /*position: relative;*/
+    position: relative;
     padding: 0;
     height: 100%;
     width: 100%;
@@ -29,13 +29,12 @@ body {
     z-index: 1;
 }
 
-
 #slider-container {
     position: absolute;
     left:0;
     right:0;
     bottom: 3%;
-    width: 70%;
+    width: 90%;
     max-width: 1200px;
     margin: auto;
     padding: 0em 0.5em 0em 0.5em;
@@ -44,7 +43,6 @@ body {
     border-radius: 5px;
     z-index: 1;
 }
-
 
 .plot-stettings-input-fields {
     padding: 0.5em 1em 0.5em 1em;

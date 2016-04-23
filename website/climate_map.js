@@ -134,7 +134,7 @@ function createContoursLayer(contours) {
 
 
 map.addControl(new ol.control.FullScreen());
-
+// map.addControl(new ol.control.ZoomSlider());
 
 // Tooltip
 
@@ -143,7 +143,7 @@ var info = $('#info');
 var displayFeatureInfo = function(pixel) {
   info.css({
     left: (pixel[0] + 10) + 'px',
-    top: (pixel[1] - 50) + 'px'
+    top: (pixel[1] - 50) + 'px',
   });
 
   var feature = map.forEachFeatureAtPixel(pixel, function(feature) {
@@ -186,6 +186,7 @@ map.on('pointermove', function(evt) {
 //map.addInteraction(select);
 
 var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec", "Jan"];
+
 
 $(function() {
     $("#month-slider").slider({
