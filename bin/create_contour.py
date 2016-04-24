@@ -38,6 +38,11 @@ TYPES = {
         'conversion_factor': 0.1,
         'config': climatemaps.contour.ContourPlotConfig(0, 30, colormap=plt.cm.jet_r, unit='days')
     },
+    'wind': {
+        'filepath': 'data/wind/cwnd6190.dat',
+        'conversion_factor': 0.1,
+        'config': climatemaps.contour.ContourPlotConfig(0, 10, colormap=plt.cm.jet, unit='m/s')
+    },
 }
 
 
