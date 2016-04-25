@@ -11,7 +11,11 @@ $.ajaxSetup({beforeSend: function(xhr) {
 var dataDir = "data/";
 var lineScaleFactor = 0.3;
 
-var map = new ol.Map({target: 'map'});
+var map = new ol.Map({
+    target: 'map',
+    interactions: ol.interaction.defaults({keyboard:false}),  // disable because this moves the map when using the arrow keys to change the slider
+});
+
 var view = new ol.View( {center: [0, 0], zoom: 3, projection: 'EPSG:3857'} );
 map.setView(view);
 
