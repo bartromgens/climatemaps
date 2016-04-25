@@ -251,7 +251,8 @@ var setSliderValue = function(monthNr) {
     var slider = $("#month-slider");
     if (monthNr >= 13) {
         slider.slider("value", 0);
-    } else if (getSliderValue() != monthNr-1) {
+//    } else if (getSliderValue() != monthNr-1) {
+    } else {
         slider.slider("value", monthNr-1);
     };
 };
@@ -372,11 +373,11 @@ if (searchParams.has('month')) {
     initialMonth = searchParams.get('month');
 };
 
-selectDataType(initialDataType);
-addContours(initialDataType, initialMonth);  // initial contour of January
 
 var onLoad = function() {
+    selectDataType(initialDataType);
     setSliderValue(initialMonth);
+//    addContours(initialDataType, initialMonth);  // initial contour of January
 };
 
 window.onload = onLoad;
