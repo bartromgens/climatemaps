@@ -36,7 +36,6 @@ view.setCenter(ol.proj.fromLonLat([lon, lat]));
 var plotTypesMonthsLayers = {};
 var plotTypesMonthsImages = {};
 
-addContours('precipitation', 1);  // initial contour of January
 
 //
 //var imageLayer = createImageLayer('precipitation', 1);
@@ -247,15 +246,34 @@ var showOrCreateContour = function(monthNr) {
     }
 };
 
+var setSliderValue = function(monthNr) {
+    console.log('set slider value')
+    var slider = $("#month-slider");
+    if (monthNr >= 13) {
+        slider.slider("value", 0);
+    } else if (getSliderValue() != monthNr-1) {
+        slider.slider("value", monthNr-1);
+    };
+};
+
+
+var getSliderValue = function() {
+    var slider = $("#month-slider");
+    return slider.slider("value");
+};
+
 
 var sliderChanged = function() {
     var slider = $("#month-slider");
-    var monthNr = slider.slider("value") + 1;
+    var monthNr = getSliderValue() + 1;
     if (monthNr == 13) {
         slider.slider("value", 0);
-        return;
     }
     console.log("slider changed to: " + monthNr);
+
+    searchParams.set('month', monthNr);
+    window.history.replaceState({}, '', `${location.pathname}?${searchParams}`);
+
     showOrCreateContour(monthNr);
 };
 
@@ -291,6 +309,12 @@ var playAnimation = function() {
 document.getElementById("animate-button").onclick = toggleAnimation;
 
 
+var selectDataType = function selectDataType(valueToSelect)
+{
+    var element = document.getElementById('select-type');
+    element.value = valueToSelect;
+}
+
 var getSelectedType = function() {
     return document.getElementById("select-type").value;
 };
@@ -298,6 +322,8 @@ var getSelectedType = function() {
 
 var typeChanged = function() {
     var selection = getSelectedType();
+    searchParams.set('datatype', selection);
+    window.history.replaceState({}, '', `${location.pathname}?${searchParams}`);
     console.log(selection);
     sliderChanged();
 };
@@ -328,3 +354,29 @@ map.on("moveend", function() {
         }
     }
 });
+
+
+var currentUrl = window.location.href;
+var url = new URL(window.location.href);
+var searchParams = new URLSearchParams(url.search.slice(1));
+console.log(searchParams);
+console.log(searchParams.get('datatype'));  // outputs "m2-m3-m4-m5"
+
+var initialDataType = 'precipitation';
+if (searchParams.has('datatype')) {
+    initialDataType = searchParams.get('datatype');
+};
+
+var initialMonth = 1;
+if (searchParams.has('month')) {
+    initialMonth = searchParams.get('month');
+};
+
+selectDataType(initialDataType);
+addContours(initialDataType, initialMonth);  // initial contour of January
+
+var onLoad = function() {
+    setSliderValue(initialMonth);
+};
+
+window.onload = onLoad;
