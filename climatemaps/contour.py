@@ -78,7 +78,7 @@ class ContourPlotConfig(object):
                 stop=self.level_upper,
                 num=self.n_contours*40
             )
-        print(self.levels)
+        # print(self.levels)
 
 
 class Contour(object):
@@ -98,6 +98,7 @@ class Contour(object):
         numpy.set_printoptions(3, threshold=100, suppress=True)  # .3f
 
     def create_contour_data(self, filepath):
+        logger.info('start')
         figure = plt.figure(frameon=False)
         ax = figure.add_subplot(111)
         m = Basemap(
@@ -120,10 +121,11 @@ class Contour(object):
         # cbar = figure.colorbar(contour, format='%.1f')
         ax.set_axis_off()
         plt.savefig(filepath + '.png', dpi=700, bbox_inches='tight', pad_inches=0, transparent=True)
-
         self.create_contour_json(filepath)
+        logger.info('end')
 
     def create_contour_json(self, filepath):
+        logger.info('start')
         # self.lonrange = gaussian_filter(self.lonrange, sigma=0.5)
         # self.latrange = gaussian_filter(self.latrange, sigma=0.5)
         # self.Z = gaussian_filter(self.Z, sigma=3.0, mode='wrap', truncate=10.0)
