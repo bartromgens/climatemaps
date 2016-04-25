@@ -81,7 +81,7 @@ def create_optimal_map(month):
             x[...] = 1.0 - x/16.0
 
     for x in numpy.nditer(Ztmax, op_flags=['readwrite']):
-        diff_from_best = math.pow(abs(x - 20.0)/10.0, 2)
+        diff_from_best = math.pow(abs(x - 22.0)/10.0, 2)
         x[...] = 1.0 - diff_from_best
 
     factor = 0.33
