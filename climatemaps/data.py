@@ -19,8 +19,8 @@ def import_climate_data(filepath, monthnr, factor_to_SI=1):
         lonrange = numpy.arange(xmin, xmax, grid_size)
         latrange = numpy.arange(ymin, ymax, grid_size)
         Z = numpy.zeros((int(latrange.shape[0]), int(lonrange.shape[0])))
-        print(len(lonrange))
-        print(len(latrange))
+        # print(len(lonrange))
+        # print(len(latrange))
 
         i = 0
         rown = 0
@@ -53,14 +53,10 @@ def import_climate_data(filepath, monthnr, factor_to_SI=1):
         half_size = int(Z.shape[1]/2)
         for i in range(0, Z.shape[0]):
             for j in range(0, Z.shape[1]):
-                if (lonrange[j] >= 0.0):
+                if lonrange[j] >= 0.0:
                     Z_new[i][j-half_size] = Z[i][j]
                 else:
                     Z_new[i][j+half_size] = Z[i][j]
-
-        # for i in range(0, len(lonrange)):
-        #     if lonrange[i] > 180.0:
-        #         lonrange[i] = -180.0 + (lonrange[i]-180.0)
 
     return latrange, lonrange, Z_new
 
