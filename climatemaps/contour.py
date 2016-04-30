@@ -5,10 +5,12 @@ import os
 from mpl_toolkits.basemap import Basemap
 import numpy
 import matplotlib.pyplot as plt
-from matplotlib.colors import LogNorm, SymLogNorm
+from matplotlib.colors import LogNorm, SymLogNorm, rgb2hex
 
 import scipy.ndimage
 from scipy.ndimage.filters import gaussian_filter
+from geojson import Feature, LineString, FeatureCollection
+import geojson
 
 from climatemaps.logger import logger
 
@@ -147,7 +149,7 @@ class Contour(object):
         )
         # cbar = figure.colorbar(contours, format='%.1f')
         ndigits = 3
-        contour_to_json(contours, filepath, self.config.levels, self.config.min_angle_between_segments, ndigits, self.config.unit)
+        contour_to_geojson(contours, filepath, self.config.levels, self.config.min_angle_between_segments, ndigits, self.config.unit)
 
 
 def contour_to_json(contour, filename, contour_labels, min_angle=2, ndigits=5, unit=''):
@@ -204,3 +206,57 @@ def contour_to_json(contour, filename, contour_labels, min_angle=2, ndigits=5, u
             logger.info('total points: ' + str(total_points) + ', compression: ' + str(int((1.0 - total_points / total_points_original) * 100)) + '%')
         else:
             logger.warning('no points found')
+
+
+def contour_to_geojson(contour, filename, contour_labels, min_angle=2, ndigits=5, unit=''):
+    collections = contour.collections
+    total_points = 0
+    total_points_original = 0
+    contour_index = 0
+    assert len(contour_labels) == len(collections)
+    line_features = []
+    for collection in collections:
+        paths = collection.get_paths()
+        color = collection.get_edgecolor()
+        for path in paths:
+            v = path.vertices
+            if len(v) < 6:
+                continue
+            coordinates = []
+            v1 = v[1] - v[0]
+            lat = round(v[0][0], ndigits)
+            long = round(v[0][1], ndigits)
+            coordinates.append((lat, long))
+            for i in range(1, len(v) - 2):
+                v2 = v[i + 1] - v[i - 1]
+                diff_angle = math.fabs(angle(v1, v2) * 180.0 / math.pi)
+                if diff_angle > min_angle:
+                    lat = round(v[i][0], ndigits)
+                    long = round(v[i][1], ndigits)
+                    coordinates.append((lat, long))
+                    v1 = v[i] - v[i - 1]
+            lat = round(v[-1][0], ndigits)
+            long = round(v[-1][1], ndigits)
+            coordinates.append((lat, long))
+            total_points += len(coordinates)
+            total_points_original += len(v)
+            line = LineString(coordinates)
+            properties = {
+                "stroke-width": 10,
+                "stroke": rgb2hex(color[0]),
+                "label": contour_labels[contour_index],
+                "unit": unit
+            }
+            line_features.append(Feature(geometry=line, properties=properties))
+        contour_index += 1
+
+    if total_points_original > 0:
+        logger.info('total points: ' + str(total_points) + ', compression: ' + str(
+            int((1.0 - total_points / total_points_original) * 100)) + '%')
+    else:
+        logger.warning('no points found')
+
+    feature_collection = FeatureCollection(line_features)
+    dump = geojson.dumps(feature_collection)
+    with open(filename + '.geojson', 'w') as fileout:
+        fileout.write(dump)
