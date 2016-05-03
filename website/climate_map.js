@@ -45,7 +45,7 @@ var plotTypesMonthsImages = {};
 function createImageLayer(dataType, monthNr) {
     return new ol.layer.Image({
         source: new ol.source.ImageStatic({
-            url: dataDir + 'contour_' + dataType + '_' + monthNr + '.png',
+            url: dataDir + '/' + dataType + '/' + monthNr + '.png',
             projection: map.getView().getProjection(),
             imageExtent: ol.extent.applyTransform([-180, -85, 180, 85], ol.proj.getTransform("EPSG:4326", "EPSG:3857"))
         }),
@@ -90,7 +90,6 @@ function createContoursLayer(dataType, monthNr) {
     console.log(dataDir + dataType + '/' + monthNr + '/tiles/{z}/{x}/{y}.geojson')
 
     var styleFunction = function (feature, resolution) {
-//        console.log(feature.get('stroke-width'))
         var lineStyle = new ol.style.Style({
             stroke: new ol.style.Stroke({
                 color: feature.get('stroke'),
@@ -115,18 +114,7 @@ function createContoursLayer(dataType, monthNr) {
         style: styleFunction
     });
 
-
-//    var layerLines = new ol.layer.Vector({
-//        source: new ol.source.Vector({
-//            url: dataDir + 'contour_' + dataType + '_' + monthNr +'.geojson',
-////            projection : 'EPSG:3857',
-//            wrapX: false,
-//            format: new ol.format.GeoJSON(),
-//        }),
-//        style: styleFunction,
-//    });
-
-//    layerLines.setZIndex(99);
+    contourLayer.setZIndex(99);
     map.addLayer(contourLayer);
     return contourLayer;
 }
