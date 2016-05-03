@@ -56,17 +56,15 @@ function createImageLayer(dataType, monthNr) {
 
 function addContours(dataType, monthNr)
 {
-    $.getJSON(dataDir + "contour_" + dataType + "_" + monthNr + ".json", function(json) {
-        var contourLayers = createContoursLayer(json.contours);
-        if ( !(dataType in plotTypesMonthsLayers)) {
-            plotTypesMonthsLayers[dataType] = {};
-            plotTypesMonthsImages[dataType] = {};
-        }
-        var imageLayer = createImageLayer(dataType, monthNr);
-        map.addLayer(imageLayer);
-        plotTypesMonthsImages[dataType][monthNr] = imageLayer;
-        plotTypesMonthsLayers[dataType][monthNr] = contourLayers;
-    });
+    var contourLayers = createContoursLayer(dataType, monthNr);
+    if ( !(dataType in plotTypesMonthsLayers)) {
+        plotTypesMonthsLayers[dataType] = {};
+        plotTypesMonthsImages[dataType] = {};
+    }
+    var imageLayer = createImageLayer(dataType, monthNr);
+    map.addLayer(imageLayer);
+    plotTypesMonthsImages[dataType][monthNr] = imageLayer;
+    plotTypesMonthsLayers[dataType][monthNr] = contourLayers;
 }
 
 
@@ -86,51 +84,63 @@ function getImageOpacity() {
 }
 
 
-function createContoursLayer(contours) {
+function createContoursLayer(dataType, monthNr) {
     console.log('create new contour layers');
-    console.log(contours.length + ' contours');
     var contourLayers = [];
 
-    // each contour can have multiple (including zero) paths.
-    for (var k = 0; k < contours.length; ++k)
-    {
-        var paths = contours[k].paths;
-        for (var j = 0; j < paths.length; ++j)
-        {
-            var markers = [];
-            for (var i = 0; i < paths[j].x.length; ++i)
-            {
-                var lon = paths[j].x[i];
-                var lat = paths[j].y[i];
-                var lonLat = [lon, lat];
-                markers.push(ol.proj.fromLonLat(lonLat));
-            }
+    var layerLines = new ol.layer.Vector({
+        source: new ol.source.Vector({
+            url: dataDir + 'contour_' + dataType + '_' + monthNr +'.geojson',
+            projection : 'EPSG:3857',
+            wrapX: false,
+            format: new ol.format.GeoJSON(),
+        })
+    })
 
-            var color = [paths[j].linecolor[0]*255, paths[j].linecolor[1]*255, paths[j].linecolor[2]*255, 1.0];
+    layerLines.setZIndex(99);
+    contourLayers.push(layerLines);
+    map.addLayer(layerLines);
 
-            var lineStyle = new ol.style.Style({
-                stroke: new ol.style.Stroke({
-                    color: color,
-                    width: getLineWidth()
-                })
-            });
-
-            var layerLines = new ol.layer.Vector({
-                source: new ol.source.Vector({
-                    features: [new ol.Feature({
-                        geometry: new ol.geom.LineString(markers, 'XY'),
-                        name: paths[j].label
-                    })],
-                    wrapX: false
-                }),
-                style: lineStyle
-            });
-
-            layerLines.setZIndex(99);
-            contourLayers.push(layerLines);
-            map.addLayer(layerLines);
-        }
-    }
+//    // each contour can have multiple (including zero) paths.
+//    for (var k = 0; k < contours.length; ++k)
+//    {
+//        var paths = contours[k].paths;
+//        for (var j = 0; j < paths.length; ++j)
+//        {
+//            var markers = [];
+//            for (var i = 0; i < paths[j].x.length; ++i)
+//            {
+//                var lon = paths[j].x[i];
+//                var lat = paths[j].y[i];
+//                var lonLat = [lon, lat];
+//                markers.push(ol.proj.fromLonLat(lonLat));
+//            }
+//
+//            var color = [paths[j].linecolor[0]*255, paths[j].linecolor[1]*255, paths[j].linecolor[2]*255, 1.0];
+//
+//            var lineStyle = new ol.style.Style({
+//                stroke: new ol.style.Stroke({
+//                    color: color,
+//                    width: getLineWidth()
+//                })
+//            });
+//
+//            var layerLines = new ol.layer.Vector({
+//                source: new ol.source.Vector({
+//                    features: [new ol.Feature({
+//                        geometry: new ol.geom.LineString(markers, 'XY'),
+//                        name: paths[j].label
+//                    })],
+//                    wrapX: false
+//                }),
+//                style: lineStyle
+//            });
+//
+//            layerLines.setZIndex(99);
+//            contourLayers.push(layerLines);
+//            map.addLayer(layerLines);
+//        }
+//    }
 
     return contourLayers;
 }
