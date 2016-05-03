@@ -43,9 +43,10 @@ class ContourPlotConfig(object):
                  level_upper=100,
                  colormap=plt.cm.jet,
                  unit='',
-                 logscale=False):  # jet, jet_r, YlOrRd, gist_rainbow
-        self.n_contours = 14
-        self.min_angle_between_segments = 15
+                 logscale=False,
+                 n_contours=14):  # jet, jet_r, YlOrRd, gist_rainbow
+        self.n_contours = n_contours
+        self.min_angle_between_segments = 5
         self.level_lower = level_lower
         self.level_upper = level_upper
         self.colormap = colormap
@@ -84,7 +85,7 @@ class ContourPlotConfig(object):
             self.levels_image = numpy.linspace(
                 start=self.level_lower,
                 stop=self.level_upper,
-                num=self.n_contours*40
+                num=self.n_contours*20
             )
         # print(self.levels)
 
@@ -137,7 +138,7 @@ class Contour(object):
         logger.info('end')
 
     def create_contour_json(self, filepath):
-        logger.info('start')
+        logger.info('create contour plot')
         # self.lonrange = gaussian_filter(self.lonrange, sigma=0.5)
         # self.latrange = gaussian_filter(self.latrange, sigma=0.5)
         # self.Z = gaussian_filter(self.Z, sigma=3.0, mode='wrap', truncate=10.0)
@@ -158,7 +159,8 @@ class Contour(object):
             norm=self.config.norm
         )
         # cbar = figure.colorbar(contours, format='%.1f')
-        ndigits = 3
+        ndigits = 4
+        logger.info('converting contour to geojson')
         geojsoncontour.contour_to_geojson(
             contours,
             filepath + '.geojson',
