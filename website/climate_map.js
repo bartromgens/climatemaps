@@ -56,7 +56,7 @@ function createImageLayer(dataType, monthNr) {
 
 function addContours(dataType, monthNr)
 {
-    var contourLayers = createContoursLayer(dataType, monthNr);
+    var contourLayer = createContoursLayer(dataType, monthNr);
     if ( !(dataType in plotTypesMonthsLayers)) {
         plotTypesMonthsLayers[dataType] = {};
         plotTypesMonthsImages[dataType] = {};
@@ -64,12 +64,13 @@ function addContours(dataType, monthNr)
     var imageLayer = createImageLayer(dataType, monthNr);
     map.addLayer(imageLayer);
     plotTypesMonthsImages[dataType][monthNr] = imageLayer;
-    plotTypesMonthsLayers[dataType][monthNr] = contourLayers;
+    plotTypesMonthsLayers[dataType][monthNr] = contourLayer;
 }
 
 
 function getLineWidth() {
     return 0.5 + Math.pow(view.getZoom(), 1.5)  * lineScaleFactor;
+//    return 10 * view.getZoom();
 }
 
 
@@ -86,63 +87,48 @@ function getImageOpacity() {
 
 function createContoursLayer(dataType, monthNr) {
     console.log('create new contour layers');
-    var contourLayers = [];
+    console.log(dataDir + dataType + '/' + monthNr + '/tiles/{z}/{x}/{y}.geojson')
 
-    var layerLines = new ol.layer.Vector({
-        source: new ol.source.Vector({
-            url: dataDir + 'contour_' + dataType + '_' + monthNr +'.geojson',
-            projection : 'EPSG:3857',
-            wrapX: false,
+    var styleFunction = function (feature, resolution) {
+//        console.log(feature.get('stroke-width'))
+        var lineStyle = new ol.style.Style({
+            stroke: new ol.style.Stroke({
+                color: feature.get('stroke'),
+//                width: feature.get('stroke-width'),
+                width: getLineWidth(),
+            })
+        });
+        return lineStyle
+    };
+
+    var contourLayer = new ol.layer.VectorTile({
+        source: new ol.source.VectorTile({
+            url: dataDir + dataType + '/' + monthNr + '/tiles/{z}/{x}/{y}.geojson',
             format: new ol.format.GeoJSON(),
-        })
-    })
+            projection: 'EPSG:3857',
+            tileGrid: ol.tilegrid.createXYZ({
+                maxZoom: 4,
+                minZoom: 1,
+                tileSize: [256, 256]
+            }),
+        }),
+        style: styleFunction
+    });
 
-    layerLines.setZIndex(99);
-    contourLayers.push(layerLines);
-    map.addLayer(layerLines);
 
-//    // each contour can have multiple (including zero) paths.
-//    for (var k = 0; k < contours.length; ++k)
-//    {
-//        var paths = contours[k].paths;
-//        for (var j = 0; j < paths.length; ++j)
-//        {
-//            var markers = [];
-//            for (var i = 0; i < paths[j].x.length; ++i)
-//            {
-//                var lon = paths[j].x[i];
-//                var lat = paths[j].y[i];
-//                var lonLat = [lon, lat];
-//                markers.push(ol.proj.fromLonLat(lonLat));
-//            }
-//
-//            var color = [paths[j].linecolor[0]*255, paths[j].linecolor[1]*255, paths[j].linecolor[2]*255, 1.0];
-//
-//            var lineStyle = new ol.style.Style({
-//                stroke: new ol.style.Stroke({
-//                    color: color,
-//                    width: getLineWidth()
-//                })
-//            });
-//
-//            var layerLines = new ol.layer.Vector({
-//                source: new ol.source.Vector({
-//                    features: [new ol.Feature({
-//                        geometry: new ol.geom.LineString(markers, 'XY'),
-//                        name: paths[j].label
-//                    })],
-//                    wrapX: false
-//                }),
-//                style: lineStyle
-//            });
-//
-//            layerLines.setZIndex(99);
-//            contourLayers.push(layerLines);
-//            map.addLayer(layerLines);
-//        }
-//    }
+//    var layerLines = new ol.layer.Vector({
+//        source: new ol.source.Vector({
+//            url: dataDir + 'contour_' + dataType + '_' + monthNr +'.geojson',
+////            projection : 'EPSG:3857',
+//            wrapX: false,
+//            format: new ol.format.GeoJSON(),
+//        }),
+//        style: styleFunction,
+//    });
 
-    return contourLayers;
+//    layerLines.setZIndex(99);
+    map.addLayer(contourLayer);
+    return contourLayer;
 }
 
 
@@ -164,7 +150,7 @@ var displayFeatureInfo = function(pixel) {
   });
 
   if (feature) {
-    info.text(feature.get('name'));
+    info.text(feature.get('title'));
     info.show();
   } else {
     info.hide();
@@ -225,9 +211,7 @@ var hideAllContours = function() {
     var month;
     for (type in plotTypesMonthsLayers) {
         for (month in plotTypesMonthsLayers[type]) {
-            for (var i = 0; i < plotTypesMonthsLayers[type][month].length; ++i) {
-                plotTypesMonthsLayers[type][month][i].setVisible(false);
-            }
+            plotTypesMonthsLayers[type][month].setVisible(false);
         }
     }
 
@@ -247,12 +231,10 @@ var showOrCreateContour = function(monthNr) {
         addContours(selectedType, monthNr);
     }
     else {
-        var monthLayers = plotTypesMonthsLayers[selectedType][monthNr];
+        var monthLayer = plotTypesMonthsLayers[selectedType][monthNr];
         var monthImage = plotTypesMonthsImages[selectedType][monthNr];
         monthImage.setVisible(true);
-        for (var i = 0; i < monthLayers.length; ++i) {
-            monthLayers[i].setVisible(true);
-        }
+        monthLayer.setVisible(true);
     }
 };
 
@@ -350,15 +332,8 @@ var plotExists = function(typeName, monthNr) {
 map.on("moveend", function() {
     var type;
     var month;
-    for (type in plotTypesMonthsLayers) {
-        for (month in plotTypesMonthsLayers[type]) {
-            for (var i = 0; i < plotTypesMonthsLayers[type][month].length; ++i) {
-                var oldStyle = plotTypesMonthsLayers[type][month][i].getStyle();
-                oldStyle.getStroke().setWidth(getLineWidth());
-                plotTypesMonthsLayers[type][month][i].setStyle(oldStyle);
-            }
-        }
-    }
+
+    // change image layer opacacity depending on zoom
     for (type in plotTypesMonthsImages) {
         for (month in plotTypesMonthsImages[type]) {
             plotTypesMonthsImages[type][month].setOpacity( getImageOpacity() );

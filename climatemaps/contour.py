@@ -13,8 +13,12 @@ from geojson import Feature, LineString, FeatureCollection
 import geojson
 
 import geojsoncontour
+import togeojsontiles
 
 from climatemaps.logger import logger
+
+
+TIPPECANOE_DIR = '/usr/local/bin/'
 
 
 def dotproduct(v1, v2):
@@ -101,7 +105,7 @@ class Contour(object):
         self.latrange = latrange[::-1]
         numpy.set_printoptions(3, threshold=100, suppress=True)  # .3f
 
-    def create_contour_data(self, filepath):
+    def create_contour_data(self, data_dir_out, data_type, month):
         logger.info('start')
         figure = plt.figure(frameon=False)
         ax = figure.add_subplot(111)
@@ -124,8 +128,12 @@ class Contour(object):
         # m.drawcoastlines(linewidth=0.1)  # draw coastlines
         # cbar = figure.colorbar(contour, format='%.1f')
         ax.set_axis_off()
+        data_dir = os.path.join(data_dir_out, data_type)
+        if not os.path.exists(data_dir):
+            os.mkdir(data_dir)
+        filepath = os.path.join(data_dir, str(month))
         plt.savefig(filepath + '.png', dpi=700, bbox_inches='tight', pad_inches=0, transparent=True)
-        self.create_contour_json(filepath + '.geojson')
+        self.create_contour_json(filepath)
         logger.info('end')
 
     def create_contour_json(self, filepath):
@@ -153,9 +161,22 @@ class Contour(object):
         ndigits = 3
         geojsoncontour.contour_to_geojson(
             contours,
-            filepath,
+            filepath + '.geojson',
             self.config.levels,
             self.config.min_angle_between_segments,
             ndigits,
             self.config.unit
+        )
+
+        togeojsontiles.geojson_to_mbtiles(
+            filepaths=[filepath + '.geojson',],
+            tippecanoe_dir=TIPPECANOE_DIR,
+            mbtiles_file='out.mbtiles',
+            maxzoom=4
+        )
+
+        togeojsontiles.mbtiles_to_geojsontiles(
+            tippecanoe_dir=TIPPECANOE_DIR,
+            tile_dir=os.path.join(filepath, 'tiles/'),
+            mbtiles_file='out.mbtiles',
         )
