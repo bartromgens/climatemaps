@@ -56,9 +56,8 @@ TYPES = {
 def main():
     for data_type, settings in TYPES.items():
         for month in range(1, 13):
-        # for month in range(1, 2):
+        # for month in range(1, 3):
             latrange, lonrange, Z = climatemaps.data.import_climate_data(settings['filepath'], month, settings['conversion_factor'])
-            filepath_out = os.path.join(DATA_OUT_DIR, 'contour_' + data_type +'_' + str(month))
             contourmap = climatemaps.contour.Contour(settings['config'], lonrange, latrange, Z)
             contourmap.create_contour_data(DATA_OUT_DIR, data_type, month)
     for month in range(1, 13):
@@ -92,10 +91,9 @@ def create_optimal_map(month):
     for x in numpy.nditer(Z, op_flags=['readwrite']):
         x[...] = max(x, 0.0)
 
-    filepath_out = os.path.join(DATA_OUT_DIR, 'contour_' + 'optimal' +'_' + str(month))
     config = climatemaps.contour.ContourPlotConfig(0.0, 9.0, colormap=plt.cm.RdYlGn, unit='')
     contourmap = climatemaps.contour.Contour(config, lonrange, latrange, Z)
-    contourmap.create_contour_data(DATA_OUT_DIR, filepath_out)
+    contourmap.create_contour_data(DATA_OUT_DIR, 'optimal', month)
     print('month done: ' + str(month))
 
 
