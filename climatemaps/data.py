@@ -61,6 +61,40 @@ def import_climate_data(filepath, monthnr, factor_to_SI=1):
     return latrange, lonrange, Z_new
 
 
+def import_ascii_grid_generic(filepath, no_data_value=9e+20):
+    with open(filepath, 'r') as filein:
+        lines = filein.readlines()
+        line_n = 0
+        grid_size = 0.083333333
+        xmin = -180.0
+        xmax = 180.0
+        ymin = -90.0
+        ymax = 90.0
+
+        lonrange = numpy.arange(xmin, xmax, grid_size)
+        latrange = numpy.arange(ymin, ymax, grid_size)
+        Z = numpy.zeros((int(latrange.shape[0]), int(lonrange.shape[0])))
+
+        i = 0
+        for line in lines:
+            line_n += 1
+            if line_n < 7:  # skip header
+                continue
+
+            j = 0
+            values = line.split()
+            for value in values:
+                value = float(value)
+                if value == no_data_value:
+                    value = numpy.nan
+                Z[i][j] = value
+                j += 1
+            i += 1
+
+    print('import_ascii_grid_generic() - END')
+    return latrange, lonrange, Z
+
+
 def geographic_to_web_mercator(x_lon, y_lat):
     if abs(x_lon) <= 180 and abs(y_lat) < 90:
         num = x_lon * 0.017453292519943295
