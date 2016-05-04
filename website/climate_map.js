@@ -9,7 +9,6 @@ $.ajaxSetup({beforeSend: function(xhr) {
 });
 
 var dataDir = "data/";
-var lineScaleFactor = 0.3;
 
 var map = new ol.Map({
     target: 'map',
@@ -20,8 +19,8 @@ var view = new ol.View( {center: [0, 0], zoom: 3, projection: 'EPSG:3857'} );
 map.setView(view);
 
 var osmSource = new ol.source.OSM("OpenCycleMap");
-osmSource.setUrl("http://a.tile.opencyclemap.org/transport/{z}/{x}/{y}.png");
-//osmSource.setUrl("http://a.tile.openstreetmap.org/{z}/{x}/{y}.png");
+//osmSource.setUrl("http://a.tile.opencyclemap.org/transport/{z}/{x}/{y}.png");
+osmSource.setUrl("http://a.tile.openstreetmap.org/{z}/{x}/{y}.png");
 //osmSource.setUrl("https://maps.wikimedia.org/osm-intl/{z}/{x}/{y}.png");
 //osmSource.setUrl("http://a.tile.stamen.com/toner/{z}/{x}/{y}.png");
 
@@ -69,6 +68,7 @@ function addContours(dataType, monthNr)
 
 
 function getLineWidth() {
+    var lineScaleFactor = 0.3;
     return 0.5 + Math.pow(view.getZoom(), 1.5)  * lineScaleFactor;
 //    return 10 * view.getZoom();
 }
