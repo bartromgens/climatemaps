@@ -158,23 +158,6 @@ map.on('pointermove', function(evt) {
 });
 
 
-// Select features
-
-//var select = new ol.interaction.Select({
-//    condition: ol.events.condition.click
-//});
-//
-//select.on('select', function(evt) {
-//    for (var i = 0; i < contourLayers.length; ++i)
-//    {
-//        var removedLayer = map.removeLayer(contourLayers[i]);
-//    }
-//    contourLayers.length = 0;
-//    addContours(1);
-//});
-
-//map.addInteraction(select);
-
 var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec", "Jan"];
 
 
