@@ -146,8 +146,9 @@ class Contour(object):
         self.Z = scipy.ndimage.zoom(self.Z, zoom=zoomfactor, order=1)
         self.lonrange = scipy.ndimage.zoom(self.lonrange, zoom=zoomfactor, order=1)
         self.latrange = scipy.ndimage.zoom(self.latrange, zoom=zoomfactor, order=1)
+
         figure = plt.figure()
-        ax = figure.add_subplot(222)
+        ax = figure.add_subplot(111)
 
         # for i in range(0, len(self.config.levels)):
         #     self.config.levels[i] -= 0.7
@@ -158,7 +159,11 @@ class Contour(object):
             cmap=self.config.colormap,
             norm=self.config.norm
         )
-        # cbar = figure.colorbar(contours, format='%.1f')
+
+        cbar = figure.colorbar(contours, format='%.1f')
+        ax.set_visible(False)
+        figure.savefig(filepath + "_colorbar.png", dpi=300, bbox_inches='tight', pad_inches=0, transparent=True)
+
         ndigits = 4
         logger.info('converting contour to geojson')
         geojsoncontour.contour_to_geojson(
