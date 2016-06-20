@@ -44,7 +44,7 @@ class ContourPlotConfig(object):
                  colormap=plt.cm.jet,
                  unit='',
                  logscale=False,
-                 n_contours=14):  # jet, jet_r, YlOrRd, gist_rainbow
+                 n_contours=21):  # jet, jet_r, YlOrRd, gist_rainbow
         self.n_contours = n_contours
         self.min_angle_between_segments = 5
         self.level_lower = level_lower
@@ -77,7 +77,7 @@ class ContourPlotConfig(object):
             self.levels_image = numpy.logspace(
                 start=math.log(self.level_lower)-0.0001,  # TODO: why is this needed?
                 stop=math.log(self.level_upper+2),
-                num=self.n_contours*40,
+                num=self.n_contours*10,
                 base=math.e
             )
             # TODO: why is this needed?
@@ -88,9 +88,10 @@ class ContourPlotConfig(object):
             self.levels_image = numpy.linspace(
                 start=self.level_lower,
                 stop=self.level_upper,
-                num=self.n_contours*20
+                num=self.n_contours*10
             )
         # print(self.levels)
+        # print(self.levels_image)
 
 
 class Contour(object):
@@ -146,6 +147,7 @@ class Contour(object):
 
         cbar = figure.colorbar(contour, format='%.1f')
         cbar.set_label(self.config.unit)
+        cbar.set_ticks(self.config.levels)
         ax.set_visible(False)
         figure.savefig(
             filepath + "_colorbar.svg",
