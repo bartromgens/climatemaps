@@ -90,6 +90,14 @@ class ContourPlotConfig(object):
                 stop=self.level_upper,
                 num=self.n_contours*10
             )
+
+        # use half the number of levels for the colorbar ticks
+        counter = 0
+        self.colorbar_ticks = []
+        for level in self.levels:
+            if counter % 2 == 0:
+                self.colorbar_ticks.append(level)
+            counter += 1
         # print(self.levels)
         # print(self.levels_image)
 
@@ -147,7 +155,7 @@ class Contour(object):
 
         cbar = figure.colorbar(contour, format='%.1f')
         cbar.set_label(self.config.unit)
-        cbar.set_ticks(self.config.levels)
+        cbar.set_ticks(self.config.colorbar_ticks)
         ax.set_visible(False)
         figure.savefig(
             filepath + "_colorbar.svg",
