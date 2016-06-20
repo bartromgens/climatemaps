@@ -7,7 +7,7 @@ import math
 import numpy
 import matplotlib.pyplot as plt
 
-sys.path.append('./climatemaps')
+sys.path.append('../climatemaps')
 
 import climatemaps
 

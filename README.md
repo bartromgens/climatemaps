@@ -8,7 +8,6 @@ Global monthly climate data visualised on an [interactive map](http://climatemap
 The climate grid data, 30 year averages, is taken from http://www.ipcc-data.org/obs/get_30yr_means.html.
 
 #### TODO
- - Add colorbar legend
  - Adjust contour line size for zoom levels higher than for which there are tiles
  - Add about page for more info about what is shown
  - Add attributions

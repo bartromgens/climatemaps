@@ -47,3 +47,15 @@ body {
 .plot-stettings-input-fields {
     padding: 0.5em 1em 0.5em 1em;
 }
+
+#colorbar-legend-container {
+    position: absolute;
+    top: 80px;
+    right: 5px;
+    margin: auto;
+    padding: 0.5em 0.5em 0.5em 0.5em;
+    font-weight: bold;
+    background-color: white;
+    border-radius: 5px;
+    z-index: 1;
+}

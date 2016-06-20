@@ -44,7 +44,7 @@ class ContourPlotConfig(object):
                  colormap=plt.cm.jet,
                  unit='',
                  logscale=False,
-                 n_contours=14):  # jet, jet_r, YlOrRd, gist_rainbow
+                 n_contours=21):  # jet, jet_r, YlOrRd, gist_rainbow
         self.n_contours = n_contours
         self.min_angle_between_segments = 5
         self.level_lower = level_lower
@@ -62,8 +62,9 @@ class ContourPlotConfig(object):
                 num=self.n_contours,
                 base=math.e
             )
+            # TODO: why is this needed?
             for i in range(0, len(self.levels)):
-                self.levels[i] -= 1
+                self.levels[i] -= 1.0
         else:
             self.levels = numpy.linspace(
                 start=self.level_lower,
@@ -74,20 +75,31 @@ class ContourPlotConfig(object):
         if logscale:
             assert self.level_lower > 0
             self.levels_image = numpy.logspace(
-                start=math.log(self.level_lower),
+                start=math.log(self.level_lower)-0.0001,  # TODO: why is this needed?
                 stop=math.log(self.level_upper+2),
-                num=self.n_contours*40,
+                num=self.n_contours*10,
                 base=math.e
             )
-            for i in range(0, len(self.levels_image)):
-                self.levels_image[i] -= 1
+            # TODO: why is this needed?
+            # for i in range(0, len(self.levels_image)):
+            #     self.levels_image[i] -= 1.0
+            # print(self.levels_image)
         else:
             self.levels_image = numpy.linspace(
                 start=self.level_lower,
                 stop=self.level_upper,
-                num=self.n_contours*20
+                num=self.n_contours*10
             )
+
+        # use half the number of levels for the colorbar ticks
+        counter = 0
+        self.colorbar_ticks = []
+        for level in self.levels:
+            if counter % 2 == 0:
+                self.colorbar_ticks.append(level)
+            counter += 1
         # print(self.levels)
+        # print(self.levels_image)
 
 
 class Contour(object):
@@ -133,7 +145,26 @@ class Contour(object):
         if not os.path.exists(data_dir):
             os.mkdir(data_dir)
         filepath = os.path.join(data_dir, str(month))
-        plt.savefig(filepath + '.png', dpi=700, bbox_inches='tight', pad_inches=0, transparent=True)
+        figure.savefig(
+            filepath + '.png',
+            dpi=700,
+            bbox_inches='tight',
+            pad_inches=0,
+            transparent=True
+        )
+
+        cbar = figure.colorbar(contour, format='%.1f')
+        cbar.set_label(self.config.unit)
+        cbar.set_ticks(self.config.colorbar_ticks)
+        ax.set_visible(False)
+        figure.savefig(
+            filepath + "_colorbar.svg",
+            # dpi=300,
+            bbox_inches='tight',
+            pad_inches=0,
+            transparent=True
+        )
+
         self.create_contour_json(filepath)
         logger.info('end')
 
@@ -146,8 +177,9 @@ class Contour(object):
         self.Z = scipy.ndimage.zoom(self.Z, zoom=zoomfactor, order=1)
         self.lonrange = scipy.ndimage.zoom(self.lonrange, zoom=zoomfactor, order=1)
         self.latrange = scipy.ndimage.zoom(self.latrange, zoom=zoomfactor, order=1)
+
         figure = plt.figure()
-        ax = figure.add_subplot(222)
+        ax = figure.add_subplot(111)
 
         # for i in range(0, len(self.config.levels)):
         #     self.config.levels[i] -= 0.7
@@ -158,7 +190,18 @@ class Contour(object):
             cmap=self.config.colormap,
             norm=self.config.norm
         )
-        # cbar = figure.colorbar(contours, format='%.1f')
+
+        cbar = figure.colorbar(contours, ax=ax, format='%.1f')
+        cbar.set_label(self.config.unit)
+        ax.set_visible(False)
+        figure.savefig(
+            filepath + "_colorbar2.svg",
+            # dpi=300,
+            bbox_inches='tight',
+            pad_inches=0,
+            transparent=True
+        )
+
         ndigits = 4
         logger.info('converting contour to geojson')
         geojsoncontour.contour_to_geojson(
