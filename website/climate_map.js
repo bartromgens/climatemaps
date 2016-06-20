@@ -256,6 +256,14 @@ var sliderChanged = function() {
     window.history.replaceState({}, '', `${location.pathname}?${searchParams}`);
 
     showOrCreateContour(monthNr);
+    updateColorBarLegend(getSelectedType(), monthNr);
+};
+
+
+var updateColorBarLegend = function(dataType, monthNr) {
+    var colorBarImage = document.getElementById('colorbar-image');
+    var imageUrl = dataDir + "/" + dataType + "/" + monthNr + "_colorbar.svg";
+    colorBarImage.setAttribute("src", imageUrl);
 };
 
 
