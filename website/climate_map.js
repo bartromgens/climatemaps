@@ -67,13 +67,6 @@ function addContours(dataType, monthNr)
 }
 
 
-function getLineWidth() {
-    var lineScaleFactor = 0.3;
-    return 0.5 + Math.pow(view.getZoom(), 1.5)  * lineScaleFactor;
-//    return 10 * view.getZoom();
-}
-
-
 function getImageOpacity() {
     var zoomedOut = 0.7;
     var zoomLevelToStart = 5;
@@ -85,20 +78,21 @@ function getImageOpacity() {
 }
 
 
+var styleFunction = function(feature, resolution) {
+    var lineStyle = new ol.style.Style({
+        stroke: new ol.style.Stroke({
+            color: feature.get('stroke'),
+//                width: feature.get('stroke-width'),
+            width: map.getView().getZoom(),
+        })
+    });
+    return lineStyle
+};
+
 function createContoursLayer(dataType, monthNr) {
     console.log('create new contour layers');
     console.log(dataDir + dataType + '/' + monthNr + '/tiles/{z}/{x}/{y}.geojson')
 
-    var styleFunction = function (feature, resolution) {
-        var lineStyle = new ol.style.Style({
-            stroke: new ol.style.Stroke({
-                color: feature.get('stroke'),
-//                width: feature.get('stroke-width'),
-                width: getLineWidth(),
-            })
-        });
-        return lineStyle
-    };
 
     var contourLayer = new ol.layer.VectorTile({
         source: new ol.source.VectorTile({
@@ -119,39 +113,48 @@ function createContoursLayer(dataType, monthNr) {
     return contourLayer;
 }
 
+// increase contour line width when zooming
+map.getView().on('change:resolution', function(evt) {
+    for (var type in plotTypesMonthsLayers) {
+        for (var month in plotTypesMonthsLayers[type]) {
+            plotTypesMonthsLayers[type][month].setStyle(styleFunction);
+        }
+    }
+});
+
 
 map.addControl(new ol.control.FullScreen());
-// map.addControl(new ol.control.ZoomSlider());
+map.addControl(new ol.control.ZoomSlider());
 
 // Tooltip
 
 var info = $('#info');
 
 var displayFeatureInfo = function(pixel) {
-  info.css({
-    left: (pixel[0] + 10) + 'px',
-    top: (pixel[1] - 50) + 'px',
-  });
+    info.css({
+        left: (pixel[0] + 10) + 'px',
+        top: (pixel[1] - 50) + 'px',
+    });
 
-  var feature = map.forEachFeatureAtPixel(pixel, function(feature) {
-    return feature;
-  });
+    var feature = map.forEachFeatureAtPixel(pixel, function(feature) {
+        return feature;
+     });
 
-  if (feature) {
-    info.text(feature.get('title'));
-    info.show();
-  } else {
-    info.hide();
-  }
+    if (feature) {
+        info.text(feature.get('title'));
+        info.show();
+    } else {
+        info.hide();
+    }
 };
 
 
 map.on('pointermove', function(evt) {
-  if (evt.dragging) {
-    info.hide();
-    return;
-  }
-  displayFeatureInfo(map.getEventPixel(evt.originalEvent));
+    if (evt.dragging) {
+        info.hide();
+        return;
+    }
+    displayFeatureInfo(map.getEventPixel(evt.originalEvent));
 });
 
 
