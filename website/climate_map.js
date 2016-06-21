@@ -100,7 +100,7 @@ function createContoursLayer(dataType, monthNr) {
             format: new ol.format.GeoJSON(),
             projection: 'EPSG:3857',
             tileGrid: ol.tilegrid.createXYZ({
-                maxZoom: 4,
+                maxZoom: 5,
                 minZoom: 1,
                 tileSize: [256, 256]
             }),

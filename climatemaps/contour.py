@@ -217,7 +217,7 @@ class Contour(object):
             filepaths=[filepath + '.geojson',],
             tippecanoe_dir=TIPPECANOE_DIR,
             mbtiles_file='out.mbtiles',
-            maxzoom=4
+            maxzoom=5
         )
 
         togeojsontiles.mbtiles_to_geojsontiles(
