@@ -60,8 +60,8 @@ def main():
             latrange, lonrange, Z = climatemaps.data.import_climate_data(settings['filepath'], month, settings['conversion_factor'])
             contourmap = climatemaps.contour.Contour(settings['config'], lonrange, latrange, Z)
             contourmap.create_contour_data(DATA_OUT_DIR, data_type, month)
-    for month in range(1, 13):
-        create_optimal_map(month)
+    # for month in range(1, 13):
+    #     create_optimal_map(month)
 
 
 def create_optimal_map(month):
