@@ -69,10 +69,14 @@ TYPES = {
 
 
 def main():
+    month_upper = 13
+    n_data_sets = len(TYPES) * month_upper
+    counter = 0
     for data_type, settings in TYPES.items():
-        # for month in range(1, 13):
-        for month in range(1, 2):
+        for month in range(1, month_upper):
             logger.info('create image and tiles for "' + data_type + '" and month ' + str(month))
+            progress = counter/n_data_sets*100.0
+            logger.info("progress: " + str(int(progress)) + '%')
             latrange, lonrange, Z = climatemaps.data.import_climate_data(settings['filepath'], month, settings['conversion_factor'])
             contourmap = climatemaps.contour.Contour(settings['config'], lonrange, latrange, Z)
             contourmap.create_contour_data(
@@ -81,6 +85,7 @@ def main():
                 month,
                 figure_dpi=800
             )
+            counter += 1
     # for month in range(1, 13):
     #     create_optimal_map(month)
 
