@@ -1,16 +1,12 @@
-import json
 import math
 import os
 
 from mpl_toolkits.basemap import Basemap
 import numpy
 import matplotlib.pyplot as plt
-from matplotlib.colors import LogNorm, SymLogNorm, rgb2hex
+from matplotlib.colors import LogNorm, SymLogNorm
 
 import scipy.ndimage
-from scipy.ndimage.filters import gaussian_filter
-from geojson import Feature, LineString, FeatureCollection
-import geojson
 
 import geojsoncontour
 import togeojsontiles
