@@ -94,7 +94,15 @@
     </div>
   </div>
 
+<div id='testdiv' style='height: 1in; left: -100%; position: absolute; top: -100%; width: 1in;'></div>
+<script type='text/javascript'>
+  var devicePixelRatio = window.devicePixelRatio || 1;
+  var dpi_x = document.getElementById('testdiv').offsetWidth * devicePixelRatio;
+  var dpi_y = document.getElementById('testdiv').offsetHeight * devicePixelRatio;
+</script>
+
   <script src="climate_map.js" type="text/javascript"></script>
+
 
 </body>
 

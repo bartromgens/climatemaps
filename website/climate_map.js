@@ -79,11 +79,14 @@ function getImageOpacity() {
 
 
 var styleFunction = function(feature, resolution) {
+    var scale_for_pixeldensity = dpi_x/96.0;
+    var lineWidth = feature.get('stroke-width') * scale_for_pixeldensity * Math.pow(map.getView().getZoom()/1.5, 1.3)
     var lineStyle = new ol.style.Style({
         stroke: new ol.style.Stroke({
             color: feature.get('stroke'),
-//                width: feature.get('stroke-width'),
-            width: map.getView().getZoom(),
+            width: lineWidth,
+            opacity: 0.0 //feature.get('opacity')
+//            width: map.getView().getZoom(),
         })
     });
     return lineStyle
@@ -92,7 +95,6 @@ var styleFunction = function(feature, resolution) {
 function createContoursLayer(dataType, monthNr) {
     console.log('create new contour layers');
     console.log(dataDir + dataType + '/' + monthNr + '/tiles/{z}/{x}/{y}.geojson')
-
 
     var contourLayer = new ol.layer.VectorTile({
         source: new ol.source.VectorTile({
@@ -129,6 +131,7 @@ map.addControl(new ol.control.ZoomSlider());
 // Tooltip
 
 var info = $('#info');
+var firstTooltipShown = false;
 
 var displayFeatureInfo = function(pixel) {
     info.css({
@@ -141,8 +144,17 @@ var displayFeatureInfo = function(pixel) {
      });
 
     if (feature) {
-        info.text(feature.get('title'));
-        info.show();
+        var title = feature.get('title');
+        if (title) {
+            firstTooltipShown = true;
+            info.text(title);
+            info.show();
+        } else if (!firstTooltipShown) {
+            info.text("Tip: hover over lines to show their value.");
+            info.show();
+        } else {
+            info.hide();
+        }
     } else {
         info.hide();
     }
