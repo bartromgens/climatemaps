@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 sys.path.append('../climatemaps')
 
 import climatemaps
-
+from climatemaps.logger import logger
 
 DATA_OUT_DIR = './website/data'
 
@@ -71,7 +71,8 @@ TYPES = {
 def main():
     for data_type, settings in TYPES.items():
         for month in range(1, 13):
-        # for month in range(1, 3):
+        # for month in range(1, 2):
+            logger.info('create image and tiles for "' + data_type + '" and month ' + str(month))
             latrange, lonrange, Z = climatemaps.data.import_climate_data(settings['filepath'], month, settings['conversion_factor'])
             contourmap = climatemaps.contour.Contour(settings['config'], lonrange, latrange, Z)
             contourmap.create_contour_data(DATA_OUT_DIR, data_type, month)
