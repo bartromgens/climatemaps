@@ -1,0 +1,1 @@
+{"type":"FeatureCollection","features":[{"type":"Feature","properties":{ "stroke": "#007dff", "stroke-width": 0, "title": "","opacity": 1.0 },"geometry":{"type":"Polygon","coordinates":[[[-180.0,-90.0],[-180.0,90],[180.0,90.0],[180.0,-90.0],[-180.0,-90.0]]]}}]}
