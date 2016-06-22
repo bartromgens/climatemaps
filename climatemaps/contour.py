@@ -165,6 +165,8 @@ class Contour(object):
             transparent=True
         )
 
+        figure.clear()
+
         self.create_contour_json(filepath)
         logger.info('end')
 
@@ -180,27 +182,13 @@ class Contour(object):
 
         figure = plt.figure()
         ax = figure.add_subplot(111)
-
-        # for i in range(0, len(self.config.levels)):
-        #     self.config.levels[i] -= 0.7
-
         contours = ax.contour(
             self.lonrange, self.latrange, self.Z,
             levels=self.config.levels,
             cmap=self.config.colormap,
             norm=self.config.norm
         )
-
-        cbar = figure.colorbar(contours, ax=ax, format='%.1f')
-        cbar.set_label(self.config.unit)
-        ax.set_visible(False)
-        figure.savefig(
-            filepath + "_colorbar2.svg",
-            # dpi=300,
-            bbox_inches='tight',
-            pad_inches=0,
-            transparent=True
-        )
+        figure.clear()
 
         ndigits = 4
         logger.info('converting contour to geojson')
