@@ -40,6 +40,11 @@ TYPES = {
         'conversion_factor': 0.1,
         'config': climatemaps.contour.ContourPlotConfig(-20, 50, colormap=plt.cm.jet, unit='C')
     },
+    'diurnaltemprange': {
+        'filepath': 'data/diurnaltemprange/cdtr6190.dat',
+        'conversion_factor': 0.1,
+        'config': climatemaps.contour.ContourPlotConfig(0, 20, colormap=plt.cm.jet, unit='C')
+    },
     'wetdays': {
         'filepath': 'data/wetdays/cwet6190.dat',
         'conversion_factor': 0.1,
