@@ -60,6 +60,11 @@ TYPES = {
         'conversion_factor': 1.0,
         'config': climatemaps.contour.ContourPlotConfig(0, 300, colormap=plt.cm.jet, unit='W/m^2')
     },
+    'vapourpressure': {
+        'filepath': 'data/vapourpressure/cvap6190.dat',
+        'conversion_factor': 0.1,
+        'config': climatemaps.contour.ContourPlotConfig(1, 34, colormap=plt.cm.jet, unit='hPa')
+    },
 }
 
 
