@@ -78,9 +78,9 @@ function getImageOpacity() {
 }
 
 
-var styleFunction = function(feature, resolution) {
+var lineStyleFunction = function(feature, resolution) {
     var scale_for_pixeldensity = dpi_x/96.0;
-    var lineWidth = feature.get('stroke-width') * scale_for_pixeldensity * Math.pow(map.getView().getZoom()/1.5, 1.3)
+    var lineWidth = feature.get('stroke-width') * scale_for_pixeldensity * Math.pow(map.getView().getZoom()/1.7, 1.3)
     var lineStyle = new ol.style.Style({
         stroke: new ol.style.Stroke({
             color: feature.get('stroke'),
@@ -107,7 +107,7 @@ function createContoursLayer(dataType, monthNr) {
                 tileSize: [256, 256]
             }),
         }),
-        style: styleFunction
+        style: lineStyleFunction
     });
 
     contourLayer.setZIndex(99);
@@ -119,7 +119,7 @@ function createContoursLayer(dataType, monthNr) {
 map.getView().on('change:resolution', function(evt) {
     for (var type in plotTypesMonthsLayers) {
         for (var month in plotTypesMonthsLayers[type]) {
-            plotTypesMonthsLayers[type][month].setStyle(styleFunction);
+            plotTypesMonthsLayers[type][month].setStyle(lineStyleFunction);
         }
     }
 });
