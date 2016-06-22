@@ -30,6 +30,11 @@ TYPES = {
         'conversion_factor': 0.1,
         'config': climatemaps.contour.ContourPlotConfig(-40, 28, colormap=plt.cm.jet, unit='C')
     },
+    'meantemp': {
+        'filepath': 'data/meantemp/ctmp6190.dat',
+        'conversion_factor': 0.1,
+        'config': climatemaps.contour.ContourPlotConfig(-30, 30, colormap=plt.cm.jet, unit='C')
+    },
     'maxtemp': {
         'filepath': 'data/maxtemp/ctmx6190.dat',
         'conversion_factor': 0.1,
