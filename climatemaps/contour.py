@@ -114,7 +114,7 @@ class Contour(object):
         self.latrange = latrange[::-1]
         numpy.set_printoptions(3, threshold=100, suppress=True)  # .3f
 
-    def create_contour_data(self, data_dir_out, data_type, month):
+    def create_contour_data(self, data_dir_out, data_type, month, figure_dpi=700):
         logger.info('start')
         figure = plt.figure(frameon=False)
         ax = figure.add_subplot(111)
@@ -143,7 +143,7 @@ class Contour(object):
         filepath = os.path.join(data_dir, str(month))
         figure.savefig(
             filepath + '.png',
-            dpi=700,
+            dpi=figure_dpi,
             bbox_inches='tight',
             pad_inches=0,
             transparent=True
@@ -189,16 +189,20 @@ class Contour(object):
         ndigits = 4
         logger.info('converting contour to geojson')
         geojsoncontour.contour_to_geojson(
-            contours,
-            filepath + '.geojson',
-            self.config.levels,
-            self.config.min_angle_between_segments,
-            ndigits,
-            self.config.unit
+            contour=contours,
+            geojson_filepath=filepath + '.geojson',
+            contour_levels=self.config.levels,
+            min_angle_deg=self.config.min_angle_between_segments,
+            ndigits=ndigits,
+            unit=self.config.unit,
+            stroke_width=1
         )
 
+        world_bounding_box_filepath = 'data/world_bounding_box.geojson'
+        assert os.path.exists(world_bounding_box_filepath)
+
         togeojsontiles.geojson_to_mbtiles(
-            filepaths=[filepath + '.geojson',],
+            filepaths=[filepath + '.geojson', world_bounding_box_filepath],
             tippecanoe_dir=TIPPECANOE_DIR,
             mbtiles_file='out.mbtiles',
             maxzoom=5

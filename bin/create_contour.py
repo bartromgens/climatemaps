@@ -70,12 +70,17 @@ TYPES = {
 
 def main():
     for data_type, settings in TYPES.items():
-        for month in range(1, 13):
-        # for month in range(1, 2):
+        # for month in range(1, 13):
+        for month in range(1, 2):
             logger.info('create image and tiles for "' + data_type + '" and month ' + str(month))
             latrange, lonrange, Z = climatemaps.data.import_climate_data(settings['filepath'], month, settings['conversion_factor'])
             contourmap = climatemaps.contour.Contour(settings['config'], lonrange, latrange, Z)
-            contourmap.create_contour_data(DATA_OUT_DIR, data_type, month)
+            contourmap.create_contour_data(
+                DATA_OUT_DIR,
+                data_type,
+                month,
+                figure_dpi=800
+            )
     # for month in range(1, 13):
     #     create_optimal_map(month)
 
@@ -109,7 +114,12 @@ def create_optimal_map(month):
 
     config = climatemaps.contour.ContourPlotConfig(0.0, 9.0, colormap=plt.cm.RdYlGn, unit='')
     contourmap = climatemaps.contour.Contour(config, lonrange, latrange, Z)
-    contourmap.create_contour_data(DATA_OUT_DIR, 'optimal', month)
+    contourmap.create_contour_data(
+        DATA_OUT_DIR,
+        'optimal',
+        month,
+        figure_dpi=1000
+    )
     print('month done: ' + str(month))
 
 
