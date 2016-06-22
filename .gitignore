@@ -8,3 +8,6 @@ env/*
 data/*
 website/data/
 website/lib/
+
+tilelist.txt
+out.mbtiles
