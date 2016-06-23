@@ -167,7 +167,7 @@ class Contour(object):
         logger.info('end')
 
     def create_contour_json(self, filepath):
-        logger.info('create contour plot')
+        logger.info('START: create contour json tiles')
         # self.lonrange = gaussian_filter(self.lonrange, sigma=0.5)
         # self.latrange = gaussian_filter(self.latrange, sigma=0.5)
         # self.Z = gaussian_filter(self.Z, sigma=3.0, mode='wrap', truncate=10.0)
@@ -208,8 +208,10 @@ class Contour(object):
             maxzoom=5
         )
 
+        logger.info('converting mbtiles to geojson-tiles')
         togeojsontiles.mbtiles_to_geojsontiles(
             tippecanoe_dir=TIPPECANOE_DIR,
             tile_dir=os.path.join(filepath, 'tiles/'),
             mbtiles_file='out.mbtiles',
         )
+        logger.info('DONE: create contour json tiles')
