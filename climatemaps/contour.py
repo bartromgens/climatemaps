@@ -1,11 +1,15 @@
 import math
 import os
+import subprocess
+
+from PIL import Image
 
 from mpl_toolkits.basemap import Basemap
 import numpy
 import matplotlib.pyplot as plt
+from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
+from matplotlib.figure import Figure
 from matplotlib.colors import LogNorm, SymLogNorm
-
 import scipy.ndimage
 
 import geojsoncontour
@@ -116,10 +120,11 @@ class Contour(object):
 
     def create_contour_data(self, data_dir_out, data_type, month, figure_dpi=700):
         logger.info('start')
-        figure = plt.figure(frameon=False)
+        figure = Figure(frameon=False)
+        FigureCanvas(figure)
         ax = figure.add_subplot(111)
         m = Basemap(
-            projection='merc',
+            projection='cyl',
             resolution='l',
             lon_0=0,
             ax=ax,
@@ -161,22 +166,36 @@ class Contour(object):
             transparent=True
         )
 
+        with Image.open(filepath + '.png') as im:
+            width, height = im.size
+        logger.info('width: ' + str(width))
+        logger.info('heigth: ' + str(height))
+
+        with open(filepath + '.pgw', 'w') as worldfile:
+            worldfile.write(str(360.0/width) + '\n')
+            worldfile.write('0.0' + '\n')
+            worldfile.write('0.0' + '\n')
+            worldfile.write(str(-170.0/height) + '\n')
+            worldfile.write('-180.0' + '\n')
+            worldfile.write('85.0' + '\n')
+
         figure.clear()
+        plt.cla()
+
+        self.create_image_tiles(filepath)
 
         self.create_contour_json(filepath)
         logger.info('end')
 
     def create_contour_json(self, filepath):
         logger.info('START: create contour json tiles')
-        # self.lonrange = gaussian_filter(self.lonrange, sigma=0.5)
-        # self.latrange = gaussian_filter(self.latrange, sigma=0.5)
-        # self.Z = gaussian_filter(self.Z, sigma=3.0, mode='wrap', truncate=10.0)
         zoomfactor = 2.0
         self.Z = scipy.ndimage.zoom(self.Z, zoom=zoomfactor, order=1)
         self.lonrange = scipy.ndimage.zoom(self.lonrange, zoom=zoomfactor, order=1)
         self.latrange = scipy.ndimage.zoom(self.latrange, zoom=zoomfactor, order=1)
 
-        figure = plt.figure()
+        figure = Figure(frameon=False)
+        FigureCanvas(figure)
         ax = figure.add_subplot(111)
         contours = ax.contour(
             self.lonrange, self.latrange, self.Z,
@@ -185,6 +204,7 @@ class Contour(object):
             norm=self.config.norm
         )
         figure.clear()
+        plt.cla()
 
         ndigits = 4
         logger.info('converting contour to geojson')
@@ -215,3 +235,17 @@ class Contour(object):
             mbtiles_file='out.mbtiles',
         )
         logger.info('DONE: create contour json tiles')
+
+    def create_image_tiles(self, filepath):
+        logger.info('create image tiles')
+        args = [
+            'gdal2tiles.py',
+            '-p', 'mercator',
+            '--s_srs', 'EPSG:4326',
+            '-z', '0-5',
+            filepath + '.png',
+            os.path.join(filepath, 'maptiles')
+        ]
+        logger.info(args)
+        output = subprocess.check_output(args)
+        logger.info(output.decode('utf-8'))

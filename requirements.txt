@@ -4,5 +4,6 @@ scipy==0.17.0
 geojson==1.3.2
 togeojsontiles==0.1.2
 geojsoncontour==0.1.1
+pillow==3.2.0
 #basemap==1.0.7  # required, but does not install via pip, see README.md for install instructions
 #git+https://github.com/bartromgens/geojsoncontour.git@master#egg=geojsoncontour
