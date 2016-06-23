@@ -122,6 +122,7 @@ class Contour(object):
         logger.info('start')
         figure = Figure(frameon=False)
         FigureCanvas(figure)
+        
         ax = figure.add_subplot(111)
         m = Basemap(
             projection='cyl',
@@ -166,24 +167,7 @@ class Contour(object):
             transparent=True
         )
 
-        with Image.open(filepath + '.png') as im:
-            width, height = im.size
-        logger.info('width: ' + str(width))
-        logger.info('heigth: ' + str(height))
-
-        with open(filepath + '.pgw', 'w') as worldfile:
-            worldfile.write(str(360.0/width) + '\n')
-            worldfile.write('0.0' + '\n')
-            worldfile.write('0.0' + '\n')
-            worldfile.write(str(-170.0/height) + '\n')
-            worldfile.write('-180.0' + '\n')
-            worldfile.write('85.0' + '\n')
-
-        figure.clear()
-        plt.cla()
-
         self.create_image_tiles(filepath)
-
         self.create_contour_json(filepath)
         logger.info('end')
 
@@ -237,6 +221,7 @@ class Contour(object):
         logger.info('DONE: create contour json tiles')
 
     def create_image_tiles(self, filepath):
+        self.create_world_file(filepath)
         logger.info('create image tiles')
         args = [
             'gdal2tiles.py',
@@ -249,3 +234,15 @@ class Contour(object):
         logger.info(args)
         output = subprocess.check_output(args)
         logger.info(output.decode('utf-8'))
+
+    def create_world_file(self, filepath):
+        with Image.open(filepath + '.png') as im:
+            width, height = im.size
+
+        with open(filepath + '.pgw', 'w') as worldfile:
+            worldfile.write(str(360.0/width) + '\n')
+            worldfile.write('0.0' + '\n')
+            worldfile.write('0.0' + '\n')
+            worldfile.write(str(-170.0/height) + '\n')
+            worldfile.write('-180.0' + '\n')
+            worldfile.write('85.0' + '\n')
