@@ -42,11 +42,18 @@ var plotTypesMonthsImages = {};
 //map.addLayer(imageLayer);
 
 function createImageLayer(dataType, monthNr) {
-    return new ol.layer.Image({
-        source: new ol.source.ImageStatic({
-            url: dataDir + '/' + dataType + '/' + monthNr + '.png',
-            projection: map.getView().getProjection(),
-            imageExtent: ol.extent.applyTransform([-180, -85, 180, 85], ol.proj.getTransform("EPSG:4326", "EPSG:3857"))
+    var extent = ol.extent.applyTransform([-180, -85, 180, 85], ol.proj.getTransform("EPSG:4326", "EPSG:3857"));
+    console.log(extent);
+    return new ol.layer.Tile({
+        source: new ol.source.XYZ({
+            url: dataDir + dataType + '/' + monthNr + '/maptiles/{z}/{x}/{-y}.png',
+            projection: "EPSG:3857",
+            wrapX: false,
+            tileGrid: ol.tilegrid.createXYZ({
+                maxZoom: 5,
+                minZoom: 1,
+                tileSize: [256, 256]
+            }),
         }),
         opacity: getImageOpacity()
     });
