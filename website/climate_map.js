@@ -42,8 +42,8 @@ var plotTypesMonthsImages = {};
 //map.addLayer(imageLayer);
 
 function createImageLayer(dataType, monthNr) {
-    var extent = ol.extent.applyTransform([-180, -85, 180, 85], ol.proj.getTransform("EPSG:4326", "EPSG:3857"));
-    console.log(extent);
+//    var extent = ol.extent.applyTransform([-180, -85, 180, 85], ol.proj.getTransform("EPSG:4326", "EPSG:3857"));
+//    console.log(extent);
     return new ol.layer.Tile({
         source: new ol.source.XYZ({
             url: dataDir + dataType + '/' + monthNr + '/maptiles/{z}/{x}/{-y}.png',
@@ -254,6 +254,7 @@ var sliderChanged = function() {
     var monthNr = getSliderValue() + 1;
     if (monthNr == 13) {
         slider.slider("value", 0);
+        monthNr = 1;
     }
     console.log("slider changed to: " + monthNr);
 
@@ -284,7 +285,7 @@ var toggleAnimation = function() {
             }
         }
         playButton.innerHTML = "Stop";
-        intervalID = window.setInterval(playAnimation, 800);
+        intervalID = window.setInterval(playAnimation, 500);
     }
     else {
         window.clearInterval(intervalID);
@@ -318,7 +319,6 @@ var typeChanged = function() {
     var selection = getSelectedType();
     searchParams.set('datatype', selection);
     window.history.replaceState({}, '', `${location.pathname}?${searchParams}`);
-    console.log(selection);
     sliderChanged();
 };
 
@@ -331,12 +331,9 @@ var plotExists = function(typeName, monthNr) {
 
 
 map.on("moveend", function() {
-    var type;
-    var month;
-
     // change image layer opacacity depending on zoom
-    for (type in plotTypesMonthsImages) {
-        for (month in plotTypesMonthsImages[type]) {
+    for (var type in plotTypesMonthsImages) {
+        for (var month in plotTypesMonthsImages[type]) {
             plotTypesMonthsImages[type][month].setOpacity( getImageOpacity() );
         }
     }
@@ -362,6 +359,7 @@ if (searchParams.has('month')) {
 
 var onLoad = function() {
     selectDataType(initialDataType);
+    typeChanged();
     setSliderValue(initialMonth);
 //    addContours(initialDataType, initialMonth);  // initial contour of January
 };
