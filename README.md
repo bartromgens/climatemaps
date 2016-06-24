@@ -32,6 +32,10 @@ $ sudo make install
 $ cd swig/python/
 $ sudo python setup.py install
 ```
+Install gdal2tiles.py from python-gdal,
+```
+$ sudo apt-get install python-gdal
+```
 
 ##### Tippecanoe
 ...
