@@ -12,68 +12,68 @@ sys.path.append('../climatemaps')
 import climatemaps
 from climatemaps.logger import logger
 
-DATA_OUT_DIR = './website/data'
+DATA_OUT_DIR = 'website/data'
 
 TYPES = {
     'precipitation': {
         'filepath': 'data/precipitation/cpre6190.dat',
         'conversion_factor': 0.1,  # (millimetres/day) *10
-        'config': climatemaps.contour.ContourPlotConfig(0.1, 16, colormap=plt.cm.jet_r, unit='mm/day', logscale=True)
+        'config': climatemaps.contour.ContourPlotConfig(0.1, 16, colormap=plt.cm.jet_r, title='Precipitation', unit='mm/day', logscale=True)
     },
     'cloud': {
         'filepath': 'data/cloud/ccld6190.dat',
         'conversion_factor': 1,
-        'config': climatemaps.contour.ContourPlotConfig(0, 100, colormap=plt.cm.jet_r, unit='%')
+        'config': climatemaps.contour.ContourPlotConfig(0, 100, colormap=plt.cm.jet_r, title='Cloud coverage', unit='%')
     },
     'mintemp': {
         'filepath': 'data/mintemp/ctmn6190.dat',
         'conversion_factor': 0.1,
-        'config': climatemaps.contour.ContourPlotConfig(-40, 28, colormap=plt.cm.jet, unit='C')
+        'config': climatemaps.contour.ContourPlotConfig(-40, 28, colormap=plt.cm.jet, title='Min. temperature', unit='C')
     },
     'meantemp': {
         'filepath': 'data/meantemp/ctmp6190.dat',
         'conversion_factor': 0.1,
-        'config': climatemaps.contour.ContourPlotConfig(-30, 30, colormap=plt.cm.jet, unit='C')
+        'config': climatemaps.contour.ContourPlotConfig(-30, 35, colormap=plt.cm.jet, title='Mean temperature', unit='C')
     },
     'maxtemp': {
         'filepath': 'data/maxtemp/ctmx6190.dat',
         'conversion_factor': 0.1,
-        'config': climatemaps.contour.ContourPlotConfig(-20, 50, colormap=plt.cm.jet, unit='C')
+        'config': climatemaps.contour.ContourPlotConfig(-20, 45, colormap=plt.cm.jet, title='Max. temperature', unit='C')
     },
     'diurnaltemprange': {
         'filepath': 'data/diurnaltemprange/cdtr6190.dat',
         'conversion_factor': 0.1,
-        'config': climatemaps.contour.ContourPlotConfig(0, 20, colormap=plt.cm.jet, unit='C')
+        'config': climatemaps.contour.ContourPlotConfig(5, 20, colormap=plt.cm.jet, title='Diurnal temperature range', unit='C')
     },
     'wetdays': {
         'filepath': 'data/wetdays/cwet6190.dat',
         'conversion_factor': 0.1,
-        'config': climatemaps.contour.ContourPlotConfig(0, 30, colormap=plt.cm.jet_r, unit='days')
+        'config': climatemaps.contour.ContourPlotConfig(0, 30, colormap=plt.cm.jet_r, title='Wet days', unit='days')
     },
     'wind': {
         'filepath': 'data/wind/cwnd6190.dat',
         'conversion_factor': 0.1,
-        'config': climatemaps.contour.ContourPlotConfig(0, 10, colormap=plt.cm.jet, unit='m/s')
+        'config': climatemaps.contour.ContourPlotConfig(0, 9, colormap=plt.cm.jet, title='Wind speed', unit='m/s')
     },
     'radiation': {
         'filepath': 'data/radiation/crad6190.dat',
         'conversion_factor': 1.0,
-        'config': climatemaps.contour.ContourPlotConfig(0, 300, colormap=plt.cm.jet, unit='W/m^2')
+        'config': climatemaps.contour.ContourPlotConfig(0, 300, colormap=plt.cm.jet, title='Radiation', unit='W/m^2')
     },
     'vapourpressure': {
         'filepath': 'data/vapourpressure/cvap6190.dat',
         'conversion_factor': 0.1,
-        'config': climatemaps.contour.ContourPlotConfig(1, 34, colormap=plt.cm.jet, unit='hPa')
+        'config': climatemaps.contour.ContourPlotConfig(1, 34, colormap=plt.cm.jet, title='Vapour pressure', unit='hPa')
     },
 }
 
 
 def main():
-    month_upper = 13
+    month_upper = 12
     n_data_sets = len(TYPES) * month_upper
     counter = 0
     for data_type, settings in TYPES.items():
-        for month in range(1, month_upper):
+        for month in range(1, month_upper+1):
             logger.info('create image and tiles for "' + data_type + '" and month ' + str(month))
             progress = counter/n_data_sets*100.0
             logger.info("progress: " + str(int(progress)) + '%')
@@ -83,7 +83,7 @@ def main():
                 DATA_OUT_DIR,
                 data_type,
                 month,
-                figure_dpi=800
+                figure_dpi=1200
             )
             counter += 1
     # for month in range(1, 13):
