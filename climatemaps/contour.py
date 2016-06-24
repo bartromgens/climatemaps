@@ -42,6 +42,7 @@ class ContourPlotConfig(object):
                  level_lower=0,
                  level_upper=100,
                  colormap=plt.cm.jet,
+                 title='',
                  unit='',
                  logscale=False,
                  n_contours=21):  # jet, jet_r, YlOrRd, gist_rainbow
@@ -50,6 +51,7 @@ class ContourPlotConfig(object):
         self.level_lower = level_lower
         self.level_upper = level_upper
         self.colormap = colormap
+        self.title = title
         self.unit = unit
         self.norm = None
 
@@ -77,7 +79,7 @@ class ContourPlotConfig(object):
             self.levels_image = numpy.logspace(
                 start=math.log(self.level_lower)-0.0001,  # TODO: why is this needed?
                 stop=math.log(self.level_upper+2),
-                num=self.n_contours*10,
+                num=self.n_contours*20,
                 base=math.e
             )
             # TODO: why is this needed?
@@ -88,7 +90,7 @@ class ContourPlotConfig(object):
             self.levels_image = numpy.linspace(
                 start=self.level_lower,
                 stop=self.level_upper,
-                num=self.n_contours*10
+                num=self.n_contours*20
             )
 
         # use half the number of levels for the colorbar ticks
@@ -122,7 +124,7 @@ class Contour(object):
         logger.info('start')
         figure = Figure(frameon=False)
         FigureCanvas(figure)
-        
+
         ax = figure.add_subplot(111)
         m = Basemap(
             projection='cyl',
@@ -156,7 +158,7 @@ class Contour(object):
         )
 
         cbar = figure.colorbar(contour, format='%.1f')
-        cbar.set_label(self.config.unit)
+        cbar.set_label(self.config.title + ' [' + self.config.unit + ']')
         cbar.set_ticks(self.config.colorbar_ticks)
         ax.set_visible(False)
         figure.savefig(
@@ -188,7 +190,6 @@ class Contour(object):
             norm=self.config.norm
         )
         figure.clear()
-        plt.cla()
 
         ndigits = 4
         logger.info('converting contour to geojson')
