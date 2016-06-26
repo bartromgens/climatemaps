@@ -79,15 +79,15 @@ function getImageOpacity() {
     var zoomLevelToStart = 5;
     var zoom = view.getZoom();
     if (zoom < zoomLevelToStart) {
-        return zoomedOut
+        return zoomedOut;
     }
     return zoomedOut - (view.getZoom()-zoomLevelToStart) / 5.0;
 }
 
 
 var lineStyleFunction = function(feature, resolution) {
-    var scale_for_pixeldensity = dpi_x/96.0;
-    var lineWidth = feature.get('stroke-width') * scale_for_pixeldensity * Math.pow(map.getView().getZoom()/1.7, 1.3)
+    var scaleForPixelDensity = dpi_x/96.0;
+    var lineWidth = feature.get('stroke-width') * scaleForPixelDensity * Math.pow(map.getView().getZoom()/2.0, 1.3)
     var lineStyle = new ol.style.Style({
         stroke: new ol.style.Stroke({
             color: feature.get('stroke'),
