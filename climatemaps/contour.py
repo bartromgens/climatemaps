@@ -137,11 +137,12 @@ class Contour(object):
             urcrnrlat=85,
         )
         x, y = m(*numpy.meshgrid(self.lonrange, self.latrange))
-        contour = m.contourf(x, y, self.Z,
-                             cmap=self.config.colormap,
-                             levels=self.config.levels_image,
-                             norm=self.config.norm
-                             )
+        contour = m.contourf(
+            x, y, self.Z,
+            cmap=self.config.colormap,
+            levels=self.config.levels_image,
+            norm=self.config.norm
+        )
         # m.drawcoastlines(linewidth=0.1)  # draw coastlines
         # cbar = figure.colorbar(contour, format='%.1f')
         ax.set_axis_off()
