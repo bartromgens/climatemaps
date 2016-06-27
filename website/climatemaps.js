@@ -63,7 +63,7 @@ function createImageLayer(dataType, monthNr) {
 function addContours(dataType, monthNr)
 {
     var contourLayer = createContoursLayer(dataType, monthNr);
-    if ( !(dataType in plotTypesMonthsLayers)) {
+    if ( !(var dataType in plotTypesMonthsLayers)) {
         plotTypesMonthsLayers[dataType] = {};
         plotTypesMonthsImages[dataType] = {};
     }
@@ -87,7 +87,7 @@ function getImageOpacity() {
 
 var lineStyleFunction = function(feature, resolution) {
     var scaleForPixelDensity = dpi_x/96.0;
-    var lineWidth = feature.get('stroke-width') * scaleForPixelDensity * Math.pow(map.getView().getZoom()/2.0, 1.3)
+    var lineWidth = feature.get('stroke-width') * scaleForPixelDensity * Math.pow(map.getView().getZoom()/2.0, 1.3);
     var lineStyle = new ol.style.Style({
         stroke: new ol.style.Stroke({
             color: feature.get('stroke'),
@@ -96,7 +96,7 @@ var lineStyleFunction = function(feature, resolution) {
 //            width: map.getView().getZoom(),
         })
     });
-    return lineStyle
+    return lineStyle;
 };
 
 function createContoursLayer(dataType, monthNr) {
@@ -236,7 +236,6 @@ var setSliderValue = function(monthNr) {
     var slider = $("#month-slider");
     if (monthNr >= 13) {
         slider.slider("value", 0);
-//    } else if (getSliderValue() != monthNr-1) {
     } else {
         slider.slider("value", monthNr-1);
     };
@@ -301,11 +300,10 @@ var playAnimation = function() {
 document.getElementById("animate-button").onclick = toggleAnimation;
 
 
-var selectDataType = function selectDataType(valueToSelect)
-{
+var selectDataType = function selectDataType(valueToSelect) {
     var element = document.getElementById('select-type');
     element.value = valueToSelect;
-}
+};
 
 var getSelectedType = function() {
     return document.getElementById("select-type").value;
