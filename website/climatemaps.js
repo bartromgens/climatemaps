@@ -258,9 +258,6 @@ var sliderChanged = function() {
     }
     console.log("slider changed to: " + monthNr);
 
-    searchParams.set('month', monthNr);
-    window.history.replaceState({}, '', `${location.pathname}?${searchParams}`);
-
     showOrCreateContour(monthNr);
     updateColorBarLegend(getSelectedType(), monthNr);
 };
@@ -317,8 +314,6 @@ var getSelectedType = function() {
 
 var typeChanged = function() {
     var selection = getSelectedType();
-    searchParams.set('datatype', selection);
-    window.history.replaceState({}, '', `${location.pathname}?${searchParams}`);
     sliderChanged();
 };
 
@@ -340,21 +335,8 @@ map.on("moveend", function() {
 });
 
 
-var currentUrl = window.location.href;
-var url = new URL(window.location.href);
-var searchParams = new URLSearchParams(url.search.slice(1));
-console.log(searchParams);
-console.log(searchParams.get('datatype'));  // outputs "m2-m3-m4-m5"
-
 var initialDataType = 'precipitation';
-if (searchParams.has('datatype')) {
-    initialDataType = searchParams.get('datatype');
-};
-
 var initialMonth = 1;
-if (searchParams.has('month')) {
-    initialMonth = searchParams.get('month');
-};
 
 
 var onLoad = function() {
