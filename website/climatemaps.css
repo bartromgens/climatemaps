@@ -50,12 +50,21 @@ body {
 
 #colorbar-legend-container {
     position: absolute;
-    top: 80px;
+    top: 3em;
     right: 5px;
+    height: 50%;
+    width: 15%;
+    max-width: 100px;
     margin: auto;
+    background-image: url("./data/precipitation/1_colorbar.png");
+    background-size: contain;
+    background-repeat: no-repeat;
     padding: 0.5em 0.5em 0.5em 0.5em;
     font-weight: bold;
-    background-color: white;
     border-radius: 5px;
     z-index: 1;
+    display: block;
+}
+
+#colorbar-image {
 }

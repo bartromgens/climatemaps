@@ -163,8 +163,8 @@ class Contour(object):
         cbar.set_ticks(self.config.colorbar_ticks)
         ax.set_visible(False)
         figure.savefig(
-            filepath + "_colorbar.svg",
-            # dpi=300,
+            filepath + "_colorbar.png",
+            dpi=90,
             bbox_inches='tight',
             pad_inches=0,
             transparent=True
@@ -211,7 +211,11 @@ class Contour(object):
             filepaths=[filepath + '.geojson', world_bounding_box_filepath],
             tippecanoe_dir=TIPPECANOE_DIR,
             mbtiles_file='out.mbtiles',
-            maxzoom=5
+            minzoom=0,
+            maxzoom=5,
+            full_detail=10,
+            lower_detail=9,
+            min_detail=7
         )
 
         logger.info('converting mbtiles to geojson-tiles')

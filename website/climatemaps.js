@@ -15,7 +15,11 @@ var map = new ol.Map({
     interactions: ol.interaction.defaults({keyboard:false}),  // disable because this moves the map when using the arrow keys to change the slider
 });
 
-var view = new ol.View( {center: [0, 0], zoom: 3, projection: 'EPSG:3857'} );
+var view = new ol.View({
+    center: [0, 0],
+    zoom: 3,
+    projection: 'EPSG:3857'
+});
 map.setView(view);
 
 var osmSource = new ol.source.OSM("OpenCycleMap");
@@ -86,7 +90,7 @@ function getImageOpacity() {
 
 
 var lineStyleFunction = function(feature, resolution) {
-    var scaleForPixelDensity = dpi_x/96.0;
+    var scaleForPixelDensity = 1.0; //dpi_x/96.0;
     var lineWidth = feature.get('stroke-width') * scaleForPixelDensity * Math.pow(map.getView().getZoom()/2.0, 1.3)
     var lineStyle = new ol.style.Style({
         stroke: new ol.style.Stroke({
@@ -138,6 +142,7 @@ map.addControl(new ol.control.ZoomSlider());
 // Tooltip
 
 var info = $('#info');
+info.hide();
 var firstTooltipShown = false;
 
 var displayFeatureInfo = function(pixel) {
@@ -265,7 +270,7 @@ var sliderChanged = function() {
 
 var updateColorBarLegend = function(dataType, monthNr) {
     var colorBarImage = document.getElementById('colorbar-image');
-    var imageUrl = dataDir + "/" + dataType + "/" + monthNr + "_colorbar.svg";
+    var imageUrl = dataDir + dataType + "/" + monthNr + "_colorbar.png";
     colorBarImage.setAttribute("src", imageUrl);
 };
 
