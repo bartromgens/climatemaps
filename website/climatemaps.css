@@ -53,15 +53,14 @@ body {
     top: 4em;
     right: 5px;
     height: 50%;
-    width: 10%;
-    max-width: 7em;
+    width: 12%;
+    max-width: 6em;
     margin: auto;
     background-image: url("./data/precipitation/1_colorbar.png");
     background-size: contain;
     background-repeat: no-repeat;
     padding: 0.5em 0.5em 0.5em 0.5em;
     font-weight: bold;
-    border-radius: 5px;
     z-index: 1;
     display: block;
 }
