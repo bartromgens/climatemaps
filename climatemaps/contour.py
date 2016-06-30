@@ -164,7 +164,7 @@ class Contour(object):
         ax.set_visible(False)
         figure.savefig(
             filepath + "_colorbar.png",
-            dpi=90,
+            dpi=150,
             bbox_inches='tight',
             pad_inches=0,
             transparent=True
