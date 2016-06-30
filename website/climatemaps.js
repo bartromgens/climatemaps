@@ -137,7 +137,7 @@ map.getView().on('change:resolution', function(evt) {
 
 
 map.addControl(new ol.control.FullScreen());
-map.addControl(new ol.control.ZoomSlider());
+//map.addControl(new ol.control.ZoomSlider());
 
 // Tooltip
 
