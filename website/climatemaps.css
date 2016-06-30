@@ -64,3 +64,8 @@ body {
     z-index: 1;
     display: block;
 }
+
+.ol-attribution {
+    display: none;  /* attributions can be found in the about.html page */
+}
+
