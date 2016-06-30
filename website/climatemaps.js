@@ -271,7 +271,7 @@ var sliderChanged = function() {
 var updateColorBarLegend = function(dataType, monthNr) {
     var colorBarImage = document.getElementById('colorbar-legend-container');
     var imageUrl = dataDir + dataType + "/" + monthNr + "_colorbar.png";
-//    colorBarImage.setStyle("background-image", imageUrl);
+    colorBarImage.style.backgroundImage = "url(" + imageUrl + ")";
 };
 
 
