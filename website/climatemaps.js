@@ -269,9 +269,9 @@ var sliderChanged = function() {
 
 
 var updateColorBarLegend = function(dataType, monthNr) {
-    var colorBarImage = document.getElementById('colorbar-image');
+    var colorBarImage = document.getElementById('colorbar-legend-container');
     var imageUrl = dataDir + dataType + "/" + monthNr + "_colorbar.png";
-    colorBarImage.setAttribute("src", imageUrl);
+//    colorBarImage.setStyle("background-image", imageUrl);
 };
 
 

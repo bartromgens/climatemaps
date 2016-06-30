@@ -3,7 +3,7 @@ html, body {
 }
 
 body {
-    padding-top: 70px;
+    padding-top: 68px;
 }
 
 #map-container {
@@ -33,11 +33,11 @@ body {
     position: absolute;
     left:0;
     right:0;
-    bottom: 3%;
-    width: 90%;
+    bottom: 0%;
+    width: 100%;
     max-width: 1200px;
     margin: auto;
-    padding: 0em 0.5em 0em 0.5em;
+    padding: 0em 0em 0em 0em;
     font-weight: bold;
     background-color: white;
     border-radius: 5px;
@@ -50,11 +50,11 @@ body {
 
 #colorbar-legend-container {
     position: absolute;
-    top: 3em;
+    top: 4em;
     right: 5px;
     height: 50%;
-    width: 15%;
-    max-width: 100px;
+    width: 10%;
+    max-width: 7em;
     margin: auto;
     background-image: url("./data/precipitation/1_colorbar.png");
     background-size: contain;
@@ -64,7 +64,4 @@ body {
     border-radius: 5px;
     z-index: 1;
     display: block;
-}
-
-#colorbar-image {
 }
