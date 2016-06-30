@@ -192,7 +192,7 @@ $(function() {
       min: 0,
       max: 12,
       value: 0,
-      slide: sliderChanged,
+      slide: sliderSlide,
       change: sliderChanged
     })
     .slider("pips", {
@@ -237,31 +237,37 @@ var showOrCreateContour = function(monthNr) {
 };
 
 var setSliderValue = function(monthNr) {
-    console.log('set slider value')
     var slider = $("#month-slider");
     if (monthNr >= 13) {
         slider.slider("value", 0);
-//    } else if (getSliderValue() != monthNr-1) {
     } else {
         slider.slider("value", monthNr-1);
     };
 };
 
 
-var getSliderValue = function() {
-    var slider = $("#month-slider");
-    return slider.slider("value");
-};
-
-
 var sliderChanged = function() {
+    console.log('sliderChanged');
     var slider = $("#month-slider");
-    var monthNr = getSliderValue() + 1;
+    var monthNr = slider.slider("value") + 1;
     if (monthNr == 13) {
         slider.slider("value", 0);
         monthNr = 1;
     }
-    console.log("slider changed to: " + monthNr);
+
+    showOrCreateContour(monthNr);
+    updateColorBarLegend(getSelectedType(), monthNr);
+};
+
+
+var sliderSlide = function(event, ui) {
+    console.log('sliderSlide');
+    var slider = $("#month-slider");
+    var monthNr = ui.value + 1;
+    if (monthNr == 13) {
+        slider.slider("value", 0);
+        monthNr = 1;
+    }
 
     showOrCreateContour(monthNr);
     updateColorBarLegend(getSelectedType(), monthNr);
@@ -345,7 +351,6 @@ var initialMonth = 1;
 
 var onLoad = function() {
     selectDataType(initialDataType);
-    typeChanged();
     setSliderValue(initialMonth);
 //    addContours(initialDataType, initialMonth);  // initial contour of January
 };
