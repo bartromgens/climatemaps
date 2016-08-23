@@ -9,8 +9,7 @@ $.ajaxSetup({beforeSend: function(xhr) {
 });
 
 var dataDir = "data/";
-
-
+var firstTooltipShown = false;
 
 var map = new ol.Map({
   target: 'map',
@@ -22,6 +21,7 @@ var view = new ol.View({
   zoom: 3,
   projection: 'EPSG:3857'
 });
+
 map.setView(view);
 
 var osmSource = new ol.source.OSM("OpenCycleMap");
@@ -31,98 +31,51 @@ osmSource.setUrl("http://a.tile.opencyclemap.org/transport/{z}/{x}/{y}.png");
 //osmSource.setUrl("http://a.tile.stamen.com/toner/{z}/{x}/{y}.png");
 
 var osmLayer = new ol.layer.Tile({source: osmSource});
-
 map.addLayer(osmLayer);
 
 var lon = 0.0;
 var lat = 10.0;
 view.setCenter(ol.proj.fromLonLat([lon, lat]));
 
-//
-//var imageLayer = createImageLayer('precipitation', 1);
-//
-//map.addLayer(imageLayer);
-
-function createImageLayer(dataType, monthNr) {
-  //    var extent = ol.extent.applyTransform([-180, -85, 180, 85], ol.proj.getTransform("EPSG:4326", "EPSG:3857"));
-  //    console.log(extent);
-  return new ol.layer.Tile({
-    source: new ol.source.XYZ({
-      url: dataDir + dataType + '/' + monthNr + '/maptiles/{z}/{x}/{-y}.png',
-      projection: "EPSG:3857",
-      wrapX: false,
-      tileGrid: ol.tilegrid.createXYZ({
-        maxZoom: 5,
-        minZoom: 1,
-        tileSize: [256, 256]
-      }),
-    }),
-    opacity: getImageOpacity()
-  });
-}
-
-
-function getImageOpacity() {
-  var zoomedOut = 0.7;
-  var zoomLevelToStart = 5;
-  var zoom = view.getZoom();
-  if (zoom < zoomLevelToStart) {
-    return zoomedOut;
-  }
-  return zoomedOut - (view.getZoom()-zoomLevelToStart) / 5.0;
-}
-
-
-
-
-
 map.addControl(new ol.control.FullScreen());
 //map.addControl(new ol.control.ZoomSlider());
 
-// Tooltip
+map.on('pointermove', function(evt) {
+  var info = $('#info');
 
-var info = $('#info');
-info.hide();
-var firstTooltipShown = false;
+  function displayFeatureInfo(pixel) {
+    info.css({
+      left: (pixel[0] + 10) + 'px',
+      top: (pixel[1] - 50) + 'px',
+    });
 
-var displayFeatureInfo = function(pixel) {
-  info.css({
-    left: (pixel[0] + 10) + 'px',
-    top: (pixel[1] - 50) + 'px',
-  });
+    var feature = map.forEachFeatureAtPixel(pixel, function(feature) {
+      return feature;
+    });
 
-  var feature = map.forEachFeatureAtPixel(pixel, function(feature) {
-    return feature;
-  });
-
-  if (feature) {
-    var title = feature.get('title');
-    if (title) {
-      firstTooltipShown = true;
-      info.text(title);
-      info.show();
-    } else if (!firstTooltipShown) {
-      info.text("Tip: hover over lines to show their value.");
-      info.show();
+    if (feature) {
+      var title = feature.get('title');
+      if (title) {
+        firstTooltipShown = true;
+        info.text(title);
+        info.show();
+      } else if (!firstTooltipShown) {
+        info.text("Tip: hover over lines to show their value.");
+        info.show();
+      } else {
+        info.hide();
+      }
     } else {
       info.hide();
     }
-  } else {
-    info.hide();
   }
-};
 
-
-map.on('pointermove', function(evt) {
   if (evt.dragging) {
     info.hide();
     return;
   }
   displayFeatureInfo(map.getEventPixel(evt.originalEvent));
 });
-
-
-var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec", "Jan"];
 
 
 var contourPlot = (function() {
@@ -177,6 +130,34 @@ var contourPlot = (function() {
     contourLayer.setZIndex(99);
     map.addLayer(contourLayer);
     return contourLayer;
+  }
+
+  function getImageOpacity() {
+    var zoomedOut = 0.7;
+    var zoomLevelToStart = 5;
+    var zoom = view.getZoom();
+    if (zoom < zoomLevelToStart) {
+      return zoomedOut;
+    }
+    return zoomedOut - (view.getZoom()-zoomLevelToStart) / 5.0;
+  }
+
+  function createImageLayer(dataType, monthNr) {
+    //    var extent = ol.extent.applyTransform([-180, -85, 180, 85], ol.proj.getTransform("EPSG:4326", "EPSG:3857"));
+    //    console.log(extent);
+    return new ol.layer.Tile({
+      source: new ol.source.XYZ({
+        url: dataDir + dataType + '/' + monthNr + '/maptiles/{z}/{x}/{-y}.png',
+        projection: "EPSG:3857",
+        wrapX: false,
+        tileGrid: ol.tilegrid.createXYZ({
+          maxZoom: 5,
+          minZoom: 1,
+          tileSize: [256, 256]
+        }),
+      }),
+      opacity: getImageOpacity()
+    });
   }
 
   // increase contour line width when zooming
@@ -237,6 +218,8 @@ var colorbarLegend = (function() {
 })();
 
 var slider = (function() {
+  var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec", "Jan"];
+
   function slide(event, ui) {
     var monthNr = ui.value + 1;
     if (monthNr == 13) {
@@ -289,13 +272,15 @@ map.on("moveend", function() {
 var animationID = 0;
 
 $(document).ready( function(){
+  $('#info').hide();
+
   slider.init();
 
-  document.getElementById("animate-button").onclick = function() {
-    var playAnimation = function() {
+  function toggleAnimate() {
+    function playAnimation() {
       var monthNr = $("#month-slider").slider("value");
       $("#month-slider").slider("value", monthNr+1);
-    };
+    }
 
     var playButton = document.getElementById('animate-button');
     var selectedType = getSelectedType();
@@ -312,7 +297,9 @@ $(document).ready( function(){
       window.clearInterval(animationID);
       playButton.innerHTML = "Animate";
     }
-  };
+  }
+
+  document.getElementById("animate-button").onclick = toggleAnimate;
 
   document.getElementById("select-type").onchange = function() {
     var selection = getSelectedType();
