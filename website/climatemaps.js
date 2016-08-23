@@ -91,7 +91,7 @@ function getImageOpacity() {
 
 var lineStyleFunction = function(feature, resolution) {
     var scaleForPixelDensity = 1.0; //dpi_x/96.0;
-    var lineWidth = feature.get('stroke-width') * scaleForPixelDensity * Math.pow(map.getView().getZoom()/2.0, 1.3)
+    var lineWidth = feature.get('stroke-width') * scaleForPixelDensity * Math.pow(map.getView().getZoom()/2.0, 1.3);
     var lineStyle = new ol.style.Style({
         stroke: new ol.style.Stroke({
             color: feature.get('stroke'),
@@ -100,13 +100,10 @@ var lineStyleFunction = function(feature, resolution) {
 //            width: map.getView().getZoom(),
         })
     });
-    return lineStyle
+    return lineStyle;
 };
 
 function createContoursLayer(dataType, monthNr) {
-    console.log('create new contour layers');
-    console.log(dataDir + dataType + '/' + monthNr + '/tiles/{z}/{x}/{y}.geojson')
-
     var contourLayer = new ol.layer.VectorTile({
         source: new ol.source.VectorTile({
             url: dataDir + dataType + '/' + monthNr + '/tiles/{z}/{x}/{y}.geojson',
@@ -204,7 +201,6 @@ $(function() {
 
 
 var hideAllContours = function() {
-    console.log('hide all contours');
     var type;
     var month;
     for (type in plotTypesMonthsLayers) {
@@ -222,7 +218,6 @@ var hideAllContours = function() {
 
 
 var showOrCreateContour = function(monthNr) {
-    console.log("showOrCreateContour");
     hideAllContours();
     var selectedType = getSelectedType();
     if ( !plotExists(selectedType, monthNr) ) {
@@ -242,12 +237,11 @@ var setSliderValue = function(monthNr) {
         slider.slider("value", 0);
     } else {
         slider.slider("value", monthNr-1);
-    };
+    }
 };
 
 
 var sliderChanged = function() {
-    console.log('sliderChanged');
     var slider = $("#month-slider");
     var monthNr = slider.slider("value") + 1;
     if (monthNr == 13) {
@@ -261,7 +255,6 @@ var sliderChanged = function() {
 
 
 var sliderSlide = function(event, ui) {
-    console.log('sliderSlide');
     var slider = $("#month-slider");
     var monthNr = ui.value + 1;
     if (monthNr == 13) {
