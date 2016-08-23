@@ -10,6 +10,8 @@ $.ajaxSetup({beforeSend: function(xhr) {
 
 var dataDir = "data/";
 
+
+
 var map = new ol.Map({
   target: 'map',
   interactions: ol.interaction.defaults({keyboard:false}),  // disable because this moves the map when using the arrow keys to change the slider
@@ -36,10 +38,6 @@ var lon = 0.0;
 var lat = 10.0;
 view.setCenter(ol.proj.fromLonLat([lon, lat]));
 
-var plotTypesMonthsLayers = {};
-var plotTypesMonthsImages = {};
-
-
 //
 //var imageLayer = createImageLayer('precipitation', 1);
 //
@@ -64,20 +62,6 @@ function createImageLayer(dataType, monthNr) {
 }
 
 
-function addContours(dataType, monthNr)
-{
-  var contourLayer = createContoursLayer(dataType, monthNr);
-  if ( !(dataType in plotTypesMonthsLayers)) {
-    plotTypesMonthsLayers[dataType] = {};
-    plotTypesMonthsImages[dataType] = {};
-  }
-  var imageLayer = createImageLayer(dataType, monthNr);
-  map.addLayer(imageLayer);
-  plotTypesMonthsImages[dataType][monthNr] = imageLayer;
-  plotTypesMonthsLayers[dataType][monthNr] = contourLayer;
-}
-
-
 function getImageOpacity() {
   var zoomedOut = 0.7;
   var zoomLevelToStart = 5;
@@ -89,48 +73,7 @@ function getImageOpacity() {
 }
 
 
-var lineStyleFunction = function(feature, resolution) {
-  var scaleForPixelDensity = 1.0; //dpi_x/96.0;
-  var lineWidth = feature.get('stroke-width') * scaleForPixelDensity * Math.pow(map.getView().getZoom()/2.0, 1.3);
-  var lineStyle = new ol.style.Style({
-    stroke: new ol.style.Stroke({
-      color: feature.get('stroke'),
-      width: lineWidth,
-      opacity: 0.0 //feature.get('opacity')
-      //            width: map.getView().getZoom(),
-    })
-  });
-  return lineStyle;
-};
 
-function createContoursLayer(dataType, monthNr) {
-  var contourLayer = new ol.layer.VectorTile({
-    source: new ol.source.VectorTile({
-      url: dataDir + dataType + '/' + monthNr + '/tiles/{z}/{x}/{y}.geojson',
-      format: new ol.format.GeoJSON(),
-      projection: 'EPSG:3857',
-      tileGrid: ol.tilegrid.createXYZ({
-        maxZoom: 5,
-        minZoom: 1,
-        tileSize: [256, 256]
-      }),
-    }),
-    style: lineStyleFunction
-  });
-
-  contourLayer.setZIndex(99);
-  map.addLayer(contourLayer);
-  return contourLayer;
-}
-
-// increase contour line width when zooming
-map.getView().on('change:resolution', function(evt) {
-  for (var type in plotTypesMonthsLayers) {
-    for (var month in plotTypesMonthsLayers[type]) {
-      plotTypesMonthsLayers[type][month].setStyle(lineStyleFunction);
-    }
-  }
-});
 
 
 map.addControl(new ol.control.FullScreen());
@@ -182,170 +125,223 @@ map.on('pointermove', function(evt) {
 var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec", "Jan"];
 
 
-$(function() {
-  $("#month-slider").slider({
-    orientation: "horizontal",
-    range: "min",
-    min: 0,
-    max: 12,
-    value: 0,
-    slide: sliderSlide,
-    change: sliderChanged
-  })
-  .slider("pips", {
-    rest: "label",
-    labels: months
-  });
-  //    .slider("float");
-});
+var contourPlot = (function() {
+  var plotTypesMonthsLayers = {};
+  var plotTypesMonthsImages = {};
 
-
-var hideAllContours = function() {
-  var type;
-  var month;
-  for (type in plotTypesMonthsLayers) {
-    for (month in plotTypesMonthsLayers[type]) {
-      plotTypesMonthsLayers[type][month].setVisible(false);
-    }
-  }
-
-  for (type in plotTypesMonthsImages) {
-    for (month in plotTypesMonthsImages[type]) {
-      plotTypesMonthsImages[type][month].setVisible(false);
-    }
-  }
-};
-
-
-var showOrCreateContour = function(monthNr) {
-  hideAllContours();
-  var selectedType = getSelectedType();
-  if ( !plotExists(selectedType, monthNr) ) {
-    addContours(selectedType, monthNr);
-  }
-  else {
-    var monthLayer = plotTypesMonthsLayers[selectedType][monthNr];
-    var monthImage = plotTypesMonthsImages[selectedType][monthNr];
-    monthImage.setVisible(true);
-    monthLayer.setVisible(true);
-  }
-};
-
-var setSliderValue = function(monthNr) {
-  var slider = $("#month-slider");
-  if (monthNr >= 13) {
-    slider.slider("value", 0);
-  } else {
-    slider.slider("value", monthNr-1);
-  }
-};
-
-
-var sliderChanged = function() {
-  var slider = $("#month-slider");
-  var monthNr = slider.slider("value") + 1;
-  if (monthNr == 13) {
-    slider.slider("value", 0);
-    monthNr = 1;
-  }
-
-  showOrCreateContour(monthNr);
-  updateColorBarLegend(getSelectedType(), monthNr);
-};
-
-
-var sliderSlide = function(event, ui) {
-  var slider = $("#month-slider");
-  var monthNr = ui.value + 1;
-  if (monthNr == 13) {
-    slider.slider("value", 0);
-    monthNr = 1;
-  }
-
-  showOrCreateContour(monthNr);
-  updateColorBarLegend(getSelectedType(), monthNr);
-};
-
-
-var updateColorBarLegend = function(dataType, monthNr) {
-  var colorBarImage = document.getElementById('colorbar-legend-container');
-  var imageUrl = dataDir + dataType + "/" + monthNr + "_colorbar.png";
-  colorBarImage.style.backgroundImage = "url(" + imageUrl + ")";
-};
-
-
-var intervalID = 0;
-
-var toggleAnimation = function() {
-  var playButton = document.getElementById('animate-button');
-  var selectedType = getSelectedType();
-  if (playButton.innerHTML == "Animate") {
-    for (var i = 1; i < 13; ++i) {
-      if ( !plotExists(selectedType, i) ) {
-        addContours(selectedType, i);
+  function hideAllContours() {
+    var type;
+    var month;
+    for (type in plotTypesMonthsLayers) {
+      for (month in plotTypesMonthsLayers[type]) {
+        plotTypesMonthsLayers[type][month].setVisible(false);
       }
     }
-    playButton.innerHTML = "Stop";
-    intervalID = window.setInterval(playAnimation, 500);
+
+    for (type in plotTypesMonthsImages) {
+      for (month in plotTypesMonthsImages[type]) {
+        plotTypesMonthsImages[type][month].setVisible(false);
+      }
+    }
   }
-  else {
-    window.clearInterval(intervalID);
-    playButton.innerHTML = "Animate";
+
+  function lineStyleFunction(feature, resolution) {
+    var scaleForPixelDensity = 1.0; //dpi_x/96.0;
+    var lineWidth = feature.get('stroke-width') * scaleForPixelDensity * Math.pow(map.getView().getZoom()/2.0, 1.3);
+    var lineStyle = new ol.style.Style({
+      stroke: new ol.style.Stroke({
+        color: feature.get('stroke'),
+        width: lineWidth,
+        opacity: 0.0 //feature.get('opacity')
+        //            width: map.getView().getZoom(),
+      })
+    });
+    return lineStyle;
   }
-};
 
+  function createContoursLayer(dataType, monthNr) {
+    var contourLayer = new ol.layer.VectorTile({
+      source: new ol.source.VectorTile({
+        url: dataDir + dataType + '/' + monthNr + '/tiles/{z}/{x}/{y}.geojson',
+        format: new ol.format.GeoJSON(),
+        projection: 'EPSG:3857',
+        tileGrid: ol.tilegrid.createXYZ({
+          maxZoom: 5,
+          minZoom: 1,
+          tileSize: [256, 256]
+        }),
+      }),
+      style: lineStyleFunction
+    });
 
-var playAnimation = function() {
-  var slider = $("#month-slider");
-  var monthNr = slider.slider("value");
-  slider.slider("value", monthNr+1);
-};
+    contourLayer.setZIndex(99);
+    map.addLayer(contourLayer);
+    return contourLayer;
+  }
 
+  // increase contour line width when zooming
+  map.getView().on('change:resolution', function(evt) {
+    for (var type in plotTypesMonthsLayers) {
+      for (var month in plotTypesMonthsLayers[type]) {
+        plotTypesMonthsLayers[type][month].setStyle(lineStyleFunction);
+      }
+    }
+  });
 
-document.getElementById("animate-button").onclick = toggleAnimation;
+  return Object.freeze({
+    showOrCreateContour: function(monthNr) {
+      hideAllContours();
+      var selectedType = getSelectedType();
+      if ( !this.plotExists(selectedType, monthNr) ) {
+        this.addContours(selectedType, monthNr);
+      }
+      else {
+        var monthLayer = plotTypesMonthsLayers[selectedType][monthNr];
+        var monthImage = plotTypesMonthsImages[selectedType][monthNr];
+        monthImage.setVisible(true);
+        monthLayer.setVisible(true);
+      }
+    },
+    addContours: function(dataType, monthNr) {
+      var contourLayer = createContoursLayer(dataType, monthNr);
+      if ( !(dataType in plotTypesMonthsLayers)) {
+        plotTypesMonthsLayers[dataType] = {};
+        plotTypesMonthsImages[dataType] = {};
+      }
+      var imageLayer = createImageLayer(dataType, monthNr);
+      map.addLayer(imageLayer);
+      plotTypesMonthsImages[dataType][monthNr] = imageLayer;
+      plotTypesMonthsLayers[dataType][monthNr] = contourLayer;
+    },
+    plotExists: function(typeName, monthNr) {
+      return typeName in plotTypesMonthsLayers && plotTypesMonthsLayers[typeName].hasOwnProperty(monthNr);
+    },
+    updateOnZoom: function() {
+      for (var type in plotTypesMonthsImages) {
+        for (var month in plotTypesMonthsImages[type]) {
+          plotTypesMonthsImages[type][month].setOpacity( getImageOpacity() );
+        }
+      }
+    }
+  });
+})();
 
+var colorbarLegend = (function() {
+  return Object.freeze({
+    update: function(dataType, monthNr) {
+      var colorBarImage = document.getElementById('colorbar-legend-container');
+      var imageUrl = dataDir + dataType + "/" + monthNr + "_colorbar.png";
+      colorBarImage.style.backgroundImage = "url(" + imageUrl + ")";
+    }
+  });
+})();
 
-var selectDataType = function selectDataType(valueToSelect) {
-  var element = document.getElementById('select-type');
-  element.value = valueToSelect;
-};
+var slider = (function() {
+  function slide(event, ui) {
+    var monthNr = ui.value + 1;
+    if (monthNr == 13) {
+      $("#month-slider").slider("value", 0);
+      monthNr = 1;
+    }
+
+    contourPlot.showOrCreateContour(monthNr);
+    colorbarLegend.update(getSelectedType(), monthNr);
+  }
+
+  function update() {
+    var monthNr = $("#month-slider").slider("value") + 1;
+    if (monthNr == 13) {
+      $("#month-slider").slider("value", 0);
+      monthNr = 1;
+    }
+
+    contourPlot.showOrCreateContour(monthNr);
+    colorbarLegend.update(getSelectedType(), monthNr);
+  }
+
+  function init() {
+    $("#month-slider").slider({
+      orientation: "horizontal",
+      range: "min",
+      min: 0,
+      max: 12,
+      value: 0,
+      slide: slide,
+      change: update
+    })
+    .slider("pips", {
+      rest: "label",
+      labels: months
+    });
+    //    .slider("float");
+  }
+
+  return Object.freeze({
+    update: update,
+    init: init
+  });
+})();
+
+map.on("moveend", function() {
+  contourPlot.updateOnZoom();
+});
+
+var animationID = 0;
+
+$(document).ready( function(){
+  slider.init();
+
+  document.getElementById("animate-button").onclick = function() {
+    var playAnimation = function() {
+      var monthNr = $("#month-slider").slider("value");
+      $("#month-slider").slider("value", monthNr+1);
+    };
+
+    var playButton = document.getElementById('animate-button');
+    var selectedType = getSelectedType();
+    if (playButton.innerHTML == "Animate") {
+      for (var i = 1; i < 13; ++i) {
+        if ( !contourPlot.plotExists(selectedType, i) ) {
+          contourPlot.addContours(selectedType, i);
+        }
+      }
+      playButton.innerHTML = "Stop";
+      animationID = window.setInterval(playAnimation, 800);
+    }
+    else {
+      window.clearInterval(animationID);
+      playButton.innerHTML = "Animate";
+    }
+  };
+
+  document.getElementById("select-type").onchange = function() {
+    var selection = getSelectedType();
+    $("#month-slider").sliderChanged();
+  };
+});
 
 var getSelectedType = function() {
   return document.getElementById("select-type").value;
 };
 
+window.onload = function() {
+  var initialDataType = 'precipitation';
+  var initialMonth = 1;
 
-var typeChanged = function() {
-  var selection = getSelectedType();
-  sliderChanged();
-};
+  function selectDataType(valueToSelect) {
+    var element = document.getElementById('select-type');
+    element.value = valueToSelect;
+  }
 
-
-document.getElementById("select-type").onchange = typeChanged;
-
-var plotExists = function(typeName, monthNr) {
-  return typeName in plotTypesMonthsLayers && plotTypesMonthsLayers[typeName].hasOwnProperty(monthNr);
-};
-
-
-map.on("moveend", function() {
-  // change image layer opacacity depending on zoom
-  for (var type in plotTypesMonthsImages) {
-    for (var month in plotTypesMonthsImages[type]) {
-      plotTypesMonthsImages[type][month].setOpacity( getImageOpacity() );
+  function setSliderValue(monthNr) {
+    if (monthNr >= 13) {
+      $("#month-slider").slider("value", 0);
+    } else {
+      $("#month-slider").slider("value", monthNr-1);
     }
   }
-});
 
-
-var initialDataType = 'precipitation';
-var initialMonth = 1;
-
-
-var onLoad = function() {
   selectDataType(initialDataType);
   setSliderValue(initialMonth);
   //    addContours(initialDataType, initialMonth);  // initial contour of January
 };
-
-window.onload = onLoad;
