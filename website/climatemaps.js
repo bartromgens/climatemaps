@@ -8,6 +8,10 @@ $.ajaxSetup({beforeSend: function(xhr) {
 }
 });
 
+function getSelectedType() {
+  return document.getElementById("select-type").value;
+}
+
 var dataDir = "data/";
 var firstTooltipShown = false;
 
@@ -303,13 +307,9 @@ $(document).ready( function(){
 
   document.getElementById("select-type").onchange = function() {
     var selection = getSelectedType();
-    $("#month-slider").sliderChanged();
+    slider.update();
   };
 });
-
-var getSelectedType = function() {
-  return document.getElementById("select-type").value;
-};
 
 window.onload = function() {
   var initialDataType = 'precipitation';
