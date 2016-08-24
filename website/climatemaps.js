@@ -1,18 +1,21 @@
+(function () {
+   'use strict';
+}());
 
 // http://stackoverflow.com/a/4234006
 $.ajaxSetup({beforeSend: function(xhr) {
   if (xhr.overrideMimeType)
   {
-    xhr.overrideMimeType("application/json");
+    xhr.overrideMimeType('application/json');
   }
 }
 });
 
 function getSelectedType() {
-  return document.getElementById("select-type").value;
+  return document.getElementById('select-type').value;
 }
 
-var dataDir = "data/";
+var dataDir = 'data/';
 var firstTooltipShown = false;
 
 var map = new ol.Map({
@@ -28,11 +31,11 @@ var view = new ol.View({
 
 map.setView(view);
 
-var osmSource = new ol.source.OSM("OpenCycleMap");
-osmSource.setUrl("http://a.tile.opencyclemap.org/transport/{z}/{x}/{y}.png");
-//osmSource.setUrl("http://a.tile.openstreetmap.org/{z}/{x}/{y}.png");
-//osmSource.setUrl("https://maps.wikimedia.org/osm-intl/{z}/{x}/{y}.png");
-//osmSource.setUrl("http://a.tile.stamen.com/toner/{z}/{x}/{y}.png");
+var osmSource = new ol.source.OSM('OpenCycleMap');
+osmSource.setUrl('http://a.tile.opencyclemap.org/transport/{z}/{x}/{y}.png');
+//osmSource.setUrl('http://a.tile.openstreetmap.org/{z}/{x}/{y}.png');
+//osmSource.setUrl('https://maps.wikimedia.org/osm-intl/{z}/{x}/{y}.png');
+//osmSource.setUrl('http://a.tile.stamen.com/toner/{z}/{x}/{y}.png');
 
 var osmLayer = new ol.layer.Tile({source: osmSource});
 map.addLayer(osmLayer);
@@ -64,7 +67,7 @@ map.on('pointermove', function(evt) {
         info.text(title);
         info.show();
       } else if (!firstTooltipShown) {
-        info.text("Tip: hover over lines to show their value.");
+        info.text('Tip: hover over lines to show their value.');
         info.show();
       } else {
         info.hide();
@@ -147,12 +150,12 @@ var contourPlot = (function() {
   }
 
   function createImageLayer(dataType, monthNr) {
-    //    var extent = ol.extent.applyTransform([-180, -85, 180, 85], ol.proj.getTransform("EPSG:4326", "EPSG:3857"));
+    //    var extent = ol.extent.applyTransform([-180, -85, 180, 85], ol.proj.getTransform('EPSG:4326', 'EPSG:3857'));
     //    console.log(extent);
     return new ol.layer.Tile({
       source: new ol.source.XYZ({
         url: dataDir + dataType + '/' + monthNr + '/maptiles/{z}/{x}/{-y}.png',
-        projection: "EPSG:3857",
+        projection: 'EPSG:3857',
         wrapX: false,
         tileGrid: ol.tilegrid.createXYZ({
           maxZoom: 5,
@@ -215,19 +218,19 @@ var colorbarLegend = (function() {
   return Object.freeze({
     update: function(dataType, monthNr) {
       var colorBarImage = document.getElementById('colorbar-legend-container');
-      var imageUrl = dataDir + dataType + "/" + monthNr + "_colorbar.png";
-      colorBarImage.style.backgroundImage = "url(" + imageUrl + ")";
+      var imageUrl = dataDir + dataType + '/' + monthNr + '_colorbar.png';
+      colorBarImage.style.backgroundImage = 'url(' + imageUrl + ')';
     }
   });
 })();
 
 var slider = (function() {
-  var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec", "Jan"];
+  var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec', 'Jan'];
 
   function slide(event, ui) {
     var monthNr = ui.value + 1;
     if (monthNr == 13) {
-      $("#month-slider").slider("value", 0);
+      $('#month-slider').slider('value', 0);
       monthNr = 1;
     }
 
@@ -236,9 +239,9 @@ var slider = (function() {
   }
 
   function update() {
-    var monthNr = $("#month-slider").slider("value") + 1;
+    var monthNr = $('#month-slider').slider('value') + 1;
     if (monthNr == 13) {
-      $("#month-slider").slider("value", 0);
+      $('#month-slider').slider('value', 0);
       monthNr = 1;
     }
 
@@ -247,20 +250,20 @@ var slider = (function() {
   }
 
   function init() {
-    $("#month-slider").slider({
-      orientation: "horizontal",
-      range: "min",
+    $('#month-slider').slider({
+      orientation: 'horizontal',
+      range: 'min',
       min: 0,
       max: 12,
       value: 0,
       slide: slide,
       change: update
     })
-    .slider("pips", {
-      rest: "label",
+    .slider('pips', {
+      rest: 'label',
       labels: months
     });
-    //    .slider("float");
+    //    .slider('float');
   }
 
   return Object.freeze({
@@ -269,7 +272,7 @@ var slider = (function() {
   });
 })();
 
-map.on("moveend", function() {
+map.on('moveend', function() {
   contourPlot.updateOnZoom();
 });
 
@@ -282,30 +285,30 @@ $(document).ready( function(){
 
   function toggleAnimate() {
     function playAnimation() {
-      var monthNr = $("#month-slider").slider("value");
-      $("#month-slider").slider("value", monthNr+1);
+      var monthNr = $('#month-slider').slider('value');
+      $('#month-slider').slider('value', monthNr+1);
     }
 
     var playButton = document.getElementById('animate-button');
     var selectedType = getSelectedType();
-    if (playButton.innerHTML == "Animate") {
+    if (playButton.innerHTML == 'Animate') {
       for (var i = 1; i < 13; ++i) {
         if ( !contourPlot.plotExists(selectedType, i) ) {
           contourPlot.addContours(selectedType, i);
         }
       }
-      playButton.innerHTML = "Stop";
+      playButton.innerHTML = 'Stop';
       animationID = window.setInterval(playAnimation, 800);
     }
     else {
       window.clearInterval(animationID);
-      playButton.innerHTML = "Animate";
+      playButton.innerHTML = 'Animate';
     }
   }
 
-  document.getElementById("animate-button").onclick = toggleAnimate;
+  document.getElementById('animate-button').onclick = toggleAnimate;
 
-  document.getElementById("select-type").onchange = function() {
+  document.getElementById('select-type').onchange = function() {
     var selection = getSelectedType();
     slider.update();
   };
@@ -322,9 +325,9 @@ window.onload = function() {
 
   function setSliderValue(monthNr) {
     if (monthNr >= 13) {
-      $("#month-slider").slider("value", 0);
+      $('#month-slider').slider('value', 0);
     } else {
-      $("#month-slider").slider("value", monthNr-1);
+      $('#month-slider').slider('value', monthNr-1);
     }
   }
 
