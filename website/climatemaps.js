@@ -18,71 +18,37 @@ function getSelectedType() {
 var dataDir = 'data/';
 var firstTooltipShown = false;
 
-var map = new ol.Map({
-  target: 'map',
-  interactions: ol.interaction.defaults({keyboard:false}),  // disable because this moves the map when using the arrow keys to change the slider
-});
+var climateMap = (function() {
+  var lon = 0.0;
+  var lat = 10.0;
 
-var view = new ol.View({
-  center: [0, 0],
-  zoom: 3,
-  projection: 'EPSG:3857'
-});
+  var map = new ol.Map({
+    target: 'map',
+    interactions: ol.interaction.defaults({keyboard:false}),  // disable because this moves the map when using the arrow keys to change the slider
+  });
 
-map.setView(view);
+  var view = new ol.View({
+    center: [0, 0],
+    zoom: 3,
+    projection: 'EPSG:3857'
+  });
 
-var osmSource = new ol.source.OSM('OpenCycleMap');
-osmSource.setUrl('http://a.tile.opencyclemap.org/transport/{z}/{x}/{y}.png');
-//osmSource.setUrl('http://a.tile.openstreetmap.org/{z}/{x}/{y}.png');
-//osmSource.setUrl('https://maps.wikimedia.org/osm-intl/{z}/{x}/{y}.png');
-//osmSource.setUrl('http://a.tile.stamen.com/toner/{z}/{x}/{y}.png');
+  view.setCenter(ol.proj.fromLonLat([lon, lat]));
+  map.setView(view);
 
-var osmLayer = new ol.layer.Tile({source: osmSource});
-map.addLayer(osmLayer);
+  var osmSource = new ol.source.OSM('OpenCycleMap');
+  osmSource.setUrl('http://a.tile.opencyclemap.org/transport/{z}/{x}/{y}.png');
+  //osmSource.setUrl('http://a.tile.openstreetmap.org/{z}/{x}/{y}.png');
+  //osmSource.setUrl('https://maps.wikimedia.org/osm-intl/{z}/{x}/{y}.png');
+  //osmSource.setUrl('http://a.tile.stamen.com/toner/{z}/{x}/{y}.png');
 
-var lon = 0.0;
-var lat = 10.0;
-view.setCenter(ol.proj.fromLonLat([lon, lat]));
+  var osmLayer = new ol.layer.Tile({source: osmSource});
+  map.addLayer(osmLayer);
+  map.addControl(new ol.control.FullScreen());
+  //map.addControl(new ol.control.ZoomSlider());
 
-map.addControl(new ol.control.FullScreen());
-//map.addControl(new ol.control.ZoomSlider());
-
-map.on('pointermove', function(evt) {
-  var info = $('#info');
-
-  function displayFeatureInfo(pixel) {
-    info.css({
-      left: (pixel[0] + 10) + 'px',
-      top: (pixel[1] - 50) + 'px',
-    });
-
-    var feature = map.forEachFeatureAtPixel(pixel, function(feature) {
-      return feature;
-    });
-
-    if (feature) {
-      var title = feature.get('title');
-      if (title) {
-        firstTooltipShown = true;
-        info.text(title);
-        info.show();
-      } else if (!firstTooltipShown) {
-        info.text('Tip: hover over lines to show their value.');
-        info.show();
-      } else {
-        info.hide();
-      }
-    } else {
-      info.hide();
-    }
-  }
-
-  if (evt.dragging) {
-    info.hide();
-    return;
-  }
-  displayFeatureInfo(map.getEventPixel(evt.originalEvent));
-});
+  return map;
+})();
 
 
 var contourPlot = (function() {
@@ -107,13 +73,13 @@ var contourPlot = (function() {
 
   function lineStyleFunction(feature, resolution) {
     var scaleForPixelDensity = 1.0; //dpi_x/96.0;
-    var lineWidth = feature.get('stroke-width') * scaleForPixelDensity * Math.pow(map.getView().getZoom()/2.0, 1.3);
+    var lineWidth = feature.get('stroke-width') * scaleForPixelDensity * Math.pow(climateMap.getView().getZoom()/2.0, 1.3);
     var lineStyle = new ol.style.Style({
       stroke: new ol.style.Stroke({
         color: feature.get('stroke'),
         width: lineWidth,
         opacity: 0.0 //feature.get('opacity')
-        //            width: map.getView().getZoom(),
+        //            width: climateMap.getView().getZoom(),
       })
     });
     return lineStyle;
@@ -135,18 +101,18 @@ var contourPlot = (function() {
     });
 
     contourLayer.setZIndex(99);
-    map.addLayer(contourLayer);
+    climateMap.addLayer(contourLayer);
     return contourLayer;
   }
 
   function getImageOpacity() {
     var zoomedOut = 0.7;
     var zoomLevelToStart = 5;
-    var zoom = view.getZoom();
+    var zoom = climateMap.getView().getZoom();
     if (zoom < zoomLevelToStart) {
       return zoomedOut;
     }
-    return zoomedOut - (view.getZoom()-zoomLevelToStart) / 5.0;
+    return zoomedOut - (climateMap.getView().getZoom()-zoomLevelToStart) / 5.0;
   }
 
   function createImageLayer(dataType, monthNr) {
@@ -168,7 +134,7 @@ var contourPlot = (function() {
   }
 
   // increase contour line width when zooming
-  map.getView().on('change:resolution', function(evt) {
+  climateMap.getView().on('change:resolution', function(evt) {
     for (var type in plotTypesMonthsLayers) {
       for (var month in plotTypesMonthsLayers[type]) {
         plotTypesMonthsLayers[type][month].setStyle(lineStyleFunction);
@@ -184,8 +150,8 @@ var contourPlot = (function() {
         this.addContours(selectedType, monthNr);
       }
       else {
-        var monthLayer = plotTypesMonthsLayers[selectedType][monthNr];
         var monthImage = plotTypesMonthsImages[selectedType][monthNr];
+        var monthLayer = plotTypesMonthsLayers[selectedType][monthNr];
         monthImage.setVisible(true);
         monthLayer.setVisible(true);
       }
@@ -197,7 +163,7 @@ var contourPlot = (function() {
         plotTypesMonthsImages[dataType] = {};
       }
       var imageLayer = createImageLayer(dataType, monthNr);
-      map.addLayer(imageLayer);
+      climateMap.addLayer(imageLayer);
       plotTypesMonthsImages[dataType][monthNr] = imageLayer;
       plotTypesMonthsLayers[dataType][monthNr] = contourLayer;
     },
@@ -272,9 +238,6 @@ var slider = (function() {
   });
 })();
 
-map.on('moveend', function() {
-  contourPlot.updateOnZoom();
-});
 
 var animationID = 0;
 
@@ -312,6 +275,47 @@ $(document).ready( function(){
     var selection = getSelectedType();
     slider.update();
   };
+
+  climateMap.on('moveend', function() {
+    contourPlot.updateOnZoom();
+  });
+
+  climateMap.on('pointermove', function(evt) {
+    var info = $('#info');
+
+    function displayFeatureInfo(pixel) {
+      info.css({
+        left: (pixel[0] + 10) + 'px',
+        top: (pixel[1] - 50) + 'px',
+      });
+
+      var feature = climateMap.forEachFeatureAtPixel(pixel, function(feature) {
+        return feature;
+      });
+
+      if (feature) {
+        var title = feature.get('title');
+        if (title) {
+          firstTooltipShown = true;
+          info.text(title);
+          info.show();
+        } else if (!firstTooltipShown) {
+          info.text('Tip: hover over lines to show their value.');
+          info.show();
+        } else {
+          info.hide();
+        }
+      } else {
+        info.hide();
+      }
+    }
+
+    if (evt.dragging) {
+      info.hide();
+      return;
+    }
+    displayFeatureInfo(climateMap.getEventPixel(evt.originalEvent));
+  });
 });
 
 window.onload = function() {
