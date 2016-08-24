@@ -3,12 +3,13 @@
 }());
 
 // http://stackoverflow.com/a/4234006
-$.ajaxSetup({beforeSend: function(xhr) {
-  if (xhr.overrideMimeType)
-  {
-    xhr.overrideMimeType('application/json');
+$.ajaxSetup({
+  beforeSend: function(xhr) {
+    if (xhr.overrideMimeType)
+    {
+      xhr.overrideMimeType('application/json');
+    }
   }
-}
 });
 
 function getSelectedType() {
