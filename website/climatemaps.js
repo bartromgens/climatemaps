@@ -38,7 +38,7 @@ var climateMap = (function() {
   map.setView(view);
 
   var osmSource = new ol.source.OSM('OpenCycleMap');
-  osmSource.setUrl('http://a.tile.opencyclemap.org/transport/{z}/{x}/{y}.png');
+  osmSource.setUrl("https://a.tile.thunderforest.com/transport/{z}/{x}/{y}.png?apikey=");  // needs an api key, get one at thunderforest.com
   //osmSource.setUrl('http://a.tile.openstreetmap.org/{z}/{x}/{y}.png');
   //osmSource.setUrl('https://maps.wikimedia.org/osm-intl/{z}/{x}/{y}.png');
   //osmSource.setUrl('http://a.tile.stamen.com/toner/{z}/{x}/{y}.png');
