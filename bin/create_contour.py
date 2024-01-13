@@ -13,6 +13,7 @@ from climatemaps.logger import logger
 
 DATA_OUT_DIR = 'website/data'
 
+ZOOM_MAX = 5
 
 TYPES = {
     'precipitation': {
