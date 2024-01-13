@@ -107,6 +107,7 @@ class ContourPlotConfig(object):
 class Contour(object):
 
     def __init__(self, config, lonrange, latrange, Z, zoom_min=0, zoom_max=5):
+        logger.info(f'Contour zoom {zoom_min}-{zoom_max}')
         self.zoom_min = zoom_min
         self.zoom_max = zoom_max
         self.config = config
@@ -123,7 +124,7 @@ class Contour(object):
         self.latrange = latrange[::-1]
         numpy.set_printoptions(3, threshold=100, suppress=True)  # .3f
 
-    def create_contour_data(self, data_dir_out, data_type, month, figure_dpi=700):
+    def create_contour_data(self, data_dir_out, data_type, month, figure_dpi=700, create_images=True):
         logger.info('start')
         figure = Figure(frameon=False)
         FigureCanvas(figure)
@@ -173,7 +174,10 @@ class Contour(object):
             transparent=True
         )
 
-        self.create_image_tiles(filepath)
+        if create_images:
+            self.create_image_tiles(filepath)
+        else:
+            logger.warning('skipping creation of image tiles')
         self.create_contour_json(filepath)
         logger.info('end')
 
