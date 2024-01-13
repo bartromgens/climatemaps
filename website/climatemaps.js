@@ -16,8 +16,15 @@ function getSelectedType() {
   return document.getElementById('select-type').value;
 }
 
-var dataDir = 'data/';
-var firstTooltipShown = false;
+const dataDir = 'data/';
+const ZOOM_DEFAULT = 3;
+const MAX_ZOOM = 6;
+const DATA_DEFAULT = 'model_precipitation';
+const MONTH_DEFAULT = 1;
+
+const PROJECTION = 'EPSG:3857';
+
+let firstTooltipShown = false;
 
 var climateMap = (function() {
   console.log('createMap');
@@ -31,8 +38,8 @@ var climateMap = (function() {
 
   var view = new ol.View({
     center: [0, 0],
-    zoom: 3,
-    projection: 'EPSG:3857'
+    zoom: ZOOM_DEFAULT,
+    projection: PROJECTION
   });
 
   view.setCenter(ol.proj.fromLonLat([lon, lat]));
@@ -95,9 +102,8 @@ var contourPlot = (function() {
       source: new ol.source.VectorTile({
         url: tileUrl,
         format: new ol.format.GeoJSON(),
-        projection: 'EPSG:3857',
         tileGrid: ol.tilegrid.createXYZ({
-          maxZoom: 5,
+          maxZoom: MAX_ZOOM,
           minZoom: 1,
           tileSize: [256, 256]
         }),
@@ -111,7 +117,7 @@ var contourPlot = (function() {
   }
 
   function getImageOpacity() {
-    var zoomedOut = 0.7;
+    var zoomedOut = 0.6;
     var zoomLevelToStart = 5;
     var zoom = climateMap.getView().getZoom();
     if (zoom < zoomLevelToStart) {
@@ -127,7 +133,7 @@ var contourPlot = (function() {
     return new ol.layer.Tile({
       source: new ol.source.XYZ({
         url: dataDir + dataType + '/' + monthNr + '/maptiles/{z}/{x}/{-y}.png',
-        projection: 'EPSG:3857',
+        projection: PROJECTION,
         wrapX: false,
         tileGrid: ol.tilegrid.createXYZ({
           maxZoom: 5,
@@ -179,6 +185,7 @@ var contourPlot = (function() {
       return typeName in plotTypesMonthsLayers && plotTypesMonthsLayers[typeName].hasOwnProperty(monthNr);
     },
     updateOnZoom: function() {
+      console.log('zoom', climateMap.getView().getZoom());
       for (var type in plotTypesMonthsImages) {
         for (var month in plotTypesMonthsImages[type]) {
           plotTypesMonthsImages[type][month].setOpacity( getImageOpacity() );
@@ -327,8 +334,8 @@ $(document).ready( function(){
 });
 
 window.onload = function() {
-  var initialDataType = 'precipitation';
-  var initialMonth = 1;
+  var initialDataType = DATA_DEFAULT;
+  var initialMonth = MONTH_DEFAULT;
 
   function selectDataType(valueToSelect) {
     var element = document.getElementById('select-type');

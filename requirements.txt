@@ -9,3 +9,6 @@ pillow==10.2.0
 basemap==1.4.0
 git+https://github.com/bartromgens/togeojsontiles.git@master#egg=togeojsontiles
 uvicorn
+
+geotiff==0.2.10
+imagecodecs==2024.1.1

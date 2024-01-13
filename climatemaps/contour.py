@@ -106,7 +106,7 @@ class ContourPlotConfig(object):
 
 class Contour(object):
 
-    def __init__(self, config, lonrange, latrange, Z, zoom_min=0, zoom_max=5):
+    def __init__(self, config: ContourPlotConfig, lonrange, latrange, Z, zoom_min=0, zoom_max=5):
         logger.info(f'Contour zoom {zoom_min}-{zoom_max}')
         self.zoom_min = zoom_min
         self.zoom_max = zoom_max
@@ -122,25 +122,45 @@ class Contour(object):
         self.lonrange = lonrange
         # self.latrange = latrange
         self.latrange = latrange[::-1]
+        logger.info(f"lat min, max {self.lat_min}, {self.lat_max}")
         numpy.set_printoptions(3, threshold=100, suppress=True)  # .3f
 
-    def create_contour_data(self, data_dir_out, data_type, month, figure_dpi=700, create_images=True):
-        logger.info('start')
+    @property
+    def lat_min(self):
+        return self.latrange[-1]
+
+    @property
+    def lat_max(self):
+        return self.latrange[0]
+
+    @property
+    def lon_min(self):
+        return self.lonrange[0]
+
+    @property
+    def lon_max(self):
+        return self.lonrange[-1]
+
+    def create_contour_data(self, data_dir_out, name, month, figure_dpi=700, create_images=True, zoomfactor=2.0):
+        logger.info(f'creating contour for {name} and month {month} and zoomfactor {zoomfactor}')
         figure = Figure(frameon=False)
         FigureCanvas(figure)
 
         ax = figure.add_subplot(111)
+        logger.info(f'creating base map')
         m = Basemap(
-            projection='cyl',
-            resolution='l',
+            epsg='4326',
+            # projection='cyl',
+            # resolution='l',
             lon_0=0,
             ax=ax,
-            llcrnrlon=-180,
-            llcrnrlat=-85,
-            urcrnrlon=180,
-            urcrnrlat=85,
+            llcrnrlon=self.lon_min,
+            llcrnrlat=self.lat_min,
+            urcrnrlon=self.lon_max,
+            urcrnrlat=self.lat_max,
         )
         x, y = m(*numpy.meshgrid(self.lonrange, self.latrange))
+        logger.info(f'creating matplotlib contourf')
         contour = m.contourf(
             x, y, self.Z,
             cmap=self.config.colormap,
@@ -150,18 +170,23 @@ class Contour(object):
         # m.drawcoastlines(linewidth=0.1)  # draw coastlines
         # cbar = figure.colorbar(contour, format='%.1f')
         ax.set_axis_off()
-        data_dir = os.path.join(data_dir_out, data_type)
+
+        data_dir = os.path.join(data_dir_out, name)
         if not os.path.exists(data_dir):
             os.mkdir(data_dir)
         filepath = os.path.join(data_dir, str(month))
-        figure.savefig(
-            filepath + '.png',
-            dpi=figure_dpi,
-            bbox_inches='tight',
-            pad_inches=0,
-            transparent=True
-        )
+        self.save_contour_image(figure, filepath, figure_dpi)
+        self.create_colorbar_image(ax, contour, figure, filepath)
 
+        if create_images:
+            self.create_image_tiles(filepath)
+        else:
+            logger.warning('skipping creation of image tiles')
+        self.create_contour_json(filepath, zoomfactor=zoomfactor)
+        logger.info(f'finished contour for {name} and month {month}')
+
+    def create_colorbar_image(self, ax, contour, figure, filepath):
+        logger.info(f'saving colorbar to image')
         cbar = figure.colorbar(contour, format='%.1f')
         cbar.set_label(self.config.title + ' [' + self.config.unit + ']')
         cbar.set_ticks(self.config.colorbar_ticks)
@@ -174,23 +199,28 @@ class Contour(object):
             transparent=True
         )
 
-        if create_images:
-            self.create_image_tiles(filepath)
-        else:
-            logger.warning('skipping creation of image tiles')
-        self.create_contour_json(filepath)
-        logger.info('end')
+    @classmethod
+    def save_contour_image(cls, figure, filepath, figure_dpi):
+        logger.info(f'saving contour to image')
+        figure.savefig(
+            filepath + '.png',
+            dpi=figure_dpi,
+            bbox_inches='tight',
+            pad_inches=0,
+            transparent=True
+        )
 
-    def create_contour_json(self, filepath):
+    def create_contour_json(self, filepath, zoomfactor: float = None):
         logger.info('START: create contour json tiles')
-        zoomfactor = 2.0
-        self.Z = scipy.ndimage.zoom(self.Z, zoom=zoomfactor, order=1)
-        self.lonrange = scipy.ndimage.zoom(self.lonrange, zoom=zoomfactor, order=1)
-        self.latrange = scipy.ndimage.zoom(self.latrange, zoom=zoomfactor, order=1)
+        if zoomfactor is not None:
+            self.Z = scipy.ndimage.zoom(self.Z, zoom=zoomfactor, order=1)
+            self.lonrange = scipy.ndimage.zoom(self.lonrange, zoom=zoomfactor, order=1)
+            self.latrange = scipy.ndimage.zoom(self.latrange, zoom=zoomfactor, order=1)
 
         figure = Figure(frameon=False)
         FigureCanvas(figure)
         ax = figure.add_subplot(111)
+        logger.info(f'creating matplotlib contour')
         contours = ax.contour(
             self.lonrange, self.latrange, self.Z,
             levels=self.config.levels,
@@ -199,7 +229,7 @@ class Contour(object):
         )
         figure.clear()
 
-        logger.info('converting contour to geojson')
+        logger.info('converting matplotlib contour to geojson')
         geojsoncontour.contour_to_geojson(
             contour=contours,
             geojson_filepath=filepath + '.geojson',
@@ -212,6 +242,7 @@ class Contour(object):
         world_bounding_box_filepath = 'data/world_bounding_box.geojson'
         assert os.path.exists(world_bounding_box_filepath)
 
+        logger.info('converting geojson_to_mbtiles')
         togeojsontiles.geojson_to_mbtiles(
             filepaths=[filepath + '.geojson', world_bounding_box_filepath],
             tippecanoe_dir=TIPPECANOE_DIR,
@@ -250,11 +281,15 @@ class Contour(object):
         logger.info(f'create world file for {filepath}')
         with Image.open(filepath + '.png') as im:
             width, height = im.size
+        logger.info(f"image width {width}, image height {height}")
 
         with open(filepath + '.pgw', 'w') as worldfile:
-            worldfile.write(str(360.0/width) + '\n')
+            y_pixel_size = 180.0/height
+            x_pixel_size = 360.0/width
+            logger.info(f"y pixel size {y_pixel_size}, x pixel size {x_pixel_size}")
+            worldfile.write(str(x_pixel_size) + '\n')
             worldfile.write('0.0' + '\n')
             worldfile.write('0.0' + '\n')
-            worldfile.write(str(-170.0/height) + '\n')
-            worldfile.write('-180.0' + '\n')
-            worldfile.write('85.0' + '\n')
+            worldfile.write(str(-y_pixel_size) + '\n')
+            worldfile.write(str(-180+x_pixel_size/2) + '\n')
+            worldfile.write(str(90-y_pixel_size/2) + '\n')
