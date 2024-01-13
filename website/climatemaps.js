@@ -20,6 +20,7 @@ var dataDir = 'data/';
 var firstTooltipShown = false;
 
 var climateMap = (function() {
+  console.log('createMap');
   var lon = 0.0;
   var lat = 10.0;
 
@@ -87,9 +88,12 @@ var contourPlot = (function() {
   }
 
   function createContoursLayer(dataType, monthNr) {
-    var contourLayer = new ol.layer.VectorTile({
+    console.log('createContoursLayer');
+    const tileUrl = dataDir + dataType + '/' + monthNr + '/tiles/{z}/{x}/{y}.geojson';
+    console.log('tileUrl', tileUrl)
+    const contourLayer = new ol.layer.VectorTile({
       source: new ol.source.VectorTile({
-        url: dataDir + dataType + '/' + monthNr + '/tiles/{z}/{x}/{y}.geojson',
+        url: tileUrl,
         format: new ol.format.GeoJSON(),
         projection: 'EPSG:3857',
         tileGrid: ol.tilegrid.createXYZ({
@@ -119,6 +123,7 @@ var contourPlot = (function() {
   function createImageLayer(dataType, monthNr) {
     //    var extent = ol.extent.applyTransform([-180, -85, 180, 85], ol.proj.getTransform('EPSG:4326', 'EPSG:3857'));
     //    console.log(extent);
+    console.log('createImageLayer');
     return new ol.layer.Tile({
       source: new ol.source.XYZ({
         url: dataDir + dataType + '/' + monthNr + '/maptiles/{z}/{x}/{-y}.png',
@@ -145,6 +150,7 @@ var contourPlot = (function() {
 
   return Object.freeze({
     showOrCreateContour: function(monthNr) {
+      console.log('showOrCreateContour', monthNr);
       hideAllContours();
       var selectedType = getSelectedType();
       if ( !this.plotExists(selectedType, monthNr) ) {
@@ -158,6 +164,7 @@ var contourPlot = (function() {
       }
     },
     addContours: function(dataType, monthNr) {
+      console.log('addContours', dataType, monthNr);
       var contourLayer = createContoursLayer(dataType, monthNr);
       if ( !(dataType in plotTypesMonthsLayers)) {
         plotTypesMonthsLayers[dataType] = {};

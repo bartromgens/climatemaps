@@ -29,8 +29,17 @@ make -j
 make install
 ```
 
-## Create contours
+## Create contour data
 Run:
 ```bash
 python ./bin/create_contour.py
 ```
+
+to create GeoJSON (.geojson) and image (png) tiles.
+
+## Run
+```bash
+uvicorn api.main:app --reload
+```
+
+The maps are now available at http://localhost:8000/index.html

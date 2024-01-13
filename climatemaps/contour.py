@@ -173,7 +173,7 @@ class Contour(object):
             transparent=True
         )
 
-        self.create_image_tiles(filepath)
+        # self.create_image_tiles(filepath)
         self.create_contour_json(filepath)
         logger.info('end')
 

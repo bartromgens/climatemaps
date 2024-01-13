@@ -8,3 +8,4 @@ geojsoncontour==0.4.0
 pillow==10.2.0
 basemap==1.4.0
 git+https://github.com/bartromgens/togeojsontiles.git@master#egg=togeojsontiles
+uvicorn
