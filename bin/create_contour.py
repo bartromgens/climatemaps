@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 import sys
-import os
 import math
 
 import numpy
@@ -13,6 +12,7 @@ import climatemaps
 from climatemaps.logger import logger
 
 DATA_OUT_DIR = 'website/data'
+
 
 TYPES = {
     'precipitation': {
@@ -78,7 +78,7 @@ def main():
             progress = counter/n_data_sets*100.0
             logger.info("progress: " + str(int(progress)) + '%')
             latrange, lonrange, Z = climatemaps.data.import_climate_data(settings['filepath'], month, settings['conversion_factor'])
-            contourmap = climatemaps.contour.Contour(settings['config'], lonrange, latrange, Z)
+            contourmap = climatemaps.contour.Contour(settings['config'], lonrange, latrange, Z, zoom_min=0, zoom_max=ZOOM_MAX)
             contourmap.create_contour_data(
                 DATA_OUT_DIR,
                 data_type,

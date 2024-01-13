@@ -105,7 +105,10 @@ class ContourPlotConfig(object):
 
 
 class Contour(object):
-    def __init__(self, config, lonrange, latrange, Z):
+
+    def __init__(self, config, lonrange, latrange, Z, zoom_min=0, zoom_max=5):
+        self.zoom_min = zoom_min
+        self.zoom_max = zoom_max
         self.config = config
         for i in range(0, Z.shape[0]):
             for j in range(0, Z.shape[1]):
@@ -192,14 +195,13 @@ class Contour(object):
         )
         figure.clear()
 
-        ndigits = 4
         logger.info('converting contour to geojson')
         geojsoncontour.contour_to_geojson(
             contour=contours,
             geojson_filepath=filepath + '.geojson',
             contour_levels=self.config.levels,
             min_angle_deg=self.config.min_angle_between_segments,
-            ndigits=ndigits,
+            ndigits=4,
             unit=self.config.unit,
             stroke_width=1
         )
@@ -211,8 +213,8 @@ class Contour(object):
             filepaths=[filepath + '.geojson', world_bounding_box_filepath],
             tippecanoe_dir=TIPPECANOE_DIR,
             mbtiles_file='out.mbtiles',
-            minzoom=0,
-            maxzoom=5,
+            minzoom=self.zoom_min,
+            maxzoom=self.zoom_max,
             full_detail=10,
             lower_detail=9,
             min_detail=7
@@ -228,12 +230,12 @@ class Contour(object):
 
     def create_image_tiles(self, filepath):
         self.create_world_file(filepath)
-        logger.info('create image tiles')
+        logger.info(f'create image tiles for {filepath}')
         args = [
             'gdal2tiles.py',
             '-p', 'mercator',
             '--s_srs', 'EPSG:4326',
-            '-z', '0-5',
+            '-z', f'{self.zoom_min}-{self.zoom_max}',
             filepath + '.png',
             os.path.join(filepath, 'maptiles')
         ]
@@ -242,6 +244,7 @@ class Contour(object):
         logger.info(output.decode('utf-8'))
 
     def create_world_file(self, filepath):
+        logger.info(f'create world file for {filepath}')
         with Image.open(filepath + '.png') as im:
             width, height = im.size
 
