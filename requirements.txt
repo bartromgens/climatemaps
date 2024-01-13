@@ -8,3 +8,4 @@ pillow==3.2.0
 #basemap==1.0.7  # required, but does not install via pip, see README.md for install instructions
 #git+https://github.com/bartromgens/geojsoncontour.git@master#egg=geojsoncontour
 git+https://github.com/bartromgens/togeojsontiles.git@master#egg=togeojsontiles
+uvicorn

@@ -37,5 +37,9 @@ Install gdal2tiles.py from python-gdal,
 $ sudo apt-get install python-gdal
 ```
 
-##### Tippecanoe
-...
+##### Run
+```bash
+uvicorn api.main:app --reload
+```
+
+The maps are now available at http://localhost:8000/index.html
