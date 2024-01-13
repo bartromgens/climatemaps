@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
 
 import sys
-import math
+from dataclasses import dataclass
 
-import numpy
 import matplotlib.pyplot as plt
 
 sys.path.append('../climatemaps')
