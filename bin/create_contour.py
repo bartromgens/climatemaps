@@ -67,30 +67,6 @@ CLIMATE_MODEL_DATA_SETS = [
 
 HISTORIC_DATA_SETS = [
     ContourConfig(
-        data_type='model_precipitation',
-        filepath='data/climate_models/wc2.1_10m_prec_ACCESS-CM2_ssp126_2021-2040.tif',
-        conversion_factor=1/30,  # value is per month, convert to day
-        config=climatemaps.contour.ContourPlotConfig(0.1, 16, colormap=plt.cm.jet_r, title='Precipitation', unit='mm/day', logscale=True),
-        format=DataFormat.GEOTIFF,
-        source='https://www.worldclim.org/data/cmip6/cmip6_clim10m.html'
-    ),
-    ContourConfig(
-        data_type='model_precipitation_5m',
-        filepath='data/climate_models/wc2.1_5m_prec_ACCESS-CM2_ssp126_2021-2040.tif',
-        conversion_factor=1/30,  # value is per month, convert to day
-        config=climatemaps.contour.ContourPlotConfig(0.1, 16, colormap=plt.cm.jet_r, title='Precipitation', unit='mm/day', logscale=True),
-        format=DataFormat.GEOTIFF,
-        source='https://www.worldclim.org/data/cmip6/cmip6_clim5m.html'
-    ),
-    ContourConfig(
-        data_type='model_precipitation_5m_2041_2060',
-        filepath='data/climate_models/wc2.1_5m_prec_ACCESS-CM2_ssp126_2041-2060.tif',
-        conversion_factor=1/30,  # value is per month, convert to day
-        config=climatemaps.contour.ContourPlotConfig(0.1, 16, colormap=plt.cm.jet_r, title='Precipitation', unit='mm/day', logscale=True),
-        format=DataFormat.GEOTIFF,
-        source='https://www.worldclim.org/data/cmip6/cmip6_clim5m.html'
-    ),
-    ContourConfig(
         data_type='precipitation',
         filepath='data/precipitation/cpre6190.dat',
         conversion_factor=0.1,  # (millimetres/day) *10
