@@ -105,7 +105,7 @@ HISTORIC_DATA_SETS = [
         data_type='diurnaltemprange',
         filepath='data/diurnaltemprange/cdtr6190.dat',
         conversion_factor=0.1,
-        config=climatemaps.contour.ContourPlotConfig(-20, 45, colormap=plt.cm.jet, title='Max. temperature', unit='C'),
+        config=climatemaps.contour.ContourPlotConfig(5, 20, colormap=plt.cm.jet, title='Diurnal temperature range', unit='C'),
         format=DataFormat.IPCC_GRID
     ),
     ContourConfig(
