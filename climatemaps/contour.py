@@ -197,7 +197,6 @@ class Contour(object):
         geojsoncontour.contour_to_geojson(
             contour=contours,
             geojson_filepath=filepath + '.geojson',
-            contour_levels=self.config.levels,
             min_angle_deg=self.config.min_angle_between_segments,
             ndigits=ndigits,
             unit=self.config.unit,

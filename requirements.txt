@@ -1,10 +1,10 @@
-numpy==1.12
-matplotlib==2.0.0
-scipy==0.19.0
-geojson==1.3.2
+matplotlib==2.2.5
+numpy
+scipy
+fastapi
+geojson==3.1.0
 #togeojsontiles==0.1.2
-geojsoncontour==0.1.1
-pillow==3.2.0
-#basemap==1.0.7  # required, but does not install via pip, see README.md for install instructions
-#git+https://github.com/bartromgens/geojsoncontour.git@master#egg=geojsoncontour
+geojsoncontour==0.4.0
+pillow==10.2.0
+basemap==1.4.0
 git+https://github.com/bartromgens/togeojsontiles.git@master#egg=togeojsontiles
