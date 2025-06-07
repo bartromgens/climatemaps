@@ -5,7 +5,14 @@ Global monthly climate data visualised on an interactive map with [OpenLayers 3]
 **http://climatemaps.romgens.com**
 
 ## Data
+
+### Historic
 The climate grid data, 30 year averages, is taken from http://www.ipcc-data.org/obs/get_30yr_means.html.
+
+### Projections (predictions)
+- Copernicus Climate Data Store - CMIP6 climate projections:
+https://cds.climate.copernicus.eu/datasets/projections-cmip6?tab=download
+- WorldClim: Downscaled CMIP5 and CMIP6 model outputs for 2021–2100 https://www.worldclim.org/data/cmip6/cmip6_clim5m.html
 
 ## Dependencies
 
