@@ -18,8 +18,8 @@ function getSelectedType() {
 
 const dataDir = 'data/';
 const ZOOM_DEFAULT = 3;
-const MAX_ZOOM = 6;
-const DATA_DEFAULT = 'model_precipitation';
+const MAX_ZOOM = 5;
+const DATA_DEFAULT = 'model_precipitation_5m_ssp585_2081_2100';
 const MONTH_DEFAULT = 1;
 
 const PROJECTION = 'EPSG:3857';

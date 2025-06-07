@@ -147,7 +147,7 @@ class Contour(object):
         FigureCanvas(figure)
 
         ax = figure.add_subplot(111)
-        logger.info(f'creating base map')
+        logger.info(f'creating base map {self.lon_min} - {self.lon_max}, {self.lat_min} - {self.lat_max}')
         m = Basemap(
             epsg='4326',
             # projection='cyl',
@@ -161,14 +161,13 @@ class Contour(object):
         )
         x, y = m(*numpy.meshgrid(self.lonrange, self.latrange))
         logger.info(f'creating matplotlib contourf')
+        logger.info(f'levels image: {self.config.levels_image}')
         contour = m.contourf(
             x, y, self.Z,
             cmap=self.config.colormap,
             levels=self.config.levels_image,
             norm=self.config.norm
         )
-        # m.drawcoastlines(linewidth=0.1)  # draw coastlines
-        # cbar = figure.colorbar(contour, format='%.1f')
         ax.set_axis_off()
 
         data_dir = os.path.join(data_dir_out, name)
