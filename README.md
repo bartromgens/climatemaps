@@ -7,7 +7,8 @@ Global monthly climate data visualised on an interactive map with [OpenLayers 3]
 ## Data
 
 ### Historic
-The climate grid data, 30 year averages, is taken from http://www.ipcc-data.org/obs/get_30yr_means.html.
+- The climate grid data, 30 year averages, is taken from http://www.ipcc-data.org/obs/get_30yr_means.html.
+- Historic 1970-2000 WorldClim data: https://www.worldclim.org/data/worldclim21.html
 
 ### Projections (predictions)
 - Copernicus Climate Data Store - CMIP6 climate projections:

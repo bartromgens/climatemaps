@@ -18,10 +18,12 @@ ZOOM_FACTOR = None if DEV_MODE else 2.0
 # ZOOM_FACTOR = 2.0
 # CREATE_IMAGES = not DEV_MODE
 CREATE_IMAGES = True
+FIGURE_DPI = 10000
 
 
 CONTOUR_TYPES = climatemaps.datasets.CLIMATE_MODEL_DATA_SETS + climatemaps.datasets.HISTORIC_DATA_SETS
-CONTOUR_TYPES = list(filter(lambda x: x.data_type == 'model_precipitation_5m_ssp585_2081_2100', CONTOUR_TYPES))
+# CONTOUR_TYPES = list(filter(lambda x: x.data_type == 'model_precipitation', CONTOUR_TYPES))
+CONTOUR_TYPES = list(filter(lambda x: x.data_type == 'precipitation_worldclim', CONTOUR_TYPES))
 
 
 def main():
@@ -41,8 +43,11 @@ def _create_contour(config: ContourConfig, month: int):
     lat_range, lon_range, values = None, None, None
     if config.format == climatemaps.datasets.DataFormat.IPCC_GRID:
         lat_range, lon_range, values = climatemaps.data.import_climate_data(config.filepath, month)
-    elif config.format == climatemaps.datasets.DataFormat.GEOTIFF:
-        lon_range, lat_range, values = climatemaps.geotiff.read_geotiff_month(config.filepath, month - 1)
+    elif config.format == climatemaps.datasets.DataFormat.GEOTIFF_WORLDCLIM_CMIP6:
+        lon_range, lat_range, values = climatemaps.geotiff.read_geotiff_month(config.filepath, month)
+        lat_range = lat_range * -1
+    elif config.format == climatemaps.datasets.DataFormat.GEOTIFF_WORLDCLIM_HISTORY:
+        lon_range, lat_range, values = climatemaps.geotiff.read_geotiff_history(config.filepath, month)
         lat_range = lat_range * -1
     else:
         assert f'DataFormat {config.format} is not supported'
@@ -54,7 +59,7 @@ def _create_contour(config: ContourConfig, month: int):
         DATA_OUT_DIR,
         config.data_type,
         month,
-        figure_dpi=1200,
+        figure_dpi=FIGURE_DPI,
         create_images=CREATE_IMAGES,
         zoomfactor=ZOOM_FACTOR
     )

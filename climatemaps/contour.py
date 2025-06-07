@@ -122,6 +122,7 @@ class Contour(object):
         self.lonrange = lonrange
         # self.latrange = latrange
         self.latrange = latrange[::-1]
+        logger.info(f"lon min, max {self.lon_max}, {self.lon_max}")
         logger.info(f"lat min, max {self.lat_min}, {self.lat_max}")
         numpy.set_printoptions(3, threshold=100, suppress=True)  # .3f
 
@@ -160,7 +161,7 @@ class Contour(object):
             urcrnrlat=self.lat_max,
         )
         x, y = m(*numpy.meshgrid(self.lonrange, self.latrange))
-        logger.info(f'creating matplotlib contourf')
+        logger.info(f'BEGIN: create matplotlib contourf')
         logger.info(f'levels image: {self.config.levels_image}')
         contour = m.contourf(
             x, y, self.Z,
@@ -169,13 +170,16 @@ class Contour(object):
             norm=self.config.norm
         )
         ax.set_axis_off()
+        logger.info(f'DONE: create matplotlib contourf')
 
+        logger.info(f'BEGIN: create contourf image')
         data_dir = os.path.join(data_dir_out, name)
         if not os.path.exists(data_dir):
             os.mkdir(data_dir)
-        filepath = os.path.join(data_dir, str(month))
+        filepath = os.path.join(str(data_dir), str(month))
         self._save_contour_image(figure, filepath, figure_dpi)
         self._create_colorbar_image(ax, contour, figure, filepath)
+        logger.info(f'DONE: create contourf image')
 
         if create_images:
             self._create_image_tiles(filepath)
@@ -263,7 +267,7 @@ class Contour(object):
 
     def _create_image_tiles(self, filepath):
         self._create_world_file(filepath)
-        logger.info(f'create image tiles for {filepath}')
+        logger.info(f'BEGIN: create image tiles for {filepath}')
         args = [
             'gdal2tiles.py',
             '-p', 'mercator',
@@ -275,6 +279,7 @@ class Contour(object):
         logger.info(args)
         output = subprocess.check_output(args)
         logger.info(output.decode('utf-8'))
+        logger.info(f'DONE: create image tiles for {filepath}')
 
     @classmethod
     def _create_world_file(cls, filepath):
