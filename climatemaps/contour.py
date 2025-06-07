@@ -21,16 +21,16 @@ from climatemaps.logger import logger
 TIPPECANOE_DIR = '/usr/local/bin/'
 
 
-def dotproduct(v1, v2):
+def dot_product(v1, v2):
     return sum((a * b) for a, b in zip(v1, v2))
 
 
 def length(v):
-    return math.sqrt(dotproduct(v, v))
+    return math.sqrt(dot_product(v, v))
 
 
 def angle(v1, v2):
-    cos_angle = dotproduct(v1, v2) / (length(v1) * length(v2))
+    cos_angle = dot_product(v1, v2) / (length(v1) * length(v2))
     cos_angle = min(1.0, max(cos_angle, -1.0))
     assert cos_angle <= 1.0
     assert cos_angle >= -1.0
@@ -174,17 +174,17 @@ class Contour(object):
         if not os.path.exists(data_dir):
             os.mkdir(data_dir)
         filepath = os.path.join(data_dir, str(month))
-        self.save_contour_image(figure, filepath, figure_dpi)
-        self.create_colorbar_image(ax, contour, figure, filepath)
+        self._save_contour_image(figure, filepath, figure_dpi)
+        self._create_colorbar_image(ax, contour, figure, filepath)
 
         if create_images:
-            self.create_image_tiles(filepath)
+            self._create_image_tiles(filepath)
         else:
             logger.warning('skipping creation of image tiles')
-        self.create_contour_json(filepath, zoomfactor=zoomfactor)
+        self._create_contour_json(filepath, zoomfactor=zoomfactor)
         logger.info(f'finished contour for {name} and month {month}')
 
-    def create_colorbar_image(self, ax, contour, figure, filepath):
+    def _create_colorbar_image(self, ax, contour, figure, filepath):
         logger.info(f'saving colorbar to image')
         cbar = figure.colorbar(contour, format='%.1f')
         cbar.set_label(self.config.title + ' [' + self.config.unit + ']')
@@ -199,7 +199,7 @@ class Contour(object):
         )
 
     @classmethod
-    def save_contour_image(cls, figure, filepath, figure_dpi):
+    def _save_contour_image(cls, figure, filepath, figure_dpi):
         logger.info(f'saving contour to image')
         figure.savefig(
             filepath + '.png',
@@ -209,7 +209,7 @@ class Contour(object):
             transparent=True
         )
 
-    def create_contour_json(self, filepath, zoomfactor: float = None):
+    def _create_contour_json(self, filepath, zoomfactor: float = None):
         logger.info('START: create contour json tiles')
         if zoomfactor is not None:
             self.Z = scipy.ndimage.zoom(self.Z, zoom=zoomfactor, order=1)
@@ -261,8 +261,8 @@ class Contour(object):
         )
         logger.info('DONE: create contour json tiles')
 
-    def create_image_tiles(self, filepath):
-        self.create_world_file(filepath)
+    def _create_image_tiles(self, filepath):
+        self._create_world_file(filepath)
         logger.info(f'create image tiles for {filepath}')
         args = [
             'gdal2tiles.py',
@@ -276,7 +276,8 @@ class Contour(object):
         output = subprocess.check_output(args)
         logger.info(output.decode('utf-8'))
 
-    def create_world_file(self, filepath):
+    @classmethod
+    def _create_world_file(cls, filepath):
         logger.info(f'create world file for {filepath}')
         with Image.open(filepath + '.png') as im:
             width, height = im.size
