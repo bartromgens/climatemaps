@@ -12,7 +12,14 @@ The climate grid data, 30 year averages, is taken from http://www.ipcc-data.org/
 ### Projections (predictions)
 - Copernicus Climate Data Store - CMIP6 climate projections:
 https://cds.climate.copernicus.eu/datasets/projections-cmip6?tab=download
-- WorldClim: Downscaled CMIP5 and CMIP6 model outputs for 2021–2100 https://www.worldclim.org/data/cmip6/cmip6_clim5m.html
+
+#### Downscaled (increasing the spatial resolution)
+- WorldClim: Downscaled CMIP5 and CMIP6 model outputs for 2021–2100: https://www.worldclim.org/data/cmip6/cmip6_clim5m.html
+- NASA NEX-GDDP-CMIP6  (~25 km resolution): https://registry.opendata.aws/nex-gddp-cmip6/
+- CHELSA (~1km resolution): https://chelsa-climate.org/
+
+### Visualizations
+- https://interactive-atlas.ipcc.ch/
 
 ## Dependencies
 
