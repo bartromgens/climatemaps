@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Leaflet + Vector & Raster Tiles</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Leaflet CSS (correct SRI!) -->
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+  />
+
+  <!-- Leaflet JS -->
+  <script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+  ></script>
+
+  <!-- VectorGrid plugin -->
+  <script src="https://unpkg.com/leaflet.vectorgrid@1.3.0/dist/Leaflet.VectorGrid.bundled.js"></script>
+
+  <style>
+    html, body { margin:0; padding:0; height:100%; }
+    #map { width:100%; height:100%; }
+  </style>
+</head>
+<body>
+  <div id="map"></div>
+  <script>
+    // 1. Initialize map
+    var map = L.map('map').setView([20, 0], 2);
+
+    // 2. Base OSM raster (optional)
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    // 3. Your local raster‐tiles from MBTiles (PNG) via tileserver-gl
+    L.tileLayer('http://localhost:8080/data/raster/{z}/{x}/{y}.png', {
+      attribution: '&copy; My Raster Tiles',
+      // adjust these to match your MBTiles metadata
+      minZoom: 0,
+      maxNativeZoom: 4,
+      maxZoom: 12,
+      tileSize: 256,
+      opacity: 0.5
+      // uncomment if your MBTiles uses TMS y‐axis:
+      // tms: true
+    }).addTo(map);
+
+    const defaultVectorStyle = (properties, zoom) => ({
+      color: properties.stroke,     // your "#rrggbb" from the tile
+      weight: 2,
+      opacity: 1
+    })
+
+    // 4. Vector‐tiles overlay
+    const grid = L.vectorGrid.protobuf(
+      'http://localhost:8080/data/vector/{z}/{x}/{y}.pbf',
+      {
+        vectorTileLayerStyles: {
+          "1geojson": defaultVectorStyle
+        },
+        interactive: true,
+        // maxNativeZoom: 14,
+        // maxZoom: 18
+      }
+    ).addTo(map);
+     // .on('mouseover', function(e) {
+     //   L.popup()
+     //    .setLatLng(e.latlng)
+     //    .setContent(
+     //      Object.entries(e.layer.properties)
+     //            .map(([k,v])=>k+': '+v).join('<br>')
+     //    )
+     //    .openOn(map);
+     // });
+
+    // grid.on('tileload', () => {
+    //   const names = grid.getDataLayerNames();   // e.g. ['water','roads','buildings',…]
+    //   names.forEach(layerName => {
+    //       console.log(layerName);
+    //     grid.options.vectorTileLayerStyles[layerName] = defaultStyle;
+    //   });
+    //   // grid.redraw();  // re-renders tiles with the new styles
+    // });
+  </script>
+</body>
+</html>
