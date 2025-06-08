@@ -18,7 +18,6 @@ import {
 } from 'leaflet';
 import 'leaflet.vectorgrid';  // bring in the vectorgrid plugin
 
-import { FooterComponent } from '../nav/footer.component';
 import { environment } from '../../environments/environment';
 
 @Component({
@@ -34,7 +33,6 @@ import { environment } from '../../environments/environment';
     MatButtonModule,
     MatCardModule,
     MatProgressSpinner,
-    FooterComponent,
   ],
   templateUrl: './map.component.html',
   styleUrl: './map.component.scss',
@@ -93,7 +91,7 @@ export class MapComponent implements OnInit {
     const rasterLayer = tileLayer(
       'http://localhost:8080/data/pre_worldclim_10m_1_raster/{z}/{x}/{y}.png',
       {
-        attribution: '&copy; My Raster Tiles',
+        // attribution: '&copy; My Raster Tiles',
         minZoom: 0,
         maxNativeZoom: 4,
         maxZoom: 12,
