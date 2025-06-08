@@ -16,6 +16,18 @@
       (leafletMapMoveEnd)="onMove($event)"
       (leafletMapZoomEnd)="onZoom($event)"
     ></div>
+    <mat-form-field appearance="fill">
+      <mat-label>Select tile layer</mat-label>
+      <mat-select
+        [(value)]="selectedOption"
+        (selectionChange)="onLayerChange()">
+        <mat-option
+          *ngFor="let opt of layerOptions"
+          [value]="opt">
+          {{ opt.name }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
     <app-month-slider></app-month-slider>
     <app-year-slider></app-year-slider>
   </mat-sidenav-content>

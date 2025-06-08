@@ -10,17 +10,27 @@ import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { LeafletModule } from '@bluehalo/ngx-leaflet';
 import {
   Control,
-  latLng,
+  latLng, Layer,
   LeafletEvent,
   LeafletMouseEvent,
   Map,
-  tileLayer,
-} from 'leaflet';
+  tileLayer
+} from "leaflet";
 import 'leaflet.vectorgrid';  // bring in the vectorgrid plugin
 
 import { environment } from '../../environments/environment';
 import { MonthSliderComponent } from "./month-slider.component";
 import { YearSliderComponent } from "./year-slider.component";
+import { MatFormFieldModule } from "@angular/material/form-field";
+import { MatSelectModule } from "@angular/material/select";
+import { ClimateMapService } from "../core/climatemap.service";
+
+interface LayerOption {
+  name: string;
+  rasterUrl: string;
+  vectorUrl: string;
+}
+
 
 @Component({
   selector: 'app-map',
@@ -35,6 +45,8 @@ import { YearSliderComponent } from "./year-slider.component";
     MatButtonModule,
     MatCardModule,
     MatProgressSpinner,
+    MatFormFieldModule,
+    MatSelectModule,
     MonthSliderComponent,
     YearSliderComponent,
   ],
@@ -43,6 +55,8 @@ import { YearSliderComponent } from "./year-slider.component";
 })
 export class MapComponent implements OnInit {
   private readonly ZOOM_DEFAULT: number = 5;
+  layerOptions: LayerOption[] = [];
+  selectedOption!: LayerOption;
 
   Object = Object;
   private baseLayer = tileLayer(
@@ -62,10 +76,13 @@ export class MapComponent implements OnInit {
 
   private map: Map | null = null;
   private readonly control: Control.Layers;
+  private rasterLayer: Layer | null = null;
+  private vectorLayer: Layer | null = null;
 
   constructor(
     private route: ActivatedRoute,
     private location: Location,
+    private climatemapService: ClimateMapService
   ) {
     this.control = new Control.Layers(undefined, undefined, {
       collapsed: false,
@@ -78,6 +95,24 @@ export class MapComponent implements OnInit {
         this.updateLocationZoomFromURL(params);
       }
     });
+    this.climatemapService.getClimateMapList().subscribe(climateMaps => {
+      console.log(climateMaps);
+      const layerOptions: LayerOption[] = [];
+      for (const climateMap of climateMaps) {
+        layerOptions.push({
+          name: `${climateMap.variable.displayName} (${climateMap.variable.unit})`,
+          rasterUrl: `${climateMap.tiles_url}_1_raster`,
+          vectorUrl: `${climateMap.tiles_url}_1_vector`,
+        });
+      }
+      this.layerOptions = layerOptions;
+      this.selectedOption = layerOptions[0];
+      this.initializeLayers();
+    })
+  }
+
+  onLayerChange() {
+    this.initializeLayers();
   }
 
   private initializeMap(): void {
@@ -86,14 +121,26 @@ export class MapComponent implements OnInit {
       console.assert(false, 'map is not defined');
       return;
     }
-    this.initializeLayers();
     this.update();
     this.addControls();
   }
 
-    private initializeLayers(): void {
-    const rasterLayer = tileLayer(
-      'http://localhost:8080/data/pre_worldclim_10m_1_raster/{z}/{x}/{y}.png',
+  private initializeLayers(): void {
+    console.log('initializeLayers selectedOption', this.selectedOption);
+
+    console.log('initializeLayers rasterLayer', this.rasterLayer);
+    console.log('initializeLayers vectorLayer', this.vectorLayer);
+    if (this.rasterLayer) {
+      console.log('remove raster layer');
+      this.map?.removeLayer(this.rasterLayer);
+    }
+    if (this.vectorLayer) {
+      console.log('remove vector layer');
+      this.map?.removeLayer(this.vectorLayer);
+    }
+
+    this.rasterLayer = tileLayer(
+      `${this.selectedOption.rasterUrl}/{z}/{x}/{y}.png`,
       {
         // attribution: '&copy; My Raster Tiles',
         minZoom: 0,
@@ -105,8 +152,8 @@ export class MapComponent implements OnInit {
       }
     );
 
-    const vecGrid: any = (window as any).L.vectorGrid.protobuf(
-      'http://localhost:8080/data/pre_worldclim_10m_1_vector/{z}/{x}/{y}.pbf',
+    this.vectorLayer = (window as any).L.vectorGrid.protobuf(
+      `${this.selectedOption.vectorUrl}/{z}/{x}/{y}.pbf`,
       {
         vectorTileLayerStyles: {
           // the layer name "1geojson" must match what your tileserver outputs
@@ -117,14 +164,18 @@ export class MapComponent implements OnInit {
           })
         },
         interactive: true,
-        maxNativeZoom: 10,
+        maxNativeZoom: 6,
         maxZoom: 18
       }
     );
 
     // configure map options
-    this.map?.addLayer(rasterLayer);
-    this.map?.addLayer(vecGrid);
+    if (this.rasterLayer) {
+      this.map?.addLayer(this.rasterLayer);
+    }
+    if (this.vectorLayer) {
+      this.map?.addLayer(this.vectorLayer);
+    }
   }
 
   private addControls() {
