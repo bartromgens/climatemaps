@@ -10,33 +10,42 @@ from climatemaps.logger import logger
 
 
 DATA_OUT_DIR = 'website/data'
-DEV_MODE = True
+DEV_MODE = False
 
 ZOOM_MIN = 1
-ZOOM_MAX = 5 if DEV_MODE else 10
+ZOOM_MAX = 8 if DEV_MODE else 10
 ZOOM_FACTOR = None if DEV_MODE else 2.0
 # ZOOM_FACTOR = 2.0
-# CREATE_IMAGES = not DEV_MODE
-CREATE_IMAGES = True
-FIGURE_DPI = 10000
+FIGURE_DPI = 5000
 
 
 CONTOUR_TYPES = climatemaps.datasets.CLIMATE_MODEL_DATA_SETS + climatemaps.datasets.HISTORIC_DATA_SETS
 # CONTOUR_TYPES = list(filter(lambda x: x.data_type == 'model_precipitation', CONTOUR_TYPES))
-CONTOUR_TYPES = list(filter(lambda x: x.data_type == 'precipitation_worldclim', CONTOUR_TYPES))
+CONTOUR_TYPES = list(filter(lambda x: x.data_type == 'precipitation_worldclim_2.5m', CONTOUR_TYPES))
+
+
+import concurrent.futures
+
+
+def process(config_month_pair):
+    config, month = config_month_pair
+    logger.info(f'Creating image and tiles for "{config.data_type}" and month {month}')
+    _create_contour(config, month)
+    return f'{config.data_type}-{month}'  # Just an indicator of progress
 
 
 def main():
-    month_upper = 1
-    n_data_sets = len(CONTOUR_TYPES) * month_upper
-    counter = 0
-    for config in CONTOUR_TYPES:
-        for month in range(1, month_upper+1):
-            logger.info('create image and tiles for "' + config.data_type + '" and month ' + str(month))
-            progress = counter/n_data_sets * 100.0
-            logger.info(f"progress: {(int(progress))} %")
-            _create_contour(config, month)
-            counter += 1
+    month_upper = 1 if DEV_MODE else 12
+    tasks = [(config, month) for config in CONTOUR_TYPES for month in range(1, month_upper + 1)]
+    total = len(tasks)
+
+    num_processes = 2
+    with concurrent.futures.ProcessPoolExecutor(max_workers=num_processes) as executor:
+        futures = {executor.submit(process, task): task for task in tasks}
+        for counter, future in enumerate(concurrent.futures.as_completed(futures)):
+            result = future.result()
+            progress = counter / total * 100.0
+            logger.info(f"Completed: {result} | Progress: {int(progress)}%")
 
 
 def _create_contour(config: ContourConfig, month: int):
@@ -60,7 +69,6 @@ def _create_contour(config: ContourConfig, month: int):
         config.data_type,
         month,
         figure_dpi=FIGURE_DPI,
-        create_images=CREATE_IMAGES,
         zoomfactor=ZOOM_FACTOR
     )
 

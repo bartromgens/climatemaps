@@ -1,5 +1,6 @@
 import math
 import os
+import pickle
 import subprocess
 
 from PIL import Image
@@ -142,7 +143,7 @@ class Contour(object):
     def lon_max(self):
         return self.lonrange[-1]
 
-    def create_contour_data(self, data_dir_out, name, month, figure_dpi=700, create_images=True, zoomfactor=2.0):
+    def create_contour_data(self, data_dir_out, name, month, figure_dpi=700, zoomfactor=2.0):
         logger.info(f'creating contour for {name} and month {month} and zoomfactor {zoomfactor}')
         figure = Figure(frameon=False)
         FigureCanvas(figure)
@@ -163,6 +164,12 @@ class Contour(object):
         x, y = m(*numpy.meshgrid(self.lonrange, self.latrange))
         logger.info(f'BEGIN: create matplotlib contourf')
         logger.info(f'levels image: {self.config.levels_image}')
+
+        data_dir = os.path.join(data_dir_out, name)
+        if not os.path.exists(data_dir):
+            os.mkdir(data_dir)
+        filepath = os.path.join(str(data_dir), str(month))
+
         contour = m.contourf(
             x, y, self.Z,
             cmap=self.config.colormap,
@@ -173,19 +180,12 @@ class Contour(object):
         logger.info(f'DONE: create matplotlib contourf')
 
         logger.info(f'BEGIN: create contourf image')
-        data_dir = os.path.join(data_dir_out, name)
-        if not os.path.exists(data_dir):
-            os.mkdir(data_dir)
-        filepath = os.path.join(str(data_dir), str(month))
         self._save_contour_image(figure, filepath, figure_dpi)
         self._create_colorbar_image(ax, contour, figure, filepath)
+        self._create_raster_mbtiles(filepath)
         logger.info(f'DONE: create contourf image')
 
-        if create_images:
-            self._create_image_tiles(filepath)
-        else:
-            logger.warning('skipping creation of image tiles')
-        self._create_contour_json(filepath, zoomfactor=zoomfactor)
+        self._create_contour_mbtiles(filepath, zoomfactor=zoomfactor)
         logger.info(f'finished contour for {name} and month {month}')
 
     def _create_colorbar_image(self, ax, contour, figure, filepath):
@@ -203,6 +203,31 @@ class Contour(object):
         )
 
     @classmethod
+    def _create_raster_mbtiles(cls, filepath):
+        contour_image_path = f"{filepath}.png"
+        mbtiles_path = f"{filepath}_raster.mbtiles"
+        logger.info(f"BEGIN: creating raster mbtiles:{mbtiles_path}")
+        args = [
+            "gdal_translate",
+            "-of", "MBTILES",
+            "-a_ullr", "-180.0", "90.0", "180.0", "-90.0",
+            "-a_srs", "EPSG:4326",
+            contour_image_path,
+            mbtiles_path
+        ]
+        output = subprocess.check_output(args)
+        print(output.decode('utf8'))
+        args = [
+            'gdaladdo',
+            '-r', 'nearest',
+            mbtiles_path,
+            '2', '4', '8', '16'
+        ]
+        output = subprocess.check_output(args)
+        print(output.decode('utf8'))
+        logger.info(f"END: creating raster mbtiles:{mbtiles_path}")
+
+    @classmethod
     def _save_contour_image(cls, figure, filepath, figure_dpi):
         logger.info(f'saving contour to image')
         figure.savefig(
@@ -213,8 +238,8 @@ class Contour(object):
             transparent=True
         )
 
-    def _create_contour_json(self, filepath, zoomfactor: float = None):
-        logger.info('START: create contour json tiles')
+    def _create_contour_mbtiles(self, filepath, zoomfactor: float = None):
+        logger.info('BEGIN: create contour mbtiles')
         if zoomfactor is not None:
             self.Z = scipy.ndimage.zoom(self.Z, zoom=zoomfactor, order=1)
             self.lonrange = scipy.ndimage.zoom(self.lonrange, zoom=zoomfactor, order=1)
@@ -245,41 +270,19 @@ class Contour(object):
         world_bounding_box_filepath = 'data/world_bounding_box.geojson'
         assert os.path.exists(world_bounding_box_filepath)
 
-        logger.info('converting geojson_to_mbtiles')
+        mbtiles_filepath = f'{filepath}_vector.mbtiles'
+        logger.info(f'converting geojson_to_mbtiles at {mbtiles_filepath}')
         togeojsontiles.geojson_to_mbtiles(
             filepaths=[filepath + '.geojson', world_bounding_box_filepath],
             tippecanoe_dir=TIPPECANOE_DIR,
-            mbtiles_file='out.mbtiles',
+            mbtiles_file=mbtiles_filepath,
             minzoom=self.zoom_min,
             maxzoom=self.zoom_max,
             full_detail=10,
             lower_detail=9,
             min_detail=7
         )
-
-        logger.info('converting mbtiles to geojson-tiles')
-        togeojsontiles.mbtiles_to_geojsontiles(
-            tippecanoe_dir=TIPPECANOE_DIR,
-            tile_dir=os.path.join(filepath, 'tiles/'),
-            mbtiles_file='out.mbtiles',
-        )
-        logger.info('DONE: create contour json tiles')
-
-    def _create_image_tiles(self, filepath):
-        self._create_world_file(filepath)
-        logger.info(f'BEGIN: create image tiles for {filepath}')
-        args = [
-            'gdal2tiles.py',
-            '-p', 'mercator',
-            '--s_srs', 'EPSG:4326',
-            '-z', f'{self.zoom_min}-{self.zoom_max}',
-            filepath + '.png',
-            os.path.join(filepath, 'maptiles')
-        ]
-        logger.info(args)
-        output = subprocess.check_output(args)
-        logger.info(output.decode('utf-8'))
-        logger.info(f'DONE: create image tiles for {filepath}')
+        logger.info('DONE: create contour mbtiles')
 
     @classmethod
     def _create_world_file(cls, filepath):
