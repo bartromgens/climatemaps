@@ -36,7 +36,7 @@
     }).addTo(map);
 
     // 3. Your local raster‐tiles from MBTiles (PNG) via tileserver-gl
-    L.tileLayer('http://localhost:8080/data/pre_worldclim_2.5m_1_raster/{z}/{x}/{y}.png', {
+    L.tileLayer('http://localhost:8080/data/pre_worldclim_10m_1_raster/{z}/{x}/{y}.png', {
       attribution: '&copy; My Raster Tiles',
       // adjust these to match your MBTiles metadata
       minZoom: 0,
@@ -56,7 +56,7 @@
 
     // 4. Vector‐tiles overlay
     const grid = L.vectorGrid.protobuf(
-      'http://localhost:8080/data/pre_worldclim_2.5m_1_vector/{z}/{x}/{y}.pbf',
+      'http://localhost:8080/data/pre_worldclim_10m_1_vector/{z}/{x}/{y}.pbf',
       {
         vectorTileLayerStyles: {
           "1geojson": defaultVectorStyle

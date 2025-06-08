@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import sys
+import concurrent.futures
 
 from climatemaps.datasets import ContourConfig
 
@@ -10,21 +11,17 @@ from climatemaps.logger import logger
 
 
 DATA_OUT_DIR = 'website/data'
-DEV_MODE = False
+DEV_MODE = True
 
 ZOOM_MIN = 1
-ZOOM_MAX = 8 if DEV_MODE else 10
+ZOOM_MAX = 6 if DEV_MODE else 10
 ZOOM_FACTOR = None if DEV_MODE else 2.0
-# ZOOM_FACTOR = 2.0
-FIGURE_DPI = 5000
+FIGURE_DPI = 1000 if DEV_MODE else 5000
 
 
 CONTOUR_TYPES = climatemaps.datasets.CLIMATE_MODEL_DATA_SETS + climatemaps.datasets.HISTORIC_DATA_SETS
 # CONTOUR_TYPES = list(filter(lambda x: x.data_type == 'model_precipitation', CONTOUR_TYPES))
-CONTOUR_TYPES = list(filter(lambda x: x.data_type == 'precipitation_worldclim_2.5m', CONTOUR_TYPES))
-
-
-import concurrent.futures
+CONTOUR_TYPES = list(filter(lambda x: x.data_type == 'precipitation_worldclim_10m', CONTOUR_TYPES))
 
 
 def process(config_month_pair):
@@ -39,7 +36,7 @@ def main():
     tasks = [(config, month) for config in CONTOUR_TYPES for month in range(1, month_upper + 1)]
     total = len(tasks)
 
-    num_processes = 2
+    num_processes = 1
     with concurrent.futures.ProcessPoolExecutor(max_workers=num_processes) as executor:
         futures = {executor.submit(process, task): task for task in tasks}
         for counter, future in enumerate(concurrent.futures.as_completed(futures)):

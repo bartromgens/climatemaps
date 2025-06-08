@@ -26,6 +26,8 @@ def read_geotiff_history(filepath, month):
     zarr_array = geo_tiff.read()
     array = numpy.array(zarr_array, dtype=float)
 
+    array[array == -32768] = numpy.nan  # Sea
+
     lon_array, lat_array = geo_tiff.get_coord_arrays(geo_tiff.tif_bBox)
     lon_array = lon_array[0, :]
     lat_array = lat_array[:, 0]

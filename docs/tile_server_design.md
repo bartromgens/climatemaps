@@ -9,6 +9,11 @@ It requires us to create `mbtiles` files that `tileserver-gl` will serve. Both f
 
 This living document describes the design of such a tileserver setup.
 
+## TODO
+- Generate tileserver config.json based on datasets
+- Create new UI
+- Generate climate charts for selected location
+
 ## mbtiles generation
 
 ### Raster mbtiles
