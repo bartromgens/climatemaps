@@ -38,3 +38,25 @@ We only need to rename and store these files in a structured way.
 
 On the client side we need to change from geojson tiles to [protobuf vector tiles](https://github.com/mapbox/vector-tile-spec) (`vectorGrid.protobuf` in LeafLet).
 
+## TileServer
+
+Example [tileserver-gl](https://github.com/maptiler/tileserver-gl) config and commands.
+
+```json
+{
+  "options": {
+    "paths": {
+      "root": "./",
+      "mbtiles": "mbtiles"
+    }
+  },
+  "data": {
+    "vector": { "mbtiles": "1_vector.mbtiles" },
+    "raster": { "mbtiles": "1_raster.mbtiles" }
+  }
+}
+```
+
+```bash
+tileserver-gl --config config.json --port 8080
+```

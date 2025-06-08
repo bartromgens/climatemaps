@@ -35,6 +35,8 @@ conda install -c conda-forge gdal==3.8.3
 ##### Tippecanoe
 **WARNING**: tippecanoe 1.19.1 is the latest version that produces valid GeoJSON due to issue https://github.com/mapbox/tippecanoe/issues/652
 
+TODO: migrate to active fork https://github.com/felt/tippecanoe
+
 ```bash
 sudo apt install libsqlite3-dev
 git clone https://github.com/mapbox/tippecanoe.git
