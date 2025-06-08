@@ -1,0 +1,16 @@
+{
+  "options": {
+    "paths": {
+      "root": "../website",
+      "mbtiles": "data"
+    }
+  },
+  "data": {
+    "pre_worldclim_2.5m_1_vector": { "mbtiles": "precipitation_worldclim_2.5m/1_vector.mbtiles" },
+    "pre_worldclim_2.5m_1_raster": { "mbtiles": "precipitation_worldclim_2.5m/1_raster.mbtiles" },
+    "pre_worldclim_5m_1_vector": { "mbtiles": "precipitation_worldclim_5m/1_vector.mbtiles" },
+    "pre_worldclim_5m_1_raster": { "mbtiles": "precipitation_worldclim_5m/1_raster.mbtiles" },
+    "pre_worldclim_10m_1_vector": { "mbtiles": "precipitation_worldclim_10m/1_vector.mbtiles" },
+    "pre_worldclim_10m_1_raster": { "mbtiles": "precipitation_worldclim_10m/1_raster.mbtiles" }
+  }
+}
