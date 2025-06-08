@@ -13,6 +13,11 @@ class DataFormat(enum.Enum):
     IPCC_GRID = 2
 
 
+class DataType(enum.Enum):
+    model_precipitation_5m_2021_2040 = 0
+    model_precipitation_10m_2021_2040 = 1
+
+
 @dataclass
 class ContourConfig:
     data_type: str
@@ -25,7 +30,7 @@ class ContourConfig:
 
 CLIMATE_MODEL_DATA_SETS = [
     ContourConfig(
-        data_type='model_precipitation',
+        data_type='model_precipitation_10m_2021_2040',
         filepath='data/climate_models/wc2.1_10m_prec_ACCESS-CM2_ssp126_2021-2040.tif',
         conversion_factor=1/30,  # value is per month, convert to day
         config=climatemaps.contour.ContourPlotConfig(0.1, 16, colormap=plt.cm.jet_r, title='Precipitation', unit='mm/day', logscale=True),
@@ -88,6 +93,14 @@ HISTORIC_DATA_SETS = [
         filepath='data/worldclim/history/wc2.1_10m_prec',
         conversion_factor=1/30,  # value is per month, convert to day
         config=climatemaps.contour.ContourPlotConfig(0.1, 16, colormap=plt.cm.jet_r, title='Precipitation', unit='mm/day', logscale=True),
+        format=DataFormat.GEOTIFF_WORLDCLIM_HISTORY,
+        source="https://www.worldclim.org/data/worldclim21.html"
+    ),
+    ContourConfig(
+        data_type='temperature_max_worldclim_10m',
+        filepath='data/worldclim/history/wc2.1_10m_tmax',
+        # conversion_factor=1
+        config=climatemaps.contour.ContourPlotConfig(-20, 45, colormap=plt.cm.jet, title='Max. temperature', unit='C'),
         format=DataFormat.GEOTIFF_WORLDCLIM_HISTORY,
         source="https://www.worldclim.org/data/worldclim21.html"
     ),

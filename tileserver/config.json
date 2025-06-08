@@ -11,6 +11,8 @@
     "pre_worldclim_5m_1_vector": { "mbtiles": "precipitation_worldclim_5m/1_vector.mbtiles" },
     "pre_worldclim_5m_1_raster": { "mbtiles": "precipitation_worldclim_5m/1_raster.mbtiles" },
     "pre_worldclim_10m_1_vector": { "mbtiles": "precipitation_worldclim_10m/1_vector.mbtiles" },
-    "pre_worldclim_10m_1_raster": { "mbtiles": "precipitation_worldclim_10m/1_raster.mbtiles" }
+    "pre_worldclim_10m_1_raster": { "mbtiles": "precipitation_worldclim_10m/1_raster.mbtiles" },
+    "tmax_worldclim_10m_1_vector": { "mbtiles": "temperature_max_worldclim_10m/1_vector.mbtiles" },
+    "tmax_worldclim_10m_1_raster": { "mbtiles": "temperature_max_worldclim_10m/1_raster.mbtiles" }
   }
 }

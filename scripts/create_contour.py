@@ -21,7 +21,7 @@ FIGURE_DPI = 1000 if DEV_MODE else 5000
 
 CONTOUR_TYPES = climatemaps.datasets.CLIMATE_MODEL_DATA_SETS + climatemaps.datasets.HISTORIC_DATA_SETS
 # CONTOUR_TYPES = list(filter(lambda x: x.data_type == 'model_precipitation', CONTOUR_TYPES))
-CONTOUR_TYPES = list(filter(lambda x: x.data_type == 'precipitation_worldclim_10m', CONTOUR_TYPES))
+CONTOUR_TYPES = list(filter(lambda x: x.data_type == 'temperature_max_worldclim_10m', CONTOUR_TYPES))
 
 
 def process(config_month_pair):
