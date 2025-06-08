@@ -159,7 +159,7 @@ export class MapComponent implements OnInit {
       `${this.selectedOption.vectorUrl}_${this.monthSelected}/{z}/{x}/{y}.pbf`,
       {
         vectorTileLayerStyles: {
-          "1geojson": (properties: any, zoom: number) => ({
+          "contours": (properties: any, zoom: number) => ({
             color: properties.stroke,
             weight: 2,
             opacity: 1

@@ -279,7 +279,8 @@ class Contour(object):
             maxzoom=self.zoom_max,
             full_detail=10,
             lower_detail=9,
-            min_detail=7
+            min_detail=7,
+            extra_args=['--layer', 'contours']
         )
         logger.info('DONE: create contour mbtiles')
 

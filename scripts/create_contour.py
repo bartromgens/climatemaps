@@ -11,24 +11,17 @@ from climatemaps.config import config_prod
 from climatemaps.datasets import ClimateMapConfig
 from climatemaps.logger import logger
 
-DEV_MODE = False
+DEV_MODE = True
 maps_config: ClimateMapsConfig = config_dev if DEV_MODE else config_prod
 
-CONTOUR_TYPES = climatemaps.datasets.CLIMATE_MODEL_DATA_SETS + climatemaps.datasets.HISTORIC_DATA_SETS
+DATA_SETS = climatemaps.datasets.CLIMATE_MODEL_DATA_SETS + climatemaps.datasets.HISTORIC_DATA_SETS
 # CONTOUR_TYPES = list(filter(lambda x: x.data_type == 'model_precipitation', CONTOUR_TYPES))
-CONTOUR_TYPES = list(filter(lambda x: x.data_type == 'temperature_max_worldclim_10m', CONTOUR_TYPES))
-
-
-def process(config_month_pair):
-    config, month = config_month_pair
-    logger.info(f'Creating image and tiles for "{config.data_type}" and month {month}')
-    _create_contour(config, month)
-    return f'{config.data_type}-{month}'  # Just an indicator of progress
+DATA_SETS = list(filter(lambda x: x.data_type == 'temperature_max_worldclim_10m', DATA_SETS))
 
 
 def main():
     month_upper = 1 if DEV_MODE else 12
-    tasks = [(contour_config, month) for contour_config in CONTOUR_TYPES for month in range(1, month_upper + 1)]
+    tasks = [(contour_config, month) for contour_config in DATA_SETS for month in range(1, month_upper + 1)]
     total = len(tasks)
 
     num_processes = 2
@@ -38,6 +31,13 @@ def main():
             result = future.result()
             progress = counter / total * 100.0
             logger.info(f"Completed: {result} | Progress: {int(progress)}%")
+
+
+def process(config_month_pair):
+    config, month = config_month_pair
+    logger.info(f'Creating image and tiles for "{config.data_type}" and month {month}')
+    _create_contour(config, month)
+    return f'{config.data_type}-{month}'  # Just an indicator of progress
 
 
 def _create_contour(contour_config: ClimateMapConfig, month: int):

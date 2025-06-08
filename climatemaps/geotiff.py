@@ -26,8 +26,6 @@ def read_geotiff_history(filepath, month):
     zarr_array = geo_tiff.read()
     array = numpy.array(zarr_array, dtype=float)
 
-    print(array)
-
     array[array == -32768] = numpy.nan  # Sea
     array[array <= -300] = numpy.nan  # Sea
 
