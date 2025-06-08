@@ -68,7 +68,7 @@ CLIMATE_MODEL_DATA_SETS = [
 
 HISTORIC_DATA_SETS = [
     ContourConfig(
-        data_type='precipitation_worldclim',
+        data_type='precipitation_worldclim_2.5m',
         filepath='data/worldclim/history/wc2.1_2.5m_prec',
         conversion_factor=1/30,  # value is per month, convert to day
         config=climatemaps.contour.ContourPlotConfig(0.1, 16, colormap=plt.cm.jet_r, title='Precipitation', unit='mm/day', logscale=True),
@@ -78,6 +78,14 @@ HISTORIC_DATA_SETS = [
     ContourConfig(
         data_type='precipitation_worldclim_5m',
         filepath='data/worldclim/history/wc2.1_5m_prec',
+        conversion_factor=1/30,  # value is per month, convert to day
+        config=climatemaps.contour.ContourPlotConfig(0.1, 16, colormap=plt.cm.jet_r, title='Precipitation', unit='mm/day', logscale=True),
+        format=DataFormat.GEOTIFF_WORLDCLIM_HISTORY,
+        source="https://www.worldclim.org/data/worldclim21.html"
+    ),
+    ContourConfig(
+        data_type='precipitation_worldclim_10m',
+        filepath='data/worldclim/history/wc2.1_10m_prec',
         conversion_factor=1/30,  # value is per month, convert to day
         config=climatemaps.contour.ContourPlotConfig(0.1, 16, colormap=plt.cm.jet_r, title='Precipitation', unit='mm/day', logscale=True),
         format=DataFormat.GEOTIFF_WORLDCLIM_HISTORY,
