@@ -16,6 +16,7 @@ import {
   Map,
   tileLayer,
 } from 'leaflet';
+import 'leaflet.vectorgrid';  // bring in the vectorgrid plugin
 
 import { FooterComponent } from '../nav/footer.component';
 import { environment } from '../../environments/environment';
@@ -85,8 +86,46 @@ export class MapComponent implements OnInit {
       console.assert(false, 'map is not defined');
       return;
     }
+    this.initializeLayers();
     this.update();
     this.addControls();
+  }
+
+    private initializeLayers(): void {
+    const rasterLayer = tileLayer(
+      'http://localhost:8080/data/pre_worldclim_10m_1_raster/{z}/{x}/{y}.png',
+      {
+        attribution: '&copy; My Raster Tiles',
+        minZoom: 0,
+        maxNativeZoom: 4,
+        maxZoom: 12,
+        tileSize: 256,
+        opacity: 0.5
+        // tms: true, // uncomment if your MBTiles uses TMS y‐axis
+      }
+    );
+
+    const vecGrid: any = (window as any).L.vectorGrid.protobuf(
+      'http://localhost:8080/data/pre_worldclim_10m_1_vector/{z}/{x}/{y}.pbf',
+      {
+        vectorTileLayerStyles: {
+          // the layer name "1geojson" must match what your tileserver outputs
+          "1geojson": (properties: any, zoom: number) => ({
+            color: properties.stroke,
+            weight: 2,
+            opacity: 1
+          })
+        },
+        interactive: true,
+        maxNativeZoom: 10,
+        maxZoom: 18
+      }
+    );
+
+    // configure map options
+    this.map?.addLayer(rasterLayer);
+    this.map?.addLayer(vecGrid);
+    this.isLoading = false;
   }
 
   private addControls() {
