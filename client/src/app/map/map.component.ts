@@ -150,7 +150,7 @@ export class MapComponent implements OnInit {
         maxNativeZoom: this.selectedOption.rasterMaxZoom,
         maxZoom: 12,
         tileSize: 256,
-        opacity: 0.5
+        opacity: 0.8
         // tms: true, // uncomment if your MBTiles uses TMS y‐axis
       }
     );
