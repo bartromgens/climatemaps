@@ -29,6 +29,8 @@ interface LayerOption {
   name: string;
   rasterUrl: string;
   vectorUrl: string;
+  rasterMaxZoom: number;
+  vectorMaxZoom: number;
 }
 
 
@@ -100,9 +102,11 @@ export class MapComponent implements OnInit {
       const layerOptions: LayerOption[] = [];
       for (const climateMap of climateMaps) {
         layerOptions.push({
-          name: `${climateMap.variable.displayName} (${climateMap.variable.unit})`,
-          rasterUrl: `${climateMap.tiles_url}_1_raster`,
-          vectorUrl: `${climateMap.tiles_url}_1_vector`,
+          name: `${climateMap.variable.displayName} (${climateMap.variable.unit})]`,
+          rasterUrl: `${climateMap.tilesUrl}_1_raster`,
+          vectorUrl: `${climateMap.tilesUrl}_1_vector`,
+          rasterMaxZoom: climateMap.maxZoomRaster,
+          vectorMaxZoom: climateMap.maxZoomVector,
         });
       }
       this.layerOptions = layerOptions;
@@ -128,8 +132,6 @@ export class MapComponent implements OnInit {
   private initializeLayers(): void {
     console.log('initializeLayers selectedOption', this.selectedOption);
 
-    console.log('initializeLayers rasterLayer', this.rasterLayer);
-    console.log('initializeLayers vectorLayer', this.vectorLayer);
     if (this.rasterLayer) {
       console.log('remove raster layer');
       this.map?.removeLayer(this.rasterLayer);
@@ -144,7 +146,7 @@ export class MapComponent implements OnInit {
       {
         // attribution: '&copy; My Raster Tiles',
         minZoom: 0,
-        maxNativeZoom: 4,
+        maxNativeZoom: this.selectedOption.rasterMaxZoom,
         maxZoom: 12,
         tileSize: 256,
         opacity: 0.5
@@ -164,7 +166,7 @@ export class MapComponent implements OnInit {
           })
         },
         interactive: true,
-        maxNativeZoom: 6,
+        maxNativeZoom: this.selectedOption.vectorMaxZoom,
         maxZoom: 18
       }
     );
