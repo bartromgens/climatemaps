@@ -19,6 +19,8 @@ import {
 import 'leaflet.vectorgrid';  // bring in the vectorgrid plugin
 
 import { environment } from '../../environments/environment';
+import { MonthSliderComponent } from "./month-slider.component";
+import { MatSliderModule } from "@angular/material/slider";
 
 @Component({
   selector: 'app-map',
@@ -33,6 +35,7 @@ import { environment } from '../../environments/environment';
     MatButtonModule,
     MatCardModule,
     MatProgressSpinner,
+    MonthSliderComponent,
   ],
   templateUrl: './map.component.html',
   styleUrl: './map.component.scss',
