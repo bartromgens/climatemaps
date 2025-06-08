@@ -20,7 +20,7 @@ import 'leaflet.vectorgrid';  // bring in the vectorgrid plugin
 
 import { environment } from '../../environments/environment';
 import { MonthSliderComponent } from "./month-slider.component";
-import { MatSliderModule } from "@angular/material/slider";
+import { YearSliderComponent } from "./year-slider.component";
 
 @Component({
   selector: 'app-map',
@@ -36,6 +36,7 @@ import { MatSliderModule } from "@angular/material/slider";
     MatCardModule,
     MatProgressSpinner,
     MonthSliderComponent,
+    YearSliderComponent,
   ],
   templateUrl: './map.component.html',
   styleUrl: './map.component.scss',
@@ -56,7 +57,7 @@ export class MapComponent implements OnInit {
     zoom: this.ZOOM_DEFAULT,
     center: latLng(52.1, 5.58),
   };
-  sidebarOpened = true;
+  sidebarOpened = false;
   debug = !environment.production;
 
   private map: Map | null = null;

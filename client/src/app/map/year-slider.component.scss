@@ -1,7 +1,7 @@
-.month-labels {
+.year-labels {
   display: flex;
   justify-content: space-between;
-  margin-bottom: 4px;
+  margin-bottom: 10px;
   font-size: 1rem;
   color: rgba(0,0,0,0.6);
 
@@ -14,7 +14,7 @@
 }
 
 mat-slider {
-  margin-left: calc((100vw)/12/2);
-  margin-right: calc((100vw)/12/2);
+  margin-left: calc((100vw)/5/2);
+  margin-right: calc((100vw)/5/2);
   display: flex;
 }

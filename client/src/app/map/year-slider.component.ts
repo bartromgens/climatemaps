@@ -3,21 +3,19 @@ import { MatSliderModule } from "@angular/material/slider";
 import { CommonModule } from "@angular/common";
 
 @Component({
-  selector: 'app-month-slider',
+  selector: 'app-year-slider',
   standalone: true,
   imports: [
     CommonModule,
     MatSliderModule,
   ],
-  templateUrl: './month-slider.component.html',
-  styleUrls: ['./month-slider.component.scss']
+  templateUrl: './year-slider.component.html',
+  styleUrls: ['./year-slider.component.scss']
 })
-export class MonthSliderComponent {
-  months = [
-    'January', 'February', 'March',
-    'April', 'May', 'June',
-    'July', 'August', 'September',
-    'October', 'November', 'December'
+export class YearSliderComponent {
+  years = [
+    '2000', '2030', '2050',
+    '2070', '2100'
   ];
   value = 1;
 
@@ -26,5 +24,5 @@ export class MonthSliderComponent {
   }
 
   displayWith = (val: number) =>
-    this.months[val - 1] || '';
+    this.years[val - 1] || '';
 }
