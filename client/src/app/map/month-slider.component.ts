@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from "@angular/core";
 import { MatSliderModule } from "@angular/material/slider";
 import { CommonModule } from "@angular/common";
 
@@ -13,18 +13,23 @@ import { CommonModule } from "@angular/common";
   styleUrls: ['./month-slider.component.scss']
 })
 export class MonthSliderComponent {
+  @Output() valueChange = new EventEmitter<number>();
+  @Input() value = 1;
+
   months = [
     'January', 'February', 'March',
     'April', 'May', 'June',
     'July', 'August', 'September',
     'October', 'November', 'December'
   ];
-  value = 1;
 
-  onInput(event: any) {
-    console.log(event);
+  onInput(value: number) {
+    console.log('onInput', value);
+    this.value = value;
+    this.valueChange.emit(value);
   }
 
-  displayWith = (val: number) =>
-    this.months[val - 1] || '';
+  displayWith = (val: number) => {
+    return this.months[val - 1] || '';
+  }
 }

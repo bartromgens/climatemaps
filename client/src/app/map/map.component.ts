@@ -59,6 +59,7 @@ export class MapComponent implements OnInit {
   private readonly ZOOM_DEFAULT: number = 5;
   layerOptions: LayerOption[] = [];
   selectedOption!: LayerOption;
+  private monthSelected = 1;
 
   Object = Object;
   private baseLayer = tileLayer(
@@ -103,20 +104,20 @@ export class MapComponent implements OnInit {
       for (const climateMap of climateMaps) {
         layerOptions.push({
           name: `${climateMap.variable.displayName} (${climateMap.variable.unit})]`,
-          rasterUrl: `${climateMap.tilesUrl}_1_raster`,
-          vectorUrl: `${climateMap.tilesUrl}_1_vector`,
+          rasterUrl: `${climateMap.tilesUrl}_raster`,
+          vectorUrl: `${climateMap.tilesUrl}_vector`,
           rasterMaxZoom: climateMap.maxZoomRaster,
           vectorMaxZoom: climateMap.maxZoomVector,
         });
       }
       this.layerOptions = layerOptions;
       this.selectedOption = layerOptions[0];
-      this.initializeLayers();
+      this.updateLayers();
     })
   }
 
   onLayerChange() {
-    this.initializeLayers();
+    this.updateLayers();
   }
 
   private initializeMap(): void {
@@ -129,7 +130,7 @@ export class MapComponent implements OnInit {
     this.addControls();
   }
 
-  private initializeLayers(): void {
+  private updateLayers(): void {
     console.log('initializeLayers selectedOption', this.selectedOption);
 
     if (this.rasterLayer) {
@@ -142,7 +143,7 @@ export class MapComponent implements OnInit {
     }
 
     this.rasterLayer = tileLayer(
-      `${this.selectedOption.rasterUrl}/{z}/{x}/{y}.png`,
+      `${this.selectedOption.rasterUrl}_${this.monthSelected}/{z}/{x}/{y}.png`,
       {
         // attribution: '&copy; My Raster Tiles',
         minZoom: 0,
@@ -155,10 +156,9 @@ export class MapComponent implements OnInit {
     );
 
     this.vectorLayer = (window as any).L.vectorGrid.protobuf(
-      `${this.selectedOption.vectorUrl}/{z}/{x}/{y}.pbf`,
+      `${this.selectedOption.vectorUrl}_${this.monthSelected}/{z}/{x}/{y}.pbf`,
       {
         vectorTileLayerStyles: {
-          // the layer name "1geojson" must match what your tileserver outputs
           "1geojson": (properties: any, zoom: number) => ({
             color: properties.stroke,
             weight: 2,
@@ -240,5 +240,11 @@ export class MapComponent implements OnInit {
     url.searchParams.set('lon', center.lng.toFixed(6));
     url.searchParams.set('zoom', String(zoom));
     this.location.replaceState(url.pathname + url.search);
+  }
+
+  onMonthSelected(month: number): void {
+    console.log('onMonthSelected', month);
+    this.monthSelected = month;
+    this.updateLayers();
   }
 }
