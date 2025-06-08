@@ -1,0 +1,34 @@
+<mat-sidenav-container>
+  <mat-sidenav
+    #sidenav
+    mode="side"
+    [(opened)]="sidebarOpened"
+    class="custom-sidebar"
+  >
+    <div class="close-sidebar-button">
+      <button
+        mat-icon-button
+        (click)="sidenav.toggle()"
+        aria-label="Close sidebar"
+      >
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+  </mat-sidenav>
+  <mat-sidenav-content>
+    <div class="loading-overlay" *ngIf="isLoading">
+      <mat-progress-spinner mode="indeterminate"></mat-progress-spinner>
+      <p class="m-0">Loading data...</p>
+    </div>
+    <div
+      class="page-content-wrapper"
+      leaflet
+      [leafletOptions]="options"
+      (leafletClick)="onMapClick($event)"
+      (leafletMapReady)="onMapReady($event)"
+      (leafletMapMoveEnd)="onMove($event)"
+      (leafletMapZoomEnd)="onZoom($event)"
+    ></div>
+  </mat-sidenav-content>
+</mat-sidenav-container>
+<app-footer></app-footer>

@@ -1,0 +1,15 @@
+.custom-sidebar {
+  width: $sidebar-width !important;
+}
+
+.page-content-wrapper {
+  height: $page-height;
+  width: 100%;
+  padding: 0;
+  position: relative;
+}
+
+.close-sidebar-button {
+  display: flex;
+  justify-content: flex-end;
+}
