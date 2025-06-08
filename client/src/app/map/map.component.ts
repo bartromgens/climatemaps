@@ -40,8 +40,7 @@ import { environment } from '../../environments/environment';
   styleUrl: './map.component.scss',
 })
 export class MapComponent implements OnInit {
-  private readonly ZOOM_DEFAULT: number = environment.production ? 8 : 9;
-  isLoading = true;
+  private readonly ZOOM_DEFAULT: number = 5;
 
   Object = Object;
   private baseLayer = tileLayer(
@@ -81,7 +80,6 @@ export class MapComponent implements OnInit {
 
   private initializeMap(): void {
     console.log('initializeMap');
-    this.isLoading = true;
     if (!this.map) {
       console.assert(false, 'map is not defined');
       return;
@@ -125,7 +123,6 @@ export class MapComponent implements OnInit {
     // configure map options
     this.map?.addLayer(rasterLayer);
     this.map?.addLayer(vecGrid);
-    this.isLoading = false;
   }
 
   private addControls() {
