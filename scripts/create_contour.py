@@ -2,22 +2,17 @@
 import sys
 import concurrent.futures
 
-from climatemaps.datasets import ContourConfig
-
 sys.path.append('../climatemaps')
 
 import climatemaps
+from climatemaps.config import ClimateMapsConfig
+from climatemaps.config import config_dev
+from climatemaps.config import config_prod
+from climatemaps.datasets import ClimateMapConfig
 from climatemaps.logger import logger
 
-
-DATA_OUT_DIR = 'website/data'
-DEV_MODE = True
-
-ZOOM_MIN = 1
-ZOOM_MAX = 6 if DEV_MODE else 10
-ZOOM_FACTOR = None if DEV_MODE else 2.0
-FIGURE_DPI = 1000 if DEV_MODE else 5000
-
+DEV_MODE = False
+maps_config: ClimateMapsConfig = config_dev if DEV_MODE else config_prod
 
 CONTOUR_TYPES = climatemaps.datasets.CLIMATE_MODEL_DATA_SETS + climatemaps.datasets.HISTORIC_DATA_SETS
 # CONTOUR_TYPES = list(filter(lambda x: x.data_type == 'model_precipitation', CONTOUR_TYPES))
@@ -33,10 +28,10 @@ def process(config_month_pair):
 
 def main():
     month_upper = 1 if DEV_MODE else 12
-    tasks = [(config, month) for config in CONTOUR_TYPES for month in range(1, month_upper + 1)]
+    tasks = [(contour_config, month) for contour_config in CONTOUR_TYPES for month in range(1, month_upper + 1)]
     total = len(tasks)
 
-    num_processes = 1
+    num_processes = 2
     with concurrent.futures.ProcessPoolExecutor(max_workers=num_processes) as executor:
         futures = {executor.submit(process, task): task for task in tasks}
         for counter, future in enumerate(concurrent.futures.as_completed(futures)):
@@ -45,28 +40,28 @@ def main():
             logger.info(f"Completed: {result} | Progress: {int(progress)}%")
 
 
-def _create_contour(config: ContourConfig, month: int):
+def _create_contour(contour_config: ClimateMapConfig, month: int):
     lat_range, lon_range, values = None, None, None
-    if config.format == climatemaps.datasets.DataFormat.IPCC_GRID:
-        lat_range, lon_range, values = climatemaps.data.import_climate_data(config.filepath, month)
-    elif config.format == climatemaps.datasets.DataFormat.GEOTIFF_WORLDCLIM_CMIP6:
-        lon_range, lat_range, values = climatemaps.geotiff.read_geotiff_month(config.filepath, month)
+    if contour_config.format == climatemaps.datasets.DataFormat.IPCC_GRID:
+        lat_range, lon_range, values = climatemaps.data.import_climate_data(contour_config.filepath, month)
+    elif contour_config.format == climatemaps.datasets.DataFormat.GEOTIFF_WORLDCLIM_CMIP6:
+        lon_range, lat_range, values = climatemaps.geotiff.read_geotiff_month(contour_config.filepath, month)
         lat_range = lat_range * -1
-    elif config.format == climatemaps.datasets.DataFormat.GEOTIFF_WORLDCLIM_HISTORY:
-        lon_range, lat_range, values = climatemaps.geotiff.read_geotiff_history(config.filepath, month)
+    elif contour_config.format == climatemaps.datasets.DataFormat.GEOTIFF_WORLDCLIM_HISTORY:
+        lon_range, lat_range, values = climatemaps.geotiff.read_geotiff_history(contour_config.filepath, month)
         lat_range = lat_range * -1
     else:
-        assert f'DataFormat {config.format} is not supported'
-    values = values * config.conversion_factor
+        assert f'DataFormat {contour_config.format} is not supported'
+    values = values * contour_config.conversion_factor
     contour_map = climatemaps.contour.Contour(
-        config.config, lon_range, lat_range, values, zoom_min=ZOOM_MIN, zoom_max=ZOOM_MAX
+        contour_config.config, lon_range, lat_range, values, zoom_min=maps_config.zoom_min, zoom_max=maps_config.zoom_max
     )
     contour_map.create_contour_data(
-        DATA_OUT_DIR,
-        config.data_type,
+        maps_config.data_dir_out,
+        contour_config.data_type,
         month,
-        figure_dpi=FIGURE_DPI,
-        zoomfactor=ZOOM_FACTOR
+        figure_dpi=maps_config.figure_dpi,
+        zoomfactor=maps_config.zoom_factor
     )
 
 

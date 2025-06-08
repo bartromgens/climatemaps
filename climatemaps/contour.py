@@ -38,7 +38,7 @@ def angle(v1, v2):
     return math.acos(cos_angle)
 
 
-class ContourPlotConfig(object):
+class ContourPlotConfig:
     def __init__(self,
                  level_lower=0,
                  level_upper=100,

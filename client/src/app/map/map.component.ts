@@ -85,7 +85,7 @@ export class MapComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private location: Location,
-    private climatemapService: ClimateMapService
+    private climateMapService: ClimateMapService
   ) {
     this.control = new Control.Layers(undefined, undefined, {
       collapsed: false,
@@ -98,12 +98,12 @@ export class MapComponent implements OnInit {
         this.updateLocationZoomFromURL(params);
       }
     });
-    this.climatemapService.getClimateMapList().subscribe(climateMaps => {
+    this.climateMapService.getClimateMapList().subscribe(climateMaps => {
       console.log(climateMaps);
       const layerOptions: LayerOption[] = [];
       for (const climateMap of climateMaps) {
         layerOptions.push({
-          name: `${climateMap.variable.displayName} (${climateMap.variable.unit})]`,
+          name: `${climateMap.variable.displayName} (${climateMap.variable.unit})`,
           rasterUrl: `${climateMap.tilesUrl}_raster`,
           vectorUrl: `${climateMap.tilesUrl}_vector`,
           rasterMaxZoom: climateMap.maxZoomRaster,
