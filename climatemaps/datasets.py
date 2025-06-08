@@ -141,6 +141,16 @@ HISTORIC_DATA_SETS = [
         format=DataFormat.GEOTIFF_WORLDCLIM_HISTORY,
         source="https://www.worldclim.org/data/worldclim21.html"
     ),
+    ClimateMapConfig(
+        data_type='temperature_max_worldclim_2.5m',
+        filepath='data/worldclim/history/wc2.1_2.5m_tmax',
+        variable=temperature_max,
+        year_range=(1970, 2000),
+        resolution=2.5,
+        config=climatemaps.contour.ContourPlotConfig(-20, 45, colormap=plt.cm.jet, title='Max. temperature', unit='C'),
+        format=DataFormat.GEOTIFF_WORLDCLIM_HISTORY,
+        source="https://www.worldclim.org/data/worldclim21.html"
+    ),
     # ClimateMapConfig(
     #     data_type='precipitation',
     #     filepath='data/precipitation/cpre6190.dat',
