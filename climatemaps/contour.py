@@ -107,7 +107,7 @@ class ContourPlotConfig(object):
 
 class Contour(object):
 
-    def __init__(self, config: ContourPlotConfig, lonrange, latrange, Z, zoom_min=0, zoom_max=5):
+    def __init__(self, config: ContourPlotConfig, lon_range, lat_range, Z, zoom_min=0, zoom_max=5):
         logger.info(f'Contour zoom {zoom_min}-{zoom_max}')
         self.zoom_min = zoom_min
         self.zoom_max = zoom_max
@@ -120,28 +120,27 @@ class Contour(object):
                     Z[i][j] = config.level_lower
 
         self.Z = Z
-        self.lonrange = lonrange
-        # self.latrange = latrange
-        self.latrange = latrange[::-1]
+        self.lon_range = lon_range
+        self.lat_range = lat_range[::-1]
         logger.info(f"lon min, max {self.lon_max}, {self.lon_max}")
         logger.info(f"lat min, max {self.lat_min}, {self.lat_max}")
         numpy.set_printoptions(3, threshold=100, suppress=True)  # .3f
 
     @property
     def lat_min(self):
-        return self.latrange[-1]
+        return self.lat_range[-1]
 
     @property
     def lat_max(self):
-        return self.latrange[0]
+        return self.lat_range[0]
 
     @property
     def lon_min(self):
-        return self.lonrange[0]
+        return self.lon_range[0]
 
     @property
     def lon_max(self):
-        return self.lonrange[-1]
+        return self.lon_range[-1]
 
     def create_contour_data(self, data_dir_out, name, month, figure_dpi=700, zoomfactor=2.0):
         logger.info(f'creating contour for {name} and month {month} and zoomfactor {zoomfactor}')
@@ -161,7 +160,7 @@ class Contour(object):
             urcrnrlon=self.lon_max,
             urcrnrlat=self.lat_max,
         )
-        x, y = m(*numpy.meshgrid(self.lonrange, self.latrange))
+        x, y = m(*numpy.meshgrid(self.lon_range, self.lat_range))
         logger.info(f'BEGIN: create matplotlib contourf')
         logger.info(f'levels image: {self.config.levels_image}')
 
@@ -242,15 +241,15 @@ class Contour(object):
         logger.info('BEGIN: create contour mbtiles')
         if zoomfactor is not None:
             self.Z = scipy.ndimage.zoom(self.Z, zoom=zoomfactor, order=1)
-            self.lonrange = scipy.ndimage.zoom(self.lonrange, zoom=zoomfactor, order=1)
-            self.latrange = scipy.ndimage.zoom(self.latrange, zoom=zoomfactor, order=1)
+            self.lon_range = scipy.ndimage.zoom(self.lon_range, zoom=zoomfactor, order=1)
+            self.lat_range = scipy.ndimage.zoom(self.lat_range, zoom=zoomfactor, order=1)
 
         figure = Figure(frameon=False)
         FigureCanvas(figure)
         ax = figure.add_subplot(111)
         logger.info(f'creating matplotlib contour')
         contours = ax.contour(
-            self.lonrange, self.latrange, self.Z,
+            self.lon_range, self.lat_range, self.Z,
             levels=self.config.levels,
             cmap=self.config.colormap,
             norm=self.config.norm
