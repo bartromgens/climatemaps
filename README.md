@@ -46,17 +46,38 @@ make -j
 make install
 ```
 
-## Create contour data
-Run:
+#### tileserver-gl
 ```bash
-python ./bin/create_contour.py
+npm install -g tileserver-gl
 ```
 
-to create GeoJSON (.geojson) and image (png) tiles.
-
 ## Run
+
+### Create contour data
+Run:
+```bash
+python scrips/create_contour.py
+```
+to create contour and raster mbtiles.
+
+### Create tileserver config
+```bash
+python tileserver/create_config.py
+```
+to generate the tileserver config.
+
+### Run the backend (FastAPI server)
 ```bash
 uvicorn api.main:app --reload
 ```
 
-The maps are now available at http://localhost:8000/index.html
+### Run the tileserver (tileserver-gl)
+```bash
+tileserver-gl --config tileserver/config.json --port 8080
+```
+
+### Run the client (Angular)
+In `./client` run:
+```bash
+ng serve
+```
