@@ -27,9 +27,9 @@ https://cds.climate.copernicus.eu/datasets/projections-cmip6?tab=download
 ##### GDAL
 GDAL is needed for the gdal2tiles.py script that creates map-tiles from a single images (matplotlib plot).
 
-Install dependencies,
+Install GDAL with conda to prevent the need to install a hugh number of system level dependencies:
 ```bash
-conda install -c conda-forge gdal==3.8.3
+conda install -c conda-forge gdal==3.11.0
 ```
 
 ##### Tippecanoe

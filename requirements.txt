@@ -1,15 +1,14 @@
-matplotlib==2.2.5
-numpy~=1.26.4
+matplotlib>=3.8
+numpy
 scipy~=1.15.3
 fastapi~=0.115.12
-geojson==3.1.0
+geojsoncontour==0.5.1
+basemap==2.0.0
+# gdal==3.11.0 # Prefer `conda-forge gdal==3.11.0` for system dependencies
 #togeojsontiles==0.1.2
-geojsoncontour==0.4.0
-pillow==10.2.0
-basemap==1.4.0
 git+https://github.com/bartromgens/togeojsontiles.git@master#egg=togeojsontiles
 uvicorn
 
 geotiff==0.2.10
-imagecodecs==2024.1.1
+imagecodecs==2025.3.30
 pydantic>=2.5.3
