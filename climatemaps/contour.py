@@ -260,10 +260,7 @@ class Contour(object):
         geojsoncontour.contour_to_geojson(
             contour=contours,
             geojson_filepath=filepath + '.geojson',
-            min_angle_deg=self.config.min_angle_between_segments,
-            ndigits=4,
             unit=self.config.unit,
-            stroke_width=1
         )
 
         world_bounding_box_filepath = 'data/world_bounding_box.geojson'
