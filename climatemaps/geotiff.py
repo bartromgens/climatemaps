@@ -32,4 +32,10 @@ def read_geotiff_history(filepath, month):
     lon_array, lat_array = geo_tiff.get_coord_arrays(geo_tiff.tif_bBox)
     lon_array = lon_array[0, :]
     lat_array = lat_array[:, 0]
+    bin_width = 360.0 / len(lon_array)
+    lon_array += bin_width / 2
+    lat_array -= bin_width / 2
+    print("lon_array", lon_array)
+    print("lat_array", lat_array)
+    print("bin width", 360.0 / len(lon_array))
     return lon_array, lat_array, array

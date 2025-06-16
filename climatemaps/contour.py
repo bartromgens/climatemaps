@@ -105,7 +105,7 @@ class ContourPlotConfig:
         # print(self.levels_image)
 
 
-class Contour(object):
+class Contour:
 
     def __init__(self, config: ContourPlotConfig, lon_range, lat_range, Z, zoom_min=0, zoom_max=5):
         logger.info(f'Contour zoom {zoom_min}-{zoom_max}')
@@ -122,7 +122,7 @@ class Contour(object):
         self.Z = Z
         self.lon_range = lon_range
         self.lat_range = lat_range[::-1]
-        logger.info(f"lon min, max {self.lon_max}, {self.lon_max}")
+        logger.info(f"lon min, max {self.lon_min}, {self.lon_max}")
         logger.info(f"lat min, max {self.lat_min}, {self.lat_max}")
         numpy.set_printoptions(3, threshold=100, suppress=True)  # .3f
 
@@ -142,23 +142,33 @@ class Contour(object):
     def lon_max(self):
         return self.lon_range[-1]
 
+    @property
+    def bin_width(self):
+        return 360.0 / len(self.lon_range)
+
     def create_contour_data(self, data_dir_out, name, month, figure_dpi=700, zoomfactor=2.0):
         logger.info(f'creating contour for {name} and month {month} and zoomfactor {zoomfactor}')
         figure = Figure(frameon=False)
         FigureCanvas(figure)
 
         ax = figure.add_subplot(111)
-        logger.info(f'creating base map {self.lon_min} - {self.lon_max}, {self.lat_min} - {self.lat_max}')
+        logger.info(f'creating base map [{self.lon_min}, {self.lon_max}], [{self.lat_min}, {self.lat_max}]')
+        llcrnrlon = self.lon_min - self.bin_width / 2
+        llcrnrlat = self.lat_min - self.bin_width / 2
+        urcrnrlon = self.lon_max + self.bin_width / 2
+        urcrnrlat = self.lat_max + self.bin_width / 2
+        logger.info(f'bin_width {self.bin_width}')
+        logger.info(f'llcrnrlat: {llcrnrlat}, llcrnrlon: {llcrnrlon}, urcrnrlat: {urcrnrlat}, urcrnrlon: {urcrnrlon}')
         m = Basemap(
             epsg='4326',
             # projection='cyl',
             # resolution='l',
             lon_0=0,
             ax=ax,
-            llcrnrlon=self.lon_min,
-            llcrnrlat=self.lat_min,
-            urcrnrlon=self.lon_max,
-            urcrnrlat=self.lat_max,
+            llcrnrlon=llcrnrlon,
+            llcrnrlat=llcrnrlat,
+            urcrnrlon=urcrnrlon,
+            urcrnrlat=urcrnrlat,
         )
         x, y = m(*numpy.meshgrid(self.lon_range, self.lat_range))
         logger.info(f'BEGIN: create matplotlib contourf')
