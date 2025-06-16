@@ -1,8 +1,12 @@
 import json
+import sys
 from typing import List
+
+sys.path.append('../climatemaps')
 
 from climatemaps.config import ClimateMap
 from climatemaps.config import DATA_SETS_API
+
 
 config = {
     "options": {

@@ -25,7 +25,7 @@ https://cds.climate.copernicus.eu/datasets/projections-cmip6?tab=download
 ## Dependencies
 
 ##### GDAL
-GDAL is needed for the gdal2tiles.py script that creates map-tiles from a single images (matplotlib plot).
+GDAL is needed for the gdal2tiles.py script that creates map-tiles from a single image (matplotlib plot).
 
 Install GDAL with conda to prevent the need to install a hugh number of system level dependencies:
 ```bash
