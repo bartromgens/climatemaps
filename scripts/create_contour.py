@@ -1,8 +1,12 @@
 #!/usr/bin/env python3
+import os
 import sys
 import concurrent.futures
 
-sys.path.append('../climatemaps')
+# Get absolute path to the module directory
+module_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+if module_dir not in sys.path:
+    sys.path.insert(0, module_dir)
 
 from climatemaps.contour import Contour
 from climatemaps.datasets import DataFormat
