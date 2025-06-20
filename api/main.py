@@ -4,7 +4,7 @@ from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 
 from climatemaps.config import ClimateMap
-from climatemaps.config import DATA_SETS_API
+from climatemaps.settings import DATA_SETS_API
 
 app = FastAPI()
 

@@ -1,17 +1,16 @@
+import logging
+import os
 from dataclasses import dataclass
 from typing import Optional
 from typing import Tuple
 
 from pydantic import BaseModel
 
-from climatemaps.datasets import ClimateMapConfig
+from climatemaps import settings
+from climatemaps.datasets import ClimateDataSetConfig
 from climatemaps.datasets import ClimateVariable
-from climatemaps.datasets import HISTORIC_DATA_SETS
 
-TILE_SERVER_URL = 'http://localhost:8080/data'
-ZOOM_MAX_RASTER = 4
-
-DATA_SETS_API = HISTORIC_DATA_SETS
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -44,7 +43,7 @@ class ClimateMapsConfigDev(ClimateMapsConfig):
 
     @property
     def zoom_max(self) -> int:
-        return 6
+        return 7
 
     @property
     def zoom_factor(self) -> Optional[float]:
@@ -55,15 +54,14 @@ class ClimateMapsConfigDev(ClimateMapsConfig):
         return 1000
 
 
-config_prod = ClimateMapsConfig()
-config_dev = ClimateMapsConfigDev()
-
-maps_config = config_dev
+# TODO: use local setting file instead
+def get_config() -> ClimateMapsConfig:
+    logger.info(f'DEV_MODE={settings.DEV_MODE}')
+    return ClimateMapsConfigDev() if os.getenv("DEV") or settings.DEV_MODE else ClimateMapsConfig()
 
 
 class ClimateMap(BaseModel):
     data_type: str
-    # year: int
     year_range: Tuple[int, int]
     variable: ClimateVariable
     resolution: float  # minutes
@@ -74,15 +72,15 @@ class ClimateMap(BaseModel):
     source: str
 
     @classmethod
-    def create(cls, config: ClimateMapConfig):
+    def create(cls, config: ClimateDataSetConfig):
         return ClimateMap(
             data_type=config.data_type,
             year_range=config.year_range,
             variable=config.variable,
             resolution=config.resolution,
-            tiles_url=f"{TILE_SERVER_URL}/{config.data_type}",
+            tiles_url=f"{settings.TILE_SERVER_URL}/{config.data_type}",
             colormap_url="?",
-            max_zoom_raster=4,
-            max_zoom_vector=maps_config.zoom_max,
+            max_zoom_raster=settings.ZOOM_MAX_RASTER,
+            max_zoom_vector=get_config().zoom_max,
             source=config.source,
         )

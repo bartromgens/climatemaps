@@ -5,7 +5,7 @@ from typing import List
 sys.path.append('../climatemaps')
 
 from climatemaps.config import ClimateMap
-from climatemaps.config import DATA_SETS_API
+from climatemaps.settings import DATA_SETS_API
 
 
 config = {
