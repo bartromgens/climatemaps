@@ -2,21 +2,13 @@ import json
 import sys
 from typing import List
 
-sys.path.append('../climatemaps')
+sys.path.append("../climatemaps")
 
 from climatemaps.config import ClimateMap
 from climatemaps.settings import DATA_SETS_API
 
 
-config = {
-    "options": {
-        "paths": {
-            "root": "../website",
-            "mbtiles": "data"
-        }
-    },
-    "data": {}
-}
+config = {"options": {"paths": {"root": "../website", "mbtiles": "data"}}, "data": {}}
 
 
 def main(data_sets: List[ClimateMap]):

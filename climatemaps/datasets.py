@@ -40,60 +40,70 @@ class ClimateDataSetConfig:
 
 CLIMATE_MODEL_DATA_SETS = [
     ClimateDataSetConfig(
-        data_type='model_precipitation_10m_2021_2040',
-        filepath='data/climate_models/wc2.1_10m_prec_ACCESS-CM2_ssp126_2021-2040.tif',
+        data_type="model_precipitation_10m_2021_2040",
+        filepath="data/climate_models/wc2.1_10m_prec_ACCESS-CM2_ssp126_2021-2040.tif",
         variable=precipitation,
         year_range=(2021, 2040),
         resolution=10,
-        conversion_factor=1/30,  # value is per month, convert to day
-        contour_config=climatemaps.contour.ContourPlotConfig(0.1, 16, colormap=plt.cm.jet_r, title='Precipitation', unit='mm/day', logscale=True),
+        conversion_factor=1 / 30,  # value is per month, convert to day
+        contour_config=climatemaps.contour.ContourPlotConfig(
+            0.1, 16, colormap=plt.cm.jet_r, title="Precipitation", unit="mm/day", logscale=True
+        ),
         format=DataFormat.GEOTIFF_WORLDCLIM_CMIP6,
-        source='https://www.worldclim.org/data/cmip6/cmip6_clim10m.html'
+        source="https://www.worldclim.org/data/cmip6/cmip6_clim10m.html",
     ),
     ClimateDataSetConfig(
-        data_type='model_precipitation_5m_2021_2040',
-        filepath='data/climate_models/wc2.1_5m_prec_ACCESS-CM2_ssp126_2021-2040.tif',
+        data_type="model_precipitation_5m_2021_2040",
+        filepath="data/climate_models/wc2.1_5m_prec_ACCESS-CM2_ssp126_2021-2040.tif",
         variable=precipitation,
         year_range=(2021, 2040),
         resolution=5,
-        conversion_factor=1/30,  # value is per month, convert to day
-        contour_config=climatemaps.contour.ContourPlotConfig(0.1, 16, colormap=plt.cm.jet_r, title='Precipitation', unit='mm/day', logscale=True),
+        conversion_factor=1 / 30,  # value is per month, convert to day
+        contour_config=climatemaps.contour.ContourPlotConfig(
+            0.1, 16, colormap=plt.cm.jet_r, title="Precipitation", unit="mm/day", logscale=True
+        ),
         format=DataFormat.GEOTIFF_WORLDCLIM_CMIP6,
-        source='https://www.worldclim.org/data/cmip6/cmip6_clim5m.html'
+        source="https://www.worldclim.org/data/cmip6/cmip6_clim5m.html",
     ),
     ClimateDataSetConfig(
-        data_type='model_precipitation_5m_ssp585_2021_2040',
-        filepath='data/climate_models/wc2.1_5m_prec_ACCESS-CM2_ssp585_2021-2040.tif',
+        data_type="model_precipitation_5m_ssp585_2021_2040",
+        filepath="data/climate_models/wc2.1_5m_prec_ACCESS-CM2_ssp585_2021-2040.tif",
         variable=precipitation,
         year_range=(2021, 2040),
         resolution=5,
-        conversion_factor=1/30,  # value is per month, convert to day
-        contour_config=climatemaps.contour.ContourPlotConfig(0.1, 16, colormap=plt.cm.jet_r, title='Precipitation', unit='mm/day', logscale=True),
+        conversion_factor=1 / 30,  # value is per month, convert to day
+        contour_config=climatemaps.contour.ContourPlotConfig(
+            0.1, 16, colormap=plt.cm.jet_r, title="Precipitation", unit="mm/day", logscale=True
+        ),
         format=DataFormat.GEOTIFF_WORLDCLIM_CMIP6,
-        source='https://www.worldclim.org/data/cmip6/cmip6_clim5m.html'
+        source="https://www.worldclim.org/data/cmip6/cmip6_clim5m.html",
     ),
     ClimateDataSetConfig(
-        data_type='model_precipitation_5m_ssp585_2081_2100',
-        filepath='data/climate_models/wc2.1_5m_prec_ACCESS-CM2_ssp585_2081-2100.tif',
+        data_type="model_precipitation_5m_ssp585_2081_2100",
+        filepath="data/climate_models/wc2.1_5m_prec_ACCESS-CM2_ssp585_2081-2100.tif",
         variable=precipitation,
         year_range=(2081, 2100),
         resolution=5,
-        conversion_factor=1/30,  # value is per month, convert to day
-        contour_config=climatemaps.contour.ContourPlotConfig(0.1, 16, colormap=plt.cm.jet_r, title='Precipitation', unit='mm/day', logscale=True),
+        conversion_factor=1 / 30,  # value is per month, convert to day
+        contour_config=climatemaps.contour.ContourPlotConfig(
+            0.1, 16, colormap=plt.cm.jet_r, title="Precipitation", unit="mm/day", logscale=True
+        ),
         format=DataFormat.GEOTIFF_WORLDCLIM_CMIP6,
-        source='https://www.worldclim.org/data/cmip6/cmip6_clim5m.html'
+        source="https://www.worldclim.org/data/cmip6/cmip6_clim5m.html",
     ),
     ClimateDataSetConfig(
-        data_type='model_precipitation_5m_2041_2060',
-        filepath='data/climate_models/wc2.1_5m_prec_ACCESS-CM2_ssp126_2041-2060.tif',
+        data_type="model_precipitation_5m_2041_2060",
+        filepath="data/climate_models/wc2.1_5m_prec_ACCESS-CM2_ssp126_2041-2060.tif",
         variable=precipitation,
         year_range=(2040, 2060),
         resolution=5,
-        conversion_factor=1/30,  # value is per month, convert to day
-        contour_config=climatemaps.contour.ContourPlotConfig(0.1, 16, colormap=plt.cm.jet_r, title='Precipitation', unit='mm/day', logscale=True),
+        conversion_factor=1 / 30,  # value is per month, convert to day
+        contour_config=climatemaps.contour.ContourPlotConfig(
+            0.1, 16, colormap=plt.cm.jet_r, title="Precipitation", unit="mm/day", logscale=True
+        ),
         format=DataFormat.GEOTIFF_WORLDCLIM_CMIP6,
-        source='https://www.worldclim.org/data/cmip6/cmip6_clim5m.html'
-    )
+        source="https://www.worldclim.org/data/cmip6/cmip6_clim5m.html",
+    ),
 ]
 
 HISTORIC_DATA_SETS = [
@@ -131,26 +141,30 @@ HISTORIC_DATA_SETS = [
     #     source="https://www.worldclim.org/data/worldclim21.html"
     # ),
     ClimateDataSetConfig(
-        data_type='temperature_max_worldclim_10m',
-        filepath='data/worldclim/history/wc2.1_10m_tmax',
+        data_type="temperature_max_worldclim_10m",
+        filepath="data/worldclim/history/wc2.1_10m_tmax",
         variable=temperature_max,
         year_range=(1970, 2000),
         resolution=10,
         # conversion_factor=1
-        contour_config=climatemaps.contour.ContourPlotConfig(-20, 45, colormap=plt.cm.jet, title='Max. temperature', unit='C'),
+        contour_config=climatemaps.contour.ContourPlotConfig(
+            -20, 45, colormap=plt.cm.jet, title="Max. temperature", unit="C"
+        ),
         format=DataFormat.GEOTIFF_WORLDCLIM_HISTORY,
-        source="https://www.worldclim.org/data/worldclim21.html"
+        source="https://www.worldclim.org/data/worldclim21.html",
     ),
     ClimateDataSetConfig(
-        data_type='temperature_max_worldclim_5m',
-        filepath='data/worldclim/history/wc2.1_5m_tmax',
+        data_type="temperature_max_worldclim_5m",
+        filepath="data/worldclim/history/wc2.1_5m_tmax",
         variable=temperature_max,
         year_range=(1970, 2000),
         resolution=5,
         # conversion_factor=1
-        contour_config=climatemaps.contour.ContourPlotConfig(-20, 45, colormap=plt.cm.jet, title='Max. temperature', unit='C'),
+        contour_config=climatemaps.contour.ContourPlotConfig(
+            -20, 45, colormap=plt.cm.jet, title="Max. temperature", unit="C"
+        ),
         format=DataFormat.GEOTIFF_WORLDCLIM_HISTORY,
-        source="https://www.worldclim.org/data/worldclim21.html"
+        source="https://www.worldclim.org/data/worldclim21.html",
     ),
     # ClimateMapConfig(
     #     data_type='temperature_max_worldclim_2.5m',

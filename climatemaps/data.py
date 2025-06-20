@@ -7,12 +7,12 @@ def import_climate_data(filepath, monthnr):
     nrows = 360
     digits = 5
 
-    with open(filepath, 'r') as filein:
+    with open(filepath, "r") as filein:
         lines = filein.readlines()
         line_n = 0
         grid_size = 0.50
-        xmin = 0.25-180
-        xmax = 360.25-180
+        xmin = 0.25 - 180
+        xmax = 360.25 - 180
         ymin = -89.75
         ymax = 90.25
 
@@ -29,11 +29,11 @@ def import_climate_data(filepath, monthnr):
             line_n += 1
             if line_n < 3:  # skip header
                 continue
-            if rown < (monthnr-1)*nrows or rown >= monthnr*nrows:  # read one month
+            if rown < (monthnr - 1) * nrows or rown >= monthnr * nrows:  # read one month
                 rown += 1
                 continue
 
-            value = ''
+            value = ""
             counter = 1
             j = 0
             for char in line:
@@ -43,26 +43,26 @@ def import_climate_data(filepath, monthnr):
                     if value == -9999:
                         value = numpy.nan
                     Z[i][j] = value
-                    value = ''
+                    value = ""
                     j += 1
                 counter += 1
             i += 1
             rown += 1
 
         Z_new = numpy.zeros((int(latrange.shape[0]), int(lonrange.shape[0])))
-        half_size = int(Z.shape[1]/2)
+        half_size = int(Z.shape[1] / 2)
         for i in range(0, Z.shape[0]):
             for j in range(0, Z.shape[1]):
                 if lonrange[j] >= 0.0:
-                    Z_new[i][j-half_size] = Z[i][j]
+                    Z_new[i][j - half_size] = Z[i][j]
                 else:
-                    Z_new[i][j+half_size] = Z[i][j]
+                    Z_new[i][j + half_size] = Z[i][j]
 
     return latrange, lonrange, Z_new
 
 
-def import_ascii_grid_generic(filepath, no_data_value=9e+20):
-    with open(filepath, 'r') as filein:
+def import_ascii_grid_generic(filepath, no_data_value=9e20):
+    with open(filepath, "r") as filein:
         lines = filein.readlines()
         line_n = 0
         grid_size = 0.083333333
@@ -91,7 +91,7 @@ def import_ascii_grid_generic(filepath, no_data_value=9e+20):
                 j += 1
             i += 1
 
-    print('import_ascii_grid_generic() - END')
+    print("import_ascii_grid_generic() - END")
     return latrange, lonrange, Z
 
 
@@ -104,4 +104,4 @@ def geographic_to_web_mercator(x_lon, y_lat):
         y_mercator = 3189068.5 * math.log((1.0 + math.sin(a)) / (1.0 - math.sin(a)))
         return x_mercator, y_mercator
     else:
-        print('Invalid coordinate values for conversion')
+        print("Invalid coordinate values for conversion")

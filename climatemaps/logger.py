@@ -1,7 +1,7 @@
 import logging
 
 
-logger = logging.getLogger('climatemaps')
+logger = logging.getLogger("climatemaps")
 logger.setLevel(logging.DEBUG)
 
 handlers = []

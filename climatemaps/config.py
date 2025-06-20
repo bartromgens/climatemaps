@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 
 @dataclass
 class ClimateMapsConfig:
-    data_dir_out = 'website/data'
+    data_dir_out = "website/data"
     zoom_min = 1
 
     @property
@@ -56,7 +56,7 @@ class ClimateMapsConfigDev(ClimateMapsConfig):
 
 # TODO: use local setting file instead
 def get_config() -> ClimateMapsConfig:
-    logger.info(f'DEV_MODE={settings.DEV_MODE}')
+    logger.info(f"DEV_MODE={settings.DEV_MODE}")
     return ClimateMapsConfigDev() if os.getenv("DEV") or settings.DEV_MODE else ClimateMapsConfig()
 
 
