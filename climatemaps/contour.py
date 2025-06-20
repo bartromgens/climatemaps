@@ -1,12 +1,12 @@
 import math
 import os
-import pickle
 import subprocess
 
 from PIL import Image
 
 from mpl_toolkits.basemap import Basemap
-import numpy
+import numpy as np
+import numpy.typing as npt
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from matplotlib.figure import Figure
@@ -61,7 +61,7 @@ class ContourPlotConfig:
         if logscale:
             assert self.level_lower > 0
             self.norm = SymLogNorm(linthresh=1.0, vmin=self.level_lower, vmax=self.level_upper)
-            self.levels = numpy.logspace(
+            self.levels = np.logspace(
                 start=self.level_lower,
                 stop=math.log(self.level_upper + 2),
                 num=self.n_contours,
@@ -71,13 +71,13 @@ class ContourPlotConfig:
             for i in range(0, len(self.levels)):
                 self.levels[i] -= 1.0
         else:
-            self.levels = numpy.linspace(
+            self.levels = np.linspace(
                 start=self.level_lower, stop=self.level_upper, num=self.n_contours
             )
 
         if logscale:
             assert self.level_lower > 0
-            self.levels_image = numpy.logspace(
+            self.levels_image = np.logspace(
                 start=math.log(self.level_lower) - 0.0001,  # TODO: why is this needed?
                 stop=math.log(self.level_upper + 2),
                 num=self.n_contours * 20,
@@ -88,7 +88,7 @@ class ContourPlotConfig:
             #     self.levels_image[i] -= 1.0
             # print(self.levels_image)
         else:
-            self.levels_image = numpy.linspace(
+            self.levels_image = np.linspace(
                 start=self.level_lower, stop=self.level_upper, num=self.n_contours * 20
             )
 
@@ -105,24 +105,32 @@ class ContourPlotConfig:
 
 class Contour:
 
-    def __init__(self, config: ContourPlotConfig, lon_range, lat_range, Z, zoom_min=0, zoom_max=5):
+    def __init__(
+        self,
+        config: ContourPlotConfig,
+        lon_range: npt.NDArray[np.floating],
+        lat_range: npt.NDArray[np.floating],
+        values: npt.NDArray[np.floating],
+        zoom_min: int = 0,
+        zoom_max: int = 5,
+    ):
         logger.info(f"Contour zoom {zoom_min}-{zoom_max}")
         self.zoom_min = zoom_min
         self.zoom_max = zoom_max
         self.config = config
-        for i in range(0, Z.shape[0]):
-            for j in range(0, Z.shape[1]):
-                if Z[i][j] >= config.level_upper:
-                    Z[i][j] = config.level_upper
-                elif Z[i][j] <= config.level_lower:
-                    Z[i][j] = config.level_lower
+        for i in range(0, values.shape[0]):
+            for j in range(0, values.shape[1]):
+                if values[i][j] >= config.level_upper:
+                    values[i][j] = config.level_upper
+                elif values[i][j] <= config.level_lower:
+                    values[i][j] = config.level_lower
 
-        self.Z = Z
+        self.values = values
         self.lon_range = lon_range
         self.lat_range = lat_range[::-1]
         logger.info(f"lon min, max {self.lon_min}, {self.lon_max}")
         logger.info(f"lat min, max {self.lat_min}, {self.lat_max}")
-        numpy.set_printoptions(3, threshold=100, suppress=True)  # .3f
+        np.set_printoptions(3, threshold=100, suppress=True)  # .3f
 
     @property
     def lat_min(self):
@@ -172,7 +180,7 @@ class Contour:
             urcrnrlon=urcrnrlon,
             urcrnrlat=urcrnrlat,
         )
-        x, y = m(*numpy.meshgrid(self.lon_range, self.lat_range))
+        x, y = m(*np.meshgrid(self.lon_range, self.lat_range))
         logger.info(f"BEGIN: create matplotlib contourf")
         logger.info(f"levels image: {self.config.levels_image}")
 
@@ -184,7 +192,7 @@ class Contour:
         contour = m.contourf(
             x,
             y,
-            self.Z,
+            self.values,
             cmap=self.config.colormap,
             levels=self.config.levels_image,
             norm=self.config.norm,
@@ -247,7 +255,7 @@ class Contour:
     def _create_contour_mbtiles(self, filepath, zoomfactor: float = None):
         logger.info("BEGIN: create contour mbtiles")
         if zoomfactor is not None:
-            self.Z = scipy.ndimage.zoom(self.Z, zoom=zoomfactor, order=1)
+            self.values = scipy.ndimage.zoom(self.values, zoom=zoomfactor, order=1)
             self.lon_range = scipy.ndimage.zoom(self.lon_range, zoom=zoomfactor, order=1)
             self.lat_range = scipy.ndimage.zoom(self.lat_range, zoom=zoomfactor, order=1)
 
@@ -258,7 +266,7 @@ class Contour:
         contours = ax.contour(
             self.lon_range,
             self.lat_range,
-            self.Z,
+            self.values,
             levels=self.config.levels,
             cmap=self.config.colormap,
             norm=self.config.norm,

@@ -1,8 +1,11 @@
 import json
+import os
 import sys
 from typing import List
 
-sys.path.append("../climatemaps")
+module_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+if module_dir not in sys.path:
+    sys.path.insert(0, module_dir)
 
 from climatemaps.config import ClimateMap
 from climatemaps.settings import DATA_SETS_API

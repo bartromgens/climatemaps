@@ -3,7 +3,6 @@ import os
 import sys
 import concurrent.futures
 
-# Get absolute path to the module directory
 module_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 if module_dir not in sys.path:
     sys.path.insert(0, module_dir)
@@ -53,21 +52,21 @@ def process(config_month_pair):
     return f"{config.data_type}-{month}"  # Just an indicator of progress
 
 
-def _create_contour(contour_config: ClimateDataSetConfig, month: int):
+def _create_contour(data_set_config: ClimateDataSetConfig, month: int):
     lat_range, lon_range, values = None, None, None
-    if contour_config.format == datasets.DataFormat.IPCC_GRID:
-        lat_range, lon_range, values = import_climate_data(contour_config.filepath, month)
-    elif contour_config.format == datasets.DataFormat.GEOTIFF_WORLDCLIM_CMIP6:
-        lon_range, lat_range, values = read_geotiff_month(contour_config.filepath, month)
+    if data_set_config.format == datasets.DataFormat.IPCC_GRID:
+        lat_range, lon_range, values = import_climate_data(data_set_config.filepath, month)
+    elif data_set_config.format == datasets.DataFormat.GEOTIFF_WORLDCLIM_CMIP6:
+        lon_range, lat_range, values = read_geotiff_month(data_set_config.filepath, month)
         lat_range = lat_range * -1
-    elif contour_config.format == DataFormat.GEOTIFF_WORLDCLIM_HISTORY:
-        lon_range, lat_range, values = read_geotiff_history(contour_config.filepath, month)
+    elif data_set_config.format == DataFormat.GEOTIFF_WORLDCLIM_HISTORY:
+        lon_range, lat_range, values = read_geotiff_history(data_set_config.filepath, month)
         lat_range = lat_range * -1
     else:
-        assert f"DataFormat {contour_config.format} is not supported"
-    values = values * contour_config.conversion_factor
+        assert f"DataFormat {data_set_config.format} is not supported"
+    values = values * data_set_config.conversion_factor
     contour_map = Contour(
-        contour_config.contour_config,
+        data_set_config.contour_config,
         lon_range,
         lat_range,
         values,
@@ -76,7 +75,7 @@ def _create_contour(contour_config: ClimateDataSetConfig, month: int):
     )
     contour_map.create_contour_data(
         maps_config.data_dir_out,
-        contour_config.data_type,
+        data_set_config.data_type,
         month,
         figure_dpi=maps_config.figure_dpi,
         zoomfactor=maps_config.zoom_factor,
