@@ -58,10 +58,8 @@ def _create_contour(data_set_config: ClimateDataSetConfig, month: int):
         lat_range, lon_range, values = import_climate_data(data_set_config.filepath, month)
     elif data_set_config.format == datasets.DataFormat.GEOTIFF_WORLDCLIM_CMIP6:
         lon_range, lat_range, values = read_geotiff_month(data_set_config.filepath, month)
-        lat_range = lat_range * -1
     elif data_set_config.format == DataFormat.GEOTIFF_WORLDCLIM_HISTORY:
         lon_range, lat_range, values = read_geotiff_history(data_set_config.filepath, month)
-        lat_range = lat_range * -1
     else:
         assert f"DataFormat {data_set_config.format} is not supported"
     values = values * data_set_config.conversion_factor

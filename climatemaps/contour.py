@@ -127,7 +127,7 @@ class Contour:
 
         self.values = values
         self.lon_range = lon_range
-        self.lat_range = lat_range[::-1]
+        self.lat_range = lat_range
         logger.info(f"lon min, max {self.lon_min}, {self.lon_max}")
         logger.info(f"lat min, max {self.lat_min}, {self.lat_max}")
         np.set_printoptions(3, threshold=100, suppress=True)  # .3f
@@ -148,13 +148,9 @@ class Contour:
         logger.info(
             f"BEGIN: create base map [{self.lon_min}, {self.lon_max}], [{self.lat_min}, {self.lat_max}]"
         )
-        llcrnrlon = self.lon_min - self.bin_width / 2
-        llcrnrlat = self.lat_min - self.bin_width / 2
-        urcrnrlon = self.lon_max + self.bin_width / 2
-        urcrnrlat = self.lat_max + self.bin_width / 2
-        logger.info(f"bin_width {self.bin_width}")
+        logger.info(f"bin_width {self.bin_width_lon}")
         logger.info(
-            f"llcrnrlat: {llcrnrlat}, llcrnrlon: {llcrnrlon}, urcrnrlat: {urcrnrlat}, urcrnrlon: {urcrnrlon}"
+            f"llcrnrlat: {self.llcrnrlat}, llcrnrlon: {self.llcrnrlon}, urcrnrlat: {self.urcrnrlat}, urcrnrlon: {self.urcrnrlon}"
         )
         m = Basemap(
             epsg="4326",
@@ -162,10 +158,10 @@ class Contour:
             # resolution='l',
             lon_0=0,
             ax=ax,
-            llcrnrlon=llcrnrlon,
-            llcrnrlat=llcrnrlat,
-            urcrnrlon=urcrnrlon,
-            urcrnrlat=urcrnrlat,
+            llcrnrlon=self.llcrnrlon,
+            llcrnrlat=self.llcrnrlat,
+            urcrnrlon=self.urcrnrlon,
+            urcrnrlat=self.urcrnrlat,
         )
         x, y = m(*np.meshgrid(self.lon_range, self.lat_range))
         logger.info(f"DONE: create base map")
@@ -215,7 +211,36 @@ class Contour:
 
     @property
     def bin_width(self):
+        assert self.bin_width_lon == self.bin_width_lat
+        return self.bin_width_lon
+
+    @property
+    def bin_width_lon(self):
         return 360.0 / len(self.lon_range)
+
+    @property
+    def bin_width_lat(self):
+        return 180.0 / len(self.lat_range)
+
+    @property
+    def llcrnrlon(self):
+        """lower left corner longitude"""
+        return self.lon_min - self.bin_width / 2
+
+    @property
+    def llcrnrlat(self):
+        """lower left corner latitude"""
+        return self.lat_min - self.bin_width / 2
+
+    @property
+    def urcrnrlon(self):
+        """upper right corner longitude"""
+        return self.lon_max + self.bin_width / 2
+
+    @property
+    def urcrnrlat(self):
+        """upper right corner latitude"""
+        return self.lat_max + self.bin_width / 2
 
     def _create_colorbar_image(self, ax, contour, figure, filepath):
         logger.info(f"saving colorbar to image")
