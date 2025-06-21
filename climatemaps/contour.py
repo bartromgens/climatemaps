@@ -132,34 +132,21 @@ class Contour:
         logger.info(f"lat min, max {self.lat_min}, {self.lat_max}")
         np.set_printoptions(3, threshold=100, suppress=True)  # .3f
 
-    @property
-    def lat_min(self):
-        return self.lat_range[-1]
-
-    @property
-    def lat_max(self):
-        return self.lat_range[0]
-
-    @property
-    def lon_min(self):
-        return self.lon_range[0]
-
-    @property
-    def lon_max(self):
-        return self.lon_range[-1]
-
-    @property
-    def bin_width(self):
-        return 360.0 / len(self.lon_range)
-
-    def create_contour_data(self, data_dir_out, name, month, figure_dpi=700, zoomfactor=2.0):
-        logger.info(f"creating contour for {name} and month {month} and zoomfactor {zoomfactor}")
+    def create_tiles(
+        self,
+        data_dir_out: str,
+        name: str,
+        month: int,
+        figure_dpi: int = 700,
+        zoom_factor: float = 2.0,
+    ):
+        logger.info(f"BEGIN: contour for {name} and month {month} and zoomfactor {zoom_factor}")
         figure = Figure(frameon=False)
         FigureCanvas(figure)
 
         ax = figure.add_subplot(111)
         logger.info(
-            f"creating base map [{self.lon_min}, {self.lon_max}], [{self.lat_min}, {self.lat_max}]"
+            f"BEGIN: create base map [{self.lon_min}, {self.lon_max}], [{self.lat_min}, {self.lat_max}]"
         )
         llcrnrlon = self.lon_min - self.bin_width / 2
         llcrnrlat = self.lat_min - self.bin_width / 2
@@ -181,6 +168,7 @@ class Contour:
             urcrnrlat=urcrnrlat,
         )
         x, y = m(*np.meshgrid(self.lon_range, self.lat_range))
+        logger.info(f"DONE: create base map")
         logger.info(f"BEGIN: create matplotlib contourf")
         logger.info(f"levels image: {self.config.levels_image}")
 
@@ -206,8 +194,28 @@ class Contour:
         self._create_raster_mbtiles(filepath)
         logger.info(f"DONE: create contourf image")
 
-        self._create_contour_mbtiles(filepath, zoomfactor=zoomfactor)
-        logger.info(f"finished contour for {name} and month {month}")
+        self._create_contour_mbtiles(filepath, zoomfactor=zoom_factor)
+        logger.info(f"DONE: contour for {name} and month {month}")
+
+    @property
+    def lat_min(self):
+        return self.lat_range[-1]
+
+    @property
+    def lat_max(self):
+        return self.lat_range[0]
+
+    @property
+    def lon_min(self):
+        return self.lon_range[0]
+
+    @property
+    def lon_max(self):
+        return self.lon_range[-1]
+
+    @property
+    def bin_width(self):
+        return 360.0 / len(self.lon_range)
 
     def _create_colorbar_image(self, ax, contour, figure, filepath):
         logger.info(f"saving colorbar to image")

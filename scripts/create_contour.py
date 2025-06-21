@@ -73,12 +73,12 @@ def _create_contour(data_set_config: ClimateDataSetConfig, month: int):
         zoom_min=maps_config.zoom_min,
         zoom_max=maps_config.zoom_max,
     )
-    contour_map.create_contour_data(
+    contour_map.create_tiles(
         maps_config.data_dir_out,
         data_set_config.data_type,
         month,
         figure_dpi=maps_config.figure_dpi,
-        zoomfactor=maps_config.zoom_factor,
+        zoom_factor=maps_config.zoom_factor,
     )
 
 
