@@ -3,6 +3,8 @@ import os
 import sys
 import concurrent.futures
 
+import numpy as np
+
 module_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 if module_dir not in sys.path:
     sys.path.insert(0, module_dir)
@@ -21,6 +23,8 @@ from climatemaps.logger import logger
 
 
 maps_config: ClimateMapsConfig = get_config()
+
+np.set_printoptions(3, threshold=100, suppress=True)  # .3f
 
 # DATA_SETS = CLIMATE_MODEL_DATA_SETS + HISTORIC_DATA_SETS
 DATA_SETS = HISTORIC_DATA_SETS

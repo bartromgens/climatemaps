@@ -6,6 +6,7 @@ from typing import Tuple
 
 from pydantic import BaseModel
 
+from climatemaps.datasets import SpatialResolution
 from climatemaps.settings import settings
 from climatemaps.datasets import ClimateDataSetConfig
 from climatemaps.datasets import ClimateVariable
@@ -64,7 +65,7 @@ class ClimateMap(BaseModel):
     data_type: str
     year_range: Tuple[int, int]
     variable: ClimateVariable
-    resolution: float  # minutes
+    resolution: SpatialResolution  # minutes
     tiles_url: str
     colormap_url: str
     max_zoom_raster: int
