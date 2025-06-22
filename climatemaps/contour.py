@@ -330,21 +330,3 @@ class Contour:
             extra_args=["--layer", "contours"],
         )
         logger.info("DONE: create contour mbtiles")
-
-    @classmethod
-    def _create_world_file(cls, filepath):
-        logger.info(f"create world file for {filepath}")
-        with Image.open(filepath + ".png") as im:
-            width, height = im.size
-        logger.info(f"image width {width}, image height {height}")
-
-        with open(filepath + ".pgw", "w") as worldfile:
-            y_pixel_size = 180.0 / height
-            x_pixel_size = 360.0 / width
-            logger.info(f"y pixel size {y_pixel_size}, x pixel size {x_pixel_size}")
-            worldfile.write(str(x_pixel_size) + "\n")
-            worldfile.write("0.0" + "\n")
-            worldfile.write("0.0" + "\n")
-            worldfile.write(str(-y_pixel_size) + "\n")
-            worldfile.write(str(-180 + x_pixel_size / 2) + "\n")
-            worldfile.write(str(90 - y_pixel_size / 2) + "\n")
