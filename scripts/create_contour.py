@@ -7,23 +7,23 @@ module_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 if module_dir not in sys.path:
     sys.path.insert(0, module_dir)
 
-from climatemaps.contour import Contour
-from climatemaps.datasets import DataFormat
-from climatemaps.geotiff import read_geotiff_history
-from climatemaps.geotiff import read_geotiff_month
-from climatemaps import settings
-from climatemaps import datasets
-from climatemaps.data import import_climate_data
 from climatemaps.config import ClimateMapsConfig
 from climatemaps.config import get_config
+from climatemaps.contour import Contour
+from climatemaps.data import import_climate_data
 from climatemaps.datasets import ClimateDataSetConfig
+from climatemaps.datasets import DataFormat
+from climatemaps.datasets import HISTORIC_DATA_SETS
+from climatemaps.geotiff import read_geotiff_history
+from climatemaps.geotiff import read_geotiff_month
+from climatemaps.settings import settings
 from climatemaps.logger import logger
 
 
 maps_config: ClimateMapsConfig = get_config()
 
-# DATA_SETS = datasets.CLIMATE_MODEL_DATA_SETS + climatemaps.datasets.HISTORIC_DATA_SETS
-DATA_SETS = datasets.HISTORIC_DATA_SETS
+# DATA_SETS = CLIMATE_MODEL_DATA_SETS + HISTORIC_DATA_SETS
+DATA_SETS = HISTORIC_DATA_SETS
 DATA_SETS = list(filter(lambda x: x.data_type == "temperature_max_worldclim_10m", DATA_SETS))
 
 
@@ -54,9 +54,9 @@ def process(config_month_pair):
 
 def _create_contour(data_set_config: ClimateDataSetConfig, month: int):
     lat_range, lon_range, values = None, None, None
-    if data_set_config.format == datasets.DataFormat.IPCC_GRID:
+    if data_set_config.format == DataFormat.IPCC_GRID:
         lat_range, lon_range, values = import_climate_data(data_set_config.filepath, month)
-    elif data_set_config.format == datasets.DataFormat.GEOTIFF_WORLDCLIM_CMIP6:
+    elif data_set_config.format == DataFormat.GEOTIFF_WORLDCLIM_CMIP6:
         lon_range, lat_range, values = read_geotiff_month(data_set_config.filepath, month)
     elif data_set_config.format == DataFormat.GEOTIFF_WORLDCLIM_HISTORY:
         lon_range, lat_range, values = read_geotiff_history(data_set_config.filepath, month)

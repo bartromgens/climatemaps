@@ -6,7 +6,7 @@ from typing import Tuple
 
 from pydantic import BaseModel
 
-from climatemaps import settings
+from climatemaps.settings import settings
 from climatemaps.datasets import ClimateDataSetConfig
 from climatemaps.datasets import ClimateVariable
 
