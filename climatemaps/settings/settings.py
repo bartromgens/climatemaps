@@ -7,6 +7,8 @@ ZOOM_MAX_RASTER = 4
 
 DATA_SETS_API = HISTORIC_DATA_SETS
 
+TIPPECANOE_DIR = "/usr/local/bin/"
+
 # Attempt to import local overrides
 try:
     from .settings_local import *  # noqa

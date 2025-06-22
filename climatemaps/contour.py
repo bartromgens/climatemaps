@@ -1,106 +1,19 @@
-import math
 import os
 import subprocess
-
-from PIL import Image
 
 from mpl_toolkits.basemap import Basemap
 import numpy as np
 import numpy.typing as npt
-import matplotlib.pyplot as plt
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from matplotlib.figure import Figure
-from matplotlib.colors import SymLogNorm
 import scipy.ndimage
 
 import geojsoncontour
 import togeojsontiles
 
+from climatemaps.contour_config import ContourPlotConfig
+from climatemaps.settings import settings
 from climatemaps.logger import logger
-
-
-TIPPECANOE_DIR = "/usr/local/bin/"
-
-
-def dot_product(v1, v2):
-    return sum((a * b) for a, b in zip(v1, v2))
-
-
-def length(v):
-    return math.sqrt(dot_product(v, v))
-
-
-def angle(v1, v2):
-    cos_angle = dot_product(v1, v2) / (length(v1) * length(v2))
-    cos_angle = min(1.0, max(cos_angle, -1.0))
-    assert cos_angle <= 1.0
-    assert cos_angle >= -1.0
-    return math.acos(cos_angle)
-
-
-class ContourPlotConfig:
-    def __init__(
-        self,
-        level_lower=0,
-        level_upper=100,
-        colormap=plt.cm.jet,
-        title="",
-        unit="",
-        logscale=False,
-        n_contours=21,
-    ):  # jet, jet_r, YlOrRd, gist_rainbow
-        self.n_contours = n_contours
-        self.min_angle_between_segments = 5
-        self.level_lower = level_lower
-        self.level_upper = level_upper
-        self.colormap = colormap
-        self.title = title
-        self.unit = unit
-        self.norm = None
-
-        if logscale:
-            assert self.level_lower > 0
-            self.norm = SymLogNorm(linthresh=1.0, vmin=self.level_lower, vmax=self.level_upper)
-            self.levels = np.logspace(
-                start=self.level_lower,
-                stop=math.log(self.level_upper + 2),
-                num=self.n_contours,
-                base=math.e,
-            )
-            # TODO: why is this needed?
-            for i in range(0, len(self.levels)):
-                self.levels[i] -= 1.0
-        else:
-            self.levels = np.linspace(
-                start=self.level_lower, stop=self.level_upper, num=self.n_contours
-            )
-
-        if logscale:
-            assert self.level_lower > 0
-            self.levels_image = np.logspace(
-                start=math.log(self.level_lower) - 0.0001,  # TODO: why is this needed?
-                stop=math.log(self.level_upper + 2),
-                num=self.n_contours * 20,
-                base=math.e,
-            )
-            # TODO: why is this needed?
-            # for i in range(0, len(self.levels_image)):
-            #     self.levels_image[i] -= 1.0
-            # print(self.levels_image)
-        else:
-            self.levels_image = np.linspace(
-                start=self.level_lower, stop=self.level_upper, num=self.n_contours * 20
-            )
-
-        # use half the number of levels for the colorbar ticks
-        counter = 0
-        self.colorbar_ticks = []
-        for level in self.levels:
-            if counter % 2 == 0:
-                self.colorbar_ticks.append(level)
-            counter += 1
-        # print(self.levels)
-        # print(self.levels_image)
 
 
 class Contour:
@@ -320,7 +233,7 @@ class Contour:
         logger.info(f"converting geojson_to_mbtiles at {mbtiles_filepath}")
         togeojsontiles.geojson_to_mbtiles(
             filepaths=[filepath + ".geojson", world_bounding_box_filepath],
-            tippecanoe_dir=TIPPECANOE_DIR,
+            tippecanoe_dir=settings.TIPPECANOE_DIR,
             mbtiles_file=mbtiles_filepath,
             minzoom=self.zoom_min,
             maxzoom=self.zoom_max,

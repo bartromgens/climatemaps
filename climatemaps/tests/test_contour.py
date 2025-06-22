@@ -7,7 +7,7 @@ import pytest
 import numpy as np
 
 from climatemaps.contour import Contour
-from climatemaps.contour import ContourPlotConfig
+from climatemaps.contour_config import ContourPlotConfig
 
 logger = logging.getLogger(__name__)
 
