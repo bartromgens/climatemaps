@@ -46,7 +46,7 @@ class TestContour:
                 filepath = os.path.join(tmpdir, name, filename)
                 assert os.path.exists(filepath)
                 checksum = self._compute_checksum(filepath)
-                logger.warning(f"checksum for {filepath}: {checksum}")
+                logger.info(f"checksum for {filepath}: {checksum}")
                 if checksum_expected is not None:
                     assert checksum_expected == checksum
 
