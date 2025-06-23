@@ -1,9 +1,9 @@
 matplotlib>=3.8
+cartopy~=0.24.1
 numpy
 scipy~=1.15.3
 fastapi~=0.115.12
 geojsoncontour==0.5.1
-basemap==2.0.0
 # gdal==3.11.0 # Prefer `conda install -c conda-forge gdal==3.11.0` for system dependencies
 #togeojsontiles==0.1.2
 git+https://github.com/bartromgens/togeojsontiles.git@master#egg=togeojsontiles

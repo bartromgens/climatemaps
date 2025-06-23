@@ -1,10 +1,10 @@
 import os
 import subprocess
 
-from mpl_toolkits.basemap import Basemap
 import numpy as np
 import numpy.typing as npt
 from matplotlib.figure import Figure
+import cartopy.crs as ccrs
 import scipy.ndimage
 
 import geojsoncontour
@@ -65,35 +65,34 @@ class Contour:
     def _create_contourf(self):
         logger.info(f"BEGIN: create matplotlib contourf")
         figure = Figure(frameon=False)
-        ax = figure.add_subplot(111)
+        ax = figure.add_subplot(1, 1, 1, projection=ccrs.PlateCarree())
+        ax.set_extent(
+            [
+                self.llcrnrlon,
+                self.urcrnrlon,
+                self.llcrnrlat,
+                self.urcrnrlat,
+            ],
+            crs=ccrs.PlateCarree(),
+        )
         logger.info(
             f"create base map [{self.lon_min}, {self.lon_max}], [{self.lat_min}, {self.lat_max}]"
         )
         logger.info(
             f"llcrnrlat: {self.llcrnrlat}, llcrnrlon: {self.llcrnrlon}, urcrnrlat: {self.urcrnrlat}, urcrnrlon: {self.urcrnrlon}"
         )
-        m = Basemap(
-            epsg="4326",
-            # projection='cyl',
-            # resolution='l',
-            lon_0=0,
-            ax=ax,
-            llcrnrlon=self.llcrnrlon,
-            llcrnrlat=self.llcrnrlat,
-            urcrnrlon=self.urcrnrlon,
-            urcrnrlat=self.urcrnrlat,
-        )
-        x, y = m(*np.meshgrid(self.lon_range, self.lat_range))
         logger.info(f"levels image: {self.config.levels_image}")
-        contourf = m.contourf(
-            x,
-            y,
+        lon_grid, lat_grid = np.meshgrid(self.lon_range, self.lat_range)
+        contourf = ax.contourf(
+            lon_grid,
+            lat_grid,
             self.values,
+            transform=ccrs.PlateCarree(),
             cmap=self.config.colormap,
             levels=self.config.levels_image,
             norm=self.config.norm,
         )
-        ax.set_axis_off()
+        ax.axis("off")
         logger.info(f"DONE: create matplotlib contourf")
         return ax, contourf, figure
 
