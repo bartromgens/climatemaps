@@ -42,7 +42,7 @@ class Contour:
         zoom_factor: float = 2.0,
     ):
         logger.info(f"BEGIN: contour for {name} and month {month} and zoomfactor {zoom_factor}")
-        data_dir = self.create_output_dir(data_dir_out, name)
+        data_dir = self._create_output_dir(data_dir_out, name)
         filepath = os.path.join(str(data_dir), str(month))
         if zoom_factor:
             self.geo_grid = self.geo_grid_orig.zoom(zoom_factor)
@@ -52,11 +52,11 @@ class Contour:
         self._save_contour_image(figure, filepath, figure_dpi)
         self._create_raster_mbtiles(filepath)
         self._create_colorbar_image(ax, contourf, figure, filepath)
-        self._create_contour_vector_mbtiles(filepath, zoomfactor=zoom_factor)
+        self._create_contour_vector_mbtiles(filepath, zoom_factor=zoom_factor)
         logger.info(f"DONE: contour for {name} and month {month} and zoomfactor {zoom_factor}")
 
     @classmethod
-    def create_output_dir(cls, data_dir_out, name):
+    def _create_output_dir(cls, data_dir_out, name):
         data_dir = os.path.join(data_dir_out, name)
         if not os.path.exists(data_dir):
             os.mkdir(data_dir)
@@ -100,22 +100,14 @@ class Contour:
         logger.info(f"DONE: create matplotlib contourf")
         return ax, contourf, figure
 
-    def _create_colorbar_image(self, ax, contour, figure, filepath):
-        logger.info(f"saving colorbar to image")
-        cbar = figure.colorbar(contour, format="%.1f")
-        cbar.set_label(self.config.title + " [" + self.config.unit + "]")
-        cbar.set_ticks(self.config.colorbar_ticks)
-        ax.set_visible(False)
-        figure.savefig(
-            filepath + "_colorbar.png", dpi=150, bbox_inches="tight", pad_inches=0, transparent=True
-        )
-
     @classmethod
     def _create_raster_mbtiles(cls, filepath):
         contour_image_path = f"{filepath}.png"
         mbtiles_path = f"{filepath}_raster.mbtiles"
-        logger.info(f"BEGIN: creating raster mbtiles:{mbtiles_path}")
-        args = [
+        logger.info(f"BEGIN: creating raster mbtiles: {mbtiles_path}")
+
+        # First GDAL translate
+        translate_cmd = [
             "gdal_translate",
             "-of",
             "MBTILES",
@@ -129,25 +121,49 @@ class Contour:
             contour_image_path,
             mbtiles_path,
         ]
-        output = subprocess.check_output(args)
-        logger.info(output.decode("utf8"))
-        args = ["gdaladdo", "-r", "nearest", mbtiles_path, "2", "4", "8", "16"]
-        output = subprocess.check_output(args)
-        logger.info(output.decode("utf8"))
+
+        # Build overviews
+        addo_cmd = [
+            "gdaladdo",
+            "-r",
+            "nearest",
+            mbtiles_path,
+            "2",
+            "4",
+            "8",
+            "16",
+        ]
+
+        try:
+            logger.debug(f"Running: {' '.join(translate_cmd)}")
+            out = subprocess.check_output(translate_cmd, stderr=subprocess.STDOUT)
+            logger.info(out.decode("utf-8"))
+
+            logger.debug(f"Running: {' '.join(addo_cmd)}")
+            out = subprocess.check_output(addo_cmd, stderr=subprocess.STDOUT)
+            logger.info(out.decode("utf-8"))
+        except subprocess.CalledProcessError as e:
+            # command ran but returned non-zero exit
+            logger.error(
+                f"GDAL command failed (exit {e.returncode}): {e.cmd}\n"
+                f"Output: {e.output.decode('utf-8', errors='replace')}"
+            )
+            raise
         logger.info(f"END: creating raster mbtiles:{mbtiles_path}")
 
     @classmethod
     def _save_contour_image(cls, figure, filepath, figure_dpi):
-        logger.info(f"saving contour to image")
+        logger.info(f"BEGIN: save contour to image")
         figure.savefig(
             filepath + ".png", dpi=figure_dpi, bbox_inches="tight", pad_inches=0, transparent=True
         )
+        logger.info(f"END: save contour to image")
 
-    def _create_contour_vector_mbtiles(self, filepath, zoomfactor: float = None):
+    def _create_contour_vector_mbtiles(self, filepath, zoom_factor: float = None):
         logger.info("BEGIN: create contour mbtiles")
 
         figure = Figure(frameon=False)
-        ax = figure.add_subplot(111)
+        ax = figure.add_subplot(1, 1, 1)
         logger.info(f"creating matplotlib contour")
         contours = ax.contour(
             self.geo_grid.lon_range,
@@ -181,3 +197,13 @@ class Contour:
             extra_args=["--layer", "contours"],
         )
         logger.info("DONE: create contour mbtiles")
+
+    def _create_colorbar_image(self, ax, contour, figure, filepath):
+        logger.info(f"saving colorbar to image")
+        cbar = figure.colorbar(contour, format="%.1f")
+        cbar.set_label(self.config.title + " [" + self.config.unit + "]")
+        cbar.set_ticks(self.config.colorbar_ticks)
+        ax.set_visible(False)
+        figure.savefig(
+            filepath + "_colorbar.png", dpi=150, bbox_inches="tight", pad_inches=0, transparent=True
+        )

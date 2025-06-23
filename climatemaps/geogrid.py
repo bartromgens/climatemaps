@@ -44,6 +44,10 @@ class GeoGrid(BaseModel):
         return np.clip(self.values.astype(float), lower, upper)
 
     def zoom(self, zoom_factor: float) -> "GeoGrid":
+        """
+        Increase resolution of the data by using spline interpolation.
+        Returns a new zoomed GeoGrid object.
+        """
         values = scipy.ndimage.zoom(self.values, zoom=zoom_factor, order=1)
         lon_range = scipy.ndimage.zoom(self.lon_range, zoom=zoom_factor, order=1)
         lat_range = scipy.ndimage.zoom(self.lat_range, zoom=zoom_factor, order=1)
