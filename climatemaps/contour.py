@@ -33,7 +33,8 @@ class Contour:
         self.config = config
         self.lon_range = lon_range
         self.lat_range = lat_range
-        self.values = self._update_out_of_range_values(config, values)
+        # Clip values to avoid out-of-range levels
+        self.values = np.clip(values.astype(float), config.level_lower, config.level_upper)
         logger.info(f"lon min, max: {self.lon_min}, {self.lon_max}")
         logger.info(f"lat min, max: {self.lat_min}, {self.lat_max}")
 
@@ -95,16 +96,6 @@ class Contour:
         ax.axis("off")
         logger.info(f"DONE: create matplotlib contourf")
         return ax, contourf, figure
-
-    @classmethod
-    def _update_out_of_range_values(cls, config, values):
-        for i in range(0, values.shape[0]):
-            for j in range(0, values.shape[1]):
-                if values[i][j] >= config.level_upper:
-                    values[i][j] = config.level_upper
-                elif values[i][j] <= config.level_lower:
-                    values[i][j] = config.level_lower
-        return values
 
     @property
     def lat_min(self):
