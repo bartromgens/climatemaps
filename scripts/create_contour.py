@@ -5,6 +5,8 @@ import concurrent.futures
 
 import numpy as np
 
+from climatemaps.geogrid import GeoGrid
+
 module_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 if module_dir not in sys.path:
     sys.path.insert(0, module_dir)
@@ -67,11 +69,10 @@ def _create_contour(data_set_config: ClimateDataSetConfig, month: int):
     else:
         assert f"DataFormat {data_set_config.format} is not supported"
     values = values * data_set_config.conversion_factor
+    geo_grid = GeoGrid(lon_range=lon_range, lat_range=lat_range, values=values)
     contour_map = Contour(
         data_set_config.contour_config,
-        lon_range,
-        lat_range,
-        values,
+        geo_grid=geo_grid,
         zoom_min=maps_config.zoom_min,
         zoom_max=maps_config.zoom_max,
     )

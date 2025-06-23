@@ -2,15 +2,14 @@ import os
 import subprocess
 
 import numpy as np
-import numpy.typing as npt
 from matplotlib.figure import Figure
 import cartopy.crs as ccrs
-import scipy.ndimage
 
 import geojsoncontour
 import togeojsontiles
 
 from climatemaps.contour_config import ContourPlotConfig
+from climatemaps.geogrid import GeoGrid
 from climatemaps.settings import settings
 from climatemaps.logger import logger
 
@@ -21,9 +20,7 @@ class Contour:
     def __init__(
         self,
         config: ContourPlotConfig,
-        lon_range: npt.NDArray[np.floating],
-        lat_range: npt.NDArray[np.floating],
-        values: npt.NDArray[np.floating],
+        geo_grid: GeoGrid,
         zoom_min: int = 0,
         zoom_max: int = 5,
     ):
@@ -31,12 +28,10 @@ class Contour:
         self.zoom_min = zoom_min
         self.zoom_max = zoom_max
         self.config = config
-        self.lon_range = lon_range
-        self.lat_range = lat_range
-        # Clip values to avoid out-of-range levels
-        self.values = np.clip(values.astype(float), config.level_lower, config.level_upper)
-        logger.info(f"lon min, max: {self.lon_min}, {self.lon_max}")
-        logger.info(f"lat min, max: {self.lat_min}, {self.lat_max}")
+        self.geo_grid_orig = geo_grid
+        self.geo_grid = geo_grid
+        logger.info(f"lon min, max: {self.geo_grid.lon_min}, {self.geo_grid.lon_max}")
+        logger.info(f"lat min, max: {self.geo_grid.lat_min}, {self.geo_grid.lat_max}")
 
     def create_tiles(
         self,
@@ -49,6 +44,10 @@ class Contour:
         logger.info(f"BEGIN: contour for {name} and month {month} and zoomfactor {zoom_factor}")
         data_dir = self.create_output_dir(data_dir_out, name)
         filepath = os.path.join(str(data_dir), str(month))
+        if zoom_factor:
+            self.geo_grid = self.geo_grid_orig.zoom(zoom_factor)
+        else:
+            self.geo_grid = self.geo_grid_orig
         ax, contourf, figure = self._create_contourf()
         self._save_contour_image(figure, filepath, figure_dpi)
         self._create_raster_mbtiles(filepath)
@@ -63,27 +62,31 @@ class Contour:
             os.mkdir(data_dir)
         return data_dir
 
+    @property
+    def values(self):
+        return self.geo_grid.clipped_values(self.config.level_lower, self.config.level_upper)
+
     def _create_contourf(self):
         logger.info(f"BEGIN: create matplotlib contourf")
         figure = Figure(frameon=False)
         ax = figure.add_subplot(1, 1, 1, projection=ccrs.PlateCarree())
         ax.set_extent(
             [
-                self.llcrnrlon,
-                self.urcrnrlon,
-                self.llcrnrlat,
-                self.urcrnrlat,
+                self.geo_grid.llcrnrlon,
+                self.geo_grid.urcrnrlon,
+                self.geo_grid.llcrnrlat,
+                self.geo_grid.urcrnrlat,
             ],
             crs=ccrs.PlateCarree(),
         )
         logger.info(
-            f"create base map [{self.lon_min}, {self.lon_max}], [{self.lat_min}, {self.lat_max}]"
+            f"create base map [{self.geo_grid.lon_min}, {self.geo_grid.lon_max}], [{self.geo_grid.lat_min}, {self.geo_grid.lat_max}]"
         )
         logger.info(
-            f"llcrnrlat: {self.llcrnrlat}, llcrnrlon: {self.llcrnrlon}, urcrnrlat: {self.urcrnrlat}, urcrnrlon: {self.urcrnrlon}"
+            f"llcrnrlat: {self.geo_grid.llcrnrlat}, llcrnrlon: {self.geo_grid.llcrnrlon}, urcrnrlat: {self.geo_grid.urcrnrlat}, urcrnrlon: {self.geo_grid.urcrnrlon}"
         )
         logger.info(f"levels image: {self.config.levels_image}")
-        lon_grid, lat_grid = np.meshgrid(self.lon_range, self.lat_range)
+        lon_grid, lat_grid = np.meshgrid(self.geo_grid.lon_range, self.geo_grid.lat_range)
         contourf = ax.contourf(
             lon_grid,
             lat_grid,
@@ -96,55 +99,6 @@ class Contour:
         ax.axis("off")
         logger.info(f"DONE: create matplotlib contourf")
         return ax, contourf, figure
-
-    @property
-    def lat_min(self):
-        return self.lat_range[-1]
-
-    @property
-    def lat_max(self):
-        return self.lat_range[0]
-
-    @property
-    def lon_min(self):
-        return self.lon_range[0]
-
-    @property
-    def lon_max(self):
-        return self.lon_range[-1]
-
-    @property
-    def bin_width(self):
-        assert self.bin_width_lon == self.bin_width_lat
-        return self.bin_width_lon
-
-    @property
-    def bin_width_lon(self):
-        return 360.0 / len(self.lon_range)
-
-    @property
-    def bin_width_lat(self):
-        return 180.0 / len(self.lat_range)
-
-    @property
-    def llcrnrlon(self):
-        """lower left corner longitude"""
-        return self.lon_min - self.bin_width / 2
-
-    @property
-    def llcrnrlat(self):
-        """lower left corner latitude"""
-        return self.lat_min - self.bin_width / 2
-
-    @property
-    def urcrnrlon(self):
-        """upper right corner longitude"""
-        return self.lon_max + self.bin_width / 2
-
-    @property
-    def urcrnrlat(self):
-        """upper right corner latitude"""
-        return self.lat_max + self.bin_width / 2
 
     def _create_colorbar_image(self, ax, contour, figure, filepath):
         logger.info(f"saving colorbar to image")
@@ -191,17 +145,13 @@ class Contour:
 
     def _create_contour_vector_mbtiles(self, filepath, zoomfactor: float = None):
         logger.info("BEGIN: create contour mbtiles")
-        if zoomfactor is not None:
-            self.values = scipy.ndimage.zoom(self.values, zoom=zoomfactor, order=1)
-            self.lon_range = scipy.ndimage.zoom(self.lon_range, zoom=zoomfactor, order=1)
-            self.lat_range = scipy.ndimage.zoom(self.lat_range, zoom=zoomfactor, order=1)
 
         figure = Figure(frameon=False)
         ax = figure.add_subplot(111)
         logger.info(f"creating matplotlib contour")
         contours = ax.contour(
-            self.lon_range,
-            self.lat_range,
+            self.geo_grid.lon_range,
+            self.geo_grid.lat_range,
             self.values,
             levels=self.config.levels,
             cmap=self.config.colormap,
