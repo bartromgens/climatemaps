@@ -1,7 +1,10 @@
-from __future__ import annotations
 from typing import Any
-from pydantic import BaseModel, Field, computed_field, model_validator, ConfigDict
 import numpy as np
+from pydantic import BaseModel
+from pydantic import Field
+from pydantic import computed_field
+from pydantic import model_validator
+from pydantic import ConfigDict
 from matplotlib import pyplot as plt
 from matplotlib.colors import SymLogNorm
 
