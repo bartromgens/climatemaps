@@ -1,57 +1,68 @@
-import logging
-
+from __future__ import annotations
+from typing import Any
+from pydantic import BaseModel, Field, computed_field, model_validator, ConfigDict
 import numpy as np
 from matplotlib import pyplot as plt
 from matplotlib.colors import SymLogNorm
 
-logger = logging.getLogger(__name__)
 
+class ContourPlotConfig(BaseModel):
+    level_lower: float = Field(0.0, description="Minimum contour level")
+    level_upper: float = Field(100.0, description="Maximum contour level")
+    colormap: Any = Field(default_factory=lambda: plt.cm.jet, description="Matplotlib colormap")
+    title: str = Field("", description="Plot title")
+    unit: str = Field("", description="Unit label for colorbar")
+    log_scale: bool = Field(False, description="Use symmetric log scale?")
+    n_contours: int = Field(21, description="Number of contour intervals")
+    linthresh: float = Field(1.0, description="Linear threshold for SymLogNorm")
 
-class ContourPlotConfig:
-    def __init__(
-        self,
-        level_lower: float = 0.0,
-        level_upper: float = 100.0,
-        colormap=plt.cm.jet,  # jet, jet_r, YlOrRd, gist_rainbow
-        title: str = "",
-        unit: str = "",
-        log_scale: bool = False,
-        n_contours: int = 21,
-        linthresh: float = 1.0,
-    ):
-        self.n_contours = n_contours
-        self.level_lower = level_lower
-        self.level_upper = level_upper
-        self.colormap = colormap
-        self.title = title
-        self.unit = unit
+    # allow matplotlib & numpy types
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
-        # Basic validation
-        assert level_upper > level_lower, "level_upper must exceed level_lower"
-        if log_scale:
-            assert level_lower > 0, "level_lower must be > 0 for log scale"
-            assert linthresh > 0, "linthresh must be > 0 for log scale"
-            assert (
-                level_upper > -linthresh
-            ), "Data range cannot lie entirely below -linthresh when using log_scale"
+    @model_validator(mode="after")
+    def _check_ranges(cls, model: "ContourPlotConfig"):
+        if model.level_upper <= model.level_lower:
+            raise ValueError("level_upper must exceed level_lower")
+        if model.log_scale:
+            lt = model.linthresh
+            if model.level_lower <= 0:
+                raise ValueError("level_lower must be > 0 for log scale")
+            if model.linthresh <= 0:
+                raise ValueError("linthresh must be > 0 for log scale")
+            if model.level_upper <= -model.linthresh:
+                raise ValueError(
+                    "Data range cannot lie entirely below -linthresh when using log_scale"
+                )
+        return model
 
-        self.norm = (
-            SymLogNorm(linthresh=linthresh, vmin=level_lower, vmax=level_upper)
-            if log_scale
-            else None
-        )
+    @computed_field
+    @property
+    def norm(self) -> SymLogNorm | None:
+        if self.log_scale:
+            return SymLogNorm(
+                linthresh=self.linthresh, vmin=self.level_lower, vmax=self.level_upper
+            )
+        return None
 
-        # Build the contour levels
-        if log_scale:
-            # Use a tiny epsilon to avoid hitting exactly linthresh
-            eps = linthresh * 1e-6
-            # Start above the linear region
-            start = max(level_lower, linthresh + eps)
-            self.levels = np.geomspace(start, level_upper, num=n_contours)
-            self.levels_image = np.geomspace(start, level_upper, num=n_contours * 20)
-        else:
-            self.levels = np.linspace(level_lower, level_upper, num=n_contours)
-            self.levels_image = np.linspace(level_lower, level_upper, num=n_contours * 20)
+    @computed_field
+    @property
+    def levels(self) -> np.ndarray:
+        if self.log_scale:
+            eps = self.linthresh * 1e-6
+            start = max(self.level_lower, self.linthresh + eps)
+            return np.geomspace(start, self.level_upper, num=self.n_contours)
+        return np.linspace(self.level_lower, self.level_upper, num=self.n_contours)
 
-        # Compute colorbar ticks at every other level
-        self.colorbar_ticks = self.levels[::2].tolist()
+    @computed_field
+    @property
+    def levels_image(self) -> np.ndarray:
+        if self.log_scale:
+            eps = self.linthresh * 1e-6
+            start = max(self.level_lower, self.linthresh + eps)
+            return np.geomspace(start, self.level_upper, num=self.n_contours * 20)
+        return np.linspace(self.level_lower, self.level_upper, num=self.n_contours * 20)
+
+    @computed_field
+    @property
+    def colorbar_ticks(self) -> list[float]:
+        return self.levels[::2].tolist()

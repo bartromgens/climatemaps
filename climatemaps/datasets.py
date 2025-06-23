@@ -53,7 +53,12 @@ CLIMATE_MODEL_DATA_SETS = [
         resolution=SpatialResolution.MIN10,
         conversion_factor=1 / 30,  # value is per month, convert to day
         contour_config=ContourPlotConfig(
-            0.1, 16, colormap=plt.cm.jet_r, title="Precipitation", unit="mm/day", log_scale=True
+            level_lower=0.1,
+            level_upper=16,
+            colormap=plt.cm.jet_r,
+            title="Precipitation",
+            unit="mm/day",
+            log_scale=True,
         ),
         format=DataFormat.GEOTIFF_WORLDCLIM_CMIP6,
         source="https://www.worldclim.org/data/cmip6/cmip6_clim10m.html",
@@ -66,7 +71,12 @@ CLIMATE_MODEL_DATA_SETS = [
         resolution=SpatialResolution.MIN5,
         conversion_factor=1 / 30,  # value is per month, convert to day
         contour_config=ContourPlotConfig(
-            0.1, 16, colormap=plt.cm.jet_r, title="Precipitation", unit="mm/day", log_scale=True
+            level_lower=0.1,
+            level_upper=16,
+            colormap=plt.cm.jet_r,
+            title="Precipitation",
+            unit="mm/day",
+            log_scale=True,
         ),
         format=DataFormat.GEOTIFF_WORLDCLIM_CMIP6,
         source="https://www.worldclim.org/data/cmip6/cmip6_clim5m.html",
@@ -79,7 +89,12 @@ CLIMATE_MODEL_DATA_SETS = [
         resolution=SpatialResolution.MIN5,
         conversion_factor=1 / 30,  # value is per month, convert to day
         contour_config=ContourPlotConfig(
-            0.1, 16, colormap=plt.cm.jet_r, title="Precipitation", unit="mm/day", log_scale=True
+            level_lower=0.1,
+            level_upper=16,
+            colormap=plt.cm.jet_r,
+            title="Precipitation",
+            unit="mm/day",
+            log_scale=True,
         ),
         format=DataFormat.GEOTIFF_WORLDCLIM_CMIP6,
         source="https://www.worldclim.org/data/cmip6/cmip6_clim5m.html",
@@ -92,7 +107,12 @@ CLIMATE_MODEL_DATA_SETS = [
         resolution=SpatialResolution.MIN5,
         conversion_factor=1 / 30,  # value is per month, convert to day
         contour_config=ContourPlotConfig(
-            0.1, 16, colormap=plt.cm.jet_r, title="Precipitation", unit="mm/day", log_scale=True
+            level_lower=0.1,
+            level_upper=16,
+            colormap=plt.cm.jet_r,
+            title="Precipitation",
+            unit="mm/day",
+            log_scale=True,
         ),
         format=DataFormat.GEOTIFF_WORLDCLIM_CMIP6,
         source="https://www.worldclim.org/data/cmip6/cmip6_clim5m.html",
@@ -105,7 +125,12 @@ CLIMATE_MODEL_DATA_SETS = [
         resolution=SpatialResolution.MIN5,
         conversion_factor=1 / 30,  # value is per month, convert to day
         contour_config=ContourPlotConfig(
-            0.1, 16, colormap=plt.cm.jet_r, title="Precipitation", unit="mm/day", log_scale=True
+            level_lower=0.1,
+            level_upper=16,
+            colormap=plt.cm.jet_r,
+            title="Precipitation",
+            unit="mm/day",
+            log_scale=True,
         ),
         format=DataFormat.GEOTIFF_WORLDCLIM_CMIP6,
         source="https://www.worldclim.org/data/cmip6/cmip6_clim5m.html",
@@ -154,7 +179,7 @@ HISTORIC_DATA_SETS = [
         resolution=SpatialResolution.MIN10,
         # conversion_factor=1
         contour_config=ContourPlotConfig(
-            -20, 45, colormap=plt.cm.jet, title="Max. temperature", unit="C"
+            level_lower=-20, level_upper=45, colormap=plt.cm.jet, title="Max. temperature", unit="C"
         ),
         format=DataFormat.GEOTIFF_WORLDCLIM_HISTORY,
         source="https://www.worldclim.org/data/worldclim21.html",
@@ -167,7 +192,7 @@ HISTORIC_DATA_SETS = [
         resolution=SpatialResolution.MIN5,
         # conversion_factor=1
         contour_config=ContourPlotConfig(
-            -20, 45, colormap=plt.cm.jet, title="Max. temperature", unit="C"
+            level_lower=-20, level_upper=45, colormap=plt.cm.jet, title="Max. temperature", unit="C"
         ),
         format=DataFormat.GEOTIFF_WORLDCLIM_HISTORY,
         source="https://www.worldclim.org/data/worldclim21.html",
