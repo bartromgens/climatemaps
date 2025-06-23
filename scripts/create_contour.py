@@ -13,7 +13,7 @@ if module_dir not in sys.path:
 
 from climatemaps.config import ClimateMapsConfig
 from climatemaps.config import get_config
-from climatemaps.contour import Contour
+from climatemaps.contour import ContourTileBuilder
 from climatemaps.data import import_climate_data
 from climatemaps.datasets import ClimateDataSetConfig
 from climatemaps.datasets import DataFormat
@@ -70,7 +70,7 @@ def _create_contour(data_set_config: ClimateDataSetConfig, month: int):
         assert f"DataFormat {data_set_config.format} is not supported"
     values = values * data_set_config.conversion_factor
     geo_grid = GeoGrid(lon_range=lon_range, lat_range=lat_range, values=values)
-    contour_map = Contour(
+    contour_map = ContourTileBuilder(
         data_set_config.contour_config,
         geo_grid=geo_grid,
         zoom_min=maps_config.zoom_min,

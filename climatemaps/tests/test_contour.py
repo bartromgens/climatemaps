@@ -6,7 +6,7 @@ import tempfile
 import pytest
 import numpy as np
 
-from climatemaps.contour import Contour
+from climatemaps.contour import ContourTileBuilder
 from climatemaps.contour_config import ContourPlotConfig
 from climatemaps.geogrid import GeoGrid
 
@@ -23,7 +23,7 @@ class TestContour:
             lat_range=np.array([45, -45]),
             values=np.array([[0, 1, 2, 4], [5, 6, 7, 8]]),
         )
-        self.contour = Contour(config=self.contour_plot_config, geo_grid=geo_grid)
+        self.contour = ContourTileBuilder(config=self.contour_plot_config, geo_grid=geo_grid)
 
     def test_create_tiles(self):
         month = 1
