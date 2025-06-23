@@ -16,7 +16,7 @@ class GeoGrid(BaseModel):
     lat_range: npt.NDArray[np.floating]
     values: npt.NDArray[np.floating]
 
-    model_config = ConfigDict(arbitrary_types_allowed=True)
+    model_config = ConfigDict(arbitrary_types_allowed=True, frozen=True)
 
     @field_validator("lon_range")
     def lon_range_must_increase(cls, v, values):
@@ -52,6 +52,19 @@ class GeoGrid(BaseModel):
         lon_range = scipy.ndimage.zoom(self.lon_range, zoom=zoom_factor, order=1)
         lat_range = scipy.ndimage.zoom(self.lat_range, zoom=zoom_factor, order=1)
         return GeoGrid(lon_range=lon_range, lat_range=lat_range, values=values)
+
+    def difference(self, other: "GeoGrid") -> "GeoGrid":
+        """
+        Return a new GeoGrid equal to (self.values - other.values).
+        """
+        if self.values.shape != other.values.shape:
+            raise ValueError(
+                f"Shape mismatch: self.values is {self.values.shape}, "
+                f"other.values is {other.values.shape}"
+            )
+
+        diff_vals = self.values - other.values
+        return GeoGrid(lon_range=self.lon_range, lat_range=self.lat_range, values=diff_vals)
 
     @property
     def lat_min(self):

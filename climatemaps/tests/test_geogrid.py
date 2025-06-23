@@ -1,10 +1,11 @@
 import numpy as np
+import numpy.testing as npt
 import pytest
 
 from climatemaps.geogrid import GeoGrid
 
 
-class TestGeoGrid:
+class TestGeoGridProperties:
 
     @pytest.fixture(autouse=True)
     def setup(self):
@@ -70,3 +71,18 @@ class TestGeoGridValidation:
         values = np.array([[0, 1], [5, 6], [0, 1], [5, 6]])
         with pytest.raises(ValueError):
             grid = GeoGrid(lon_range=lon_range, lat_range=lat_range, values=values)
+
+
+class TestGeoGridDifference:
+
+    @pytest.fixture(autouse=True)
+    def setup(self):
+        lon_range = np.array([-135, -45, 45, 135])
+        lat_range = np.array([45, -45])
+        values = np.array([[0, 1, 2, 4], [5, 6, 7, 8]])
+        self.geo_grid_a = GeoGrid(lon_range=lon_range, lat_range=lat_range, values=values)
+        self.geo_grid_b = GeoGrid(lon_range=lon_range, lat_range=lat_range, values=values)
+
+    def test_difference(self):
+        geo_grid_diff = self.geo_grid_a.difference(self.geo_grid_b)
+        npt.assert_array_almost_equal(geo_grid_diff.values, 0, decimal=6)
