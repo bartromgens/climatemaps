@@ -58,70 +58,72 @@ CLIMATE_CONTOUR_CONFIGS: Dict[ClimateVarKey, ContourPlotConfig] = {
 
 @dataclass
 class ClimateDataSetConfig:
-    data_type: str
+    variable_type: ClimateVarKey.PRECIPITATION
     filepath: str
-    variable: ClimateVariable
     year_range: Tuple[int, int]
     resolution: SpatialResolution
-    contour_config: ContourPlotConfig
     format: DataFormat
     conversion_factor: float = 1.0
     source: Optional[str] = None
 
+    @property
+    def variable(self) -> ClimateVariable:
+        return CLIMATE_VARIABLES[self.variable_type]
+
+    @property
+    def data_type(self) -> str:
+        return f"{self.variable.name}_{self.year_range[0]}_{self.year_range[1]}_{self.resolution.value}".lower().replace(
+            ".", "_"
+        )
+
+    @property
+    def contour_config(self) -> ContourPlotConfig:
+        return CLIMATE_CONTOUR_CONFIGS[self.variable_type]
+
 
 CLIMATE_MODEL_DATA_SETS = [
     ClimateDataSetConfig(
-        data_type="model_precipitation_10m_2021_2040",
+        variable_type=ClimateVarKey.PRECIPITATION,
         filepath="data/climate_models/wc2.1_10m_prec_ACCESS-CM2_ssp126_2021-2040.tif",
-        variable=CLIMATE_VARIABLES[ClimateVarKey.PRECIPITATION],
         year_range=(2021, 2040),
         resolution=SpatialResolution.MIN10,
         conversion_factor=1 / 30,  # value is per month, convert to day
-        contour_config=CLIMATE_CONTOUR_CONFIGS[ClimateVarKey.PRECIPITATION],
         format=DataFormat.GEOTIFF_WORLDCLIM_CMIP6,
         source="https://www.worldclim.org/data/cmip6/cmip6_clim10m.html",
     ),
     ClimateDataSetConfig(
-        data_type="model_precipitation_5m_2021_2040",
+        variable_type=ClimateVarKey.PRECIPITATION,
         filepath="data/climate_models/wc2.1_5m_prec_ACCESS-CM2_ssp126_2021-2040.tif",
-        variable=CLIMATE_VARIABLES[ClimateVarKey.PRECIPITATION],
         year_range=(2021, 2040),
         resolution=SpatialResolution.MIN5,
         conversion_factor=1 / 30,  # value is per month, convert to day
-        contour_config=CLIMATE_CONTOUR_CONFIGS[ClimateVarKey.PRECIPITATION],
         format=DataFormat.GEOTIFF_WORLDCLIM_CMIP6,
         source="https://www.worldclim.org/data/cmip6/cmip6_clim5m.html",
     ),
     ClimateDataSetConfig(
-        data_type="model_precipitation_5m_ssp585_2021_2040",
+        variable_type=ClimateVarKey.PRECIPITATION,
         filepath="data/climate_models/wc2.1_5m_prec_ACCESS-CM2_ssp585_2021-2040.tif",
-        variable=CLIMATE_VARIABLES[ClimateVarKey.PRECIPITATION],
         year_range=(2021, 2040),
         resolution=SpatialResolution.MIN5,
         conversion_factor=1 / 30,  # value is per month, convert to day
-        contour_config=CLIMATE_CONTOUR_CONFIGS[ClimateVarKey.PRECIPITATION],
         format=DataFormat.GEOTIFF_WORLDCLIM_CMIP6,
         source="https://www.worldclim.org/data/cmip6/cmip6_clim5m.html",
     ),
     ClimateDataSetConfig(
-        data_type="model_precipitation_5m_ssp585_2081_2100",
+        variable_type=ClimateVarKey.PRECIPITATION,
         filepath="data/climate_models/wc2.1_5m_prec_ACCESS-CM2_ssp585_2081-2100.tif",
-        variable=CLIMATE_VARIABLES[ClimateVarKey.PRECIPITATION],
         year_range=(2081, 2100),
         resolution=SpatialResolution.MIN5,
         conversion_factor=1 / 30,  # value is per month, convert to day
-        contour_config=CLIMATE_CONTOUR_CONFIGS[ClimateVarKey.PRECIPITATION],
         format=DataFormat.GEOTIFF_WORLDCLIM_CMIP6,
         source="https://www.worldclim.org/data/cmip6/cmip6_clim5m.html",
     ),
     ClimateDataSetConfig(
-        data_type="model_precipitation_5m_2041_2060",
+        variable_type=ClimateVarKey.PRECIPITATION,
         filepath="data/climate_models/wc2.1_5m_prec_ACCESS-CM2_ssp126_2041-2060.tif",
-        variable=CLIMATE_VARIABLES[ClimateVarKey.PRECIPITATION],
         year_range=(2040, 2060),
         resolution=SpatialResolution.MIN5,
         conversion_factor=1 / 30,  # value is per month, convert to day
-        contour_config=CLIMATE_CONTOUR_CONFIGS[ClimateVarKey.PRECIPITATION],
         format=DataFormat.GEOTIFF_WORLDCLIM_CMIP6,
         source="https://www.worldclim.org/data/cmip6/cmip6_clim5m.html",
     ),
@@ -162,24 +164,20 @@ HISTORIC_DATA_SETS = [
     #     source="https://www.worldclim.org/data/worldclim21.html"
     # ),
     ClimateDataSetConfig(
-        data_type="temperature_max_worldclim_10m",
+        variable_type=ClimateVarKey.T_MAX,
         filepath="data/worldclim/history/wc2.1_10m_tmax",
-        variable=CLIMATE_VARIABLES[ClimateVarKey.T_MAX],
         year_range=(1970, 2000),
         resolution=SpatialResolution.MIN10,
         # conversion_factor=1
-        contour_config=CLIMATE_CONTOUR_CONFIGS[ClimateVarKey.T_MAX],
         format=DataFormat.GEOTIFF_WORLDCLIM_HISTORY,
         source="https://www.worldclim.org/data/worldclim21.html",
     ),
     ClimateDataSetConfig(
-        data_type="temperature_max_worldclim_5m",
+        variable_type=ClimateVarKey.T_MAX,
         filepath="data/worldclim/history/wc2.1_5m_tmax",
-        variable=CLIMATE_VARIABLES[ClimateVarKey.T_MAX],
         year_range=(1970, 2000),
         resolution=SpatialResolution.MIN5,
         # conversion_factor=1
-        contour_config=CLIMATE_CONTOUR_CONFIGS[ClimateVarKey.T_MAX],
         format=DataFormat.GEOTIFF_WORLDCLIM_HISTORY,
         source="https://www.worldclim.org/data/worldclim21.html",
     ),

@@ -8,7 +8,7 @@ if module_dir not in sys.path:
     sys.path.insert(0, module_dir)
 
 from climatemaps.config import ClimateMap
-from climatemaps.settings import DATA_SETS_API
+from climatemaps.settings import settings
 
 
 config = {"options": {"paths": {"root": "../website", "mbtiles": "data"}}, "data": {}}
@@ -32,4 +32,4 @@ def main(data_sets: List[ClimateMap]):
 
 
 if __name__ == "__main__":
-    main(DATA_SETS_API)
+    main(settings.DATA_SETS_API)

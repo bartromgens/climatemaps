@@ -5,7 +5,6 @@ import concurrent.futures
 
 import numpy as np
 
-from climatemaps.geogrid import GeoGrid
 
 module_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 if module_dir not in sys.path:
@@ -15,9 +14,13 @@ from climatemaps.config import ClimateMapsConfig
 from climatemaps.config import get_config
 from climatemaps.contour import ContourTileBuilder
 from climatemaps.data import import_climate_data
+from climatemaps.datasets import CLIMATE_VARIABLES
+from climatemaps.datasets import ClimateVarKey
 from climatemaps.datasets import ClimateDataSetConfig
 from climatemaps.datasets import DataFormat
 from climatemaps.datasets import HISTORIC_DATA_SETS
+from climatemaps.datasets import SpatialResolution
+from climatemaps.geogrid import GeoGrid
 from climatemaps.geotiff import read_geotiff_history
 from climatemaps.geotiff import read_geotiff_month
 from climatemaps.settings import settings
@@ -30,7 +33,13 @@ np.set_printoptions(3, threshold=100, suppress=True)  # .3f
 
 # DATA_SETS = CLIMATE_MODEL_DATA_SETS + HISTORIC_DATA_SETS
 DATA_SETS = HISTORIC_DATA_SETS
-DATA_SETS = list(filter(lambda x: x.data_type == "temperature_max_worldclim_10m", DATA_SETS))
+DATA_SETS = list(
+    filter(
+        lambda x: x.variable_type == ClimateVarKey.T_MAX
+        and x.resolution == SpatialResolution.MIN10,
+        DATA_SETS,
+    )
+)
 
 
 def main():
