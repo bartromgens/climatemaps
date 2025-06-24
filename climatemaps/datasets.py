@@ -1,5 +1,6 @@
 import enum
 from dataclasses import dataclass
+from typing import Dict
 from typing import Optional
 from typing import Tuple
 
@@ -10,9 +11,9 @@ from climatemaps.contour_config import ContourPlotConfig
 
 
 class DataFormat(enum.Enum):
-    GEOTIFF_WORLDCLIM_CMIP6 = 0
-    GEOTIFF_WORLDCLIM_HISTORY = 1
-    IPCC_GRID = 2
+    GEOTIFF_WORLDCLIM_CMIP6 = enum.auto()
+    GEOTIFF_WORLDCLIM_HISTORY = enum.auto()
+    IPCC_GRID = enum.auto()
 
 
 class SpatialResolution(enum.Enum):
@@ -21,14 +22,38 @@ class SpatialResolution(enum.Enum):
     MIN2_5 = "2.5min"
 
 
+class ClimateVarKey(enum.Enum):
+    PRECIPITATION = enum.auto()
+    T_MAX = enum.auto()
+
+
 class ClimateVariable(BaseModel):
     name: str
     display_name: str
     unit: str
 
 
-precipitation = ClimateVariable(name="Precipitation", display_name="Precipitation", unit="mm/day")
-temperature_max = ClimateVariable(name="Tmax", display_name="Temperature Max", unit="C")
+CLIMATE_VARIABLES: Dict[ClimateVarKey, ClimateVariable] = {
+    ClimateVarKey.PRECIPITATION: ClimateVariable(
+        name="Precipitation", display_name="Precipitation", unit="mm/day"
+    ),
+    ClimateVarKey.T_MAX: ClimateVariable(name="Tmax", display_name="Temperature Max", unit="°C"),
+}
+
+
+CLIMATE_CONTOUR_CONFIGS: Dict[ClimateVarKey, ContourPlotConfig] = {
+    ClimateVarKey.PRECIPITATION: ContourPlotConfig(
+        level_lower=0.1,
+        level_upper=16,
+        colormap=plt.cm.jet_r,
+        title="Precipitation",
+        unit="mm/day",
+        log_scale=True,
+    ),
+    ClimateVarKey.T_MAX: ContourPlotConfig(
+        level_lower=-20, level_upper=45, colormap=plt.cm.jet, title="Max. temperature", unit="C"
+    ),
+}
 
 
 @dataclass
@@ -48,90 +73,55 @@ CLIMATE_MODEL_DATA_SETS = [
     ClimateDataSetConfig(
         data_type="model_precipitation_10m_2021_2040",
         filepath="data/climate_models/wc2.1_10m_prec_ACCESS-CM2_ssp126_2021-2040.tif",
-        variable=precipitation,
+        variable=CLIMATE_VARIABLES[ClimateVarKey.PRECIPITATION],
         year_range=(2021, 2040),
         resolution=SpatialResolution.MIN10,
         conversion_factor=1 / 30,  # value is per month, convert to day
-        contour_config=ContourPlotConfig(
-            level_lower=0.1,
-            level_upper=16,
-            colormap=plt.cm.jet_r,
-            title="Precipitation",
-            unit="mm/day",
-            log_scale=True,
-        ),
+        contour_config=CLIMATE_CONTOUR_CONFIGS[ClimateVarKey.PRECIPITATION],
         format=DataFormat.GEOTIFF_WORLDCLIM_CMIP6,
         source="https://www.worldclim.org/data/cmip6/cmip6_clim10m.html",
     ),
     ClimateDataSetConfig(
         data_type="model_precipitation_5m_2021_2040",
         filepath="data/climate_models/wc2.1_5m_prec_ACCESS-CM2_ssp126_2021-2040.tif",
-        variable=precipitation,
+        variable=CLIMATE_VARIABLES[ClimateVarKey.PRECIPITATION],
         year_range=(2021, 2040),
         resolution=SpatialResolution.MIN5,
         conversion_factor=1 / 30,  # value is per month, convert to day
-        contour_config=ContourPlotConfig(
-            level_lower=0.1,
-            level_upper=16,
-            colormap=plt.cm.jet_r,
-            title="Precipitation",
-            unit="mm/day",
-            log_scale=True,
-        ),
+        contour_config=CLIMATE_CONTOUR_CONFIGS[ClimateVarKey.PRECIPITATION],
         format=DataFormat.GEOTIFF_WORLDCLIM_CMIP6,
         source="https://www.worldclim.org/data/cmip6/cmip6_clim5m.html",
     ),
     ClimateDataSetConfig(
         data_type="model_precipitation_5m_ssp585_2021_2040",
         filepath="data/climate_models/wc2.1_5m_prec_ACCESS-CM2_ssp585_2021-2040.tif",
-        variable=precipitation,
+        variable=CLIMATE_VARIABLES[ClimateVarKey.PRECIPITATION],
         year_range=(2021, 2040),
         resolution=SpatialResolution.MIN5,
         conversion_factor=1 / 30,  # value is per month, convert to day
-        contour_config=ContourPlotConfig(
-            level_lower=0.1,
-            level_upper=16,
-            colormap=plt.cm.jet_r,
-            title="Precipitation",
-            unit="mm/day",
-            log_scale=True,
-        ),
+        contour_config=CLIMATE_CONTOUR_CONFIGS[ClimateVarKey.PRECIPITATION],
         format=DataFormat.GEOTIFF_WORLDCLIM_CMIP6,
         source="https://www.worldclim.org/data/cmip6/cmip6_clim5m.html",
     ),
     ClimateDataSetConfig(
         data_type="model_precipitation_5m_ssp585_2081_2100",
         filepath="data/climate_models/wc2.1_5m_prec_ACCESS-CM2_ssp585_2081-2100.tif",
-        variable=precipitation,
+        variable=CLIMATE_VARIABLES[ClimateVarKey.PRECIPITATION],
         year_range=(2081, 2100),
         resolution=SpatialResolution.MIN5,
         conversion_factor=1 / 30,  # value is per month, convert to day
-        contour_config=ContourPlotConfig(
-            level_lower=0.1,
-            level_upper=16,
-            colormap=plt.cm.jet_r,
-            title="Precipitation",
-            unit="mm/day",
-            log_scale=True,
-        ),
+        contour_config=CLIMATE_CONTOUR_CONFIGS[ClimateVarKey.PRECIPITATION],
         format=DataFormat.GEOTIFF_WORLDCLIM_CMIP6,
         source="https://www.worldclim.org/data/cmip6/cmip6_clim5m.html",
     ),
     ClimateDataSetConfig(
         data_type="model_precipitation_5m_2041_2060",
         filepath="data/climate_models/wc2.1_5m_prec_ACCESS-CM2_ssp126_2041-2060.tif",
-        variable=precipitation,
+        variable=CLIMATE_VARIABLES[ClimateVarKey.PRECIPITATION],
         year_range=(2040, 2060),
         resolution=SpatialResolution.MIN5,
         conversion_factor=1 / 30,  # value is per month, convert to day
-        contour_config=ContourPlotConfig(
-            level_lower=0.1,
-            level_upper=16,
-            colormap=plt.cm.jet_r,
-            title="Precipitation",
-            unit="mm/day",
-            log_scale=True,
-        ),
+        contour_config=CLIMATE_CONTOUR_CONFIGS[ClimateVarKey.PRECIPITATION],
         format=DataFormat.GEOTIFF_WORLDCLIM_CMIP6,
         source="https://www.worldclim.org/data/cmip6/cmip6_clim5m.html",
     ),
@@ -174,26 +164,22 @@ HISTORIC_DATA_SETS = [
     ClimateDataSetConfig(
         data_type="temperature_max_worldclim_10m",
         filepath="data/worldclim/history/wc2.1_10m_tmax",
-        variable=temperature_max,
+        variable=CLIMATE_VARIABLES[ClimateVarKey.T_MAX],
         year_range=(1970, 2000),
         resolution=SpatialResolution.MIN10,
         # conversion_factor=1
-        contour_config=ContourPlotConfig(
-            level_lower=-20, level_upper=45, colormap=plt.cm.jet, title="Max. temperature", unit="C"
-        ),
+        contour_config=CLIMATE_CONTOUR_CONFIGS[ClimateVarKey.T_MAX],
         format=DataFormat.GEOTIFF_WORLDCLIM_HISTORY,
         source="https://www.worldclim.org/data/worldclim21.html",
     ),
     ClimateDataSetConfig(
         data_type="temperature_max_worldclim_5m",
         filepath="data/worldclim/history/wc2.1_5m_tmax",
-        variable=temperature_max,
+        variable=CLIMATE_VARIABLES[ClimateVarKey.T_MAX],
         year_range=(1970, 2000),
         resolution=SpatialResolution.MIN5,
         # conversion_factor=1
-        contour_config=ContourPlotConfig(
-            level_lower=-20, level_upper=45, colormap=plt.cm.jet, title="Max. temperature", unit="C"
-        ),
+        contour_config=CLIMATE_CONTOUR_CONFIGS[ClimateVarKey.T_MAX],
         format=DataFormat.GEOTIFF_WORLDCLIM_HISTORY,
         source="https://www.worldclim.org/data/worldclim21.html",
     ),
