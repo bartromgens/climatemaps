@@ -1,9 +1,13 @@
+import calendar
 import enum
 from dataclasses import dataclass
+from typing import Callable
 from typing import Dict
 from typing import Optional
 from typing import Tuple
 
+import numpy as np
+import numpy.typing as npt
 import matplotlib.pyplot as plt
 from pydantic import BaseModel
 
@@ -25,6 +29,11 @@ class SpatialResolution(enum.Enum):
 class ClimateVarKey(enum.Enum):
     PRECIPITATION = enum.auto()
     T_MAX = enum.auto()
+    T_MIN = enum.auto()
+    CLOUD_COVER = enum.auto()
+    WET_DAYS = enum.auto()
+    WIND_SPEED = enum.auto()
+    RADIATION = enum.auto()
 
 
 class ClimateVariable(BaseModel):
@@ -38,6 +47,17 @@ CLIMATE_VARIABLES: Dict[ClimateVarKey, ClimateVariable] = {
         name="Precipitation", display_name="Precipitation", unit="mm/day"
     ),
     ClimateVarKey.T_MAX: ClimateVariable(name="Tmax", display_name="Temperature Max", unit="°C"),
+    ClimateVarKey.T_MIN: ClimateVariable(name="Tmin", display_name="Temperature Min", unit="°C"),
+    ClimateVarKey.CLOUD_COVER: ClimateVariable(
+        name="CloudCover", display_name="Cloud Cover", unit="%"
+    ),
+    ClimateVarKey.WET_DAYS: ClimateVariable(name="WetDays", display_name="Wet Days", unit="days"),
+    ClimateVarKey.WIND_SPEED: ClimateVariable(
+        name="WindSpeed", display_name="Wind Speed", unit="m/s"
+    ),
+    ClimateVarKey.RADIATION: ClimateVariable(
+        name="Radiation", display_name="Radiation", unit="W/m^2"
+    ),
 }
 
 
@@ -53,7 +73,29 @@ CLIMATE_CONTOUR_CONFIGS: Dict[ClimateVarKey, ContourPlotConfig] = {
     ClimateVarKey.T_MAX: ContourPlotConfig(
         level_lower=-20, level_upper=45, colormap=plt.cm.jet, title="Max. temperature", unit="C"
     ),
+    ClimateVarKey.T_MIN: ContourPlotConfig(
+        level_lower=-30, level_upper=28, colormap=plt.cm.jet, title="Mix. temperature", unit="C"
+    ),
+    ClimateVarKey.CLOUD_COVER: ContourPlotConfig(
+        level_lower=0, level_upper=100, colormap=plt.cm.jet_r, title="Cloud coverage", unit="%"
+    ),
+    ClimateVarKey.WET_DAYS: ContourPlotConfig(
+        level_lower=0, level_upper=30, colormap=plt.cm.jet_r, title="Wet days", unit="days"
+    ),
+    ClimateVarKey.WIND_SPEED: ContourPlotConfig(
+        level_lower=0, level_upper=9, colormap=plt.cm.jet, title="Wind speed", unit="m/s"
+    ),
+    ClimateVarKey.RADIATION: ContourPlotConfig(
+        level_lower=0, level_upper=300, colormap=plt.cm.jet, title="Radiation", unit="W/m^2"
+    ),
 }
+
+
+def convert_per_month_to_per_day(
+    v: npt.NDArray[np.floating], month: int
+) -> npt.NDArray[np.floating]:
+    days_in_month = calendar.monthrange(2025, month)[1]
+    return v / days_in_month
 
 
 @dataclass
@@ -63,7 +105,8 @@ class ClimateDataSetConfig:
     year_range: Tuple[int, int]
     resolution: SpatialResolution
     format: DataFormat
-    conversion_factor: float = 1.0
+    conversion_function: Callable[[npt.NDArray[np.floating], int], npt.NDArray[np.floating]] = None
+    conversion_factor: float = 1
     source: Optional[str] = None
 
     @property
@@ -87,46 +130,10 @@ CLIMATE_MODEL_DATA_SETS = [
         filepath="data/climate_models/wc2.1_10m_prec_ACCESS-CM2_ssp126_2021-2040.tif",
         year_range=(2021, 2040),
         resolution=SpatialResolution.MIN10,
-        conversion_factor=1 / 30,  # value is per month, convert to day
+        conversion_function=convert_per_month_to_per_day,
         format=DataFormat.GEOTIFF_WORLDCLIM_CMIP6,
         source="https://www.worldclim.org/data/cmip6/cmip6_clim10m.html",
-    ),
-    ClimateDataSetConfig(
-        variable_type=ClimateVarKey.PRECIPITATION,
-        filepath="data/climate_models/wc2.1_5m_prec_ACCESS-CM2_ssp126_2021-2040.tif",
-        year_range=(2021, 2040),
-        resolution=SpatialResolution.MIN5,
-        conversion_factor=1 / 30,  # value is per month, convert to day
-        format=DataFormat.GEOTIFF_WORLDCLIM_CMIP6,
-        source="https://www.worldclim.org/data/cmip6/cmip6_clim5m.html",
-    ),
-    ClimateDataSetConfig(
-        variable_type=ClimateVarKey.PRECIPITATION,
-        filepath="data/climate_models/wc2.1_5m_prec_ACCESS-CM2_ssp585_2021-2040.tif",
-        year_range=(2021, 2040),
-        resolution=SpatialResolution.MIN5,
-        conversion_factor=1 / 30,  # value is per month, convert to day
-        format=DataFormat.GEOTIFF_WORLDCLIM_CMIP6,
-        source="https://www.worldclim.org/data/cmip6/cmip6_clim5m.html",
-    ),
-    ClimateDataSetConfig(
-        variable_type=ClimateVarKey.PRECIPITATION,
-        filepath="data/climate_models/wc2.1_5m_prec_ACCESS-CM2_ssp585_2081-2100.tif",
-        year_range=(2081, 2100),
-        resolution=SpatialResolution.MIN5,
-        conversion_factor=1 / 30,  # value is per month, convert to day
-        format=DataFormat.GEOTIFF_WORLDCLIM_CMIP6,
-        source="https://www.worldclim.org/data/cmip6/cmip6_clim5m.html",
-    ),
-    ClimateDataSetConfig(
-        variable_type=ClimateVarKey.PRECIPITATION,
-        filepath="data/climate_models/wc2.1_5m_prec_ACCESS-CM2_ssp126_2041-2060.tif",
-        year_range=(2040, 2060),
-        resolution=SpatialResolution.MIN5,
-        conversion_factor=1 / 30,  # value is per month, convert to day
-        format=DataFormat.GEOTIFF_WORLDCLIM_CMIP6,
-        source="https://www.worldclim.org/data/cmip6/cmip6_clim5m.html",
-    ),
+    )
 ]
 
 HISTORIC_DATA_SETS = [
@@ -136,7 +143,7 @@ HISTORIC_DATA_SETS = [
     #     variable=precipitation,
     #     year_range=(1970, 2000),
     #     resolution=Resolution.MIN2_5,
-    #     conversion_factor=1/30,  # value is per month, convert to day
+    #     conversion_function=convert_per_month_to_per_day
     #     config=ContourPlotConfig(0.1, 16, colormap=plt.cm.jet_r, title='Precipitation', unit='mm/day', logscale=True),
     #     format=DataFormat.GEOTIFF_WORLDCLIM_HISTORY,
     #     source="https://www.worldclim.org/data/worldclim21.html"
@@ -147,7 +154,7 @@ HISTORIC_DATA_SETS = [
     #     variable=precipitation,
     #     year_range=(1970, 2000),
     #     resolution=Resolution.MIN5,
-    #     conversion_factor=1/30,  # value is per month, convert to day
+    #     conversion_function=convert_per_month_to_per_day
     #     config=ContourPlotConfig(0.1, 16, colormap=plt.cm.jet_r, title='Precipitation', unit='mm/day', logscale=True),
     #     format=DataFormat.GEOTIFF_WORLDCLIM_HISTORY,
     #     source="https://www.worldclim.org/data/worldclim21.html"
@@ -158,7 +165,7 @@ HISTORIC_DATA_SETS = [
     #     variable=precipitation,
     #     year_range=(1970, 2000),
     #     resolution=Resolution.MIN10,
-    #     conversion_factor=1/30,  # value is per month, convert to day
+    #     conversion_function=convert_per_month_to_per_day
     #     config=ContourPlotConfig(0.1, 16, colormap=plt.cm.jet_r, title='Precipitation', unit='mm/day', logscale=True),
     #     format=DataFormat.GEOTIFF_WORLDCLIM_HISTORY,
     #     source="https://www.worldclim.org/data/worldclim21.html"
@@ -168,7 +175,6 @@ HISTORIC_DATA_SETS = [
         filepath="data/worldclim/history/wc2.1_10m_tmax",
         year_range=(1970, 2000),
         resolution=SpatialResolution.MIN10,
-        # conversion_factor=1
         format=DataFormat.GEOTIFF_WORLDCLIM_HISTORY,
         source="https://www.worldclim.org/data/worldclim21.html",
     ),
@@ -177,7 +183,6 @@ HISTORIC_DATA_SETS = [
         filepath="data/worldclim/history/wc2.1_5m_tmax",
         year_range=(1970, 2000),
         resolution=SpatialResolution.MIN5,
-        # conversion_factor=1
         format=DataFormat.GEOTIFF_WORLDCLIM_HISTORY,
         source="https://www.worldclim.org/data/worldclim21.html",
     ),

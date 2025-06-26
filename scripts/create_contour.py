@@ -77,7 +77,9 @@ def _create_contour(data_set_config: ClimateDataSetConfig, month: int):
         lon_range, lat_range, values = read_geotiff_history(data_set_config.filepath, month)
     else:
         assert f"DataFormat {data_set_config.format} is not supported"
-    values = values * data_set_config.conversion_factor
+    values = values * data_set_config.conversion_function
+    if data_set_config.conversion_function is not None:
+        values = data_set_config.conversion_function(values, month)
     geo_grid = GeoGrid(lon_range=lon_range, lat_range=lat_range, values=values)
     contour_map = ContourTileBuilder(
         data_set_config.contour_config,
