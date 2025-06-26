@@ -8,7 +8,7 @@ from pydantic import BaseModel
 
 from climatemaps.datasets import SpatialResolution
 from climatemaps.settings import settings
-from climatemaps.datasets import ClimateDataSetConfig
+from climatemaps.datasets import ClimateDataConfig
 from climatemaps.datasets import ClimateVariable
 
 logger = logging.getLogger(__name__)
@@ -73,13 +73,13 @@ class ClimateMap(BaseModel):
     source: str
 
     @classmethod
-    def create(cls, config: ClimateDataSetConfig):
+    def create(cls, config: ClimateDataConfig):
         return ClimateMap(
-            data_type=config.data_type,
+            data_type=config.data_type_slug,
             year_range=config.year_range,
             variable=config.variable,
             resolution=config.resolution,
-            tiles_url=f"{settings.TILE_SERVER_URL}/{config.data_type}",
+            tiles_url=f"{settings.TILE_SERVER_URL}/{config.data_type_slug}",
             colormap_url="?",
             max_zoom_raster=settings.ZOOM_MAX_RASTER,
             max_zoom_vector=get_config().zoom_max,

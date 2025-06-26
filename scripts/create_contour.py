@@ -2,9 +2,9 @@
 import os
 import sys
 import concurrent.futures
+from typing import List
 
 import numpy as np
-
 
 module_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 if module_dir not in sys.path:
@@ -14,9 +14,8 @@ from climatemaps.config import ClimateMapsConfig
 from climatemaps.config import get_config
 from climatemaps.contour import ContourTileBuilder
 from climatemaps.data import import_climate_data
-from climatemaps.datasets import CLIMATE_VARIABLES
 from climatemaps.datasets import ClimateVarKey
-from climatemaps.datasets import ClimateDataSetConfig
+from climatemaps.datasets import ClimateDataConfig
 from climatemaps.datasets import DataFormat
 from climatemaps.datasets import HISTORIC_DATA_SETS
 from climatemaps.datasets import SpatialResolution
@@ -32,7 +31,7 @@ maps_config: ClimateMapsConfig = get_config()
 np.set_printoptions(3, threshold=100, suppress=True)  # .3f
 
 # DATA_SETS = CLIMATE_MODEL_DATA_SETS + HISTORIC_DATA_SETS
-DATA_SETS = HISTORIC_DATA_SETS
+DATA_SETS: List[ClimateDataConfig] = HISTORIC_DATA_SETS
 DATA_SETS = list(
     filter(
         lambda x: x.variable_type == ClimateVarKey.T_MAX
@@ -62,12 +61,12 @@ def main():
 
 def process(config_month_pair):
     config, month = config_month_pair
-    logger.info(f'Creating image and tiles for "{config.data_type}" and month {month}')
+    logger.info(f'Creating image and tiles for "{config.data_type_slug}" and month {month}')
     _create_contour(config, month)
-    return f"{config.data_type}-{month}"  # Just an indicator of progress
+    return f"{config.data_type_slug}-{month}"  # Just an indicator of progress
 
 
-def _create_contour(data_set_config: ClimateDataSetConfig, month: int):
+def _create_contour(data_set_config: ClimateDataConfig, month: int):
     lat_range, lon_range, values = None, None, None
     if data_set_config.format == DataFormat.IPCC_GRID:
         lat_range, lon_range, values = import_climate_data(data_set_config.filepath, month)
@@ -77,7 +76,7 @@ def _create_contour(data_set_config: ClimateDataSetConfig, month: int):
         lon_range, lat_range, values = read_geotiff_history(data_set_config.filepath, month)
     else:
         assert f"DataFormat {data_set_config.format} is not supported"
-    values = values * data_set_config.conversion_function
+    values = values * data_set_config.conversion_factor
     if data_set_config.conversion_function is not None:
         values = data_set_config.conversion_function(values, month)
     geo_grid = GeoGrid(lon_range=lon_range, lat_range=lat_range, values=values)
@@ -89,7 +88,7 @@ def _create_contour(data_set_config: ClimateDataSetConfig, month: int):
     )
     contour_map.create_tiles(
         maps_config.data_dir_out,
-        data_set_config.data_type,
+        data_set_config.data_type_slug,
         month,
         figure_dpi=maps_config.figure_dpi,
         zoom_factor=maps_config.zoom_factor,

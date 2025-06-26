@@ -3,6 +3,7 @@ import enum
 from dataclasses import dataclass
 from typing import Callable
 from typing import Dict
+from typing import List
 from typing import Optional
 from typing import Tuple
 
@@ -21,9 +22,9 @@ class DataFormat(enum.Enum):
 
 
 class SpatialResolution(enum.Enum):
-    MIN10 = "10min"
-    MIN5 = "5min"
-    MIN2_5 = "2.5min"
+    MIN10 = "10m"
+    MIN5 = "5m"
+    MIN2_5 = "2.5m"
 
 
 class ClimateVarKey(enum.Enum):
@@ -99,12 +100,12 @@ def convert_per_month_to_per_day(
 
 
 @dataclass
-class ClimateDataSetConfig:
+class ClimateDataConfig:
     variable_type: ClimateVarKey.PRECIPITATION
     filepath: str
-    year_range: Tuple[int, int]
-    resolution: SpatialResolution
     format: DataFormat
+    resolution: SpatialResolution
+    year_range: Tuple[int, int]
     conversion_function: Callable[[npt.NDArray[np.floating], int], npt.NDArray[np.floating]] = None
     conversion_factor: float = 1
     source: Optional[str] = None
@@ -114,7 +115,7 @@ class ClimateDataSetConfig:
         return CLIMATE_VARIABLES[self.variable_type]
 
     @property
-    def data_type(self) -> str:
+    def data_type_slug(self) -> str:
         return f"{self.variable.name}_{self.year_range[0]}_{self.year_range[1]}_{self.resolution.value}".lower().replace(
             ".", "_"
         )
@@ -124,146 +125,140 @@ class ClimateDataSetConfig:
         return CLIMATE_CONTOUR_CONFIGS[self.variable_type]
 
 
-CLIMATE_MODEL_DATA_SETS = [
-    ClimateDataSetConfig(
-        variable_type=ClimateVarKey.PRECIPITATION,
-        filepath="data/climate_models/wc2.1_10m_prec_ACCESS-CM2_ssp126_2021-2040.tif",
-        year_range=(2021, 2040),
-        resolution=SpatialResolution.MIN10,
-        conversion_function=convert_per_month_to_per_day,
-        format=DataFormat.GEOTIFF_WORLDCLIM_CMIP6,
-        source="https://www.worldclim.org/data/cmip6/cmip6_clim10m.html",
-    )
+@dataclass
+class ClimateDataConfigGroup:
+    variable_types: List[ClimateVarKey]
+    format: DataFormat
+    resolutions: List[SpatialResolution]
+    year_ranges: List[Tuple[int, int]]
+    conversion_function: Callable[[npt.NDArray[np.floating], int], npt.NDArray[np.floating]] = None
+    conversion_factor: float = 1
+    source: Optional[str] = None
+    configs: List[ClimateDataConfig] = ()
+    filepath_template: Optional[str] = None
+
+    def __post_init__(self):
+        for cfg in self.configs:
+            cfg.group = self
+
+    def create_configs(self) -> List[ClimateDataConfig]:
+        configs: List[ClimateDataConfig] = []
+        for variable_type in self.variable_types:
+            for year_range in self.year_ranges:
+                for resolution in self.resolutions:
+                    config = ClimateDataConfig(
+                        variable_type=variable_type,
+                        format=self.format,
+                        resolution=resolution,
+                        year_range=year_range,
+                        filepath=self.filepath_template.format(
+                            resolution=resolution.value,
+                            year_range=year_range,
+                            variable_name=CLIMATE_VARIABLES[variable_type].name.lower(),
+                        ),
+                        conversion_function=self.conversion_function,
+                        conversion_factor=self.conversion_factor,
+                    )
+                    configs.append(config)
+        return configs
+
+
+# CLIMATE_MODEL_DATA_SETS = [
+#     ClimateDataConfig(
+#         variable_type=ClimateVarKey.PRECIPITATION,
+#         filepath="data/climate_models/wc2.1_10m_prec_ACCESS-CM2_ssp126_2021-2040.tif",
+#         year_range=(2021, 2040),
+#         resolution=SpatialResolution.MIN10,
+#         conversion_function=convert_per_month_to_per_day,
+#         format=DataFormat.GEOTIFF_WORLDCLIM_CMIP6,
+#         source="https://www.worldclim.org/data/cmip6/cmip6_clim10m.html",
+#     )
+# ]
+
+HISTORIC_DATA_GROUPS: List[ClimateDataConfigGroup] = [
+    ClimateDataConfigGroup(
+        variable_types=[ClimateVarKey.T_MAX],
+        format=DataFormat.GEOTIFF_WORLDCLIM_HISTORY,
+        source="https://www.worldclim.org/data/worldclim21.html",
+        resolutions=[SpatialResolution.MIN10, SpatialResolution.MIN5, SpatialResolution.MIN2_5],
+        year_ranges=[(1970, 2000)],
+        filepath_template="data/worldclim/history/wc2.1_{resolution}_{variable_name}",
+    ),
 ]
 
-HISTORIC_DATA_SETS = [
-    # ClimateMapConfig(
-    #     data_type='precipitation_worldclim_2.5m',
-    #     filepath='data/worldclim/history/wc2.1_2.5m_prec',
-    #     variable=precipitation,
-    #     year_range=(1970, 2000),
-    #     resolution=Resolution.MIN2_5,
-    #     conversion_function=convert_per_month_to_per_day
-    #     config=ContourPlotConfig(0.1, 16, colormap=plt.cm.jet_r, title='Precipitation', unit='mm/day', logscale=True),
-    #     format=DataFormat.GEOTIFF_WORLDCLIM_HISTORY,
-    #     source="https://www.worldclim.org/data/worldclim21.html"
-    # ),
-    # ClimateMapConfig(
-    #     data_type='precipitation_worldclim_5m',
-    #     filepath='data/worldclim/history/wc2.1_5m_prec',
-    #     variable=precipitation,
-    #     year_range=(1970, 2000),
-    #     resolution=Resolution.MIN5,
-    #     conversion_function=convert_per_month_to_per_day
-    #     config=ContourPlotConfig(0.1, 16, colormap=plt.cm.jet_r, title='Precipitation', unit='mm/day', logscale=True),
-    #     format=DataFormat.GEOTIFF_WORLDCLIM_HISTORY,
-    #     source="https://www.worldclim.org/data/worldclim21.html"
-    # ),
-    # ClimateMapConfig(
-    #     data_type='precipitation_worldclim_10m',
-    #     filepath='data/worldclim/history/wc2.1_10m_prec',
-    #     variable=precipitation,
-    #     year_range=(1970, 2000),
-    #     resolution=Resolution.MIN10,
-    #     conversion_function=convert_per_month_to_per_day
-    #     config=ContourPlotConfig(0.1, 16, colormap=plt.cm.jet_r, title='Precipitation', unit='mm/day', logscale=True),
-    #     format=DataFormat.GEOTIFF_WORLDCLIM_HISTORY,
-    #     source="https://www.worldclim.org/data/worldclim21.html"
-    # ),
-    ClimateDataSetConfig(
-        variable_type=ClimateVarKey.T_MAX,
-        filepath="data/worldclim/history/wc2.1_10m_tmax",
-        year_range=(1970, 2000),
-        resolution=SpatialResolution.MIN10,
-        format=DataFormat.GEOTIFF_WORLDCLIM_HISTORY,
-        source="https://www.worldclim.org/data/worldclim21.html",
-    ),
-    ClimateDataSetConfig(
-        variable_type=ClimateVarKey.T_MAX,
-        filepath="data/worldclim/history/wc2.1_5m_tmax",
-        year_range=(1970, 2000),
-        resolution=SpatialResolution.MIN5,
-        format=DataFormat.GEOTIFF_WORLDCLIM_HISTORY,
-        source="https://www.worldclim.org/data/worldclim21.html",
-    ),
-    # ClimateMapConfig(
-    #     data_type='temperature_max_worldclim_2.5m',
-    #     filepath='data/worldclim/history/wc2.1_2.5m_tmax',
-    #     variable=temperature_max,
-    #     year_range=(1970, 2000),
-    #     resolution=Resolution.MIN2_5,
-    #     config=ContourPlotConfig(-20, 45, colormap=plt.cm.jet, title='Max. temperature', unit='C'),
-    #     format=DataFormat.GEOTIFF_WORLDCLIM_HISTORY,
-    #     source="https://www.worldclim.org/data/worldclim21.html"
-    # ),
-    # ClimateMapConfig(
-    #     data_type='precipitation',
-    #     filepath='data/precipitation/cpre6190.dat',
-    #     conversion_factor=0.1,  # (millimetres/day) *10
-    #     config=ContourPlotConfig(0.1, 16, colormap=plt.cm.jet_r, title='Precipitation', unit='mm/day', logscale=True),
-    #     format=DataFormat.IPCC_GRID
-    # ),
-    # ClimateMapConfig(
-    #     data_type='cloud',
-    #     filepath='data/cloud/ccld6190.dat',
-    #     conversion_factor=1,
-    #     config=ContourPlotConfig(0, 100, colormap=plt.cm.jet_r, title='Cloud coverage', unit='%'),
-    #     format=DataFormat.IPCC_GRID
-    # ),
-    # ClimateMapConfig(
-    #     data_type='mintemp',
-    #     filepath='data/mintemp/ctmn6190.dat',
-    #     conversion_factor=0.1,
-    #     config=ContourPlotConfig(-30, 28, colormap=plt.cm.jet, title='Min. temperature', unit='C'),
-    #     format=DataFormat.IPCC_GRID
-    # ),
-    # ClimateMapConfig(
-    #     data_type='meantemp',
-    #     filepath='data/meantemp/ctmp6190.dat',
-    #     conversion_factor=0.1,
-    #     config=ContourPlotConfig(-30, 35, colormap=plt.cm.jet, title='Mean temperature', unit='C'),
-    #     format=DataFormat.IPCC_GRID
-    # ),
-    # ClimateMapConfig(
-    #     data_type='maxtemp',
-    #     filepath='data/maxtemp/ctmx6190.dat',
-    #     conversion_factor=0.1,
-    #     config=ContourPlotConfig(-20, 45, colormap=plt.cm.jet, title='Max. temperature', unit='C'),
-    #     format=DataFormat.IPCC_GRID
-    # ),
-    # ClimateMapConfig(
-    #     data_type='diurnaltemprange',
-    #     filepath='data/diurnaltemprange/cdtr6190.dat',
-    #     conversion_factor=0.1,
-    #     config=ContourPlotConfig(5, 20, colormap=plt.cm.jet, title='Diurnal temperature range', unit='C'),
-    #     format=DataFormat.IPCC_GRID
-    # ),
-    # ClimateMapConfig(
-    #     data_type='wetdays',
-    #     filepath='data/wetdays/cwet6190.dat',
-    #     conversion_factor=0.1,
-    #     config=ContourPlotConfig(0, 30, colormap=plt.cm.jet_r, title='Wet days', unit='days'),
-    #     format=DataFormat.IPCC_GRID
-    # ),
-    # ClimateMapConfig(
-    #     data_type='wind',
-    #     filepath='data/wind/cwnd6190.dat',
-    #     conversion_factor=0.1,
-    #     config=ContourPlotConfig(0, 9, colormap=plt.cm.jet, title='Wind speed', unit='m/s'),
-    #     format=DataFormat.IPCC_GRID
-    # ),
-    # ClimateMapConfig(
-    #     data_type='radiation',
-    #     filepath='data/radiation/crad6190.dat',
-    #     conversion_factor=1,
-    #     config=ContourPlotConfig(0, 300, colormap=plt.cm.jet, title='Radiation', unit='W/m^2'),
-    #     format=DataFormat.IPCC_GRID
-    # ),
-    # ClimateMapConfig(
-    #     data_type='vapourpressure',
-    #     filepath='data/vapourpressure/cvap6190.dat',
-    #     conversion_factor=0.1,
-    #     config=ContourPlotConfig(1, 34, colormap=plt.cm.jet, title='Vapour pressure', unit='hPa'),
-    #     format=DataFormat.IPCC_GRID
-    # ),
+HISTORIC_DATA_SETS: List[ClimateDataConfig] = [
+    cfg for data_group in HISTORIC_DATA_GROUPS for cfg in data_group.create_configs()
 ]
+
+# IPCC_HISTORIC_SETS = [
+#     ClimateMapConfig(
+#         data_type='precipitation',
+#         filepath='data/precipitation/cpre6190.dat',
+#         conversion_factor=0.1,  # (millimetres/day) *10
+#         config=ContourPlotConfig(0.1, 16, colormap=plt.cm.jet_r, title='Precipitation', unit='mm/day', logscale=True),
+#         format=DataFormat.IPCC_GRID
+#     ),
+#     ClimateMapConfig(
+#         data_type='cloud',
+#         filepath='data/cloud/ccld6190.dat',
+#         conversion_factor=1,
+#         config=ContourPlotConfig(0, 100, colormap=plt.cm.jet_r, title='Cloud coverage', unit='%'),
+#         format=DataFormat.IPCC_GRID
+#     ),
+#     ClimateMapConfig(
+#         data_type='mintemp',
+#         filepath='data/mintemp/ctmn6190.dat',
+#         conversion_factor=0.1,
+#         config=ContourPlotConfig(-30, 28, colormap=plt.cm.jet, title='Min. temperature', unit='C'),
+#         format=DataFormat.IPCC_GRID
+#     ),
+#     ClimateMapConfig(
+#         data_type='meantemp',
+#         filepath='data/meantemp/ctmp6190.dat',
+#         conversion_factor=0.1,
+#         config=ContourPlotConfig(-30, 35, colormap=plt.cm.jet, title='Mean temperature', unit='C'),
+#         format=DataFormat.IPCC_GRID
+#     ),
+#     ClimateMapConfig(
+#         data_type='maxtemp',
+#         filepath='data/maxtemp/ctmx6190.dat',
+#         conversion_factor=0.1,
+#         config=ContourPlotConfig(-20, 45, colormap=plt.cm.jet, title='Max. temperature', unit='C'),
+#         format=DataFormat.IPCC_GRID
+#     ),
+#     ClimateMapConfig(
+#         data_type='diurnaltemprange',
+#         filepath='data/diurnaltemprange/cdtr6190.dat',
+#         conversion_factor=0.1,
+#         config=ContourPlotConfig(5, 20, colormap=plt.cm.jet, title='Diurnal temperature range', unit='C'),
+#         format=DataFormat.IPCC_GRID
+#     ),
+#     ClimateMapConfig(
+#         data_type='wetdays',
+#         filepath='data/wetdays/cwet6190.dat',
+#         conversion_factor=0.1,
+#         config=ContourPlotConfig(0, 30, colormap=plt.cm.jet_r, title='Wet days', unit='days'),
+#         format=DataFormat.IPCC_GRID
+#     ),
+#     ClimateMapConfig(
+#         data_type='wind',
+#         filepath='data/wind/cwnd6190.dat',
+#         conversion_factor=0.1,
+#         config=ContourPlotConfig(0, 9, colormap=plt.cm.jet, title='Wind speed', unit='m/s'),
+#         format=DataFormat.IPCC_GRID
+#     ),
+#     ClimateMapConfig(
+#         data_type='radiation',
+#         filepath='data/radiation/crad6190.dat',
+#         conversion_factor=1,
+#         config=ContourPlotConfig(0, 300, colormap=plt.cm.jet, title='Radiation', unit='W/m^2'),
+#         format=DataFormat.IPCC_GRID
+#     ),
+#     ClimateMapConfig(
+#         data_type='vapourpressure',
+#         filepath='data/vapourpressure/cvap6190.dat',
+#         conversion_factor=0.1,
+#         config=ContourPlotConfig(1, 34, colormap=plt.cm.jet, title='Vapour pressure', unit='hPa'),
+#         format=DataFormat.IPCC_GRID
+#     ),
+# ]
