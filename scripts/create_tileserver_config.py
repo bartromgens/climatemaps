@@ -12,7 +12,7 @@ from climatemaps.datasets import ClimateDataConfig
 from climatemaps.settings import settings
 
 
-config = {"options": {"paths": {"root": "../data", "mbtiles": "tiles"}}, "data": {}}
+config = {"options": {"paths": {"root": "../", "mbtiles": "tiles"}}, "data": {}}
 
 
 def main(data_configs: List[ClimateDataConfig]):
@@ -28,7 +28,7 @@ def main(data_configs: List[ClimateDataConfig]):
             }
 
     # write to file
-    with open("config.json", "w") as f:
+    with open("tileserver_config.json", "w") as f:
         json.dump(config, f, indent=2)
 
 

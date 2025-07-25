@@ -62,7 +62,7 @@ to create contour and raster mbtiles.
 
 ### Create tileserver config
 ```bash
-python tileserver/create_config.py
+python scripts/create_tileserver_config.py
 ```
 to generate the tileserver config.
 
@@ -73,7 +73,7 @@ uvicorn api.main:app --reload
 
 ### Run the tileserver (tileserver-gl)
 ```bash
-tileserver-gl --config tileserver/config.json --port 8080
+tileserver-gl --config tileserver_config.json --port 8080
 ```
 
 ### Run the client (Angular)

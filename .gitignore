@@ -203,5 +203,7 @@ __marimo__/
 # Project specific
 settings_local.py
 data/*
+tiles/*
 
 out.mbtiles
+tileserver_config.json
