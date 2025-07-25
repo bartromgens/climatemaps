@@ -11,7 +11,7 @@ from climatemaps.config import ClimateMap
 from climatemaps.settings import settings
 
 
-config = {"options": {"paths": {"root": "../website", "mbtiles": "data"}}, "data": {}}
+config = {"options": {"paths": {"root": "../data", "mbtiles": "tiles"}}, "data": {}}
 
 
 def main(data_sets: List[ClimateMap]):

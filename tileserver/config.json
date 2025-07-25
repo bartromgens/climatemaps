@@ -1,16 +1,16 @@
 {
   "options": {
     "paths": {
-      "root": "../website",
-      "mbtiles": "data"
+      "root": "../data",
+      "mbtiles": "tiles"
     }
   },
   "data": {
-    "temperature_max_worldclim_10m_vector_1": {
-      "mbtiles": "temperature_max_worldclim_10m/1_vector.mbtiles"
+    "tmax_1970_2000_10m_vector_1": {
+      "mbtiles": "tmax_1970_2000_10m/1_vector.mbtiles"
     },
-    "temperature_max_worldclim_10m_raster_1": {
-      "mbtiles": "temperature_max_worldclim_10m/1_raster.mbtiles"
+    "tmax_1970_2000_10m_raster_1": {
+      "mbtiles": "tmax_1970_2000_10m/1_raster.mbtiles"
     }
   }
 }

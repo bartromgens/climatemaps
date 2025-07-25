@@ -203,6 +203,5 @@ __marimo__/
 # Project specific
 settings_local.py
 data/*
-website/data/
 
 out.mbtiles

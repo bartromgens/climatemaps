@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 @dataclass
 class ClimateMapsConfig:
-    data_dir_out = "website/data"
+    data_dir_out = "data/tiles"
     zoom_min = 1
 
     @property
