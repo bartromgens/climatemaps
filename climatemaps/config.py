@@ -55,7 +55,6 @@ class ClimateMapsConfigDev(ClimateMapsConfig):
         return 1000
 
 
-# TODO: use local setting file instead
 def get_config() -> ClimateMapsConfig:
     logger.info(f"DEV_MODE={settings.DEV_MODE}")
     return ClimateMapsConfigDev() if os.getenv("DEV") or settings.DEV_MODE else ClimateMapsConfig()
@@ -70,7 +69,7 @@ class ClimateMap(BaseModel):
     colormap_url: str
     max_zoom_raster: int
     max_zoom_vector: int
-    source: str
+    source: Optional[str]
 
     @classmethod
     def create(cls, config: ClimateDataConfig):
