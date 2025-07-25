@@ -1,15 +1,11 @@
 from typing import List
 
 from fastapi import FastAPI
-from fastapi.staticfiles import StaticFiles
 
 from climatemaps.config import ClimateMap
 from climatemaps.settings import settings
 
 app = FastAPI()
-
-app.mount("/static/", StaticFiles(directory="website/"), name="data")
-
 
 climate_maps = [ClimateMap.create(maps_config) for maps_config in settings.DATA_SETS_API]
 
