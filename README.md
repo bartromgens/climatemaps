@@ -81,3 +81,9 @@ In `./client` run:
 ```bash
 ng serve
 ```
+
+## Tests
+Run:
+```bash
+pytest
+```
