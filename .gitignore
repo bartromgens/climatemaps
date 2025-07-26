@@ -206,4 +206,3 @@ data/*
 tiles/*
 
 out.mbtiles
-tileserver_config.json
