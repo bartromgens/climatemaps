@@ -90,13 +90,15 @@ Run:
 pytest
 ```
 
-## Deployment (to openclimatemap.org)
+## Build and deploy (to openclimatemap.org)
 
 ### Everything
-Deploy client and backend:
+Build and deploy client and backend:
 ```bash
 bash scripts/deploy.sh
 ```
+
+TODO: include create tiles, create config and upload tiles
 
 ### Client
 Deploy the client angular app:
@@ -109,3 +111,8 @@ bash scripts/deploy_client.sh
 bash scripts/deploy_backend.sh
 ```
 
+### Upload tiles (optional)
+If you have locally created tiles, upload them to the server with:
+```bash
+rsync -avP tiles openclimatemap.org:/home/bart/climatemaps
+```
