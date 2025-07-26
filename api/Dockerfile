@@ -8,13 +8,13 @@ RUN apt-get update && \
 WORKDIR /app
 
 # Install dependencies
-COPY setup.py .
-COPY README.md .
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Install climatemaps package
 COPY climatemaps ./climatemaps
+COPY setup.py .
+COPY README.md .
 RUN pip install --no-cache-dir .
 
 # Copy the rest of your FastAPI app
