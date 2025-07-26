@@ -1,8 +1,11 @@
 #!/usr/bin/env python3
+import argparse
+import multiprocessing
 import os
 import sys
 import concurrent.futures
 from typing import List
+from typing import Tuple
 
 import numpy as np
 
@@ -41,7 +44,7 @@ DATA_SETS: List[ClimateDataConfig] = HISTORIC_DATA_SETS
 # )
 
 
-def main():
+def main(force_recreate: bool = False):
     month_upper = 1 if settings.DEV_MODE else 12
     tasks = [
         (contour_config, month)
@@ -51,18 +54,47 @@ def main():
     total = len(tasks)
 
     num_processes = 2
+    run_tasks_with_process_pool(tasks, process, num_processes)
+
+
+def run_tasks_with_process_pool(tasks, process, num_processes):
+    total = len(tasks)
     with concurrent.futures.ProcessPoolExecutor(max_workers=num_processes) as executor:
-        futures = {executor.submit(process, task): task for task in tasks}
-        for counter, future in enumerate(concurrent.futures.as_completed(futures)):
-            result = future.result()
-            progress = counter / total * 100.0
-            logger.info(f"Completed: {result} | Progress: {int(progress)}%")
+        try:
+            futures = {executor.submit(process, task): task for task in tasks}
+            for counter, future in enumerate(concurrent.futures.as_completed(futures)):
+                result = future.result()  # May raise if process fails
+                progress = counter / total * 100.0
+                logger.info(f"Completed: {result} | Progress: {int(progress)}%")
+        except KeyboardInterrupt:
+            logger.warning("KeyboardInterrupt received! Attempting to shut down executor...")
+
+            # Shutdown the executor immediately
+            executor.shutdown(wait=False, cancel_futures=True)
+
+            # Terminate all child processes (optional but safer)
+            terminate_process_pool_children()
+
+            raise  # Re-raise to let caller handle or exit
 
 
-def process(config_month_pair):
+def terminate_process_pool_children():
+    """Forcefully kill any subprocesses started by the current process."""
+    for proc in multiprocessing.active_children():
+        logger.info(f"Terminating child process PID={proc.pid}")
+        proc.terminate()
+    logger.info("All child processes terminated.")
+
+
+def process(config_month_pair: Tuple[ClimateDataConfig, int]):
     config, month = config_month_pair
     logger.info(f'Creating image and tiles for "{config.data_type_slug}" and month {month}')
-    _create_contour(config, month)
+    if not _tile_files_exist(config, month):
+        _create_contour(config, month)
+    else:
+        logger.info(
+            f'Skip creation of "{config.data_type_slug}" - {month} because it already exist'
+        )
     return f"{config.data_type_slug}-{month}"  # Just an indicator of progress
 
 
@@ -95,5 +127,44 @@ def _create_contour(data_set_config: ClimateDataConfig, month: int):
     )
 
 
+def _tile_files_exist(data_set_config: ClimateDataConfig, month: int) -> bool:
+    files_to_check = [
+        f"{month}_raster.mbtiles",
+        f"{month}_vector.mbtiles",
+        f"{month}_colorbar.png",
+    ]
+
+    directory = os.path.join(maps_config.data_dir_out, data_set_config.data_type_slug)
+    status = _check_files_exist(directory, files_to_check)
+    all_exist = True
+    for file, exists in status.items():
+        if exists:
+            print(f"{file} already exists")
+        else:
+            all_exist = False
+
+    return all_exist
+
+
+def _check_files_exist(directory, filenames):
+    if not os.path.isdir(directory):
+        raise ValueError(f"The path '{directory}' is not a valid directory.")
+
+    result = {}
+    for filename in filenames:
+        full_path = os.path.join(directory, filename)
+        result[filename] = os.path.isfile(full_path)
+
+        return result
+
+
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser(description="Your script description here.")
+    parser.add_argument(
+        "--force-recreate",
+        action="store_true",
+        default=False,
+        help="Force recreation of resources. Defaults to False.",
+    )
+    args = parser.parse_args()
+    main(force_recreate=args.force_recreate)
