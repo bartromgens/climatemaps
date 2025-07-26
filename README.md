@@ -22,7 +22,9 @@ https://cds.climate.copernicus.eu/datasets/projections-cmip6?tab=download
 ### Visualizations
 - https://interactive-atlas.ipcc.ch/
 
-## Dependencies
+## Development
+
+### Dependencies
 
 ##### GDAL
 GDAL is needed for the gdal2tiles.py script that creates map-tiles from a single image (matplotlib plot).
@@ -51,39 +53,59 @@ make install
 npm install -g tileserver-gl
 ```
 
-## Run
+### Run
 
-### Create contour data
+#### Create contour data
 Run:
 ```bash
 python scrips/create_contour.py
 ```
 to create contour and raster mbtiles.
 
-### Create tileserver config
+#### Create tileserver config
 ```bash
 python scripts/create_tileserver_config.py
 ```
 to generate the tileserver config.
 
-### Run the backend (FastAPI server)
+#### Run the backend (FastAPI server)
 ```bash
 uvicorn api.main:app --reload
 ```
 
-### Run the tileserver (tileserver-gl)
+#### Run the tileserver (tileserver-gl)
 ```bash
 tileserver-gl --config tileserver_config.json --port 8080
 ```
 
-### Run the client (Angular)
+#### Run the client (Angular)
 In `./client` run:
 ```bash
 ng serve
 ```
 
-## Tests
+### Tests
 Run:
 ```bash
 pytest
 ```
+
+## Deployment (to openclimatemap.org)
+
+### Everything
+Deploy client and backend:
+```bash
+bash scripts/deploy.sh
+```
+
+### Client
+Deploy the client angular app:
+```bash
+bash scripts/deploy_client.sh
+```
+
+### API and TileServer
+```bash
+bash scripts/deploy_backend.sh
+```
+
