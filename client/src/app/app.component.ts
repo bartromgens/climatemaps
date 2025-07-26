@@ -19,5 +19,5 @@ import { MatButtonModule } from '@angular/material/button';
   styleUrl: './app.component.scss',
 })
 export class AppComponent {
-  readonly title: string = 'climatemaps';
+  readonly title: string = 'OpenClimateMap';
 }
