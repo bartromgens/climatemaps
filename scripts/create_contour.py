@@ -32,13 +32,13 @@ np.set_printoptions(3, threshold=100, suppress=True)  # .3f
 
 # DATA_SETS = CLIMATE_MODEL_DATA_SETS + HISTORIC_DATA_SETS
 DATA_SETS: List[ClimateDataConfig] = HISTORIC_DATA_SETS
-DATA_SETS = list(
-    filter(
-        lambda x: x.variable_type == ClimateVarKey.T_MAX
-        and x.resolution == SpatialResolution.MIN10,
-        DATA_SETS,
-    )
-)
+# DATA_SETS = list(
+#     filter(
+#         lambda x: x.variable_type == ClimateVarKey.T_MAX
+#         and x.resolution == SpatialResolution.MIN10,
+#         DATA_SETS,
+#     )
+# )
 
 
 def main():
