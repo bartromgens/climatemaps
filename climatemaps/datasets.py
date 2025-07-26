@@ -177,7 +177,7 @@ class ClimateDataConfigGroup:
 
 HISTORIC_DATA_GROUPS: List[ClimateDataConfigGroup] = [
     ClimateDataConfigGroup(
-        variable_types=[ClimateVarKey.T_MAX],
+        variable_types=[ClimateVarKey.T_MAX, ClimateVarKey.T_MIN],
         format=DataFormat.GEOTIFF_WORLDCLIM_HISTORY,
         source="https://www.worldclim.org/data/worldclim21.html",
         resolutions=[SpatialResolution.MIN10, SpatialResolution.MIN5, SpatialResolution.MIN2_5],
