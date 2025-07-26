@@ -1,6 +1,6 @@
 export const environment = {
   production: true,
-  apiBaseUrl: 'https://api.climatemaps.com/api',
+  apiBaseUrl: 'https://openclimatemap.org/api',
   matomoUrl: 'https://piwik.romgens.com/',
   matomoSiteId: 9999,
 };
