@@ -5,20 +5,19 @@ RUN apt-get update && \
       git \
     && rm -rf /var/lib/apt/lists/*
 
-# 1. Set workdir
 WORKDIR /app
 
-# 2. Copy only what we need for install
+# Install dependencies
 COPY setup.py .
 COPY README.md .
-COPY climatemaps ./climatemaps
 COPY requirements.txt .
-
-# 3. Install dependencies & your package
 RUN pip install --no-cache-dir -r requirements.txt
+
+# Install climatemaps package
+COPY climatemaps ./climatemaps
 RUN pip install --no-cache-dir .
 
-# 4. Copy the rest of your FastAPI app
+# Copy the rest of your FastAPI app
 COPY api/ .
 
 # 5. Run Uvicorn
