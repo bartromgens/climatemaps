@@ -52,7 +52,7 @@ def main(force_recreate: bool = False):
         for month in range(1, month_upper + 1)
     ]
 
-    num_processes = 2
+    num_processes = settings.CREATE_CONTOUR_PROCESSES
     run_tasks_with_process_pool(tasks, process, num_processes)
 
 

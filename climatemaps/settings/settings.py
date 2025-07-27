@@ -9,6 +9,8 @@ DATA_SETS_API = HISTORIC_DATA_SETS
 
 TIPPECANOE_DIR = "/usr/local/bin/"
 
+CREATE_CONTOUR_PROCESSES = 1
+
 # Attempt to import local overrides
 try:
     from .settings_local import *  # noqa
