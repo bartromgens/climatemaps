@@ -18,16 +18,27 @@ from climatemaps.tile import tile_files_exist
 logger = logging.getLogger(__name__)
 
 maps_config: ClimateMapsConfig = get_config()
-config = {"options": {"paths": {"root": "./", "mbtiles": "tiles"}}, "data": {}}
 
 
 def main(data_configs: List[ClimateDataConfig]):
+    config = _create_config(data_configs, dev_mode=False)
+    config_dev = _create_config(data_configs, dev_mode=True)
+
+    # write to file
+    with open("tileserver_config.json", "w") as f:
+        json.dump(config, f, indent=2)
+    with open("tileserver_config_dev.json", "w") as f:
+        json.dump(config_dev, f, indent=2)
+
+
+def _create_config(data_configs, dev_mode: bool = False):
+    config = {"options": {"paths": {"root": "./", "mbtiles": "tiles"}}, "data": {}}
     for data_config in data_configs:
-        month_upper = 1 if settings.DEV_MODE else 12
+        month_upper = 1 if dev_mode else 12
         for month in range(1, month_upper + 1):
-            if not tile_files_exist(data_config, month, maps_config):
+            if dev_mode and not tile_files_exist(data_config, month, maps_config):
                 logger.warning(
-                    f"Tiles for {data_config.data_type_slug} {month} does not exist. Excluded from config."
+                    f"Tiles for {data_config.data_type_slug} {month} does not exist. Excluded from config (dev_mode={dev_mode})."
                 )
                 continue
             # vector entry
@@ -38,10 +49,7 @@ def main(data_configs: List[ClimateDataConfig]):
             config["data"][f"{data_config.data_type_slug}_raster_{month}"] = {
                 "mbtiles": f"{data_config.data_type_slug}/{month}_raster.mbtiles"
             }
-
-    # write to file
-    with open("tileserver_config.json", "w") as f:
-        json.dump(config, f, indent=2)
+    return config
 
 
 if __name__ == "__main__":

@@ -75,7 +75,7 @@ uvicorn api.main:app --reload
 
 #### Run the tileserver (tileserver-gl)
 ```bash
-tileserver-gl --config tileserver_config.json --port 8080
+tileserver-gl --config tileserver_config_dev.json --port 8080
 ```
 
 #### Run the client (Angular)

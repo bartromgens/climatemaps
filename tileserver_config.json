@@ -12,11 +12,143 @@
     "tmax_1970_2000_10m_raster_1": {
       "mbtiles": "tmax_1970_2000_10m/1_raster.mbtiles"
     },
+    "tmax_1970_2000_10m_vector_2": {
+      "mbtiles": "tmax_1970_2000_10m/2_vector.mbtiles"
+    },
+    "tmax_1970_2000_10m_raster_2": {
+      "mbtiles": "tmax_1970_2000_10m/2_raster.mbtiles"
+    },
+    "tmax_1970_2000_10m_vector_3": {
+      "mbtiles": "tmax_1970_2000_10m/3_vector.mbtiles"
+    },
+    "tmax_1970_2000_10m_raster_3": {
+      "mbtiles": "tmax_1970_2000_10m/3_raster.mbtiles"
+    },
+    "tmax_1970_2000_10m_vector_4": {
+      "mbtiles": "tmax_1970_2000_10m/4_vector.mbtiles"
+    },
+    "tmax_1970_2000_10m_raster_4": {
+      "mbtiles": "tmax_1970_2000_10m/4_raster.mbtiles"
+    },
+    "tmax_1970_2000_10m_vector_5": {
+      "mbtiles": "tmax_1970_2000_10m/5_vector.mbtiles"
+    },
+    "tmax_1970_2000_10m_raster_5": {
+      "mbtiles": "tmax_1970_2000_10m/5_raster.mbtiles"
+    },
+    "tmax_1970_2000_10m_vector_6": {
+      "mbtiles": "tmax_1970_2000_10m/6_vector.mbtiles"
+    },
+    "tmax_1970_2000_10m_raster_6": {
+      "mbtiles": "tmax_1970_2000_10m/6_raster.mbtiles"
+    },
+    "tmax_1970_2000_10m_vector_7": {
+      "mbtiles": "tmax_1970_2000_10m/7_vector.mbtiles"
+    },
+    "tmax_1970_2000_10m_raster_7": {
+      "mbtiles": "tmax_1970_2000_10m/7_raster.mbtiles"
+    },
+    "tmax_1970_2000_10m_vector_8": {
+      "mbtiles": "tmax_1970_2000_10m/8_vector.mbtiles"
+    },
+    "tmax_1970_2000_10m_raster_8": {
+      "mbtiles": "tmax_1970_2000_10m/8_raster.mbtiles"
+    },
+    "tmax_1970_2000_10m_vector_9": {
+      "mbtiles": "tmax_1970_2000_10m/9_vector.mbtiles"
+    },
+    "tmax_1970_2000_10m_raster_9": {
+      "mbtiles": "tmax_1970_2000_10m/9_raster.mbtiles"
+    },
+    "tmax_1970_2000_10m_vector_10": {
+      "mbtiles": "tmax_1970_2000_10m/10_vector.mbtiles"
+    },
+    "tmax_1970_2000_10m_raster_10": {
+      "mbtiles": "tmax_1970_2000_10m/10_raster.mbtiles"
+    },
+    "tmax_1970_2000_10m_vector_11": {
+      "mbtiles": "tmax_1970_2000_10m/11_vector.mbtiles"
+    },
+    "tmax_1970_2000_10m_raster_11": {
+      "mbtiles": "tmax_1970_2000_10m/11_raster.mbtiles"
+    },
+    "tmax_1970_2000_10m_vector_12": {
+      "mbtiles": "tmax_1970_2000_10m/12_vector.mbtiles"
+    },
+    "tmax_1970_2000_10m_raster_12": {
+      "mbtiles": "tmax_1970_2000_10m/12_raster.mbtiles"
+    },
     "tmax_1970_2000_5m_vector_1": {
       "mbtiles": "tmax_1970_2000_5m/1_vector.mbtiles"
     },
     "tmax_1970_2000_5m_raster_1": {
       "mbtiles": "tmax_1970_2000_5m/1_raster.mbtiles"
+    },
+    "tmax_1970_2000_5m_vector_2": {
+      "mbtiles": "tmax_1970_2000_5m/2_vector.mbtiles"
+    },
+    "tmax_1970_2000_5m_raster_2": {
+      "mbtiles": "tmax_1970_2000_5m/2_raster.mbtiles"
+    },
+    "tmax_1970_2000_5m_vector_3": {
+      "mbtiles": "tmax_1970_2000_5m/3_vector.mbtiles"
+    },
+    "tmax_1970_2000_5m_raster_3": {
+      "mbtiles": "tmax_1970_2000_5m/3_raster.mbtiles"
+    },
+    "tmax_1970_2000_5m_vector_4": {
+      "mbtiles": "tmax_1970_2000_5m/4_vector.mbtiles"
+    },
+    "tmax_1970_2000_5m_raster_4": {
+      "mbtiles": "tmax_1970_2000_5m/4_raster.mbtiles"
+    },
+    "tmax_1970_2000_5m_vector_5": {
+      "mbtiles": "tmax_1970_2000_5m/5_vector.mbtiles"
+    },
+    "tmax_1970_2000_5m_raster_5": {
+      "mbtiles": "tmax_1970_2000_5m/5_raster.mbtiles"
+    },
+    "tmax_1970_2000_5m_vector_6": {
+      "mbtiles": "tmax_1970_2000_5m/6_vector.mbtiles"
+    },
+    "tmax_1970_2000_5m_raster_6": {
+      "mbtiles": "tmax_1970_2000_5m/6_raster.mbtiles"
+    },
+    "tmax_1970_2000_5m_vector_7": {
+      "mbtiles": "tmax_1970_2000_5m/7_vector.mbtiles"
+    },
+    "tmax_1970_2000_5m_raster_7": {
+      "mbtiles": "tmax_1970_2000_5m/7_raster.mbtiles"
+    },
+    "tmax_1970_2000_5m_vector_8": {
+      "mbtiles": "tmax_1970_2000_5m/8_vector.mbtiles"
+    },
+    "tmax_1970_2000_5m_raster_8": {
+      "mbtiles": "tmax_1970_2000_5m/8_raster.mbtiles"
+    },
+    "tmax_1970_2000_5m_vector_9": {
+      "mbtiles": "tmax_1970_2000_5m/9_vector.mbtiles"
+    },
+    "tmax_1970_2000_5m_raster_9": {
+      "mbtiles": "tmax_1970_2000_5m/9_raster.mbtiles"
+    },
+    "tmax_1970_2000_5m_vector_10": {
+      "mbtiles": "tmax_1970_2000_5m/10_vector.mbtiles"
+    },
+    "tmax_1970_2000_5m_raster_10": {
+      "mbtiles": "tmax_1970_2000_5m/10_raster.mbtiles"
+    },
+    "tmax_1970_2000_5m_vector_11": {
+      "mbtiles": "tmax_1970_2000_5m/11_vector.mbtiles"
+    },
+    "tmax_1970_2000_5m_raster_11": {
+      "mbtiles": "tmax_1970_2000_5m/11_raster.mbtiles"
+    },
+    "tmax_1970_2000_5m_vector_12": {
+      "mbtiles": "tmax_1970_2000_5m/12_vector.mbtiles"
+    },
+    "tmax_1970_2000_5m_raster_12": {
+      "mbtiles": "tmax_1970_2000_5m/12_raster.mbtiles"
     },
     "tmax_1970_2000_2_5m_vector_1": {
       "mbtiles": "tmax_1970_2000_2_5m/1_vector.mbtiles"
@@ -24,11 +156,143 @@
     "tmax_1970_2000_2_5m_raster_1": {
       "mbtiles": "tmax_1970_2000_2_5m/1_raster.mbtiles"
     },
+    "tmax_1970_2000_2_5m_vector_2": {
+      "mbtiles": "tmax_1970_2000_2_5m/2_vector.mbtiles"
+    },
+    "tmax_1970_2000_2_5m_raster_2": {
+      "mbtiles": "tmax_1970_2000_2_5m/2_raster.mbtiles"
+    },
+    "tmax_1970_2000_2_5m_vector_3": {
+      "mbtiles": "tmax_1970_2000_2_5m/3_vector.mbtiles"
+    },
+    "tmax_1970_2000_2_5m_raster_3": {
+      "mbtiles": "tmax_1970_2000_2_5m/3_raster.mbtiles"
+    },
+    "tmax_1970_2000_2_5m_vector_4": {
+      "mbtiles": "tmax_1970_2000_2_5m/4_vector.mbtiles"
+    },
+    "tmax_1970_2000_2_5m_raster_4": {
+      "mbtiles": "tmax_1970_2000_2_5m/4_raster.mbtiles"
+    },
+    "tmax_1970_2000_2_5m_vector_5": {
+      "mbtiles": "tmax_1970_2000_2_5m/5_vector.mbtiles"
+    },
+    "tmax_1970_2000_2_5m_raster_5": {
+      "mbtiles": "tmax_1970_2000_2_5m/5_raster.mbtiles"
+    },
+    "tmax_1970_2000_2_5m_vector_6": {
+      "mbtiles": "tmax_1970_2000_2_5m/6_vector.mbtiles"
+    },
+    "tmax_1970_2000_2_5m_raster_6": {
+      "mbtiles": "tmax_1970_2000_2_5m/6_raster.mbtiles"
+    },
+    "tmax_1970_2000_2_5m_vector_7": {
+      "mbtiles": "tmax_1970_2000_2_5m/7_vector.mbtiles"
+    },
+    "tmax_1970_2000_2_5m_raster_7": {
+      "mbtiles": "tmax_1970_2000_2_5m/7_raster.mbtiles"
+    },
+    "tmax_1970_2000_2_5m_vector_8": {
+      "mbtiles": "tmax_1970_2000_2_5m/8_vector.mbtiles"
+    },
+    "tmax_1970_2000_2_5m_raster_8": {
+      "mbtiles": "tmax_1970_2000_2_5m/8_raster.mbtiles"
+    },
+    "tmax_1970_2000_2_5m_vector_9": {
+      "mbtiles": "tmax_1970_2000_2_5m/9_vector.mbtiles"
+    },
+    "tmax_1970_2000_2_5m_raster_9": {
+      "mbtiles": "tmax_1970_2000_2_5m/9_raster.mbtiles"
+    },
+    "tmax_1970_2000_2_5m_vector_10": {
+      "mbtiles": "tmax_1970_2000_2_5m/10_vector.mbtiles"
+    },
+    "tmax_1970_2000_2_5m_raster_10": {
+      "mbtiles": "tmax_1970_2000_2_5m/10_raster.mbtiles"
+    },
+    "tmax_1970_2000_2_5m_vector_11": {
+      "mbtiles": "tmax_1970_2000_2_5m/11_vector.mbtiles"
+    },
+    "tmax_1970_2000_2_5m_raster_11": {
+      "mbtiles": "tmax_1970_2000_2_5m/11_raster.mbtiles"
+    },
+    "tmax_1970_2000_2_5m_vector_12": {
+      "mbtiles": "tmax_1970_2000_2_5m/12_vector.mbtiles"
+    },
+    "tmax_1970_2000_2_5m_raster_12": {
+      "mbtiles": "tmax_1970_2000_2_5m/12_raster.mbtiles"
+    },
     "tmin_1970_2000_10m_vector_1": {
       "mbtiles": "tmin_1970_2000_10m/1_vector.mbtiles"
     },
     "tmin_1970_2000_10m_raster_1": {
       "mbtiles": "tmin_1970_2000_10m/1_raster.mbtiles"
+    },
+    "tmin_1970_2000_10m_vector_2": {
+      "mbtiles": "tmin_1970_2000_10m/2_vector.mbtiles"
+    },
+    "tmin_1970_2000_10m_raster_2": {
+      "mbtiles": "tmin_1970_2000_10m/2_raster.mbtiles"
+    },
+    "tmin_1970_2000_10m_vector_3": {
+      "mbtiles": "tmin_1970_2000_10m/3_vector.mbtiles"
+    },
+    "tmin_1970_2000_10m_raster_3": {
+      "mbtiles": "tmin_1970_2000_10m/3_raster.mbtiles"
+    },
+    "tmin_1970_2000_10m_vector_4": {
+      "mbtiles": "tmin_1970_2000_10m/4_vector.mbtiles"
+    },
+    "tmin_1970_2000_10m_raster_4": {
+      "mbtiles": "tmin_1970_2000_10m/4_raster.mbtiles"
+    },
+    "tmin_1970_2000_10m_vector_5": {
+      "mbtiles": "tmin_1970_2000_10m/5_vector.mbtiles"
+    },
+    "tmin_1970_2000_10m_raster_5": {
+      "mbtiles": "tmin_1970_2000_10m/5_raster.mbtiles"
+    },
+    "tmin_1970_2000_10m_vector_6": {
+      "mbtiles": "tmin_1970_2000_10m/6_vector.mbtiles"
+    },
+    "tmin_1970_2000_10m_raster_6": {
+      "mbtiles": "tmin_1970_2000_10m/6_raster.mbtiles"
+    },
+    "tmin_1970_2000_10m_vector_7": {
+      "mbtiles": "tmin_1970_2000_10m/7_vector.mbtiles"
+    },
+    "tmin_1970_2000_10m_raster_7": {
+      "mbtiles": "tmin_1970_2000_10m/7_raster.mbtiles"
+    },
+    "tmin_1970_2000_10m_vector_8": {
+      "mbtiles": "tmin_1970_2000_10m/8_vector.mbtiles"
+    },
+    "tmin_1970_2000_10m_raster_8": {
+      "mbtiles": "tmin_1970_2000_10m/8_raster.mbtiles"
+    },
+    "tmin_1970_2000_10m_vector_9": {
+      "mbtiles": "tmin_1970_2000_10m/9_vector.mbtiles"
+    },
+    "tmin_1970_2000_10m_raster_9": {
+      "mbtiles": "tmin_1970_2000_10m/9_raster.mbtiles"
+    },
+    "tmin_1970_2000_10m_vector_10": {
+      "mbtiles": "tmin_1970_2000_10m/10_vector.mbtiles"
+    },
+    "tmin_1970_2000_10m_raster_10": {
+      "mbtiles": "tmin_1970_2000_10m/10_raster.mbtiles"
+    },
+    "tmin_1970_2000_10m_vector_11": {
+      "mbtiles": "tmin_1970_2000_10m/11_vector.mbtiles"
+    },
+    "tmin_1970_2000_10m_raster_11": {
+      "mbtiles": "tmin_1970_2000_10m/11_raster.mbtiles"
+    },
+    "tmin_1970_2000_10m_vector_12": {
+      "mbtiles": "tmin_1970_2000_10m/12_vector.mbtiles"
+    },
+    "tmin_1970_2000_10m_raster_12": {
+      "mbtiles": "tmin_1970_2000_10m/12_raster.mbtiles"
     },
     "tmin_1970_2000_5m_vector_1": {
       "mbtiles": "tmin_1970_2000_5m/1_vector.mbtiles"
@@ -36,11 +300,143 @@
     "tmin_1970_2000_5m_raster_1": {
       "mbtiles": "tmin_1970_2000_5m/1_raster.mbtiles"
     },
+    "tmin_1970_2000_5m_vector_2": {
+      "mbtiles": "tmin_1970_2000_5m/2_vector.mbtiles"
+    },
+    "tmin_1970_2000_5m_raster_2": {
+      "mbtiles": "tmin_1970_2000_5m/2_raster.mbtiles"
+    },
+    "tmin_1970_2000_5m_vector_3": {
+      "mbtiles": "tmin_1970_2000_5m/3_vector.mbtiles"
+    },
+    "tmin_1970_2000_5m_raster_3": {
+      "mbtiles": "tmin_1970_2000_5m/3_raster.mbtiles"
+    },
+    "tmin_1970_2000_5m_vector_4": {
+      "mbtiles": "tmin_1970_2000_5m/4_vector.mbtiles"
+    },
+    "tmin_1970_2000_5m_raster_4": {
+      "mbtiles": "tmin_1970_2000_5m/4_raster.mbtiles"
+    },
+    "tmin_1970_2000_5m_vector_5": {
+      "mbtiles": "tmin_1970_2000_5m/5_vector.mbtiles"
+    },
+    "tmin_1970_2000_5m_raster_5": {
+      "mbtiles": "tmin_1970_2000_5m/5_raster.mbtiles"
+    },
+    "tmin_1970_2000_5m_vector_6": {
+      "mbtiles": "tmin_1970_2000_5m/6_vector.mbtiles"
+    },
+    "tmin_1970_2000_5m_raster_6": {
+      "mbtiles": "tmin_1970_2000_5m/6_raster.mbtiles"
+    },
+    "tmin_1970_2000_5m_vector_7": {
+      "mbtiles": "tmin_1970_2000_5m/7_vector.mbtiles"
+    },
+    "tmin_1970_2000_5m_raster_7": {
+      "mbtiles": "tmin_1970_2000_5m/7_raster.mbtiles"
+    },
+    "tmin_1970_2000_5m_vector_8": {
+      "mbtiles": "tmin_1970_2000_5m/8_vector.mbtiles"
+    },
+    "tmin_1970_2000_5m_raster_8": {
+      "mbtiles": "tmin_1970_2000_5m/8_raster.mbtiles"
+    },
+    "tmin_1970_2000_5m_vector_9": {
+      "mbtiles": "tmin_1970_2000_5m/9_vector.mbtiles"
+    },
+    "tmin_1970_2000_5m_raster_9": {
+      "mbtiles": "tmin_1970_2000_5m/9_raster.mbtiles"
+    },
+    "tmin_1970_2000_5m_vector_10": {
+      "mbtiles": "tmin_1970_2000_5m/10_vector.mbtiles"
+    },
+    "tmin_1970_2000_5m_raster_10": {
+      "mbtiles": "tmin_1970_2000_5m/10_raster.mbtiles"
+    },
+    "tmin_1970_2000_5m_vector_11": {
+      "mbtiles": "tmin_1970_2000_5m/11_vector.mbtiles"
+    },
+    "tmin_1970_2000_5m_raster_11": {
+      "mbtiles": "tmin_1970_2000_5m/11_raster.mbtiles"
+    },
+    "tmin_1970_2000_5m_vector_12": {
+      "mbtiles": "tmin_1970_2000_5m/12_vector.mbtiles"
+    },
+    "tmin_1970_2000_5m_raster_12": {
+      "mbtiles": "tmin_1970_2000_5m/12_raster.mbtiles"
+    },
     "tmin_1970_2000_2_5m_vector_1": {
       "mbtiles": "tmin_1970_2000_2_5m/1_vector.mbtiles"
     },
     "tmin_1970_2000_2_5m_raster_1": {
       "mbtiles": "tmin_1970_2000_2_5m/1_raster.mbtiles"
+    },
+    "tmin_1970_2000_2_5m_vector_2": {
+      "mbtiles": "tmin_1970_2000_2_5m/2_vector.mbtiles"
+    },
+    "tmin_1970_2000_2_5m_raster_2": {
+      "mbtiles": "tmin_1970_2000_2_5m/2_raster.mbtiles"
+    },
+    "tmin_1970_2000_2_5m_vector_3": {
+      "mbtiles": "tmin_1970_2000_2_5m/3_vector.mbtiles"
+    },
+    "tmin_1970_2000_2_5m_raster_3": {
+      "mbtiles": "tmin_1970_2000_2_5m/3_raster.mbtiles"
+    },
+    "tmin_1970_2000_2_5m_vector_4": {
+      "mbtiles": "tmin_1970_2000_2_5m/4_vector.mbtiles"
+    },
+    "tmin_1970_2000_2_5m_raster_4": {
+      "mbtiles": "tmin_1970_2000_2_5m/4_raster.mbtiles"
+    },
+    "tmin_1970_2000_2_5m_vector_5": {
+      "mbtiles": "tmin_1970_2000_2_5m/5_vector.mbtiles"
+    },
+    "tmin_1970_2000_2_5m_raster_5": {
+      "mbtiles": "tmin_1970_2000_2_5m/5_raster.mbtiles"
+    },
+    "tmin_1970_2000_2_5m_vector_6": {
+      "mbtiles": "tmin_1970_2000_2_5m/6_vector.mbtiles"
+    },
+    "tmin_1970_2000_2_5m_raster_6": {
+      "mbtiles": "tmin_1970_2000_2_5m/6_raster.mbtiles"
+    },
+    "tmin_1970_2000_2_5m_vector_7": {
+      "mbtiles": "tmin_1970_2000_2_5m/7_vector.mbtiles"
+    },
+    "tmin_1970_2000_2_5m_raster_7": {
+      "mbtiles": "tmin_1970_2000_2_5m/7_raster.mbtiles"
+    },
+    "tmin_1970_2000_2_5m_vector_8": {
+      "mbtiles": "tmin_1970_2000_2_5m/8_vector.mbtiles"
+    },
+    "tmin_1970_2000_2_5m_raster_8": {
+      "mbtiles": "tmin_1970_2000_2_5m/8_raster.mbtiles"
+    },
+    "tmin_1970_2000_2_5m_vector_9": {
+      "mbtiles": "tmin_1970_2000_2_5m/9_vector.mbtiles"
+    },
+    "tmin_1970_2000_2_5m_raster_9": {
+      "mbtiles": "tmin_1970_2000_2_5m/9_raster.mbtiles"
+    },
+    "tmin_1970_2000_2_5m_vector_10": {
+      "mbtiles": "tmin_1970_2000_2_5m/10_vector.mbtiles"
+    },
+    "tmin_1970_2000_2_5m_raster_10": {
+      "mbtiles": "tmin_1970_2000_2_5m/10_raster.mbtiles"
+    },
+    "tmin_1970_2000_2_5m_vector_11": {
+      "mbtiles": "tmin_1970_2000_2_5m/11_vector.mbtiles"
+    },
+    "tmin_1970_2000_2_5m_raster_11": {
+      "mbtiles": "tmin_1970_2000_2_5m/11_raster.mbtiles"
+    },
+    "tmin_1970_2000_2_5m_vector_12": {
+      "mbtiles": "tmin_1970_2000_2_5m/12_vector.mbtiles"
+    },
+    "tmin_1970_2000_2_5m_raster_12": {
+      "mbtiles": "tmin_1970_2000_2_5m/12_raster.mbtiles"
     }
   }
 }
