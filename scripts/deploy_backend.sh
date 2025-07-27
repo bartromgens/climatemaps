@@ -15,7 +15,9 @@ ssh "$SSH_HOST" << 'EOF'
   git pull
 
   echo "Rebuilding and restarting containers..."
-  docker compose up -d --build
+  docker compose build
+  docker compose down
+  docker compose up -d
 
   echo "Deployment completed successfully."
 EOF
