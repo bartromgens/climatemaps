@@ -37,8 +37,7 @@ np.set_printoptions(3, threshold=100, suppress=True)  # .3f
 DATA_SETS: List[ClimateDataConfig] = HISTORIC_DATA_SETS
 # DATA_SETS = list(
 #     filter(
-#         lambda x: x.variable_type == ClimateVarKey.T_MAX
-#         and x.resolution == SpatialResolution.MIN10,
+#         lambda x: x.variable_type == ClimateVarKey.T_MAX and x.resolution == SpatialResolution.MIN5,
 #         DATA_SETS,
 #     )
 # )
@@ -47,11 +46,10 @@ DATA_SETS: List[ClimateDataConfig] = HISTORIC_DATA_SETS
 def main(force_recreate: bool = False):
     month_upper = 1 if settings.DEV_MODE else 12
     tasks = [
-        (contour_config, month)
+        (contour_config, month, force_recreate)
         for contour_config in DATA_SETS
         for month in range(1, month_upper + 1)
     ]
-    total = len(tasks)
 
     num_processes = 2
     run_tasks_with_process_pool(tasks, process, num_processes)
@@ -61,7 +59,7 @@ def run_tasks_with_process_pool(tasks, process, num_processes):
     total = len(tasks)
     with concurrent.futures.ProcessPoolExecutor(max_workers=num_processes) as executor:
         try:
-            futures = {executor.submit(process, task): task for task in tasks}
+            futures = {executor.submit(process, *task): task for task in tasks}
             for counter, future in enumerate(concurrent.futures.as_completed(futures)):
                 result = future.result()  # May raise if process fails
                 progress = counter / total * 100.0
@@ -86,10 +84,9 @@ def terminate_process_pool_children():
     logger.info("All child processes terminated.")
 
 
-def process(config_month_pair: Tuple[ClimateDataConfig, int]):
-    config, month = config_month_pair
+def process(config: ClimateDataConfig, month: int, force_recreate: bool):
     logger.info(f'Creating image and tiles for "{config.data_type_slug}" and month {month}')
-    if not _tile_files_exist(config, month):
+    if force_recreate or not _tile_files_exist(config, month):
         _create_contour(config, month)
     else:
         logger.info(
@@ -135,27 +132,20 @@ def _tile_files_exist(data_set_config: ClimateDataConfig, month: int) -> bool:
     ]
 
     directory = os.path.join(maps_config.data_dir_out, data_set_config.data_type_slug)
-    status = _check_files_exist(directory, files_to_check)
-    all_exist = True
-    for file, exists in status.items():
-        if exists:
-            print(f"{file} already exists")
-        else:
-            all_exist = False
-
-    return all_exist
+    return _check_files_exist(directory, files_to_check)
 
 
 def _check_files_exist(directory, filenames):
     if not os.path.isdir(directory):
-        raise ValueError(f"The path '{directory}' is not a valid directory.")
+        return False
 
-    result = {}
     for filename in filenames:
         full_path = os.path.join(directory, filename)
-        result[filename] = os.path.isfile(full_path)
+        exists = os.path.isfile(full_path)
+        if not exists:
+            return False
 
-        return result
+    return True
 
 
 if __name__ == "__main__":
