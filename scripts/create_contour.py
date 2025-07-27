@@ -9,6 +9,7 @@ from typing import Tuple
 
 import numpy as np
 
+
 module_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 if module_dir not in sys.path:
     sys.path.insert(0, module_dir)
@@ -27,6 +28,7 @@ from climatemaps.geotiff import read_geotiff_history
 from climatemaps.geotiff import read_geotiff_month
 from climatemaps.settings import settings
 from climatemaps.logger import logger
+from climatemaps.tile import tile_files_exist
 
 
 maps_config: ClimateMapsConfig = get_config()
@@ -86,7 +88,7 @@ def terminate_process_pool_children():
 
 def process(config: ClimateDataConfig, month: int, force_recreate: bool):
     logger.info(f'Creating image and tiles for "{config.data_type_slug}" and month {month}')
-    if force_recreate or not _tile_files_exist(config, month):
+    if force_recreate or not tile_files_exist(config, month, maps_config):
         _create_contour(config, month)
     else:
         logger.info(
@@ -122,30 +124,6 @@ def _create_contour(data_set_config: ClimateDataConfig, month: int):
         figure_dpi=maps_config.figure_dpi,
         zoom_factor=maps_config.zoom_factor,
     )
-
-
-def _tile_files_exist(data_set_config: ClimateDataConfig, month: int) -> bool:
-    files_to_check = [
-        f"{month}_raster.mbtiles",
-        f"{month}_vector.mbtiles",
-        f"{month}_colorbar.png",
-    ]
-
-    directory = os.path.join(maps_config.data_dir_out, data_set_config.data_type_slug)
-    return _check_files_exist(directory, files_to_check)
-
-
-def _check_files_exist(directory, filenames):
-    if not os.path.isdir(directory):
-        return False
-
-    for filename in filenames:
-        full_path = os.path.join(directory, filename)
-        exists = os.path.isfile(full_path)
-        if not exists:
-            return False
-
-    return True
 
 
 if __name__ == "__main__":
