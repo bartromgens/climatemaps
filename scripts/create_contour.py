@@ -17,10 +17,13 @@ from climatemaps.config import ClimateMapsConfig
 from climatemaps.config import get_config
 from climatemaps.contour import ContourTileBuilder
 from climatemaps.data import import_climate_data
+from climatemaps.datasets import ClimateScenario
 from climatemaps.datasets import ClimateVarKey
+from climatemaps.datasets import ClimateModel
 from climatemaps.datasets import ClimateDataConfig
 from climatemaps.datasets import DataFormat
 from climatemaps.datasets import HISTORIC_DATA_SETS
+from climatemaps.datasets import FUTURE_DATA_SETS
 from climatemaps.datasets import SpatialResolution
 from climatemaps.geogrid import GeoGrid
 from climatemaps.geotiff import read_geotiff_history
@@ -35,13 +38,16 @@ maps_config: ClimateMapsConfig = get_config()
 np.set_printoptions(3, threshold=100, suppress=True)  # .3f
 
 # DATA_SETS = CLIMATE_MODEL_DATA_SETS + HISTORIC_DATA_SETS
-DATA_SETS: List[ClimateDataConfig] = HISTORIC_DATA_SETS
-# DATA_SETS = list(
-#     filter(
-#         lambda x: x.variable_type == ClimateVarKey.T_MAX and x.resolution == SpatialResolution.MIN5,
-#         DATA_SETS,
-#     )
-# )
+DATA_SETS: List[ClimateDataConfig] = FUTURE_DATA_SETS
+DATA_SETS = list(
+    filter(
+        lambda x: x.variable_type == ClimateVarKey.T_MIN
+        and x.resolution == SpatialResolution.MIN10
+        and x.climate_scenario == ClimateScenario.SSP585
+        and x.year_range == (2081, 2100),
+        DATA_SETS,
+    )
+)
 
 
 def main(force_recreate: bool = False):
@@ -105,7 +111,7 @@ def _create_contour(data_set_config: ClimateDataConfig, month: int):
     elif data_set_config.format == DataFormat.GEOTIFF_WORLDCLIM_HISTORY:
         lon_range, lat_range, values = read_geotiff_history(data_set_config.filepath, month)
     else:
-        assert f"DataFormat {data_set_config.format} is not supported"
+        assert False, f"DataFormat {data_set_config.format} is not supported"
     values = values * data_set_config.conversion_factor
     if data_set_config.conversion_function is not None:
         values = data_set_config.conversion_function(values, month)

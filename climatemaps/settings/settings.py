@@ -1,11 +1,12 @@
 from climatemaps.datasets import HISTORIC_DATA_SETS
+from climatemaps.datasets import FUTURE_DATA_SETS
 
 DEV_MODE = False
 
 TILE_SERVER_URL = "http://localhost:8080/data"
 ZOOM_MAX_RASTER = 4
 
-DATA_SETS_API = HISTORIC_DATA_SETS
+DATA_SETS_API = HISTORIC_DATA_SETS + FUTURE_DATA_SETS
 
 TIPPECANOE_DIR = "/usr/local/bin/"
 

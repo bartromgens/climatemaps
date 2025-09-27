@@ -1,6 +1,6 @@
 import calendar
 import enum
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Callable
 from typing import Dict
 from typing import List
@@ -35,6 +35,38 @@ class ClimateVarKey(enum.Enum):
     WET_DAYS = enum.auto()
     WIND_SPEED = enum.auto()
     RADIATION = enum.auto()
+
+
+class ClimateScenario(enum.Enum):
+    """
+    Shared Socioeconomic Pathways (SSP) + expected level of radiative forcing in the year 2100
+    """
+
+    SSP126 = enum.auto()
+    SSP245 = enum.auto()
+    SSP370 = enum.auto()
+    SSP585 = enum.auto()
+
+
+class ClimateModel(enum.Enum):
+    """
+    Climate models used for future climate predictions
+    """
+
+    ACCESS_CM2 = enum.auto()
+    BCC_CSM2_MR = enum.auto()
+    CMCC_ESM2 = enum.auto()
+    EC_EARTH3_VEG = "EC-Earth3-Veg"
+    FIO_ESM_2_0 = enum.auto()
+    GFDL_ESM4 = enum.auto()
+    GISS_E2_1_G = enum.auto()
+    HADGEM3_GC31_LL = enum.auto()
+    INM_CM5_0 = enum.auto()
+    IPSL_CM6A_LR = enum.auto()
+    MIROC6 = enum.auto()
+    MPI_ESM1_2_HR = enum.auto()
+    MRI_ESM2_0 = enum.auto()
+    UKESM1_0_LL = enum.auto()
 
 
 class ClimateVariable(BaseModel):
@@ -133,6 +165,17 @@ class ClimateDataConfig:
 
 
 @dataclass
+class FutureClimateDataConfig(ClimateDataConfig):
+    climate_scenario: ClimateScenario = field(default=None)
+    climate_model: ClimateModel = field(default=None)
+
+    @property
+    def data_type_slug(self) -> str:
+        base_slug = super().data_type_slug
+        return f"{base_slug}_{self.climate_scenario.name}_{self.climate_model.name}".lower()
+
+
+@dataclass
 class ClimateDataConfigGroup:
     variable_types: List[ClimateVarKey]
     format: DataFormat
@@ -170,6 +213,41 @@ class ClimateDataConfigGroup:
         return configs
 
 
+@dataclass
+class FutureClimateDataConfigGroup(ClimateDataConfigGroup):
+    climate_scenarios: List[ClimateScenario] = field(default_factory=list)
+    climate_models: List[ClimateModel] = field(default_factory=list)
+    configs: List[FutureClimateDataConfig] = field(default_factory=list)
+
+    def create_configs(self) -> List[FutureClimateDataConfig]:
+        configs: List[FutureClimateDataConfig] = []
+        for variable_type in self.variable_types:
+            for year_range in self.year_ranges:
+                for resolution in self.resolutions:
+                    for climate_scenario in self.climate_scenarios:
+                        for climate_model in self.climate_models:
+                            config = FutureClimateDataConfig(
+                                variable_type=variable_type,
+                                format=self.format,
+                                resolution=resolution,
+                                year_range=year_range,
+                                climate_scenario=climate_scenario,
+                                climate_model=climate_model,
+                                filepath=self.filepath_template.format(
+                                    resolution=resolution.value,
+                                    year_range=year_range,
+                                    variable_name=CLIMATE_VARIABLES[variable_type].filename.lower(),
+                                    climate_scenario=climate_scenario.name.lower(),
+                                    climate_model=climate_model.value,
+                                ),
+                                conversion_function=self.conversion_function,
+                                conversion_factor=self.conversion_factor,
+                                source=self.source,
+                            )
+                            configs.append(config)
+        return configs
+
+
 # CLIMATE_MODEL_DATA_SETS = [
 #     ClimateDataConfig(
 #         variable_type=ClimateVarKey.PRECIPITATION,
@@ -193,8 +271,32 @@ HISTORIC_DATA_GROUPS: List[ClimateDataConfigGroup] = [
     ),
 ]
 
+FUTURE_DATA_GROUPS: List[FutureClimateDataConfigGroup] = [
+    FutureClimateDataConfigGroup(
+        variable_types=[ClimateVarKey.T_MAX, ClimateVarKey.T_MIN, ClimateVarKey.PRECIPITATION],
+        format=DataFormat.GEOTIFF_WORLDCLIM_CMIP6,
+        source="https://www.worldclim.org/data/cmip6/cmip6climate.html",
+        resolutions=[SpatialResolution.MIN10, SpatialResolution.MIN5, SpatialResolution.MIN2_5],
+        year_ranges=[(2021, 2040), (2041, 2060), (2081, 2100)],
+        climate_scenarios=[
+            ClimateScenario.SSP126,
+            ClimateScenario.SSP245,
+            ClimateScenario.SSP370,
+            ClimateScenario.SSP585,
+        ],
+        climate_models=[
+            ClimateModel.EC_EARTH3_VEG,
+        ],
+        filepath_template="data/worldclim/future/wc2.1_{resolution}_{variable_name}_{climate_model}_{climate_scenario}_{year_range[0]}-{year_range[1]}.tif",
+    ),
+]
+
 HISTORIC_DATA_SETS: List[ClimateDataConfig] = [
     cfg for data_group in HISTORIC_DATA_GROUPS for cfg in data_group.create_configs()
+]
+
+FUTURE_DATA_SETS: List[FutureClimateDataConfig] = [
+    cfg for data_group in FUTURE_DATA_GROUPS for cfg in data_group.create_configs()
 ]
 
 # IPCC_HISTORIC_SETS = [
