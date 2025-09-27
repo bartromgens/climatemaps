@@ -16,9 +16,9 @@ from climatemaps.contour_config import ContourPlotConfig
 
 
 class DataFormat(enum.Enum):
-    GEOTIFF_WORLDCLIM_CMIP6 = enum.auto()
-    GEOTIFF_WORLDCLIM_HISTORY = enum.auto()
-    IPCC_GRID = enum.auto()
+    GEOTIFF_WORLDCLIM_CMIP6 = "GEOTIFF_WORLDCLIM_CMIP6"
+    GEOTIFF_WORLDCLIM_HISTORY = "GEOTIFF_WORLDCLIM_HISTORY"
+    IPCC_GRID = "IPCC_GRID"
 
 
 class SpatialResolution(enum.Enum):
@@ -28,13 +28,13 @@ class SpatialResolution(enum.Enum):
 
 
 class ClimateVarKey(enum.Enum):
-    PRECIPITATION = enum.auto()
-    T_MAX = enum.auto()
-    T_MIN = enum.auto()
-    CLOUD_COVER = enum.auto()
-    WET_DAYS = enum.auto()
-    WIND_SPEED = enum.auto()
-    RADIATION = enum.auto()
+    PRECIPITATION = "PRECIPITATION"
+    T_MAX = "T_MAX"
+    T_MIN = "T_MIN"
+    CLOUD_COVER = "CLOUD_COVER"
+    WET_DAYS = "WET_DAYS"
+    WIND_SPEED = "WIND_SPEED"
+    RADIATION = "RADIATION"
 
 
 class ClimateScenario(enum.Enum):
@@ -42,10 +42,10 @@ class ClimateScenario(enum.Enum):
     Shared Socioeconomic Pathways (SSP) + expected level of radiative forcing in the year 2100
     """
 
-    SSP126 = enum.auto()
-    SSP245 = enum.auto()
-    SSP370 = enum.auto()
-    SSP585 = enum.auto()
+    SSP126 = "SSP126"
+    SSP245 = "SSP245"
+    SSP370 = "SSP370"
+    SSP585 = "SSP585"
 
 
 class ClimateModel(enum.Enum):
@@ -53,20 +53,20 @@ class ClimateModel(enum.Enum):
     Climate models used for future climate predictions
     """
 
-    ACCESS_CM2 = enum.auto()
-    BCC_CSM2_MR = enum.auto()
-    CMCC_ESM2 = enum.auto()
+    ACCESS_CM2 = "ACCESS_CM2"
+    BCC_CSM2_MR = "BCC_CSM2_MR"
+    CMCC_ESM2 = "CMCC_ESM2"
     EC_EARTH3_VEG = "EC-Earth3-Veg"
-    FIO_ESM_2_0 = enum.auto()
-    GFDL_ESM4 = enum.auto()
-    GISS_E2_1_G = enum.auto()
+    FIO_ESM_2_0 = "FIO_ESM_2_0"
+    GFDL_ESM4 = "GFDL_ESM4"
+    GISS_E2_1_G = "GISS_E2_1_G"
     HADGEM3_GC31_LL = "HadGEM3-GC31-LL"
-    INM_CM5_0 = enum.auto()
-    IPSL_CM6A_LR = enum.auto()
-    MIROC6 = enum.auto()
-    MPI_ESM1_2_HR = enum.auto()
-    MRI_ESM2_0 = enum.auto()
-    UKESM1_0_LL = enum.auto()
+    INM_CM5_0 = "INM_CM5_0"
+    IPSL_CM6A_LR = "IPSL_CM6A_LR"
+    MIROC6 = "MIROC6"
+    MPI_ESM1_2_HR = "MPI_ESM1_2_HR"
+    MRI_ESM2_0 = "MRI_ESM2_0"
+    UKESM1_0_LL = "UKESM1_0_LL"
 
 
 class ClimateVariable(BaseModel):
@@ -276,11 +276,11 @@ FUTURE_DATA_GROUPS: List[FutureClimateDataConfigGroup] = [
         variable_types=[ClimateVarKey.T_MAX, ClimateVarKey.T_MIN, ClimateVarKey.PRECIPITATION],
         format=DataFormat.GEOTIFF_WORLDCLIM_CMIP6,
         source="https://www.worldclim.org/data/cmip6/cmip6climate.html",
-        resolutions=[SpatialResolution.MIN10, SpatialResolution.MIN5, SpatialResolution.MIN2_5],
+        resolutions=[SpatialResolution.MIN10, SpatialResolution.MIN2_5],
         year_ranges=[(2021, 2040), (2041, 2060), (2081, 2100)],
         climate_scenarios=[
             ClimateScenario.SSP126,
-            ClimateScenario.SSP245,
+            # ClimateScenario.SSP245,
             ClimateScenario.SSP370,
             ClimateScenario.SSP585,
         ],

@@ -28,3 +28,14 @@
   flex-direction: column;
   flex: 1;
 }
+
+// Styling for disabled dropdown options
+::ng-deep .disabled-option {
+  color: #999 !important;
+  opacity: 0.6 !important;
+  cursor: not-allowed !important;
+}
+
+::ng-deep .disabled-option:hover {
+  background-color: transparent !important;
+}

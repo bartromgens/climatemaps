@@ -18,13 +18,114 @@
     ></div>
     <div class="row">
       <mat-form-field subscriptSizing="dynamic">
-        <mat-label>Select tile layer</mat-label>
+        <mat-label>Variable Type</mat-label>
         <mat-select
-          [(value)]="selectedOption"
-          (selectionChange)="onLayerChange()"
+          [(value)]="selectedVariableType"
+          (selectionChange)="onVariableTypeChange()"
         >
-          <mat-option *ngFor="let opt of layerOptions" [value]="opt">
-            {{ opt.name }}
+          <mat-option
+            *ngFor="let variableType of variableTypes"
+            [value]="variableType"
+            [disabled]="!availableVariableTypes.includes(variableType)"
+            [class.disabled-option]="
+              !availableVariableTypes.includes(variableType)
+            "
+          >
+            {{ climateVariables[variableType].displayName }} ({{
+              climateVariables[variableType].unit
+            }})
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+
+    <div class="row">
+      <mat-form-field subscriptSizing="dynamic">
+        <mat-label>Year Range</mat-label>
+        <mat-select
+          [(value)]="selectedYearRange"
+          (selectionChange)="onYearRangeChange()"
+        >
+          <mat-option
+            *ngFor="let yearRange of yearRanges; trackBy: trackByYearRange"
+            [value]="yearRange"
+            [disabled]="
+              climateMaps.length > 0 && !availableYearRanges.includes(yearRange)
+            "
+            [class.disabled-option]="
+              climateMaps.length > 0 && !availableYearRanges.includes(yearRange)
+            "
+          >
+            {{ yearRange.label }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+
+    <div class="row">
+      <mat-form-field subscriptSizing="dynamic">
+        <mat-label>Resolution</mat-label>
+        <mat-select
+          [(value)]="selectedResolution"
+          (selectionChange)="onResolutionChange()"
+        >
+          <mat-option
+            *ngFor="let resolution of resolutions"
+            [value]="resolution"
+            [disabled]="!availableResolutions.includes(resolution)"
+            [class.disabled-option]="!availableResolutions.includes(resolution)"
+          >
+            {{ resolution }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+
+    <div
+      class="row"
+      *ngIf="
+        selectedYearRange && !isHistoricalYearRange(selectedYearRange.value)
+      "
+    >
+      <mat-form-field subscriptSizing="dynamic">
+        <mat-label>Climate Scenario</mat-label>
+        <mat-select
+          [(value)]="selectedClimateScenario"
+          (selectionChange)="onClimateScenarioChange()"
+        >
+          <mat-option
+            *ngFor="let scenario of climateScenarios"
+            [value]="scenario"
+            [disabled]="!availableClimateScenarios.includes(scenario)"
+            [class.disabled-option]="
+              !availableClimateScenarios.includes(scenario)
+            "
+          >
+            {{ scenario }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+
+    <div
+      class="row"
+      *ngIf="
+        selectedYearRange && !isHistoricalYearRange(selectedYearRange.value)
+      "
+    >
+      <mat-form-field subscriptSizing="dynamic">
+        <mat-label>Climate Model</mat-label>
+        <mat-select
+          [(value)]="selectedClimateModel"
+          (selectionChange)="onClimateModelChange()"
+        >
+          <mat-option
+            *ngFor="let model of climateModels"
+            [value]="model"
+            [disabled]="!availableClimateModels.includes(model)"
+            [class.disabled-option]="!availableClimateModels.includes(model)"
+          >
+            {{ model }}
           </mat-option>
         </mat-select>
       </mat-form-field>

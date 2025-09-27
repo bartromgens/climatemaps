@@ -1,3 +1,21 @@
+// Climate Variable Type enum matching the backend
+export enum ClimateVarKey {
+  PRECIPITATION = 'PRECIPITATION',
+  T_MAX = 'T_MAX',
+  T_MIN = 'T_MIN',
+  CLOUD_COVER = 'CLOUD_COVER',
+  WET_DAYS = 'WET_DAYS',
+  WIND_SPEED = 'WIND_SPEED',
+  RADIATION = 'RADIATION',
+}
+
+// Spatial Resolution enum matching the backend
+export enum SpatialResolution {
+  MIN10 = '10m',
+  MIN5 = '5m',
+  MIN2_5 = '2.5m',
+}
+
 // Climate Model enum matching the backend
 export enum ClimateModel {
   ACCESS_CM2 = 'ACCESS_CM2',
@@ -23,6 +41,16 @@ export enum ClimateScenario {
   SSP370 = 'SSP370',
   SSP585 = 'SSP585',
 }
+
+// Data format enum matching the backend
+export enum DataFormat {
+  GEOTIFF_WORLDCLIM_CMIP6 = 'GEOTIFF_WORLDCLIM_CMIP6',
+  GEOTIFF_WORLDCLIM_HISTORY = 'GEOTIFF_WORLDCLIM_HISTORY',
+  IPCC_GRID = 'IPCC_GRID',
+}
+
+// Note: Climate variable configurations and year ranges are now dynamically
+// loaded from the API via the MetadataService instead of being hardcoded here.
 
 // eslint-disable-next-line @typescript-eslint/no-namespace
 export namespace EnumUtils {
