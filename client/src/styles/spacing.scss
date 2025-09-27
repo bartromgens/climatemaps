@@ -1,13 +1,20 @@
 // Define spacing scale
-$spacings: (0: 0, 1: 4px, 2: 8px, 3: 16px, 4: 24px, 5: 32px);
+$spacings: (
+  0: 0,
+  1: 4px,
+  2: 8px,
+  3: 16px,
+  4: 24px,
+  5: 32px,
+);
 
 // Define margin and padding sides
 $sides: (
-  '': '',
-  't': 'top',
-  'r': 'right',
-  'b': 'bottom',
-  'l': 'left'
+  "": "",
+  "t": "top",
+  "r": "right",
+  "b": "bottom",
+  "l": "left",
 );
 
 // Margin and padding classes generator

@@ -10,20 +10,21 @@ import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { LeafletModule } from '@bluehalo/ngx-leaflet';
 import {
   Control,
-  latLng, Layer,
+  latLng,
+  Layer,
   LeafletEvent,
   LeafletMouseEvent,
   Map,
-  tileLayer
-} from "leaflet";
-import 'leaflet.vectorgrid';  // bring in the vectorgrid plugin
+  tileLayer,
+} from 'leaflet';
+import 'leaflet.vectorgrid'; // bring in the vectorgrid plugin
 
 import { environment } from '../../environments/environment';
-import { MonthSliderComponent } from "./month-slider.component";
-import { YearSliderComponent } from "./year-slider.component";
-import { MatFormFieldModule } from "@angular/material/form-field";
-import { MatSelectModule } from "@angular/material/select";
-import { ClimateMapService } from "../core/climatemap.service";
+import { MonthSliderComponent } from './month-slider.component';
+import { YearSliderComponent } from './year-slider.component';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatSelectModule } from '@angular/material/select';
+import { ClimateMapService } from '../core/climatemap.service';
 
 interface LayerOption {
   name: string;
@@ -32,7 +33,6 @@ interface LayerOption {
   rasterMaxZoom: number;
   vectorMaxZoom: number;
 }
-
 
 @Component({
   selector: 'app-map',
@@ -85,7 +85,7 @@ export class MapComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private location: Location,
-    private climateMapService: ClimateMapService
+    private climateMapService: ClimateMapService,
   ) {
     this.control = new Control.Layers(undefined, undefined, {
       collapsed: false,
@@ -98,7 +98,7 @@ export class MapComponent implements OnInit {
         this.updateLocationZoomFromURL(params);
       }
     });
-    this.climateMapService.getClimateMapList().subscribe(climateMaps => {
+    this.climateMapService.getClimateMapList().subscribe((climateMaps) => {
       console.log(climateMaps);
       const layerOptions: LayerOption[] = [];
       for (const climateMap of climateMaps) {
@@ -113,7 +113,7 @@ export class MapComponent implements OnInit {
       this.layerOptions = layerOptions;
       this.selectedOption = layerOptions[0];
       this.updateLayers();
-    })
+    });
   }
 
   onLayerChange() {
@@ -150,25 +150,25 @@ export class MapComponent implements OnInit {
         maxNativeZoom: this.selectedOption.rasterMaxZoom,
         maxZoom: 12,
         tileSize: 256,
-        opacity: 0.8
+        opacity: 0.8,
         // tms: true, // uncomment if your MBTiles uses TMS y‐axis
-      }
+      },
     );
 
     this.vectorLayer = (window as any).L.vectorGrid.protobuf(
       `${this.selectedOption.vectorUrl}_${this.monthSelected}/{z}/{x}/{y}.pbf`,
       {
         vectorTileLayerStyles: {
-          "contours": (properties: any, zoom: number) => ({
+          contours: (properties: any, zoom: number) => ({
             color: properties.stroke,
             weight: 2,
-            opacity: 1
-          })
+            opacity: 1,
+          }),
         },
         interactive: true,
         maxNativeZoom: this.selectedOption.vectorMaxZoom,
-        maxZoom: 18
-      }
+        maxZoom: 18,
+      },
     );
 
     // configure map options

@@ -16,25 +16,26 @@
       (leafletMapMoveEnd)="onMove($event)"
       (leafletMapZoomEnd)="onZoom($event)"
     ></div>
-    <div class='row'>
+    <div class="row">
       <mat-form-field subscriptSizing="dynamic">
         <mat-label>Select tile layer</mat-label>
         <mat-select
           [(value)]="selectedOption"
-          (selectionChange)="onLayerChange()">
-          <mat-option
-            *ngFor="let opt of layerOptions"
-            [value]="opt">
+          (selectionChange)="onLayerChange()"
+        >
+          <mat-option *ngFor="let opt of layerOptions" [value]="opt">
             {{ opt.name }}
           </mat-option>
         </mat-select>
       </mat-form-field>
     </div>
-    <div class='row'>
-      <div class='column'>
-        <app-month-slider (valueChange)="onMonthSelected($event)"></app-month-slider>
+    <div class="row">
+      <div class="column">
+        <app-month-slider
+          (valueChange)="onMonthSelected($event)"
+        ></app-month-slider>
       </div>
-      <div class='column'>
+      <div class="column">
         <app-year-slider></app-year-slider>
       </div>
     </div>

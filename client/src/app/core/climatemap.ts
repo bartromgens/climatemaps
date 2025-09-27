@@ -7,7 +7,7 @@ export interface ClimateVariableResource {
 export interface ClimateMapResource {
   year: number;
   year_range: [number, number];
-  variable: ClimateVariableResource
+  variable: ClimateVariableResource;
   resolution: string;
   tiles_url: URL;
   colormap_url: URL;
@@ -27,8 +27,7 @@ export class ClimateMap {
     public maxZoomRaster: number,
     public maxZoomVector: number,
     public source: string,
-  ) {
-  }
+  ) {}
 
   static fromResource(resource: ClimateMapResource): ClimateMap {
     return new ClimateMap(
@@ -54,14 +53,13 @@ export class ClimateVariable {
     public name: string,
     public displayName: string,
     public unit: string,
-  ) {
-  }
+  ) {}
 
   static fromResource(resource: ClimateVariableResource): ClimateVariable {
     return new ClimateVariable(
       resource.name,
       resource.display_name,
-      resource.unit
+      resource.unit,
     );
   }
 }

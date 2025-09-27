@@ -1,12 +1,9 @@
-<mat-slider
-  showTickMarks
-  min="1" max="12" step="1"
-  [displayWith]="displayWith">
-  <input matSliderThumb [value]="value" (valueChange)="onInput($event)">
+<mat-slider showTickMarks min="1" max="12" step="1" [displayWith]="displayWith">
+  <input matSliderThumb [value]="value" (valueChange)="onInput($event)" />
 </mat-slider>
 
 <div class="month-labels">
   <span *ngFor="let m of months; let i = index">
-    {{ m.substr(0,3) }}
+    {{ m.substr(0, 3) }}
   </span>
 </div>
