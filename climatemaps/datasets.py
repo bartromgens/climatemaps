@@ -60,7 +60,7 @@ class ClimateModel(enum.Enum):
     FIO_ESM_2_0 = enum.auto()
     GFDL_ESM4 = enum.auto()
     GISS_E2_1_G = enum.auto()
-    HADGEM3_GC31_LL = enum.auto()
+    HADGEM3_GC31_LL = "HadGEM3-GC31-LL"
     INM_CM5_0 = enum.auto()
     IPSL_CM6A_LR = enum.auto()
     MIROC6 = enum.auto()
@@ -238,7 +238,7 @@ class FutureClimateDataConfigGroup(ClimateDataConfigGroup):
                                     year_range=year_range,
                                     variable_name=CLIMATE_VARIABLES[variable_type].filename.lower(),
                                     climate_scenario=climate_scenario.name.lower(),
-                                    climate_model=climate_model.value,
+                                    climate_model=climate_model.value.replace("_", "-"),
                                 ),
                                 conversion_function=self.conversion_function,
                                 conversion_factor=self.conversion_factor,

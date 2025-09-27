@@ -102,8 +102,15 @@ export class MapComponent implements OnInit {
       console.log(climateMaps);
       const layerOptions: LayerOption[] = [];
       for (const climateMap of climateMaps) {
+        let displayName = `${climateMap.variable.displayName} (${climateMap.variable.unit})`;
+
+        // Add climate model and scenario information if available
+        if (climateMap.climateModel && climateMap.climateScenario) {
+          displayName += ` - ${climateMap.climateModel} ${climateMap.climateScenario}`;
+        }
+
         layerOptions.push({
-          name: `${climateMap.variable.displayName} (${climateMap.variable.unit})`,
+          name: displayName,
           rasterUrl: `${climateMap.tilesUrl}_raster`,
           vectorUrl: `${climateMap.tilesUrl}_vector`,
           rasterMaxZoom: climateMap.maxZoomRaster,

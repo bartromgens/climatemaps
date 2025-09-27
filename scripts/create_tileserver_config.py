@@ -1,5 +1,4 @@
 import json
-import logging
 import os
 import sys
 from typing import List
@@ -14,8 +13,7 @@ from climatemaps.config import get_config
 from climatemaps.datasets import ClimateDataConfig
 from climatemaps.settings import settings
 from climatemaps.tile import tile_files_exist
-
-logger = logging.getLogger(__name__)
+from climatemaps.logger import logger
 
 maps_config: ClimateMapsConfig = get_config()
 
@@ -23,18 +21,27 @@ maps_config: ClimateMapsConfig = get_config()
 def main(data_configs: List[ClimateDataConfig]):
     config = _create_config(data_configs, dev_mode=False)
     config_dev = _create_config(data_configs, dev_mode=True)
+    filename = "tileserver_config.json"
+    filename_dev = "tileserver_config_dev.json"
 
     # write to file
-    with open("tileserver_config.json", "w") as f:
+    with open(filename, "w") as f:
         json.dump(config, f, indent=2)
-    with open("tileserver_config_dev.json", "w") as f:
+    with open(filename_dev, "w") as f:
         json.dump(config_dev, f, indent=2)
+
+    logger.info(
+        f"Tileserver config created for production and dev mode: {filename} and {filename_dev}"
+    )
 
 
 def _create_config(data_configs, dev_mode: bool = False):
+    logger.info(
+        f"Creating tileserver config for {len(data_configs)} data configs. Dev mode: {dev_mode}"
+    )
     config = {"options": {"paths": {"root": "./", "mbtiles": "tiles"}}, "data": {}}
     for data_config in data_configs:
-        month_upper = 1 if dev_mode else 12
+        month_upper = 12
         for month in range(1, month_upper + 1):
             if dev_mode and not tile_files_exist(data_config, month, maps_config):
                 logger.warning(
@@ -49,6 +56,7 @@ def _create_config(data_configs, dev_mode: bool = False):
             config["data"][f"{data_config.data_type_slug}_raster_{month}"] = {
                 "mbtiles": f"{data_config.data_type_slug}/{month}_raster.mbtiles"
             }
+            logger.info(f"Added {data_config.data_type_slug} {month} to config")
     return config
 
 
