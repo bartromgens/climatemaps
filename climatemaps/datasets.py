@@ -41,23 +41,30 @@ class ClimateVariable(BaseModel):
     name: str
     display_name: str
     unit: str
+    filename: str
 
 
 CLIMATE_VARIABLES: Dict[ClimateVarKey, ClimateVariable] = {
     ClimateVarKey.PRECIPITATION: ClimateVariable(
-        name="Precipitation", display_name="Precipitation", unit="mm/day"
+        name="Precipitation", display_name="Precipitation", unit="mm/day", filename="prec"
     ),
-    ClimateVarKey.T_MAX: ClimateVariable(name="Tmax", display_name="Temperature Max", unit="°C"),
-    ClimateVarKey.T_MIN: ClimateVariable(name="Tmin", display_name="Temperature Min", unit="°C"),
+    ClimateVarKey.T_MAX: ClimateVariable(
+        name="Tmax", display_name="Temperature Max", unit="°C", filename="tmax"
+    ),
+    ClimateVarKey.T_MIN: ClimateVariable(
+        name="Tmin", display_name="Temperature Min", unit="°C", filename="tmin"
+    ),
     ClimateVarKey.CLOUD_COVER: ClimateVariable(
-        name="CloudCover", display_name="Cloud Cover", unit="%"
+        name="CloudCover", display_name="Cloud Cover", unit="%", filename="cloud"
     ),
-    ClimateVarKey.WET_DAYS: ClimateVariable(name="WetDays", display_name="Wet Days", unit="days"),
+    ClimateVarKey.WET_DAYS: ClimateVariable(
+        name="WetDays", display_name="Wet Days", unit="days", filename="wetdays"
+    ),
     ClimateVarKey.WIND_SPEED: ClimateVariable(
-        name="WindSpeed", display_name="Wind Speed", unit="m/s"
+        name="WindSpeed", display_name="Wind Speed", unit="m/s", filename="wind"
     ),
     ClimateVarKey.RADIATION: ClimateVariable(
-        name="Radiation", display_name="Radiation", unit="W/m^2"
+        name="Radiation", display_name="Radiation", unit="W/m^2", filename="radiation"
     ),
 }
 
@@ -101,7 +108,7 @@ def convert_per_month_to_per_day(
 
 @dataclass
 class ClimateDataConfig:
-    variable_type: ClimateVarKey.PRECIPITATION
+    variable_type: ClimateVarKey
     filepath: str
     format: DataFormat
     resolution: SpatialResolution
@@ -154,7 +161,7 @@ class ClimateDataConfigGroup:
                         filepath=self.filepath_template.format(
                             resolution=resolution.value,
                             year_range=year_range,
-                            variable_name=CLIMATE_VARIABLES[variable_type].name.lower(),
+                            variable_name=CLIMATE_VARIABLES[variable_type].filename.lower(),
                         ),
                         conversion_function=self.conversion_function,
                         conversion_factor=self.conversion_factor,
@@ -177,7 +184,7 @@ class ClimateDataConfigGroup:
 
 HISTORIC_DATA_GROUPS: List[ClimateDataConfigGroup] = [
     ClimateDataConfigGroup(
-        variable_types=[ClimateVarKey.T_MAX, ClimateVarKey.T_MIN],
+        variable_types=[ClimateVarKey.T_MAX, ClimateVarKey.T_MIN, ClimateVarKey.PRECIPITATION],
         format=DataFormat.GEOTIFF_WORLDCLIM_HISTORY,
         source="https://www.worldclim.org/data/worldclim21.html",
         resolutions=[SpatialResolution.MIN10, SpatialResolution.MIN5, SpatialResolution.MIN2_5],
