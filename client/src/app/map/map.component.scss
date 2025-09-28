@@ -29,6 +29,16 @@
   flex: 1;
 }
 
+.dropdown-field {
+  flex: 1;
+  margin-right: 16px;
+  min-width: 200px;
+}
+
+.dropdown-field:last-child {
+  margin-right: 0;
+}
+
 // Styling for disabled dropdown options
 ::ng-deep .disabled-option {
   color: #999 !important;

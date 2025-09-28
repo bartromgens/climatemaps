@@ -17,7 +17,7 @@
       (leafletMapZoomEnd)="onZoom($event)"
     ></div>
     <div class="row">
-      <mat-form-field subscriptSizing="dynamic">
+      <mat-form-field subscriptSizing="dynamic" class="dropdown-field">
         <mat-label>Variable Type</mat-label>
         <mat-select
           [(value)]="selectedVariableType"
@@ -37,10 +37,8 @@
           </mat-option>
         </mat-select>
       </mat-form-field>
-    </div>
 
-    <div class="row">
-      <mat-form-field subscriptSizing="dynamic">
+      <mat-form-field subscriptSizing="dynamic" class="dropdown-field">
         <mat-label>Year Range</mat-label>
         <mat-select
           [(value)]="selectedYearRange"
@@ -60,10 +58,8 @@
           </mat-option>
         </mat-select>
       </mat-form-field>
-    </div>
 
-    <div class="row">
-      <mat-form-field subscriptSizing="dynamic">
+      <mat-form-field subscriptSizing="dynamic" class="dropdown-field">
         <mat-label>Resolution</mat-label>
         <mat-select
           [(value)]="selectedResolution"
@@ -79,15 +75,14 @@
           </mat-option>
         </mat-select>
       </mat-form-field>
-    </div>
 
-    <div
-      class="row"
-      *ngIf="
-        selectedYearRange && !isHistoricalYearRange(selectedYearRange.value)
-      "
-    >
-      <mat-form-field subscriptSizing="dynamic">
+      <mat-form-field
+        subscriptSizing="dynamic"
+        class="dropdown-field"
+        *ngIf="
+          selectedYearRange && !isHistoricalYearRange(selectedYearRange.value)
+        "
+      >
         <mat-label>Climate Scenario</mat-label>
         <mat-select
           [(value)]="selectedClimateScenario"
@@ -105,15 +100,14 @@
           </mat-option>
         </mat-select>
       </mat-form-field>
-    </div>
 
-    <div
-      class="row"
-      *ngIf="
-        selectedYearRange && !isHistoricalYearRange(selectedYearRange.value)
-      "
-    >
-      <mat-form-field subscriptSizing="dynamic">
+      <mat-form-field
+        subscriptSizing="dynamic"
+        class="dropdown-field"
+        *ngIf="
+          selectedYearRange && !isHistoricalYearRange(selectedYearRange.value)
+        "
+      >
         <mat-label>Climate Model</mat-label>
         <mat-select
           [(value)]="selectedClimateModel"
