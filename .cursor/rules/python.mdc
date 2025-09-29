@@ -1,0 +1,11 @@
+---
+description: Python
+globs:
+alwaysApply: true
+---
+
+- Active the conda environment before running python commands
+- Add mypy type hints
+- Don't add docstrings to functions
+- Don't comment the obvious
+- Always try to remove duplicate code
