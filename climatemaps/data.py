@@ -1,5 +1,9 @@
 import numpy
 
+from climatemaps.datasets import ClimateDataConfig, DataFormat, FutureClimateDataConfig
+from climatemaps.geotiff import read_geotiff_month, read_geotiff_history
+from climatemaps.geogrid import GeoGrid
+
 
 def import_climate_data(filepath, monthnr):
     ncols = 720
@@ -90,3 +94,36 @@ def import_ascii_grid_generic(filepath, no_data_value=9e20):
 
     print("import_ascii_grid_generic() - END")
     return latrange, lonrange, Z
+
+
+def load_climate_data(data_config: ClimateDataConfig, month: int) -> GeoGrid:
+    if data_config.format == DataFormat.IPCC_GRID:
+        lat_range, lon_range, values = import_climate_data(data_config.filepath, month)
+    elif data_config.format == DataFormat.GEOTIFF_WORLDCLIM_CMIP6:
+        lon_range, lat_range, values = read_geotiff_month(data_config.filepath, month)
+    elif data_config.format == DataFormat.GEOTIFF_WORLDCLIM_HISTORY:
+        lon_range, lat_range, values = read_geotiff_history(data_config.filepath, month)
+    else:
+        raise ValueError(f"Unsupported data format: {data_config.format}")
+
+    values = values * data_config.conversion_factor
+
+    if data_config.conversion_function is not None:
+        values = data_config.conversion_function(values, month)
+
+    return GeoGrid(lon_range=lon_range, lat_range=lat_range, values=values)
+
+
+def load_climate_data_for_difference(
+    historical_config: ClimateDataConfig, future_config: FutureClimateDataConfig, month: int
+) -> GeoGrid:
+    historical_grid = load_climate_data(historical_config, month)
+    future_grid = load_climate_data(future_config, month)
+
+    # Ensure coordinate arrays match
+    if not numpy.allclose(historical_grid.lon_range, future_grid.lon_range) or not numpy.allclose(
+        historical_grid.lat_range, future_grid.lat_range
+    ):
+        raise ValueError("Coordinate arrays don't match between historical and future data")
+
+    return future_grid.difference(historical_grid)

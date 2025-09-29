@@ -1,12 +1,28 @@
 import os
 
 from climatemaps.config import ClimateMapsConfig
-from climatemaps.datasets import ClimateDataConfig
+from climatemaps.datasets import ClimateDataConfig, ClimateDifferenceDataConfig
 
 
 def tile_files_exist(
     data_set_config: ClimateDataConfig, month: int, maps_config: ClimateMapsConfig
 ) -> bool:
+    files_to_check = [
+        f"{month}_raster.mbtiles",
+        f"{month}_vector.mbtiles",
+        f"{month}_colorbar.png",
+    ]
+
+    directory = os.path.join(maps_config.data_dir_out, data_set_config.data_type_slug)
+    return _check_files_exist(directory, files_to_check)
+
+
+def difference_tile_files_exist(
+    data_set_config: ClimateDifferenceDataConfig, month: int, maps_config: ClimateMapsConfig
+) -> bool:
+    """
+    Check if difference map tile files exist
+    """
     files_to_check = [
         f"{month}_raster.mbtiles",
         f"{month}_vector.mbtiles",

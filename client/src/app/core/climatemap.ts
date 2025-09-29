@@ -18,6 +18,8 @@ export interface ClimateMapResource {
   source: string | null;
   climate_model: ClimateModel | null;
   climate_scenario: ClimateScenario | null;
+  is_difference_map?: boolean;
+  historical_year_range?: [number, number];
 }
 
 export class ClimateMap {
@@ -33,6 +35,8 @@ export class ClimateMap {
     public source: string | null,
     public climateModel: ClimateModel | null = null,
     public climateScenario: ClimateScenario | null = null,
+    public isDifferenceMap = false,
+    public historicalYearRange: [number, number] | null = null,
   ) {}
 
   static fromResource(resource: ClimateMapResource): ClimateMap {
@@ -48,11 +52,20 @@ export class ClimateMap {
       resource.source,
       resource.climate_model,
       resource.climate_scenario,
+      resource.is_difference_map || false,
+      resource.historical_year_range || null,
     );
   }
 
   static fromResources(resources: ClimateMapResource[]): ClimateMap[] {
     return resources.map((resource) => ClimateMap.fromResource(resource));
+  }
+
+  getDisplayName(): string {
+    if (this.isDifferenceMap && this.historicalYearRange) {
+      return `${this.variable.displayName} Change (${this.historicalYearRange[0]}-${this.historicalYearRange[1]} to ${this.yearRange[0]}-${this.yearRange[1]})`;
+    }
+    return `${this.variable.displayName} (${this.yearRange[0]}-${this.yearRange[1]})`;
   }
 }
 

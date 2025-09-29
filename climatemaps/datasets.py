@@ -114,7 +114,7 @@ CLIMATE_CONTOUR_CONFIGS: Dict[ClimateVarKey, ContourPlotConfig] = {
         level_lower=-20, level_upper=45, colormap=plt.cm.jet, title="Max. temperature", unit="C"
     ),
     ClimateVarKey.T_MIN: ContourPlotConfig(
-        level_lower=-30, level_upper=28, colormap=plt.cm.jet, title="Mix. temperature", unit="C"
+        level_lower=-30, level_upper=28, colormap=plt.cm.jet, title="Min. temperature", unit="C"
     ),
     ClimateVarKey.CLOUD_COVER: ContourPlotConfig(
         level_lower=0, level_upper=100, colormap=plt.cm.jet_r, title="Cloud coverage", unit="%"
@@ -127,6 +127,33 @@ CLIMATE_CONTOUR_CONFIGS: Dict[ClimateVarKey, ContourPlotConfig] = {
     ),
     ClimateVarKey.RADIATION: ContourPlotConfig(
         level_lower=0, level_upper=300, colormap=plt.cm.jet, title="Radiation", unit="W/m^2"
+    ),
+}
+
+# Contour configurations for difference maps (future - historical)
+# Only includes variables that have both historical and future data available
+CLIMATE_DIFFERENCE_CONTOUR_CONFIGS: Dict[ClimateVarKey, ContourPlotConfig] = {
+    ClimateVarKey.PRECIPITATION: ContourPlotConfig(
+        level_lower=-5,
+        level_upper=5,
+        colormap=plt.cm.RdBu_r,  # Red-Blue diverging colormap
+        title="Precipitation Change",
+        unit="mm/day",
+        log_scale=False,
+    ),
+    ClimateVarKey.T_MAX: ContourPlotConfig(
+        level_lower=-8,
+        level_upper=8,
+        colormap=plt.cm.RdBu_r,
+        title="Max. Temperature Change",
+        unit="°C",
+    ),
+    ClimateVarKey.T_MIN: ContourPlotConfig(
+        level_lower=-20,
+        level_upper=20,
+        colormap=plt.cm.RdBu_r,
+        title="Min. Temperature Change",
+        unit="°C",
     ),
 }
 
@@ -173,6 +200,28 @@ class FutureClimateDataConfig(ClimateDataConfig):
     def data_type_slug(self) -> str:
         base_slug = super().data_type_slug
         return f"{base_slug}_{self.climate_scenario.name}_{self.climate_model.name}".lower()
+
+
+@dataclass
+class ClimateDifferenceDataConfig(ClimateDataConfig):
+    """
+    Configuration for climate difference maps (future - historical)
+    """
+
+    historical_config: ClimateDataConfig = field(default=None)
+    future_config: FutureClimateDataConfig = field(default=None)
+
+    @property
+    def data_type_slug(self) -> str:
+        if self.future_config and self.historical_config:
+            return f"difference_{self.variable.name}_{self.historical_config.year_range[0]}_{self.historical_config.year_range[1]}_to_{self.future_config.year_range[0]}_{self.future_config.year_range[1]}_{self.resolution.value}_{self.future_config.climate_scenario.name}_{self.future_config.climate_model.name}".lower().replace(
+                ".", "_"
+            )
+        return super().data_type_slug
+
+    @property
+    def contour_config(self) -> ContourPlotConfig:
+        return CLIMATE_DIFFERENCE_CONTOUR_CONFIGS[self.variable_type]
 
 
 @dataclass
@@ -298,6 +347,44 @@ HISTORIC_DATA_SETS: List[ClimateDataConfig] = [
 FUTURE_DATA_SETS: List[FutureClimateDataConfig] = [
     cfg for data_group in FUTURE_DATA_GROUPS for cfg in data_group.create_configs()
 ]
+
+
+def create_difference_map_configs() -> List[ClimateDifferenceDataConfig]:
+    """
+    Create difference map configurations by pairing historical and future data
+    """
+    difference_configs = []
+
+    for future_config in FUTURE_DATA_SETS:
+        # Find matching historical config with same variable and resolution
+        historical_config = None
+        for hist_config in HISTORIC_DATA_SETS:
+            if (
+                hist_config.variable_type == future_config.variable_type
+                and hist_config.resolution == future_config.resolution
+            ):
+                historical_config = hist_config
+                break
+
+        if historical_config:
+            diff_config = ClimateDifferenceDataConfig(
+                variable_type=future_config.variable_type,
+                filepath="",  # Not used for difference maps
+                format=future_config.format,
+                resolution=future_config.resolution,
+                year_range=future_config.year_range,
+                conversion_function=None,
+                conversion_factor=1,
+                source=f"Difference: {future_config.source} - {historical_config.source}",
+                historical_config=historical_config,
+                future_config=future_config,
+            )
+            difference_configs.append(diff_config)
+
+    return difference_configs
+
+
+DIFFERENCE_DATA_SETS: List[ClimateDifferenceDataConfig] = create_difference_map_configs()
 
 # IPCC_HISTORIC_SETS = [
 #     ClimateMapConfig(

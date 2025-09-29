@@ -9,6 +9,7 @@ from pydantic import BaseModel
 from climatemaps.datasets import SpatialResolution
 from climatemaps.settings import settings
 from climatemaps.datasets import ClimateDataConfig
+from climatemaps.datasets import ClimateDifferenceDataConfig
 from climatemaps.datasets import ClimateVariable
 from climatemaps.datasets import ClimateModel
 from climatemaps.datasets import ClimateScenario
@@ -74,12 +75,21 @@ class ClimateMap(BaseModel):
     source: Optional[str]
     climate_model: Optional[ClimateModel] = None
     climate_scenario: Optional[ClimateScenario] = None
+    is_difference_map: bool = False
+    historical_year_range: Optional[Tuple[int, int]] = None
 
     @classmethod
     def create(cls, config: ClimateDataConfig):
         # Check if config has climate model and scenario (FutureClimateDataConfig)
         climate_model = getattr(config, "climate_model", None)
         climate_scenario = getattr(config, "climate_scenario", None)
+
+        # Check if this is a difference map
+        is_difference_map = isinstance(config, ClimateDifferenceDataConfig)
+        historical_year_range = None
+
+        if is_difference_map and config.historical_config:
+            historical_year_range = config.historical_config.year_range
 
         return ClimateMap(
             data_type=config.data_type_slug,
@@ -93,4 +103,6 @@ class ClimateMap(BaseModel):
             source=config.source,
             climate_model=climate_model,
             climate_scenario=climate_scenario,
+            is_difference_map=is_difference_map,
+            historical_year_range=historical_year_range,
         )
