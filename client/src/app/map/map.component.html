@@ -31,5 +31,10 @@
         <app-year-slider></app-year-slider>
       </div>
     </div>
+    <app-colorbar
+      [colormapUrl]="selectedOption?.climateMap?.colormapUrl || null"
+      [displayName]="selectedOption?.climateMap?.getDisplayName() || null"
+      [selectedMonth]="monthSelected"
+    ></app-colorbar>
   </mat-sidenav-content>
 </mat-sidenav-container>

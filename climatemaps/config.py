@@ -101,7 +101,7 @@ class ClimateMap(BaseModel):
             variable=config.variable,
             resolution=config.resolution,
             tiles_url=f"{settings.TILE_SERVER_URL}/{config.data_type_slug}",
-            colormap_url="?",
+            colormap_url=f"{settings.API_BASE_URL}/colorbar/{config.data_type_slug}",
             max_zoom_raster=settings.ZOOM_MAX_RASTER,
             max_zoom_vector=get_config().zoom_max,
             source=config.source,

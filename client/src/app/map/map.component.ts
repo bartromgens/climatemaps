@@ -28,6 +28,7 @@ import {
   MapControlsData,
   MapControlsOptions,
 } from './map-controls.component';
+import { ColorbarComponent } from './colorbar.component';
 import { ClimateMapService } from '../core/climatemap.service';
 import { ClimateMap } from '../core/climatemap';
 import {
@@ -57,6 +58,7 @@ interface LayerOption {
     variableType: string;
     isDifferenceMap: boolean;
   };
+  climateMap?: ClimateMap;
 }
 
 @Component({
@@ -73,6 +75,7 @@ interface LayerOption {
     MonthSliderComponent,
     YearSliderComponent,
     MapControlsComponent,
+    ColorbarComponent,
   ],
   templateUrl: './map.component.html',
   styleUrl: './map.component.scss',
@@ -81,7 +84,7 @@ export class MapComponent implements OnInit {
   private readonly ZOOM_DEFAULT: number = 5;
   layerOptions: LayerOption[] = [];
   selectedOption: LayerOption | undefined;
-  private monthSelected = 1;
+  monthSelected = 1;
 
   // Climate maps data from backend
   climateMaps: ClimateMap[] = [];
@@ -459,6 +462,8 @@ export class MapComponent implements OnInit {
           variableType: climateMap.variable.name,
           isDifferenceMap: climateMap.isDifferenceMap,
         },
+        // Store the full ClimateMap object for colorbar access
+        climateMap: climateMap,
       });
     }
     return layerOptions;
