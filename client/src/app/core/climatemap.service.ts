@@ -6,6 +6,16 @@ import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { ClimateMap, ClimateMapResource } from './climatemap';
 
+export interface ClimateValueResponse {
+  value: number;
+  data_type: string;
+  month: number;
+  latitude: number;
+  longitude: number;
+  unit: string;
+  variable_name: string;
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -19,6 +29,18 @@ export class ClimateMapService {
         observer.next(ClimateMap.fromResources(resources));
         observer.complete();
       });
+    });
+  }
+
+  public getClimateValue(
+    dataType: string,
+    month: number,
+    lat: number,
+    lon: number,
+  ): Observable<ClimateValueResponse> {
+    const url = `${environment.apiBaseUrl}/value/${dataType}/${month}`;
+    return this.httpClient.get<ClimateValueResponse>(url, {
+      params: { lat: lat.toString(), lon: lon.toString() },
     });
   }
 }

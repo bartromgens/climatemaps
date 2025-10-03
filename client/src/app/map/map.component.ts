@@ -29,7 +29,10 @@ import {
   MapControlsOptions,
 } from './map-controls.component';
 import { ColorbarComponent } from './colorbar.component';
-import { ClimateMapService } from '../core/climatemap.service';
+import {
+  ClimateMapService,
+  ClimateValueResponse,
+} from '../core/climatemap.service';
 import { ClimateMap } from '../core/climatemap';
 import {
   MetadataService,
@@ -327,6 +330,8 @@ export class MapComponent implements OnInit {
   private rasterLayer: Layer | null = null;
   private vectorLayer: Layer | null = null;
   private hoverTooltip: Tooltip | null = null;
+  private clickTooltip: Tooltip | null = null;
+  private isLoadingClickValue = false;
 
   constructor(
     private route: ActivatedRoute,
@@ -576,6 +581,11 @@ export class MapComponent implements OnInit {
       this.map?.removeLayer(this.hoverTooltip);
       this.hoverTooltip = null;
     }
+    // Clean up click tooltip
+    if (this.clickTooltip) {
+      this.map?.removeLayer(this.clickTooltip);
+      this.clickTooltip = null;
+    }
   }
 
   private updateLayers(): void {
@@ -665,8 +675,111 @@ export class MapComponent implements OnInit {
     this.map?.setView([lat, lon], zoom);
   }
 
+  private normalizeLongitude(lon: number): number {
+    // Normalize longitude to -180 to 180 range
+    while (lon > 180) {
+      lon -= 360;
+    }
+    while (lon < -180) {
+      lon += 360;
+    }
+    return lon;
+  }
+
   onMapClick(event: LeafletMouseEvent): void {
     console.log('mapClick', event);
+
+    if (!this.selectedOption?.metadata?.dataType) {
+      console.log('No layer selected, skipping click handler');
+      return;
+    }
+
+    const lat = event.latlng.lat;
+    const lon = this.normalizeLongitude(event.latlng.lng);
+
+    // Remove existing click tooltip
+    if (this.clickTooltip) {
+      this.map?.removeLayer(this.clickTooltip);
+      this.clickTooltip = null;
+    }
+
+    // Show loading tooltip
+    this.isLoadingClickValue = true;
+    this.clickTooltip = new Tooltip({
+      content: 'Loading...',
+      className: 'click-value-tooltip',
+      direction: 'top',
+      offset: [0, -10],
+      opacity: 0.95,
+      permanent: true,
+    });
+    this.clickTooltip.setLatLng(event.latlng);
+    this.clickTooltip.addTo(this.map!);
+
+    // Fetch climate value from API
+    this.climateMapService
+      .getClimateValue(
+        this.selectedOption.metadata.dataType,
+        this.monthSelected,
+        lat,
+        lon,
+      )
+      .subscribe({
+        next: (response: ClimateValueResponse) => {
+          this.isLoadingClickValue = false;
+          this.displayClickValue(event.latlng, response);
+        },
+        error: (error) => {
+          this.isLoadingClickValue = false;
+          console.error('Error fetching climate value:', error);
+
+          // Show error message in tooltip
+          if (this.clickTooltip) {
+            this.map?.removeLayer(this.clickTooltip);
+          }
+
+          const errorMessage = error.error?.detail || 'Error loading value';
+          this.clickTooltip = new Tooltip({
+            content: `<div style="color: #ff5252;">${errorMessage}</div>`,
+            className: 'click-value-tooltip error',
+            direction: 'top',
+            offset: [0, -10],
+            opacity: 0.95,
+            permanent: true,
+          });
+          this.clickTooltip.setLatLng(event.latlng);
+          this.clickTooltip.addTo(this.map!);
+        },
+      });
+  }
+
+  private displayClickValue(latlng: any, response: ClimateValueResponse): void {
+    // Remove existing click tooltip
+    if (this.clickTooltip) {
+      this.map?.removeLayer(this.clickTooltip);
+    }
+
+    // Format the value display
+    const content = `
+      <div class="climate-value-popup">
+        <div class="value-main">${response.value.toFixed(2)} ${response.unit}</div>
+        <div class="value-details">
+          <div>Location: ${response.latitude.toFixed(4)}°, ${response.longitude.toFixed(4)}°</div>
+        </div>
+      </div>
+    `;
+
+    // Create persistent tooltip with the value
+    this.clickTooltip = new Tooltip({
+      content: content,
+      className: 'click-value-tooltip',
+      direction: 'top',
+      offset: [0, -10],
+      opacity: 0.95,
+      permanent: true,
+    });
+    this.clickTooltip.setLatLng(latlng);
+    this.clickTooltip.addTo(this.map!);
   }
 
   onMapReady(map: Map): void {

@@ -81,3 +81,46 @@
 ::ng-deep .contour-hover-tooltip::before {
   border-top-color: rgba(0, 0, 0, 0.8) !important;
 }
+
+// Styling for climate value click tooltip
+::ng-deep .click-value-tooltip {
+  background: rgba(255, 255, 255, 0.98) !important;
+  border: 2px solid #2196f3 !important;
+  border-radius: 8px !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+  padding: 0 !important;
+  font-family: 'Roboto', sans-serif !important;
+  
+  &.error {
+    border-color: #ff5252 !important;
+  }
+
+  .leaflet-tooltip-left::before,
+  .leaflet-tooltip-right::before {
+    border-left-color: transparent !important;
+    border-right-color: transparent !important;
+  }
+}
+
+::ng-deep .climate-value-popup {
+  padding: 12px 16px;
+  
+  .value-main {
+    font-size: 20px;
+    font-weight: 600;
+    color: #1976d2;
+    margin-bottom: 8px;
+    text-align: center;
+  }
+  
+  .value-details {
+    font-size: 12px;
+    color: #666;
+    border-top: 1px solid #e0e0e0;
+    padding-top: 8px;
+    
+    div {
+      margin: 2px 0;
+    }
+  }
+}

@@ -114,3 +114,26 @@ class GeoGrid(BaseModel):
     def urcrnrlat(self):
         """upper right corner latitude"""
         return self.lat_max + self.bin_width / 2
+
+    def get_value_at_coordinate(self, lon: float, lat: float) -> float:
+        if lon < self.lon_min or lon > self.lon_max:
+            raise ValueError(f"Longitude {lon} is out of range [{self.lon_min}, {self.lon_max}]")
+        if lat < self.lat_min or lat > self.lat_max:
+            raise ValueError(f"Latitude {lat} is out of range [{self.lat_min}, {self.lat_max}]")
+
+        from scipy.interpolate import RegularGridInterpolator
+
+        interpolator = RegularGridInterpolator(
+            (self.lat_range, self.lon_range),
+            self.values,
+            method="linear",
+            bounds_error=False,
+            fill_value=np.nan,
+        )
+
+        value = float(interpolator([lat, lon])[0])
+
+        if np.isnan(value):
+            raise ValueError(f"No data available at coordinates (lat={lat}, lon={lon})")
+
+        return value
