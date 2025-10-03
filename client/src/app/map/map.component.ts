@@ -16,7 +16,6 @@ import {
   LeafletMouseEvent,
   Map,
   tileLayer,
-  Tooltip,
 } from 'leaflet';
 import 'leaflet.vectorgrid'; // bring in the vectorgrid plugin
 
@@ -45,24 +44,12 @@ import {
   ClimateScenario,
   ClimateModel,
 } from '../utils/enum';
-
-interface LayerOption {
-  name: string;
-  rasterUrl: string;
-  vectorUrl: string;
-  rasterMaxZoom: number;
-  vectorMaxZoom: number;
-  metadata?: {
-    dataType: string;
-    yearRange: [number, number];
-    resolution: string;
-    climateModel: string | null;
-    climateScenario: string | null;
-    variableType: string;
-    isDifferenceMap: boolean;
-  };
-  climateMap?: ClimateMap;
-}
+import { TooltipManagerService } from './services/tooltip-manager.service';
+import {
+  LayerBuilderService,
+  LayerOption,
+} from './services/layer-builder.service';
+import { LayerFilterService } from './services/layer-filter.service';
 
 @Component({
   selector: 'app-map',
@@ -185,127 +172,49 @@ export class MapComponent implements OnInit {
 
   // Computed properties for filtering available options based on actual data
   private getAvailableVariableTypes(): ClimateVarKey[] {
-    return this.variableTypes.filter((variableType) => {
-      return this.climateMaps.some(
-        (map) =>
-          map.variable.name === this.climateVariables[variableType]?.name,
-      );
-    });
+    return this.layerFilter.getAvailableVariableTypes(
+      this.climateMaps,
+      this.variableTypes,
+      this.climateVariables,
+    );
   }
 
   private getAvailableYearRanges(): YearRange[] {
-    return this.yearRanges.filter((yearRange) => {
-      return this.climateMaps.some(
-        (map) =>
-          map.yearRange[0] === yearRange.value[0] &&
-          map.yearRange[1] === yearRange.value[1] &&
-          map.variable.name ===
-            this.climateVariables[this.controlsData.selectedVariableType]
-              ?.name &&
-          map.isDifferenceMap === this.controlsData.showDifferenceMap,
-      );
-    });
+    return this.layerFilter.getAvailableYearRanges(
+      this.climateMaps,
+      this.yearRanges,
+      this.controlsData,
+      this.climateVariables,
+    );
   }
 
   private getAvailableResolutions(): SpatialResolution[] {
-    if (!this.controlsData.selectedYearRange) return [];
-
-    // First, get all maps that match the current variable type and year range
-    const matchingMaps = this.climateMaps.filter(
-      (map) =>
-        map.variable.name ===
-          this.climateVariables[this.controlsData.selectedVariableType]?.name &&
-        map.yearRange[0] === this.controlsData.selectedYearRange!.value[0] &&
-        map.yearRange[1] === this.controlsData.selectedYearRange!.value[1] &&
-        map.isDifferenceMap === this.controlsData.showDifferenceMap,
+    return this.layerFilter.getAvailableResolutions(
+      this.climateMaps,
+      this.resolutions,
+      this.controlsData,
+      this.climateVariables,
+      this.isHistoricalYearRange,
     );
-
-    // For future data, further filter by climate scenario and model if selected
-    let filteredMaps = matchingMaps;
-    if (
-      !this.isHistoricalYearRange(this.controlsData.selectedYearRange!.value)
-    ) {
-      if (this.controlsData.selectedClimateScenario) {
-        filteredMaps = filteredMaps.filter(
-          (map) =>
-            map.climateScenario === this.controlsData.selectedClimateScenario,
-        );
-      }
-      if (this.controlsData.selectedClimateModel) {
-        filteredMaps = filteredMaps.filter(
-          (map) => map.climateModel === this.controlsData.selectedClimateModel,
-        );
-      }
-    }
-
-    // Get unique resolutions from the filtered maps
-    const availableResolutions = this.resolutions.filter((resolution) =>
-      filteredMaps.some((map) => map.resolution === resolution),
-    );
-
-    return availableResolutions;
   }
 
   private getAvailableClimateScenarios(): ClimateScenario[] {
-    // Only show climate scenarios for future data or difference maps
-    if (
-      !this.controlsData.selectedYearRange ||
-      (this.isHistoricalYearRange(this.controlsData.selectedYearRange.value) &&
-        !this.controlsData.showDifferenceMap)
-    ) {
-      return [];
-    }
-
-    // Get all maps that match the current variable type and year range
-    const matchingMaps = this.climateMaps.filter(
-      (map) =>
-        map.variable.name ===
-          this.climateVariables[this.controlsData.selectedVariableType]?.name &&
-        map.yearRange[0] === this.controlsData.selectedYearRange!.value[0] &&
-        map.yearRange[1] === this.controlsData.selectedYearRange!.value[1] &&
-        map.isDifferenceMap === this.controlsData.showDifferenceMap,
+    return this.layerFilter.getAvailableClimateScenarios(
+      this.climateMaps,
+      this.climateScenarios,
+      this.controlsData,
+      this.climateVariables,
+      this.isHistoricalYearRange,
     );
-
-    // Get unique climate scenarios from the matching maps
-    const availableScenarios = this.climateScenarios.filter((scenario) =>
-      matchingMaps.some((map) => map.climateScenario === scenario),
-    );
-
-    return availableScenarios;
   }
 
   private getAvailableClimateModels(): ClimateModel[] {
-    // Only show climate models for future data or difference maps
-    if (
-      !this.controlsData.selectedYearRange ||
-      (this.isHistoricalYearRange(this.controlsData.selectedYearRange.value) &&
-        !this.controlsData.showDifferenceMap)
-    ) {
-      return [];
-    }
-
-    // Get all maps that match the current variable type and year range
-    const matchingMaps = this.climateMaps.filter(
-      (map) =>
-        map.variable.name ===
-          this.climateVariables[this.controlsData.selectedVariableType]?.name &&
-        map.yearRange[0] === this.controlsData.selectedYearRange!.value[0] &&
-        map.yearRange[1] === this.controlsData.selectedYearRange!.value[1] &&
-        map.isDifferenceMap === this.controlsData.showDifferenceMap,
-    );
-
-    // Further filter by climate scenario if selected
-    let filteredMaps = matchingMaps;
-    if (this.controlsData.selectedClimateScenario) {
-      filteredMaps = filteredMaps.filter(
-        (map) =>
-          map.climateScenario === this.controlsData.selectedClimateScenario,
-      );
-    }
-
-    // Get unique climate models from the filtered maps
-    return this.climateModels.filter((model) =>
-      filteredMaps.some((map) => map.climateModel === model),
+    return this.layerFilter.getAvailableClimateModels(
+      this.climateMaps,
+      this.climateModels,
+      this.controlsData,
+      this.climateVariables,
+      this.isHistoricalYearRange,
     );
   }
 
@@ -329,8 +238,6 @@ export class MapComponent implements OnInit {
   private readonly control: Control.Layers;
   private rasterLayer: Layer | null = null;
   private vectorLayer: Layer | null = null;
-  private hoverTooltip: Tooltip | null = null;
-  private clickTooltip: Tooltip | null = null;
   private isLoadingClickValue = false;
 
   constructor(
@@ -338,6 +245,9 @@ export class MapComponent implements OnInit {
     private location: Location,
     private climateMapService: ClimateMapService,
     private metadataService: MetadataService,
+    private tooltipManager: TooltipManagerService,
+    private layerBuilder: LayerBuilderService,
+    private layerFilter: LayerFilterService,
   ) {
     this.control = new Control.Layers(undefined, undefined, {
       collapsed: false,
@@ -359,7 +269,7 @@ export class MapComponent implements OnInit {
       // Populate metadata from API data
       this.populateMetadataFromAPI(climateMaps);
 
-      this.layerOptions = this.buildLayerOptions(climateMaps);
+      this.layerOptions = this.layerBuilder.buildLayerOptions(climateMaps);
       console.log('Built layer options:', this.layerOptions.length);
 
       // Reset selections to ensure they are available
@@ -439,39 +349,6 @@ export class MapComponent implements OnInit {
       availableClimateScenarios: this.getAvailableClimateScenarios(),
       availableClimateModels: this.getAvailableClimateModels(),
     };
-  }
-
-  private buildLayerOptions(climateMaps: any[]): LayerOption[] {
-    const layerOptions: LayerOption[] = [];
-    for (const climateMap of climateMaps) {
-      let displayName = `${climateMap.variable.displayName} (${climateMap.variable.unit})`;
-
-      // Add climate model and scenario information if available
-      if (climateMap.climateModel && climateMap.climateScenario) {
-        displayName += ` - ${climateMap.climateModel} ${climateMap.climateScenario}`;
-      }
-
-      layerOptions.push({
-        name: displayName,
-        rasterUrl: `${climateMap.tilesUrl}_raster`,
-        vectorUrl: `${climateMap.tilesUrl}_vector`,
-        rasterMaxZoom: climateMap.maxZoomRaster,
-        vectorMaxZoom: climateMap.maxZoomVector,
-        // Store additional metadata for better matching
-        metadata: {
-          dataType: climateMap.dataType,
-          yearRange: climateMap.yearRange,
-          resolution: climateMap.resolution,
-          climateModel: climateMap.climateModel,
-          climateScenario: climateMap.climateScenario,
-          variableType: climateMap.variable.name,
-          isDifferenceMap: climateMap.isDifferenceMap,
-        },
-        // Store the full ClimateMap object for colorbar access
-        climateMap: climateMap,
-      });
-    }
-    return layerOptions;
   }
 
   private findMatchingLayer() {
@@ -576,15 +453,9 @@ export class MapComponent implements OnInit {
       this.map?.removeLayer(this.vectorLayer);
       this.vectorLayer = null;
     }
-    // Clean up hover tooltip
-    if (this.hoverTooltip) {
-      this.map?.removeLayer(this.hoverTooltip);
-      this.hoverTooltip = null;
-    }
-    // Clean up click tooltip
-    if (this.clickTooltip) {
-      this.map?.removeLayer(this.clickTooltip);
-      this.clickTooltip = null;
+    // Clean up tooltips
+    if (this.map) {
+      this.tooltipManager.removeAllTooltips(this.map);
     }
   }
 
@@ -676,31 +547,9 @@ export class MapComponent implements OnInit {
   }
 
   private normalizeLongitude(lon: number): number {
-    // Normalize longitude to -180 to 180 range
-    while (lon > 180) {
-      lon -= 360;
-    }
-    while (lon < -180) {
-      lon += 360;
-    }
+    while (lon > 180) lon -= 360;
+    while (lon < -180) lon += 360;
     return lon;
-  }
-
-  private createPersistentTooltip(content: string, latlng: any): void {
-    if (this.clickTooltip) {
-      this.map?.removeLayer(this.clickTooltip);
-    }
-
-    this.clickTooltip = new Tooltip({
-      content: content,
-      className: 'contour-hover-tooltip',
-      direction: 'top',
-      offset: [0, -10],
-      opacity: 0.9,
-      permanent: true,
-    });
-    this.clickTooltip.setLatLng(latlng);
-    this.clickTooltip.addTo(this.map!);
   }
 
   onMapClick(event: LeafletMouseEvent): void {
@@ -716,7 +565,11 @@ export class MapComponent implements OnInit {
 
     // Show loading tooltip
     this.isLoadingClickValue = true;
-    this.createPersistentTooltip('Loading...', event.latlng);
+    this.tooltipManager.createPersistentTooltip(
+      'Loading...',
+      event.latlng,
+      this.map!,
+    );
 
     // Fetch climate value from API
     this.climateMapService
@@ -736,14 +589,22 @@ export class MapComponent implements OnInit {
           console.error('Error fetching climate value:', error);
 
           const errorMessage = error.error?.detail || 'Error loading value';
-          this.createPersistentTooltip(errorMessage, event.latlng);
+          this.tooltipManager.createPersistentTooltip(
+            errorMessage,
+            event.latlng,
+            this.map!,
+          );
         },
       });
   }
 
   private displayClickValue(latlng: any, response: ClimateValueResponse): void {
     const displayValue = `${response.value.toFixed(1)} ${response.unit}`;
-    this.createPersistentTooltip(displayValue, latlng);
+    this.tooltipManager.createPersistentTooltip(
+      displayValue,
+      latlng,
+      this.map!,
+    );
   }
 
   onMapReady(map: Map): void {
@@ -783,35 +644,17 @@ export class MapComponent implements OnInit {
 
   private onVectorLayerHover(e: any): void {
     const properties = e.layer?.properties;
-    if (properties && properties['level-value'] !== undefined) {
+    if (properties && properties['level-value'] !== undefined && this.map) {
       const value = properties['level-value'];
       const unit = this.getCurrentUnit();
       const displayValue = `${value.toFixed(1)} ${unit}`;
-
-      // Remove existing tooltip
-      if (this.hoverTooltip) {
-        this.map?.removeLayer(this.hoverTooltip);
-      }
-
-      // Create new tooltip
-      this.hoverTooltip = new Tooltip({
-        content: displayValue,
-        className: 'contour-hover-tooltip',
-        direction: 'top',
-        offset: [0, -10],
-        opacity: 0.9,
-      });
-
-      // Bind tooltip to the layer and open it
-      this.hoverTooltip.setLatLng(e.latlng);
-      this.hoverTooltip.addTo(this.map!);
+      this.tooltipManager.createHoverTooltip(displayValue, e.latlng, this.map);
     }
   }
 
   private onVectorLayerMouseOut(): void {
-    if (this.hoverTooltip) {
-      this.map?.removeLayer(this.hoverTooltip);
-      this.hoverTooltip = null;
+    if (this.map) {
+      this.tooltipManager.removeHoverTooltip(this.map);
     }
   }
 

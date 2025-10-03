@@ -8,4 +8,4 @@ alwaysApply: true
 - Add mypy type hints
 - Don't add docstrings to functions
 - Don't comment the obvious
-- Always try to remove duplicate code
+- Remove duplicate code
