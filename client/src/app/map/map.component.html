@@ -17,6 +17,17 @@
       (leafletMapZoomEnd)="onZoom($event)"
     ></div>
     <div class="row">
+      <div class="checkbox-field">
+        <mat-checkbox
+          [(ngModel)]="showDifferenceMap"
+          (change)="onDifferenceMapChange()"
+          color="primary"
+        >
+          Show Difference Map (Future - Historic)
+        </mat-checkbox>
+      </div>
+    </div>
+    <div class="row">
       <mat-form-field subscriptSizing="dynamic" class="dropdown-field">
         <mat-label>Variable Type</mat-label>
         <mat-select

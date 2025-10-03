@@ -90,6 +90,10 @@ class ClimateMap(BaseModel):
 
         if is_difference_map and config.historical_config:
             historical_year_range = config.historical_config.year_range
+            # For difference maps, get climate model and scenario from future_config
+            if hasattr(config, "future_config") and config.future_config:
+                climate_model = config.future_config.climate_model
+                climate_scenario = config.future_config.climate_scenario
 
         return ClimateMap(
             data_type=config.data_type_slug,

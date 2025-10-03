@@ -219,12 +219,10 @@ def _create_regular_contour(data_set_config: ClimateDataConfig, month: int):
 
 def _create_difference_contour(data_set_config: ClimateDifferenceDataConfig, month: int):
     """Create contour tiles for climate difference maps."""
-    # Load and calculate difference data using GeoGrid.difference()
     difference_grid = load_climate_data_for_difference(
         data_set_config.historical_config, data_set_config.future_config, month
     )
 
-    # Create contour map with difference-specific configuration
     contour_map = ContourTileBuilder(
         data_set_config.contour_config,
         geo_grid=difference_grid,
@@ -232,7 +230,6 @@ def _create_difference_contour(data_set_config: ClimateDifferenceDataConfig, mon
         zoom_max=maps_config.zoom_max,
     )
 
-    # Generate tiles
     contour_map.create_tiles(
         maps_config.data_dir_out,
         data_set_config.data_type_slug,

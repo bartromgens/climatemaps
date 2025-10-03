@@ -1,7 +1,7 @@
 import numpy
 
 from climatemaps.datasets import ClimateDataConfig, DataFormat, FutureClimateDataConfig
-from climatemaps.geotiff import read_geotiff_month, read_geotiff_history
+from climatemaps.geotiff import read_geotiff_future, read_geotiff_history
 from climatemaps.geogrid import GeoGrid
 
 
@@ -100,7 +100,7 @@ def load_climate_data(data_config: ClimateDataConfig, month: int) -> GeoGrid:
     if data_config.format == DataFormat.IPCC_GRID:
         lat_range, lon_range, values = import_climate_data(data_config.filepath, month)
     elif data_config.format == DataFormat.GEOTIFF_WORLDCLIM_CMIP6:
-        lon_range, lat_range, values = read_geotiff_month(data_config.filepath, month)
+        lon_range, lat_range, values = read_geotiff_future(data_config.filepath, month)
     elif data_config.format == DataFormat.GEOTIFF_WORLDCLIM_HISTORY:
         lon_range, lat_range, values = read_geotiff_history(data_config.filepath, month)
     else:

@@ -149,8 +149,8 @@ CLIMATE_DIFFERENCE_CONTOUR_CONFIGS: Dict[ClimateVarKey, ContourPlotConfig] = {
         unit="°C",
     ),
     ClimateVarKey.T_MIN: ContourPlotConfig(
-        level_lower=-20,
-        level_upper=20,
+        level_lower=-5,
+        level_upper=5,
         colormap=plt.cm.RdBu_r,
         title="Min. Temperature Change",
         unit="°C",
@@ -322,10 +322,10 @@ HISTORIC_DATA_GROUPS: List[ClimateDataConfigGroup] = [
 
 FUTURE_DATA_GROUPS: List[FutureClimateDataConfigGroup] = [
     FutureClimateDataConfigGroup(
-        variable_types=[ClimateVarKey.T_MAX, ClimateVarKey.T_MIN, ClimateVarKey.PRECIPITATION],
+        variable_types=[ClimateVarKey.T_MIN],
         format=DataFormat.GEOTIFF_WORLDCLIM_CMIP6,
         source="https://www.worldclim.org/data/cmip6/cmip6climate.html",
-        resolutions=[SpatialResolution.MIN10, SpatialResolution.MIN2_5],
+        resolutions=[SpatialResolution.MIN10],
         year_ranges=[(2021, 2040), (2041, 2060), (2081, 2100)],
         climate_scenarios=[
             ClimateScenario.SSP126,
@@ -333,9 +333,7 @@ FUTURE_DATA_GROUPS: List[FutureClimateDataConfigGroup] = [
             ClimateScenario.SSP370,
             ClimateScenario.SSP585,
         ],
-        climate_models=[
-            ClimateModel.EC_EARTH3_VEG,
-        ],
+        climate_models=[ClimateModel.EC_EARTH3_VEG],
         filepath_template="data/worldclim/future/wc2.1_{resolution}_{variable_name}_{climate_model}_{climate_scenario}_{year_range[0]}-{year_range[1]}.tif",
     ),
 ]

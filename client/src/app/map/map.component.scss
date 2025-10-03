@@ -39,6 +39,11 @@
   margin-right: 0;
 }
 
+.checkbox-field {
+  margin-bottom: 16px;
+  padding: 8px 0;
+}
+
 // Styling for disabled dropdown options
 ::ng-deep .disabled-option {
   color: #999 !important;

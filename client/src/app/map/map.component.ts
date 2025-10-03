@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, ParamMap } from '@angular/router';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatButtonModule } from '@angular/material/button';
@@ -23,6 +24,7 @@ import { MonthSliderComponent } from './month-slider.component';
 import { YearSliderComponent } from './year-slider.component';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 import { ClimateMapService } from '../core/climatemap.service';
 import { ClimateMap } from '../core/climatemap';
 import {
@@ -50,6 +52,7 @@ interface LayerOption {
     climateModel: string | null;
     climateScenario: string | null;
     variableType: string;
+    isDifferenceMap: boolean;
   };
 }
 
@@ -58,6 +61,7 @@ interface LayerOption {
   standalone: true,
   imports: [
     CommonModule,
+    FormsModule,
     LeafletModule,
     MatIconModule,
     MatSidenavModule,
@@ -65,6 +69,7 @@ interface LayerOption {
     MatCardModule,
     MatFormFieldModule,
     MatSelectModule,
+    MatCheckboxModule,
     MonthSliderComponent,
     YearSliderComponent,
   ],
@@ -86,6 +91,7 @@ export class MapComponent implements OnInit {
   selectedResolution: SpatialResolution = SpatialResolution.MIN10;
   selectedClimateScenario: ClimateScenario | null = null;
   selectedClimateModel: ClimateModel | null = null;
+  showDifferenceMap = false;
 
   // Available options for dropdowns (populated from API data)
   variableTypes: ClimateVarKey[] = [];
@@ -137,7 +143,8 @@ export class MapComponent implements OnInit {
           map.yearRange[0] === yearRange.value[0] &&
           map.yearRange[1] === yearRange.value[1] &&
           map.variable.name ===
-            this.climateVariables[this.selectedVariableType]?.name,
+            this.climateVariables[this.selectedVariableType]?.name &&
+          map.isDifferenceMap === this.showDifferenceMap,
       );
     });
   }
@@ -151,7 +158,8 @@ export class MapComponent implements OnInit {
         map.variable.name ===
           this.climateVariables[this.selectedVariableType]?.name &&
         map.yearRange[0] === this.selectedYearRange!.value[0] &&
-        map.yearRange[1] === this.selectedYearRange!.value[1],
+        map.yearRange[1] === this.selectedYearRange!.value[1] &&
+        map.isDifferenceMap === this.showDifferenceMap,
     );
 
     // For future data, further filter by climate scenario and model if selected
@@ -178,10 +186,11 @@ export class MapComponent implements OnInit {
   }
 
   get availableClimateScenarios() {
-    // Only show climate scenarios for future data
+    // Only show climate scenarios for future data or difference maps
     if (
       !this.selectedYearRange ||
-      this.isHistoricalYearRange(this.selectedYearRange.value)
+      (this.isHistoricalYearRange(this.selectedYearRange.value) &&
+        !this.showDifferenceMap)
     ) {
       return [];
     }
@@ -192,7 +201,8 @@ export class MapComponent implements OnInit {
         map.variable.name ===
           this.climateVariables[this.selectedVariableType]?.name &&
         map.yearRange[0] === this.selectedYearRange!.value[0] &&
-        map.yearRange[1] === this.selectedYearRange!.value[1],
+        map.yearRange[1] === this.selectedYearRange!.value[1] &&
+        map.isDifferenceMap === this.showDifferenceMap,
     );
 
     // Get unique climate scenarios from the matching maps
@@ -204,10 +214,11 @@ export class MapComponent implements OnInit {
   }
 
   get availableClimateModels() {
-    // Only show climate models for future data
+    // Only show climate models for future data or difference maps
     if (
       !this.selectedYearRange ||
-      this.isHistoricalYearRange(this.selectedYearRange.value)
+      (this.isHistoricalYearRange(this.selectedYearRange.value) &&
+        !this.showDifferenceMap)
     ) {
       return [];
     }
@@ -218,7 +229,8 @@ export class MapComponent implements OnInit {
         map.variable.name ===
           this.climateVariables[this.selectedVariableType]?.name &&
         map.yearRange[0] === this.selectedYearRange!.value[0] &&
-        map.yearRange[1] === this.selectedYearRange!.value[1],
+        map.yearRange[1] === this.selectedYearRange!.value[1] &&
+        map.isDifferenceMap === this.showDifferenceMap,
     );
 
     // Further filter by climate scenario if selected
@@ -352,6 +364,12 @@ export class MapComponent implements OnInit {
     this.updateLayers();
   }
 
+  onDifferenceMapChange() {
+    this.resetInvalidSelections();
+    this.findMatchingLayer();
+    this.updateLayers();
+  }
+
   private resetInvalidSelections() {
     // Reset year range if not available for current selections
     if (
@@ -408,6 +426,7 @@ export class MapComponent implements OnInit {
           climateModel: climateMap.climateModel,
           climateScenario: climateMap.climateScenario,
           variableType: climateMap.variable.name,
+          isDifferenceMap: climateMap.isDifferenceMap,
         },
       });
     }
@@ -446,6 +465,11 @@ export class MapComponent implements OnInit {
 
       // Check if the resolution matches
       if (metadata.resolution !== this.selectedResolution) {
+        return false;
+      }
+
+      // Check if difference map status matches
+      if (metadata.isDifferenceMap !== this.showDifferenceMap) {
         return false;
       }
 

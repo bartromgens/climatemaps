@@ -17,7 +17,7 @@ def _process_coordinate_arrays(geo_tiff: GeoTiff):
     return lon_array, lat_array
 
 
-def read_geotiff_month(filepath: str, month: int):
+def read_geotiff_future(filepath: str, month: int):
     geo_tiff = GeoTiff(filepath)
     zarr_array = geo_tiff.read()
     array = numpy.array(zarr_array, dtype=float)
