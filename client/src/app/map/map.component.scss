@@ -23,6 +23,11 @@
   width: 100%;
 }
 
+.controls-row {
+  flex-wrap: nowrap;
+  overflow-x: auto;
+}
+
 .column {
   display: flex;
   flex-direction: column;
@@ -40,8 +45,12 @@
 }
 
 .checkbox-field {
-  margin-bottom: 16px;
+  margin-bottom: 0;
   padding: 8px 0;
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  margin-left: auto;
 }
 
 // Styling for disabled dropdown options

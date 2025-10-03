@@ -16,18 +16,7 @@
       (leafletMapMoveEnd)="onMove($event)"
       (leafletMapZoomEnd)="onZoom($event)"
     ></div>
-    <div class="row">
-      <div class="checkbox-field">
-        <mat-checkbox
-          [(ngModel)]="showDifferenceMap"
-          (change)="onDifferenceMapChange()"
-          color="primary"
-        >
-          Show Difference Map (Future - Historic)
-        </mat-checkbox>
-      </div>
-    </div>
-    <div class="row">
+    <div class="row controls-row">
       <mat-form-field subscriptSizing="dynamic" class="dropdown-field">
         <mat-label>Variable Type</mat-label>
         <mat-select
@@ -134,6 +123,21 @@
           </mat-option>
         </mat-select>
       </mat-form-field>
+
+      <div
+        class="checkbox-field"
+        *ngIf="
+          selectedYearRange && !isHistoricalYearRange(selectedYearRange.value)
+        "
+      >
+        <mat-checkbox
+          [(ngModel)]="showDifferenceMap"
+          (change)="onDifferenceMapChange()"
+          color="primary"
+        >
+          Show Difference
+        </mat-checkbox>
+      </div>
     </div>
     <div class="row">
       <div class="column">
