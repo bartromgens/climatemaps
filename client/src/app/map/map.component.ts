@@ -16,6 +16,7 @@ import {
   LeafletMouseEvent,
   Map,
   tileLayer,
+  Tooltip,
 } from 'leaflet';
 import 'leaflet.vectorgrid'; // bring in the vectorgrid plugin
 
@@ -322,6 +323,7 @@ export class MapComponent implements OnInit {
   private readonly control: Control.Layers;
   private rasterLayer: Layer | null = null;
   private vectorLayer: Layer | null = null;
+  private hoverTooltip: Tooltip | null = null;
 
   constructor(
     private route: ActivatedRoute,
@@ -564,6 +566,11 @@ export class MapComponent implements OnInit {
       this.map?.removeLayer(this.vectorLayer);
       this.vectorLayer = null;
     }
+    // Clean up hover tooltip
+    if (this.hoverTooltip) {
+      this.map?.removeLayer(this.hoverTooltip);
+      this.hoverTooltip = null;
+    }
   }
 
   private updateLayers(): void {
@@ -602,6 +609,15 @@ export class MapComponent implements OnInit {
           maxZoom: 18,
         },
       );
+
+      // Add hover event listeners
+      this.vectorLayer?.on('mouseover', (e: any) => {
+        this.onVectorLayerHover(e);
+      });
+
+      this.vectorLayer?.on('mouseout', () => {
+        this.onVectorLayerMouseOut();
+      });
 
       // Add new layers to map
       if (this.rasterLayer) {
@@ -681,5 +697,53 @@ export class MapComponent implements OnInit {
     console.log('onMonthSelected', month);
     this.monthSelected = month;
     this.updateLayers();
+  }
+
+  private onVectorLayerHover(e: any): void {
+    const properties = e.layer?.properties;
+    if (properties && properties['level-value'] !== undefined) {
+      const value = properties['level-value'];
+      const unit = this.getCurrentUnit();
+      const displayValue = `${value.toFixed(1)} ${unit}`;
+
+      // Remove existing tooltip
+      if (this.hoverTooltip) {
+        this.map?.removeLayer(this.hoverTooltip);
+      }
+
+      // Create new tooltip
+      this.hoverTooltip = new Tooltip({
+        content: displayValue,
+        className: 'contour-hover-tooltip',
+        direction: 'top',
+        offset: [0, -10],
+        opacity: 0.9,
+      });
+
+      // Bind tooltip to the layer and open it
+      this.hoverTooltip.setLatLng(e.latlng);
+      this.hoverTooltip.addTo(this.map!);
+    }
+  }
+
+  private onVectorLayerMouseOut(): void {
+    if (this.hoverTooltip) {
+      this.map?.removeLayer(this.hoverTooltip);
+      this.hoverTooltip = null;
+    }
+  }
+
+  private getCurrentUnit(): string {
+    if (!this.selectedOption?.metadata) {
+      return '';
+    }
+
+    const climateVariable =
+      this.climateVariables[this.controlsData.selectedVariableType];
+
+    if (climateVariable?.unit) {
+      return climateVariable.unit;
+    }
+    return 'unknown';
   }
 }
