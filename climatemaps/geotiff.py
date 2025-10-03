@@ -21,7 +21,7 @@ def read_geotiff_future(filepath: str, month: int):
     geo_tiff = GeoTiff(filepath)
     zarr_array = geo_tiff.read()
     array = numpy.array(zarr_array, dtype=float)
-    array = array[:, :, month + 1]
+    array = array[:, :, month - 1]
 
     lon_array, lat_array = _process_coordinate_arrays(geo_tiff)
     return lon_array, lat_array, array
