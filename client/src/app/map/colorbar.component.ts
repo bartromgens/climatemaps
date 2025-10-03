@@ -27,7 +27,7 @@ import { CommonModule } from '@angular/common';
         position: fixed;
         bottom: 200px;
         right: 20px;
-        background: rgba(255, 255, 255, 0.9);
+        background: rgba(255, 255, 255, 0.4);
         border-radius: 8px;
         padding: 10px;
         box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
