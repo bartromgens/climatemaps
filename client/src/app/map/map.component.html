@@ -71,7 +71,7 @@
             [disabled]="!availableResolutions.includes(resolution)"
             [class.disabled-option]="!availableResolutions.includes(resolution)"
           >
-            {{ resolution }}
+            {{ getResolutionDisplayName(resolution) }}
           </mat-option>
         </mat-select>
       </mat-form-field>

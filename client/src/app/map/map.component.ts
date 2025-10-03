@@ -247,6 +247,19 @@ export class MapComponent implements OnInit {
     );
   }
 
+  getResolutionDisplayName(resolution: SpatialResolution): string {
+    switch (resolution) {
+      case SpatialResolution.MIN10:
+        return 'Low';
+      case SpatialResolution.MIN5:
+        return 'Medium';
+      case SpatialResolution.MIN2_5:
+        return 'High';
+      default:
+        return resolution;
+    }
+  }
+
   Object = Object;
   private baseLayer = tileLayer(
     'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
