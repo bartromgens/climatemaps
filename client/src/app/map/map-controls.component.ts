@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
+import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -49,16 +49,10 @@ export interface MapControlsOptions {
   templateUrl: './map-controls.component.html',
   styleUrl: './map-controls.component.scss',
 })
-export class MapControlsComponent implements OnInit {
+export class MapControlsComponent {
   @Input() controlsData: MapControlsData | undefined;
   @Input() controlsOptions: MapControlsOptions | undefined;
   @Output() controlsChange = new EventEmitter<MapControlsData>();
-
-  ngOnInit(): void {
-    if (!this.controlsData || !this.controlsOptions) {
-      console.error('MapControlsComponent: Required inputs not provided');
-    }
-  }
 
   onVariableTypeChange(event: any): void {
     if (this.controlsData) {
