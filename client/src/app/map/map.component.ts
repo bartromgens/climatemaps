@@ -686,6 +686,23 @@ export class MapComponent implements OnInit {
     return lon;
   }
 
+  private createPersistentTooltip(content: string, latlng: any): void {
+    if (this.clickTooltip) {
+      this.map?.removeLayer(this.clickTooltip);
+    }
+
+    this.clickTooltip = new Tooltip({
+      content: content,
+      className: 'contour-hover-tooltip',
+      direction: 'top',
+      offset: [0, -10],
+      opacity: 0.9,
+      permanent: true,
+    });
+    this.clickTooltip.setLatLng(latlng);
+    this.clickTooltip.addTo(this.map!);
+  }
+
   onMapClick(event: LeafletMouseEvent): void {
     console.log('mapClick', event);
 
@@ -697,24 +714,9 @@ export class MapComponent implements OnInit {
     const lat = event.latlng.lat;
     const lon = this.normalizeLongitude(event.latlng.lng);
 
-    // Remove existing click tooltip
-    if (this.clickTooltip) {
-      this.map?.removeLayer(this.clickTooltip);
-      this.clickTooltip = null;
-    }
-
     // Show loading tooltip
     this.isLoadingClickValue = true;
-    this.clickTooltip = new Tooltip({
-      content: 'Loading...',
-      className: 'click-value-tooltip',
-      direction: 'top',
-      offset: [0, -10],
-      opacity: 0.95,
-      permanent: true,
-    });
-    this.clickTooltip.setLatLng(event.latlng);
-    this.clickTooltip.addTo(this.map!);
+    this.createPersistentTooltip('Loading...', event.latlng);
 
     // Fetch climate value from API
     this.climateMapService
@@ -733,53 +735,15 @@ export class MapComponent implements OnInit {
           this.isLoadingClickValue = false;
           console.error('Error fetching climate value:', error);
 
-          // Show error message in tooltip
-          if (this.clickTooltip) {
-            this.map?.removeLayer(this.clickTooltip);
-          }
-
           const errorMessage = error.error?.detail || 'Error loading value';
-          this.clickTooltip = new Tooltip({
-            content: `<div style="color: #ff5252;">${errorMessage}</div>`,
-            className: 'click-value-tooltip error',
-            direction: 'top',
-            offset: [0, -10],
-            opacity: 0.95,
-            permanent: true,
-          });
-          this.clickTooltip.setLatLng(event.latlng);
-          this.clickTooltip.addTo(this.map!);
+          this.createPersistentTooltip(errorMessage, event.latlng);
         },
       });
   }
 
   private displayClickValue(latlng: any, response: ClimateValueResponse): void {
-    // Remove existing click tooltip
-    if (this.clickTooltip) {
-      this.map?.removeLayer(this.clickTooltip);
-    }
-
-    // Format the value display
-    const content = `
-      <div class="climate-value-popup">
-        <div class="value-main">${response.value.toFixed(2)} ${response.unit}</div>
-        <div class="value-details">
-          <div>Location: ${response.latitude.toFixed(4)}°, ${response.longitude.toFixed(4)}°</div>
-        </div>
-      </div>
-    `;
-
-    // Create persistent tooltip with the value
-    this.clickTooltip = new Tooltip({
-      content: content,
-      className: 'click-value-tooltip',
-      direction: 'top',
-      offset: [0, -10],
-      opacity: 0.95,
-      permanent: true,
-    });
-    this.clickTooltip.setLatLng(latlng);
-    this.clickTooltip.addTo(this.map!);
+    const displayValue = `${response.value.toFixed(1)} ${response.unit}`;
+    this.createPersistentTooltip(displayValue, latlng);
   }
 
   onMapReady(map: Map): void {
