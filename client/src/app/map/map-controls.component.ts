@@ -50,8 +50,8 @@ export interface MapControlsOptions {
   styleUrl: './map-controls.component.scss',
 })
 export class MapControlsComponent implements OnInit {
-  @Input() controlsData!: MapControlsData;
-  @Input() controlsOptions!: MapControlsOptions;
+  @Input() controlsData: MapControlsData | undefined;
+  @Input() controlsOptions: MapControlsOptions | undefined;
   @Output() controlsChange = new EventEmitter<MapControlsData>();
 
   ngOnInit(): void {
@@ -60,28 +60,46 @@ export class MapControlsComponent implements OnInit {
     }
   }
 
-  onVariableTypeChange(): void {
-    this.emitChange();
+  onVariableTypeChange(event: any): void {
+    if (this.controlsData) {
+      this.controlsData.selectedVariableType = event.value;
+      this.emitChange();
+    }
   }
 
-  onYearRangeChange(): void {
-    this.emitChange();
+  onYearRangeChange(event: any): void {
+    if (this.controlsData) {
+      this.controlsData.selectedYearRange = event.value;
+      this.emitChange();
+    }
   }
 
-  onResolutionChange(): void {
-    this.emitChange();
+  onResolutionChange(event: any): void {
+    if (this.controlsData) {
+      this.controlsData.selectedResolution = event.value;
+      this.emitChange();
+    }
   }
 
-  onClimateScenarioChange(): void {
-    this.emitChange();
+  onClimateScenarioChange(event: any): void {
+    if (this.controlsData) {
+      this.controlsData.selectedClimateScenario = event.value;
+      this.emitChange();
+    }
   }
 
-  onClimateModelChange(): void {
-    this.emitChange();
+  onClimateModelChange(event: any): void {
+    if (this.controlsData) {
+      this.controlsData.selectedClimateModel = event.value;
+      this.emitChange();
+    }
   }
 
-  onDifferenceMapChange(): void {
-    this.emitChange();
+  onDifferenceMapChange(event: any): void {
+    if (this.controlsData) {
+      this.controlsData.showDifferenceMap = event;
+      this.emitChange();
+    }
   }
 
   getResolutionDisplayName(resolution: SpatialResolution): string {
@@ -101,7 +119,20 @@ export class MapControlsComponent implements OnInit {
     return `${yearRange.value[0]}-${yearRange.value[1]}`;
   }
 
+  shouldShowFutureControls(): boolean {
+    return !!(
+      this.controlsData?.selectedYearRange &&
+      this.controlsOptions?.isHistoricalYearRange &&
+      this.controlsData.selectedYearRange.value &&
+      !this.controlsOptions.isHistoricalYearRange(
+        this.controlsData.selectedYearRange.value,
+      )
+    );
+  }
+
   private emitChange(): void {
-    this.controlsChange.emit(this.controlsData);
+    if (this.controlsData) {
+      this.controlsChange.emit(this.controlsData);
+    }
   }
 }
