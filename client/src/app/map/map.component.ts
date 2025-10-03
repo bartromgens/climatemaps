@@ -22,9 +22,11 @@ import 'leaflet.vectorgrid'; // bring in the vectorgrid plugin
 import { environment } from '../../environments/environment';
 import { MonthSliderComponent } from './month-slider.component';
 import { YearSliderComponent } from './year-slider.component';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatSelectModule } from '@angular/material/select';
-import { MatCheckboxModule } from '@angular/material/checkbox';
+import {
+  MapControlsComponent,
+  MapControlsData,
+  MapControlsOptions,
+} from './map-controls.component';
 import { ClimateMapService } from '../core/climatemap.service';
 import { ClimateMap } from '../core/climatemap';
 import {
@@ -67,11 +69,9 @@ interface LayerOption {
     MatSidenavModule,
     MatButtonModule,
     MatCardModule,
-    MatFormFieldModule,
-    MatSelectModule,
-    MatCheckboxModule,
     MonthSliderComponent,
     YearSliderComponent,
+    MapControlsComponent,
   ],
   templateUrl: './map.component.html',
   styleUrl: './map.component.scss',
@@ -85,13 +85,18 @@ export class MapComponent implements OnInit {
   // Climate maps data from backend
   climateMaps: ClimateMap[] = [];
 
-  // Dropdown selections
-  selectedVariableType: ClimateVarKey = ClimateVarKey.PRECIPITATION;
-  selectedYearRange: YearRange | null = null;
-  selectedResolution: SpatialResolution = SpatialResolution.MIN10;
-  selectedClimateScenario: ClimateScenario | null = null;
-  selectedClimateModel: ClimateModel | null = null;
-  showDifferenceMap = false;
+  // Controls data for the MapControlsComponent
+  controlsData: MapControlsData = {
+    selectedVariableType: ClimateVarKey.PRECIPITATION,
+    selectedYearRange: null,
+    selectedResolution: SpatialResolution.MIN10,
+    selectedClimateScenario: null,
+    selectedClimateModel: null,
+    showDifferenceMap: false,
+  };
+
+  // Controls options for the MapControlsComponent
+  controlsOptions!: MapControlsOptions;
 
   // Available options for dropdowns (populated from API data)
   variableTypes: ClimateVarKey[] = [];
@@ -121,13 +126,58 @@ export class MapComponent implements OnInit {
     this.variableTypes = Object.keys(this.climateVariables) as ClimateVarKey[];
 
     // Set default year range if none selected
-    if (!this.selectedYearRange && this.yearRanges.length > 0) {
-      this.selectedYearRange = this.yearRanges[0];
+    if (!this.controlsData.selectedYearRange && this.yearRanges.length > 0) {
+      this.controlsData.selectedYearRange = this.yearRanges[0];
     }
+
+    // Initialize controls options
+    this.controlsOptions = {
+      variableTypes: this.variableTypes,
+      yearRanges: this.yearRanges,
+      resolutions: this.resolutions,
+      climateScenarios: this.climateScenarios,
+      climateModels: this.climateModels,
+      climateVariables: this.climateVariables,
+      availableVariableTypes: this.getAvailableVariableTypes(),
+      availableYearRanges: this.getAvailableYearRanges(),
+      availableResolutions: this.getAvailableResolutions(),
+      availableClimateScenarios: this.getAvailableClimateScenarios(),
+      availableClimateModels: this.getAvailableClimateModels(),
+      isHistoricalYearRange: this.isHistoricalYearRange,
+    };
+  }
+
+  // Method to handle controls changes from MapControlsComponent
+  onControlsChange(newControlsData: MapControlsData): void {
+    this.controlsData = { ...newControlsData };
+    this.handleControlsChange();
+  }
+
+  private handleControlsChange(): void {
+    // Reset climate scenario and model for historical data
+    if (
+      this.controlsData.selectedYearRange &&
+      this.isHistoricalYearRange(this.controlsData.selectedYearRange.value)
+    ) {
+      this.controlsData.selectedClimateScenario = null;
+      this.controlsData.selectedClimateModel = null;
+    } else {
+      // Set default values for future data if not already set
+      if (!this.controlsData.selectedClimateScenario) {
+        this.controlsData.selectedClimateScenario = ClimateScenario.SSP126;
+      }
+      if (!this.controlsData.selectedClimateModel) {
+        this.controlsData.selectedClimateModel = ClimateModel.EC_EARTH3_VEG;
+      }
+    }
+
+    this.resetInvalidSelections();
+    this.findMatchingLayer();
+    this.updateLayers();
   }
 
   // Computed properties for filtering available options based on actual data
-  get availableVariableTypes() {
+  private getAvailableVariableTypes(): ClimateVarKey[] {
     return this.variableTypes.filter((variableType) => {
       return this.climateMaps.some(
         (map) =>
@@ -136,43 +186,47 @@ export class MapComponent implements OnInit {
     });
   }
 
-  get availableYearRanges() {
+  private getAvailableYearRanges(): YearRange[] {
     return this.yearRanges.filter((yearRange) => {
       return this.climateMaps.some(
         (map) =>
           map.yearRange[0] === yearRange.value[0] &&
           map.yearRange[1] === yearRange.value[1] &&
           map.variable.name ===
-            this.climateVariables[this.selectedVariableType]?.name &&
-          map.isDifferenceMap === this.showDifferenceMap,
+            this.climateVariables[this.controlsData.selectedVariableType]
+              ?.name &&
+          map.isDifferenceMap === this.controlsData.showDifferenceMap,
       );
     });
   }
 
-  get availableResolutions() {
-    if (!this.selectedYearRange) return [];
+  private getAvailableResolutions(): SpatialResolution[] {
+    if (!this.controlsData.selectedYearRange) return [];
 
     // First, get all maps that match the current variable type and year range
     const matchingMaps = this.climateMaps.filter(
       (map) =>
         map.variable.name ===
-          this.climateVariables[this.selectedVariableType]?.name &&
-        map.yearRange[0] === this.selectedYearRange!.value[0] &&
-        map.yearRange[1] === this.selectedYearRange!.value[1] &&
-        map.isDifferenceMap === this.showDifferenceMap,
+          this.climateVariables[this.controlsData.selectedVariableType]?.name &&
+        map.yearRange[0] === this.controlsData.selectedYearRange!.value[0] &&
+        map.yearRange[1] === this.controlsData.selectedYearRange!.value[1] &&
+        map.isDifferenceMap === this.controlsData.showDifferenceMap,
     );
 
     // For future data, further filter by climate scenario and model if selected
     let filteredMaps = matchingMaps;
-    if (!this.isHistoricalYearRange(this.selectedYearRange!.value)) {
-      if (this.selectedClimateScenario) {
+    if (
+      !this.isHistoricalYearRange(this.controlsData.selectedYearRange!.value)
+    ) {
+      if (this.controlsData.selectedClimateScenario) {
         filteredMaps = filteredMaps.filter(
-          (map) => map.climateScenario === this.selectedClimateScenario,
+          (map) =>
+            map.climateScenario === this.controlsData.selectedClimateScenario,
         );
       }
-      if (this.selectedClimateModel) {
+      if (this.controlsData.selectedClimateModel) {
         filteredMaps = filteredMaps.filter(
-          (map) => map.climateModel === this.selectedClimateModel,
+          (map) => map.climateModel === this.controlsData.selectedClimateModel,
         );
       }
     }
@@ -185,12 +239,12 @@ export class MapComponent implements OnInit {
     return availableResolutions;
   }
 
-  get availableClimateScenarios() {
+  private getAvailableClimateScenarios(): ClimateScenario[] {
     // Only show climate scenarios for future data or difference maps
     if (
-      !this.selectedYearRange ||
-      (this.isHistoricalYearRange(this.selectedYearRange.value) &&
-        !this.showDifferenceMap)
+      !this.controlsData.selectedYearRange ||
+      (this.isHistoricalYearRange(this.controlsData.selectedYearRange.value) &&
+        !this.controlsData.showDifferenceMap)
     ) {
       return [];
     }
@@ -199,10 +253,10 @@ export class MapComponent implements OnInit {
     const matchingMaps = this.climateMaps.filter(
       (map) =>
         map.variable.name ===
-          this.climateVariables[this.selectedVariableType]?.name &&
-        map.yearRange[0] === this.selectedYearRange!.value[0] &&
-        map.yearRange[1] === this.selectedYearRange!.value[1] &&
-        map.isDifferenceMap === this.showDifferenceMap,
+          this.climateVariables[this.controlsData.selectedVariableType]?.name &&
+        map.yearRange[0] === this.controlsData.selectedYearRange!.value[0] &&
+        map.yearRange[1] === this.controlsData.selectedYearRange!.value[1] &&
+        map.isDifferenceMap === this.controlsData.showDifferenceMap,
     );
 
     // Get unique climate scenarios from the matching maps
@@ -213,12 +267,12 @@ export class MapComponent implements OnInit {
     return availableScenarios;
   }
 
-  get availableClimateModels() {
+  private getAvailableClimateModels(): ClimateModel[] {
     // Only show climate models for future data or difference maps
     if (
-      !this.selectedYearRange ||
-      (this.isHistoricalYearRange(this.selectedYearRange.value) &&
-        !this.showDifferenceMap)
+      !this.controlsData.selectedYearRange ||
+      (this.isHistoricalYearRange(this.controlsData.selectedYearRange.value) &&
+        !this.controlsData.showDifferenceMap)
     ) {
       return [];
     }
@@ -227,17 +281,18 @@ export class MapComponent implements OnInit {
     const matchingMaps = this.climateMaps.filter(
       (map) =>
         map.variable.name ===
-          this.climateVariables[this.selectedVariableType]?.name &&
-        map.yearRange[0] === this.selectedYearRange!.value[0] &&
-        map.yearRange[1] === this.selectedYearRange!.value[1] &&
-        map.isDifferenceMap === this.showDifferenceMap,
+          this.climateVariables[this.controlsData.selectedVariableType]?.name &&
+        map.yearRange[0] === this.controlsData.selectedYearRange!.value[0] &&
+        map.yearRange[1] === this.controlsData.selectedYearRange!.value[1] &&
+        map.isDifferenceMap === this.controlsData.showDifferenceMap,
     );
 
     // Further filter by climate scenario if selected
     let filteredMaps = matchingMaps;
-    if (this.selectedClimateScenario) {
+    if (this.controlsData.selectedClimateScenario) {
       filteredMaps = filteredMaps.filter(
-        (map) => map.climateScenario === this.selectedClimateScenario,
+        (map) =>
+          map.climateScenario === this.controlsData.selectedClimateScenario,
       );
     }
 
@@ -245,19 +300,6 @@ export class MapComponent implements OnInit {
     return this.climateModels.filter((model) =>
       filteredMaps.some((map) => map.climateModel === model),
     );
-  }
-
-  getResolutionDisplayName(resolution: SpatialResolution): string {
-    switch (resolution) {
-      case SpatialResolution.MIN10:
-        return 'Low';
-      case SpatialResolution.MIN5:
-        return 'Medium';
-      case SpatialResolution.MIN2_5:
-        return 'High';
-      default:
-        return resolution;
-    }
   }
 
   Object = Object;
@@ -314,13 +356,15 @@ export class MapComponent implements OnInit {
       this.resetInvalidSelections();
 
       console.log('Initial selections:', {
-        variableType: this.selectedVariableType,
-        yearRange: this.selectedYearRange?.value,
-        resolution: this.selectedResolution,
-        climateScenario: this.selectedClimateScenario,
-        climateModel: this.selectedClimateModel,
-        isHistorical: this.selectedYearRange
-          ? this.isHistoricalYearRange(this.selectedYearRange.value)
+        variableType: this.controlsData.selectedVariableType,
+        yearRange: this.controlsData.selectedYearRange?.value,
+        resolution: this.controlsData.selectedResolution,
+        climateScenario: this.controlsData.selectedClimateScenario,
+        climateModel: this.controlsData.selectedClimateModel,
+        isHistorical: this.controlsData.selectedYearRange
+          ? this.isHistoricalYearRange(
+              this.controlsData.selectedYearRange.value,
+            )
           : false,
       });
       this.findMatchingLayer();
@@ -332,87 +376,59 @@ export class MapComponent implements OnInit {
     this.updateLayers();
   }
 
-  onVariableTypeChange() {
-    this.resetInvalidSelections();
-    this.findMatchingLayer();
-    this.updateLayers();
-  }
-
-  onYearRangeChange() {
-    // Reset climate scenario and model for historical data
-    if (
-      this.selectedYearRange &&
-      this.isHistoricalYearRange(this.selectedYearRange.value)
-    ) {
-      this.selectedClimateScenario = null;
-      this.selectedClimateModel = null;
-    } else {
-      // Set default values for future data if not already set
-      if (!this.selectedClimateScenario) {
-        this.selectedClimateScenario = ClimateScenario.SSP126;
-      }
-      if (!this.selectedClimateModel) {
-        this.selectedClimateModel = ClimateModel.EC_EARTH3_VEG;
-      }
-    }
-    this.resetInvalidSelections();
-    this.findMatchingLayer();
-    this.updateLayers();
-  }
-
-  onResolutionChange() {
-    this.resetInvalidSelections();
-    this.findMatchingLayer();
-    this.updateLayers();
-  }
-
-  onClimateScenarioChange() {
-    this.resetInvalidSelections();
-    this.findMatchingLayer();
-    this.updateLayers();
-  }
-
-  onClimateModelChange() {
-    this.findMatchingLayer();
-    this.updateLayers();
-  }
-
-  onDifferenceMapChange() {
-    this.resetInvalidSelections();
-    this.findMatchingLayer();
-    this.updateLayers();
-  }
-
   private resetInvalidSelections() {
+    const availableYearRanges = this.getAvailableYearRanges();
+    const availableResolutions = this.getAvailableResolutions();
+    const availableClimateScenarios = this.getAvailableClimateScenarios();
+    const availableClimateModels = this.getAvailableClimateModels();
+
     // Reset year range if not available for current selections
     if (
-      this.selectedYearRange &&
-      !this.availableYearRanges.includes(this.selectedYearRange)
+      this.controlsData.selectedYearRange &&
+      !availableYearRanges.includes(this.controlsData.selectedYearRange)
     ) {
-      this.selectedYearRange = this.availableYearRanges[0] || null;
+      this.controlsData.selectedYearRange = availableYearRanges[0] || null;
     }
 
     // Reset resolution if not available for current selections
-    if (!this.availableResolutions.includes(this.selectedResolution)) {
-      this.selectedResolution =
-        this.availableResolutions[0] || SpatialResolution.MIN10;
+    if (!availableResolutions.includes(this.controlsData.selectedResolution)) {
+      this.controlsData.selectedResolution =
+        availableResolutions[0] || SpatialResolution.MIN10;
     }
 
     // Reset climate scenario if not available for current selections
     if (
-      this.selectedClimateScenario &&
-      !this.availableClimateScenarios.includes(this.selectedClimateScenario)
+      this.controlsData.selectedClimateScenario &&
+      !availableClimateScenarios.includes(
+        this.controlsData.selectedClimateScenario,
+      )
     ) {
-      this.selectedClimateScenario = this.availableClimateScenarios[0] || null;
+      this.controlsData.selectedClimateScenario =
+        availableClimateScenarios[0] || null;
     }
 
     // Reset climate model if not available for current selections
     if (
-      this.selectedClimateModel &&
-      !this.availableClimateModels.includes(this.selectedClimateModel)
+      this.controlsData.selectedClimateModel &&
+      !availableClimateModels.includes(this.controlsData.selectedClimateModel)
     ) {
-      this.selectedClimateModel = this.availableClimateModels[0] || null;
+      this.controlsData.selectedClimateModel =
+        availableClimateModels[0] || null;
     }
+
+    // Update controls options with fresh data
+    this.updateControlsOptions();
+  }
+
+  private updateControlsOptions(): void {
+    this.controlsOptions = {
+      ...this.controlsOptions,
+      availableVariableTypes: this.getAvailableVariableTypes(),
+      availableYearRanges: this.getAvailableYearRanges(),
+      availableResolutions: this.getAvailableResolutions(),
+      availableClimateScenarios: this.getAvailableClimateScenarios(),
+      availableClimateModels: this.getAvailableClimateModels(),
+    };
   }
 
   private buildLayerOptions(climateMaps: any[]): LayerOption[] {
@@ -448,9 +464,9 @@ export class MapComponent implements OnInit {
 
   private findMatchingLayer() {
     console.log('Finding matching layer for:', {
-      variableType: this.selectedVariableType,
-      yearRange: this.selectedYearRange,
-      resolution: this.selectedResolution,
+      variableType: this.controlsData.selectedVariableType,
+      yearRange: this.controlsData.selectedYearRange,
+      resolution: this.controlsData.selectedResolution,
     });
 
     // Find the layer that matches the current selections
@@ -463,40 +479,43 @@ export class MapComponent implements OnInit {
 
       // Check if the variable type matches
       const expectedVariableName =
-        this.climateVariables[this.selectedVariableType]?.name;
+        this.climateVariables[this.controlsData.selectedVariableType]?.name;
       if (metadata.variableType !== expectedVariableName) {
         return false;
       }
 
       // Check if the year range matches
       if (
-        metadata.yearRange[0] !== this.selectedYearRange!.value[0] ||
-        metadata.yearRange[1] !== this.selectedYearRange!.value[1]
+        metadata.yearRange[0] !==
+          this.controlsData.selectedYearRange!.value[0] ||
+        metadata.yearRange[1] !== this.controlsData.selectedYearRange!.value[1]
       ) {
         return false;
       }
 
       // Check if the resolution matches
-      if (metadata.resolution !== this.selectedResolution) {
+      if (metadata.resolution !== this.controlsData.selectedResolution) {
         return false;
       }
 
       // Check if difference map status matches
-      if (metadata.isDifferenceMap !== this.showDifferenceMap) {
+      if (metadata.isDifferenceMap !== this.controlsData.showDifferenceMap) {
         return false;
       }
 
       // For future data, check climate scenario and model
-      if (!this.isHistoricalYearRange(this.selectedYearRange!.value)) {
+      if (
+        !this.isHistoricalYearRange(this.controlsData.selectedYearRange!.value)
+      ) {
         if (
-          this.selectedClimateScenario &&
-          metadata.climateScenario !== this.selectedClimateScenario
+          this.controlsData.selectedClimateScenario &&
+          metadata.climateScenario !== this.controlsData.selectedClimateScenario
         ) {
           return false;
         }
         if (
-          this.selectedClimateModel &&
-          metadata.climateModel !== this.selectedClimateModel
+          this.controlsData.selectedClimateModel &&
+          metadata.climateModel !== this.controlsData.selectedClimateModel
         ) {
           return false;
         }
@@ -662,9 +681,5 @@ export class MapComponent implements OnInit {
     console.log('onMonthSelected', month);
     this.monthSelected = month;
     this.updateLayers();
-  }
-
-  trackByYearRange(index: number, yearRange: YearRange): string {
-    return `${yearRange.value[0]}-${yearRange.value[1]}`;
   }
 }

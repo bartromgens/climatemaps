@@ -1,0 +1,35 @@
+.controls-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: flex-end;
+}
+
+.dropdown-field {
+  min-width: 150px;
+  flex: 1;
+}
+
+.checkbox-field {
+  display: flex;
+  align-items: center;
+  min-width: 150px;
+}
+
+.disabled-option {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+@media (max-width: 768px) {
+  .controls-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .dropdown-field,
+  .checkbox-field {
+    min-width: unset;
+    width: 100%;
+  }
+}
