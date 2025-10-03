@@ -88,7 +88,7 @@ export class MapComponent implements OnInit {
 
   // Controls data for the MapControlsComponent
   controlsData: MapControlsData = {
-    selectedVariableType: ClimateVarKey.PRECIPITATION,
+    selectedVariableType: ClimateVarKey.T_MAX,
     selectedYearRange: null,
     selectedResolution: SpatialResolution.MIN10,
     selectedClimateScenario: null,
