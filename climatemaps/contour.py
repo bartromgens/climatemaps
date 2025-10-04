@@ -15,7 +15,7 @@ from climatemaps.logger import logger
 
 
 class ContourTileBuilder:
-    world_bounding_box_filepath = "data/world_bounding_box.geojson"
+    world_bounding_box_filepath = "data/raw/world_bounding_box.geojson"
 
     def __init__(
         self,

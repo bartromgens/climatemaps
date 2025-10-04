@@ -39,7 +39,7 @@ def _create_config(data_configs, dev_mode: bool = False):
     logger.info(
         f"Creating tileserver config for {len(data_configs)} data configs. Dev mode: {dev_mode}"
     )
-    config = {"options": {"paths": {"root": "./", "mbtiles": "tiles"}}, "data": {}}
+    config = {"options": {"paths": {"root": "./", "mbtiles": "data/tiles"}}, "data": {}}
     for data_config in data_configs:
         month_upper = 12
         for month in range(1, month_upper + 1):

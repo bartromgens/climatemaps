@@ -2,7 +2,7 @@
   "options": {
     "paths": {
       "root": "./",
-      "mbtiles": "tiles"
+      "mbtiles": "data/tiles"
     }
   },
   "data": {

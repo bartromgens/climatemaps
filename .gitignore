@@ -202,8 +202,12 @@ __marimo__/
 
 # Project specific
 settings_local.py
-data/*
-tiles/*
+data/raw/*
+!data/raw/.gitkeep
+!data/raw/world_bounding_box.geojson
+data/tiles/*
+!data/tiles/.gitkeep
+!data/tiles/README.md
 
 out.mbtiles
 tileserver_config_dev.json

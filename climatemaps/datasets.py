@@ -316,7 +316,7 @@ HISTORIC_DATA_GROUPS: List[ClimateDataConfigGroup] = [
         source="https://www.worldclim.org/data/worldclim21.html",
         resolutions=[SpatialResolution.MIN10, SpatialResolution.MIN5, SpatialResolution.MIN2_5],
         year_ranges=[(1970, 2000)],
-        filepath_template="data/worldclim/history/wc2.1_{resolution}_{variable_name}",
+        filepath_template="data/raw/worldclim/history/wc2.1_{resolution}_{variable_name}",
     ),
 ]
 
@@ -330,11 +330,11 @@ FUTURE_DATA_GROUPS: List[FutureClimateDataConfigGroup] = [
         climate_scenarios=[
             ClimateScenario.SSP126,
             # ClimateScenario.SSP245,
-            ClimateScenario.SSP370,
+            # ClimateScenario.SSP370,
             ClimateScenario.SSP585,
         ],
         climate_models=[ClimateModel.EC_EARTH3_VEG],
-        filepath_template="data/worldclim/future/wc2.1_{resolution}_{variable_name}_{climate_model}_{climate_scenario}_{year_range[0]}-{year_range[1]}.tif",
+        filepath_template="data/raw/worldclim/future/wc2.1_{resolution}_{variable_name}_{climate_model}_{climate_scenario}_{year_range[0]}-{year_range[1]}.tif",
     ),
 ]
 
@@ -390,69 +390,79 @@ DIFFERENCE_DATA_SETS: List[ClimateDifferenceDataConfig] = create_difference_map_
 #         filepath='data/precipitation/cpre6190.dat',
 #         conversion_factor=0.1,  # (millimetres/day) *10
 #         config=ContourPlotConfig(0.1, 16, colormap=plt.cm.jet_r, title='Precipitation', unit='mm/day', logscale=True),
-#         format=DataFormat.IPCC_GRID
+#         format=DataFormat.IPCC_GRID,
+#         source="https://www.ipcc-data.org/observ/clim/get_30yr_means.html",
 #     ),
 #     ClimateMapConfig(
 #         data_type='cloud',
 #         filepath='data/cloud/ccld6190.dat',
 #         conversion_factor=1,
 #         config=ContourPlotConfig(0, 100, colormap=plt.cm.jet_r, title='Cloud coverage', unit='%'),
-#         format=DataFormat.IPCC_GRID
+#         format=DataFormat.IPCC_GRID,
+#         source="https://www.ipcc-data.org/observ/clim/get_30yr_means.html",
 #     ),
 #     ClimateMapConfig(
 #         data_type='mintemp',
 #         filepath='data/mintemp/ctmn6190.dat',
 #         conversion_factor=0.1,
 #         config=ContourPlotConfig(-30, 28, colormap=plt.cm.jet, title='Min. temperature', unit='C'),
-#         format=DataFormat.IPCC_GRID
+#         format=DataFormat.IPCC_GRID,
+#         source="https://www.ipcc-data.org/observ/clim/get_30yr_means.html",
 #     ),
 #     ClimateMapConfig(
 #         data_type='meantemp',
 #         filepath='data/meantemp/ctmp6190.dat',
 #         conversion_factor=0.1,
 #         config=ContourPlotConfig(-30, 35, colormap=plt.cm.jet, title='Mean temperature', unit='C'),
-#         format=DataFormat.IPCC_GRID
+#         format=DataFormat.IPCC_GRID,
+#         source="https://www.ipcc-data.org/observ/clim/get_30yr_means.html",
 #     ),
 #     ClimateMapConfig(
 #         data_type='maxtemp',
 #         filepath='data/maxtemp/ctmx6190.dat',
 #         conversion_factor=0.1,
 #         config=ContourPlotConfig(-20, 45, colormap=plt.cm.jet, title='Max. temperature', unit='C'),
-#         format=DataFormat.IPCC_GRID
+#         format=DataFormat.IPCC_GRID,
+#         source="https://www.ipcc-data.org/observ/clim/get_30yr_means.html",
 #     ),
 #     ClimateMapConfig(
 #         data_type='diurnaltemprange',
 #         filepath='data/diurnaltemprange/cdtr6190.dat',
 #         conversion_factor=0.1,
 #         config=ContourPlotConfig(5, 20, colormap=plt.cm.jet, title='Diurnal temperature range', unit='C'),
-#         format=DataFormat.IPCC_GRID
+#         format=DataFormat.IPCC_GRID,
+#         source="https://www.ipcc-data.org/observ/clim/get_30yr_means.html",
 #     ),
 #     ClimateMapConfig(
 #         data_type='wetdays',
 #         filepath='data/wetdays/cwet6190.dat',
 #         conversion_factor=0.1,
 #         config=ContourPlotConfig(0, 30, colormap=plt.cm.jet_r, title='Wet days', unit='days'),
-#         format=DataFormat.IPCC_GRID
+#         format=DataFormat.IPCC_GRID,
+#         source="https://www.ipcc-data.org/observ/clim/get_30yr_means.html",
 #     ),
 #     ClimateMapConfig(
 #         data_type='wind',
 #         filepath='data/wind/cwnd6190.dat',
 #         conversion_factor=0.1,
 #         config=ContourPlotConfig(0, 9, colormap=plt.cm.jet, title='Wind speed', unit='m/s'),
-#         format=DataFormat.IPCC_GRID
+#         format=DataFormat.IPCC_GRID,
+#         source="https://www.ipcc-data.org/observ/clim/get_30yr_means.html",
 #     ),
 #     ClimateMapConfig(
 #         data_type='radiation',
 #         filepath='data/radiation/crad6190.dat',
 #         conversion_factor=1,
 #         config=ContourPlotConfig(0, 300, colormap=plt.cm.jet, title='Radiation', unit='W/m^2'),
-#         format=DataFormat.IPCC_GRID
+#         format=DataFormat.IPCC_GRID,
+#         source="https://www.ipcc-data.org/observ/clim/get_30yr_means.html",
 #     ),
 #     ClimateMapConfig(
 #         data_type='vapourpressure',
 #         filepath='data/vapourpressure/cvap6190.dat',
 #         conversion_factor=0.1,
 #         config=ContourPlotConfig(1, 34, colormap=plt.cm.jet, title='Vapour pressure', unit='hPa'),
-#         format=DataFormat.IPCC_GRID
+#         format=DataFormat.IPCC_GRID,
+#         source="https://www.ipcc-data.org/observ/clim/get_30yr_means.html",
 #     ),
 # ]

@@ -114,5 +114,5 @@ bash scripts/deploy_backend.sh
 ### Upload tiles (optional)
 If you have locally created tiles, upload them to the server with:
 ```bash
-rsync -avP tiles openclimatemap.org:/home/bart/climatemaps
+rsync -avP data/tiles openclimatemap.org:/home/bart/climatemaps/data/
 ```
