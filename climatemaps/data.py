@@ -4,6 +4,7 @@ from climatemaps.datasets import ClimateDataConfig, DataFormat, FutureClimateDat
 from climatemaps.download import ensure_data_available
 from climatemaps.geotiff import read_geotiff_future, read_geotiff_history
 from climatemaps.geogrid import GeoGrid
+from climatemaps.logger import logger
 
 
 def import_climate_data(filepath, monthnr):
@@ -98,23 +99,30 @@ def import_ascii_grid_generic(filepath, no_data_value=9e20):
 
 
 def load_climate_data(data_config: ClimateDataConfig, month: int) -> GeoGrid:
-    ensure_data_available(data_config)
+    try:
+        ensure_data_available(data_config)
 
-    if data_config.format == DataFormat.IPCC_GRID:
-        lat_range, lon_range, values = import_climate_data(data_config.filepath, month)
-    elif data_config.format == DataFormat.GEOTIFF_WORLDCLIM_CMIP6:
-        lon_range, lat_range, values = read_geotiff_future(data_config.filepath, month)
-    elif data_config.format == DataFormat.GEOTIFF_WORLDCLIM_HISTORY:
-        lon_range, lat_range, values = read_geotiff_history(data_config.filepath, month)
-    else:
-        raise ValueError(f"Unsupported data format: {data_config.format}")
+        if data_config.format == DataFormat.IPCC_GRID:
+            lat_range, lon_range, values = import_climate_data(data_config.filepath, month)
+        elif data_config.format == DataFormat.GEOTIFF_WORLDCLIM_CMIP6:
+            lon_range, lat_range, values = read_geotiff_future(data_config.filepath, month)
+        elif data_config.format == DataFormat.GEOTIFF_WORLDCLIM_HISTORY:
+            lon_range, lat_range, values = read_geotiff_history(data_config.filepath, month)
+        else:
+            raise ValueError(f"Unsupported data format: {data_config.format}")
 
-    values = values * data_config.conversion_factor
+        values = values * data_config.conversion_factor
 
-    if data_config.conversion_function is not None:
-        values = data_config.conversion_function(values, month)
+        if data_config.conversion_function is not None:
+            values = data_config.conversion_function(values, month)
 
-    return GeoGrid(lon_range=lon_range, lat_range=lat_range, values=values)
+        return GeoGrid(lon_range=lon_range, lat_range=lat_range, values=values)
+    except FileNotFoundError as e:
+        logger.error(f"Failed to load climate data for {data_config.data_type_slug}, month {month}, file: {data_config.filepath}: {e}")
+        raise
+    except Exception as e:
+        logger.error(f"Unexpected error loading climate data for {data_config.data_type_slug}, month {month}, file: {data_config.filepath}: {e}")
+        raise
 
 
 def load_climate_data_for_difference(

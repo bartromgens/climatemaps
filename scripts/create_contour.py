@@ -176,19 +176,23 @@ def process(config, month: int, force_recreate: bool):
     """Process either regular or difference climate data configs."""
     logger.info(f'Creating image and tiles for "{config.data_type_slug}" and month {month}')
 
-    # Check if files exist using appropriate function
-    if isinstance(config, ClimateDifferenceDataConfig):
-        files_exist = difference_tile_files_exist(config, month, maps_config)
-    else:
-        files_exist = tile_files_exist(config, month, maps_config)
+    try:
+        # Check if files exist using appropriate function
+        if isinstance(config, ClimateDifferenceDataConfig):
+            files_exist = difference_tile_files_exist(config, month, maps_config)
+        else:
+            files_exist = tile_files_exist(config, month, maps_config)
 
-    if force_recreate or not files_exist:
-        _create_contour(config, month)
-    else:
-        logger.info(
-            f'Skip creation of "{config.data_type_slug}" - {month} because it already exist'
-        )
-    return f"{config.data_type_slug}-{month}"  # Just an indicator of progress
+        if force_recreate or not files_exist:
+            _create_contour(config, month)
+        else:
+            logger.info(
+                f'Skip creation of "{config.data_type_slug}" - {month} because it already exist'
+            )
+        return f"{config.data_type_slug}-{month}"  # Just an indicator of progress
+    except Exception as e:
+        logger.error(f"Failed to process {config.data_type_slug}, month {month}: {e}")
+        raise
 
 
 def _create_contour(data_set_config, month: int):
