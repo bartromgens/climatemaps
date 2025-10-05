@@ -1,7 +1,5 @@
-import os
 import zipfile
 from pathlib import Path
-from typing import Optional
 from urllib.request import urlretrieve
 
 from climatemaps.datasets import (
@@ -12,7 +10,6 @@ from climatemaps.datasets import (
     DataFormat,
     FutureClimateDataConfig,
     SpatialResolution,
-    CLIMATE_VARIABLES,
 )
 from climatemaps.logger import logger
 
@@ -134,7 +131,7 @@ def download_historical_data(config: ClimateDataConfig) -> None:
     temp_zip = data_dir.parent / f"{data_dir.name}.zip"
 
     _download_file(url, temp_zip)
-    _extract_zip(temp_zip, data_dir.parent)
+    _extract_zip(temp_zip, data_dir)
 
 
 def download_future_data(config: FutureClimateDataConfig) -> None:
