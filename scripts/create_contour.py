@@ -17,16 +17,14 @@ from climatemaps.config import ClimateMapsConfig
 from climatemaps.config import get_config
 from climatemaps.contour import ContourTileBuilder
 from climatemaps.data import (
-    import_climate_data,
     load_climate_data,
     load_climate_data_for_difference,
 )
+from climatemaps.datasets import ClimateModel
 from climatemaps.datasets import ClimateScenario
 from climatemaps.datasets import ClimateVarKey
-from climatemaps.datasets import ClimateModel
 from climatemaps.datasets import ClimateDataConfig
 from climatemaps.datasets import ClimateDifferenceDataConfig
-from climatemaps.datasets import DataFormat
 from climatemaps.datasets import HISTORIC_DATA_SETS
 from climatemaps.datasets import FUTURE_DATA_SETS
 from climatemaps.datasets import DIFFERENCE_DATA_SETS
@@ -50,6 +48,7 @@ DEFAULT_FILTER = {
     "variable_type": ClimateVarKey.T_MIN,
     "resolution": SpatialResolution.MIN10,
     "climate_scenario": ClimateScenario.SSP126,
+    "climate_model": ClimateModel.EC_EARTH3_VEG,
     "year_range": (2021, 2040),
 }
 
@@ -64,6 +63,7 @@ def _apply_filter(
                 x.variable_type == filter_criteria["variable_type"]
                 and x.resolution == filter_criteria["resolution"]
                 and getattr(x, "climate_scenario", None) == filter_criteria["climate_scenario"]
+                and getattr(x, "climate_model", None) == filter_criteria["climate_model"]
                 and x.year_range == filter_criteria["year_range"]
             ),
             data_sets,

@@ -1,6 +1,7 @@
 import numpy
 
 from climatemaps.datasets import ClimateDataConfig, DataFormat, FutureClimateDataConfig
+from climatemaps.download import ensure_data_available
 from climatemaps.geotiff import read_geotiff_future, read_geotiff_history
 from climatemaps.geogrid import GeoGrid
 
@@ -97,6 +98,8 @@ def import_ascii_grid_generic(filepath, no_data_value=9e20):
 
 
 def load_climate_data(data_config: ClimateDataConfig, month: int) -> GeoGrid:
+    ensure_data_available(data_config)
+
     if data_config.format == DataFormat.IPCC_GRID:
         lat_range, lon_range, values = import_climate_data(data_config.filepath, month)
     elif data_config.format == DataFormat.GEOTIFF_WORLDCLIM_CMIP6:

@@ -8,4 +8,5 @@ alwaysApply: true
 - Add mypy type hints
 - Don't add docstrings to functions
 - Don't comment the obvious
+- Don't create readmes unless asked
 - Remove duplicate code
