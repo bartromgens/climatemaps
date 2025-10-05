@@ -311,10 +311,10 @@ class FutureClimateDataConfigGroup(ClimateDataConfigGroup):
 
 HISTORIC_DATA_GROUPS: List[ClimateDataConfigGroup] = [
     ClimateDataConfigGroup(
-        variable_types=[ClimateVarKey.T_MAX, ClimateVarKey.T_MIN, ClimateVarKey.PRECIPITATION],
+        variable_types=[ClimateVarKey.T_MAX, ClimateVarKey.T_MIN],
         format=DataFormat.GEOTIFF_WORLDCLIM_HISTORY,
         source="https://www.worldclim.org/data/worldclim21.html",
-        resolutions=[SpatialResolution.MIN10, SpatialResolution.MIN5, SpatialResolution.MIN2_5],
+        resolutions=[SpatialResolution.MIN10, SpatialResolution.MIN5],
         year_ranges=[(1970, 2000)],
         filepath_template="data/raw/worldclim/history/wc2.1_{resolution}_{variable_name}",
     ),
@@ -322,7 +322,7 @@ HISTORIC_DATA_GROUPS: List[ClimateDataConfigGroup] = [
 
 FUTURE_DATA_GROUPS: List[FutureClimateDataConfigGroup] = [
     FutureClimateDataConfigGroup(
-        variable_types=[ClimateVarKey.T_MIN],
+        variable_types=[ClimateVarKey.T_MIN, ClimateVarKey.T_MAX],
         format=DataFormat.GEOTIFF_WORLDCLIM_CMIP6,
         source="https://www.worldclim.org/data/cmip6/cmip6climate.html",
         resolutions=[SpatialResolution.MIN10],
