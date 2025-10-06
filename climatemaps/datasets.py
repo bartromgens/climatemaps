@@ -329,11 +329,11 @@ FUTURE_DATA_GROUPS: List[FutureClimateDataConfigGroup] = [
         year_ranges=[(2021, 2040), (2041, 2060), (2061, 2080), (2081, 2100)],
         climate_scenarios=[
             ClimateScenario.SSP126,
-            # ClimateScenario.SSP245,
-            # ClimateScenario.SSP370,
+            ClimateScenario.SSP245,
+            ClimateScenario.SSP370,
             ClimateScenario.SSP585,
         ],
-        climate_models=[ClimateModel.EC_EARTH3_VEG],
+        climate_models=[ClimateModel.EC_EARTH3_VEG, ClimateModel.MPI_ESM1_2_HR, ClimateModel.ACCESS_CM2],
         filepath_template="data/raw/worldclim/future/wc2.1_{resolution}_{variable_name}_{climate_model}_{climate_scenario}_{year_range[0]}-{year_range[1]}.tif",
     ),
 ]
