@@ -111,6 +111,8 @@
       (valueChange)="onMonthSelected($event)"
     ></app-month-slider>
     <app-year-slider
+      [value]="controlsData?.selectedYearRange || null"
+      [years]="controlsOptions?.yearRanges || []"
       (valueChange)="onYearSelected($event)"
     ></app-year-slider>
   </div>

@@ -48,6 +48,7 @@ import {
   LayerOption,
 } from './services/layer-builder.service';
 import { LayerFilterService } from './services/layer-filter.service';
+import { URLUtils } from '../utils/url-utils';
 
 @Component({
   selector: 'app-map',
@@ -167,6 +168,9 @@ export class MapComponent implements OnInit {
     this.resetInvalidSelections();
     this.findMatchingLayer();
     this.updateLayers();
+    
+    // Update URL with current control values
+    this.updateUrlWithControls();
   }
 
   // Computed properties for filtering available options based on actual data
@@ -256,6 +260,10 @@ export class MapComponent implements OnInit {
       if (params.has('lat') && params.has('lon') && params.has('zoom')) {
         this.updateLocationZoomFromURL(params);
       }
+      // Read map controls from URL parameters (only if data is loaded)
+      if (this.climateMaps.length > 0) {
+        this.updateControlsFromURL(params);
+      }
     });
     this.climateMapService.getClimateMapList().subscribe((climateMaps) => {
       console.log('Loaded climate maps:', climateMaps.length);
@@ -269,6 +277,11 @@ export class MapComponent implements OnInit {
 
       // Reset selections to ensure they are available
       this.resetInvalidSelections();
+
+      // Update controls from URL parameters after data is loaded
+      this.route.queryParamMap.subscribe((params) => {
+        this.updateControlsFromURL(params);
+      });
 
       console.log('Initial selections:', {
         variableType: this.controlsData.selectedVariableType,
@@ -635,6 +648,70 @@ export class MapComponent implements OnInit {
     url.searchParams.set('lon', center.lng.toFixed(6));
     url.searchParams.set('zoom', String(zoom));
     this.location.replaceState(url.pathname + url.search);
+  }
+
+  private updateControlsFromURL(params: ParamMap): void {
+    // Only update if we have climate maps loaded
+    if (this.climateMaps.length === 0) {
+      return;
+    }
+
+    const urlData = {
+      variable: params.get('variable') as ClimateVarKey,
+      resolution: params.get('resolution') as SpatialResolution,
+      scenario: params.get('scenario') as ClimateScenario,
+      model: params.get('model') as ClimateModel,
+      difference: params.get('difference') === 'true',
+      month: params.get('month') ? parseInt(params.get('month')!, 10) : undefined,
+      yearRange: params.get('yearRange') || undefined,
+    };
+
+    const decoded = URLUtils.decodeControls(urlData, this.yearRanges);
+    let hasChanges = false;
+
+    if (decoded.variable && decoded.variable !== this.controlsData.selectedVariableType) {
+      this.controlsData.selectedVariableType = decoded.variable;
+      hasChanges = true;
+    }
+
+    if (decoded.resolution && decoded.resolution !== this.controlsData.selectedResolution) {
+      this.controlsData.selectedResolution = decoded.resolution;
+      hasChanges = true;
+    }
+
+    if (decoded.scenario !== undefined && decoded.scenario !== this.controlsData.selectedClimateScenario) {
+      this.controlsData.selectedClimateScenario = decoded.scenario;
+      hasChanges = true;
+    }
+
+    if (decoded.model !== undefined && decoded.model !== this.controlsData.selectedClimateModel) {
+      this.controlsData.selectedClimateModel = decoded.model;
+      hasChanges = true;
+    }
+
+    if (decoded.difference !== undefined && decoded.difference !== this.controlsData.showDifferenceMap) {
+      this.controlsData.showDifferenceMap = decoded.difference;
+      hasChanges = true;
+    }
+
+    if (decoded.month && decoded.month !== this.controlsData.selectedMonth) {
+      this.controlsData.selectedMonth = decoded.month;
+      hasChanges = true;
+    }
+
+    if (decoded.yearRange && decoded.yearRange !== this.controlsData.selectedYearRange) {
+      this.controlsData.selectedYearRange = decoded.yearRange;
+      hasChanges = true;
+    }
+
+    if (hasChanges) {
+      this.handleControlsChange();
+    }
+  }
+
+  private updateUrlWithControls(): void {
+    const urlData = URLUtils.encodeControls(this.controlsData);
+    URLUtils.updateURLParams(urlData);
   }
 
 

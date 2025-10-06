@@ -12,21 +12,30 @@ import { YearRange } from '../core/metadata.service';
 })
 export class YearSliderComponent {
   @Output() valueChange = new EventEmitter<YearRange>();
-  @Input() value = 1;
+  @Input() value: YearRange | null = null;
+  @Input() years: YearRange[] = [];
 
-  years: YearRange[] = [
-    { value: [1970, 2000], label: '1970-2000' },
-    { value: [2021, 2040], label: '2021-2040' },
-    { value: [2041, 2060], label: '2041-2060' },
-    { value: [2061, 2080], label: '2061-2080' },
-    { value: [2081, 2100], label: '2081-2100' },
-  ];
+  get sliderValue(): number {
+    if (!this.value || this.years.length === 0) {
+      return 1;
+    }
+    const index = this.years.findIndex(year => 
+      year.value[0] === this.value!.value[0] && year.value[1] === this.value!.value[1]
+    );
+    return index >= 0 ? index + 1 : 1;
+  }
 
   onInput(value: number) {
     console.log('onInput', value);
-    this.value = value;
-    this.valueChange.emit(this.years[value - 1]);
+    if (this.years.length > 0 && value >= 1 && value <= this.years.length) {
+      this.valueChange.emit(this.years[value - 1]);
+    }
   }
 
-  displayWith = (val: number) => this.years[val - 1]?.label || '';
+  displayWith = (val: number) => {
+    if (this.years.length > 0 && val >= 1 && val <= this.years.length) {
+      return this.years[val - 1]?.label || '';
+    }
+    return '';
+  };
 }
