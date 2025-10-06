@@ -1,14 +1,15 @@
 import os
+from typing import Tuple
 
-import numpy
-from geotiff import GeoTiff
+import numpy as np
+import rasterio
 
 
-def _process_coordinate_arrays(geo_tiff: GeoTiff):
-    lon_array, lat_array = geo_tiff.get_coord_arrays(geo_tiff.tif_bBox)
-    lon_array = lon_array[0, :]
-    lat_array = lat_array[:, 0]
-
+def _process_coordinate_arrays(transform, width: int, height: int) -> Tuple[np.ndarray, np.ndarray]:
+    # Create coordinate arrays using rasterio's transform
+    lon_array = np.linspace(transform.c, transform.c + width * transform.a, width)
+    lat_array = np.linspace(transform.f, transform.f + height * transform.e, height)
+    
     # Apply coordinate adjustment for consistency
     bin_width = 360.0 / len(lon_array)
     lon_array += bin_width / 2
@@ -17,25 +18,29 @@ def _process_coordinate_arrays(geo_tiff: GeoTiff):
     return lon_array, lat_array
 
 
-def read_geotiff_future(filepath: str, month: int):
-    geo_tiff = GeoTiff(filepath)
-    zarr_array = geo_tiff.read()
-    array = numpy.array(zarr_array, dtype=float)
-    array = array[:, :, month - 1]
-
-    lon_array, lat_array = _process_coordinate_arrays(geo_tiff)
+def read_geotiff_future(filepath: str, month: int) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+    with rasterio.open(filepath) as src:
+        # Read the data for the specified month (0-indexed)
+        array = src.read(month).astype(float)
+        
+        # Get coordinate arrays
+        lon_array, lat_array = _process_coordinate_arrays(src.transform, src.width, src.height)
+        
     return lon_array, lat_array, array
 
 
-def read_geotiff_history(filepath: str, month: int):
+def read_geotiff_history(filepath: str, month: int) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     data_type = filepath.split("/")[-1]
     filepath = os.path.join(filepath, f"{data_type}_{month:02d}.tif")
-    geo_tiff = GeoTiff(filepath)
-    zarr_array = geo_tiff.read()
-    array = numpy.array(zarr_array, dtype=float)
-
-    array[array == -32768] = numpy.nan  # Sea
-    array[array <= -300] = numpy.nan  # Sea
-
-    lon_array, lat_array = _process_coordinate_arrays(geo_tiff)
+    
+    with rasterio.open(filepath) as src:
+        array = src.read(1).astype(float)
+        
+        # Apply the same data cleaning as before
+        array[array == -32768] = np.nan  # Sea
+        array[array <= -300] = np.nan  # Sea
+        
+        # Get coordinate arrays
+        lon_array, lat_array = _process_coordinate_arrays(src.transform, src.width, src.height)
+        
     return lon_array, lat_array, array
