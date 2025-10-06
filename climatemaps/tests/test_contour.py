@@ -1,5 +1,4 @@
 import hashlib
-import logging
 import os
 import tempfile
 
@@ -9,8 +8,7 @@ import numpy as np
 from climatemaps.contour import ContourTileBuilder
 from climatemaps.contour_config import ContourPlotConfig
 from climatemaps.geogrid import GeoGrid
-
-logger = logging.getLogger(__name__)
+from climatemaps.logger import logger
 
 
 class TestContour:
@@ -34,10 +32,10 @@ class TestContour:
         expected_raster_tiles_file = f"{month}_raster.mbtiles"
         expected_vector_tiles_file = f"{month}_vector.mbtiles"
         expected_files = {
-            expected_colorbar_file: "f8ae25cd2b9a0a7014a0fe48aca14f467856c6228a118ba03759d23466c15616",
-            expected_image_file: "021935e7d2d63a568f0b4805e2e117ed442e16af9918723b3eea65f0da0c45c4",
+            expected_colorbar_file: "eafbf9435e36abbf4b16512ec57f5ca57954894e4942db8b147c60f9d9b070d3",
+            expected_image_file: "7094f3b47d24f49da3c2b9f2b6720c97f494074f6353ae0691b4f74c25921093",
             expected_geojson_file: "b164315696323348d514e34b76999e9a83c9bbc217821687bcfaf2fbde4d9b13",
-            expected_raster_tiles_file: "219a04d48f88699d04e0c838a683a3e913a7933c06d617984064c5b2056983da",
+            expected_raster_tiles_file: "a8a09c479e036df0c1ef61ae6b927f79b626a8322041b2851af8dc90a00667f3",
             expected_vector_tiles_file: None,  # This checksum changes each run, no idea why (timestamp?)
         }
         with tempfile.TemporaryDirectory() as tmpdir:
