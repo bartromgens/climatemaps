@@ -22,7 +22,11 @@
     </mat-select>
   </mat-form-field>
 
-  <mat-form-field subscriptSizing="dynamic" class="dropdown-field">
+  <mat-form-field 
+    subscriptSizing="dynamic" 
+    class="dropdown-field"
+    *ngIf="shouldShowYearRangeDropdown()"
+  >
     <mat-label>Year Range</mat-label>
     <mat-select
       [value]="controlsData?.selectedYearRange"
@@ -68,12 +72,12 @@
   <mat-form-field
     subscriptSizing="dynamic"
     class="dropdown-field"
-    *ngIf="shouldShowFutureControls()"
   >
     <mat-label>Climate Scenario</mat-label>
     <mat-select
       [value]="controlsData?.selectedClimateScenario"
       (selectionChange)="onClimateScenarioChange($event)"
+      [disabled]="!shouldShowFutureControls()"
     >
       <mat-option
         *ngFor="let scenario of controlsOptions?.climateScenarios || []"
@@ -93,12 +97,12 @@
   <mat-form-field
     subscriptSizing="dynamic"
     class="dropdown-field"
-    *ngIf="shouldShowFutureControls()"
   >
     <mat-label>Climate Model</mat-label>
     <mat-select
       [value]="controlsData?.selectedClimateModel"
       (selectionChange)="onClimateModelChange($event)"
+      [disabled]="!shouldShowFutureControls()"
     >
       <mat-option
         *ngFor="let model of controlsOptions?.climateModels || []"
@@ -113,10 +117,11 @@
     </mat-select>
   </mat-form-field>
 
-  <div class="checkbox-field" *ngIf="shouldShowFutureControls()">
+  <div class="checkbox-field">
     <mat-checkbox
       [ngModel]="controlsData?.showDifferenceMap"
       (ngModelChange)="onDifferenceMapChange($event)"
+      [disabled]="!shouldShowDifferenceCheckbox()"
       color="primary"
     >
       Show Difference

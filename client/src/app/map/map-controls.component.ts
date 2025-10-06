@@ -124,6 +124,21 @@ export class MapControlsComponent {
     );
   }
 
+  shouldShowYearRangeDropdown(): boolean {
+    return !!(this.controlsData?.showDifferenceMap || this.controlsData?.selectedYearRange);
+  }
+
+  shouldShowDifferenceCheckbox(): boolean {
+    return !!(
+      this.controlsData?.selectedYearRange &&
+      this.controlsOptions?.isHistoricalYearRange &&
+      this.controlsData.selectedYearRange.value &&
+      !this.controlsOptions.isHistoricalYearRange(
+        this.controlsData.selectedYearRange.value,
+      )
+    );
+  }
+
   private emitChange(): void {
     if (this.controlsData) {
       this.controlsChange.emit(this.controlsData);

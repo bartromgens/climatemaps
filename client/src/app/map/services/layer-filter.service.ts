@@ -38,7 +38,7 @@ export class LayerFilterService {
           map.yearRange[1] === yearRange.value[1] &&
           map.variable.name ===
             climateVariables[controlsData.selectedVariableType]?.name &&
-          map.isDifferenceMap === controlsData.showDifferenceMap,
+          (controlsData.showDifferenceMap ? true : map.isDifferenceMap === controlsData.showDifferenceMap),
       );
     });
   }
