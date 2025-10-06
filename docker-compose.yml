@@ -1,12 +1,12 @@
 services:
   tileserver:
-    image: klokantech/tileserver-gl
+    image: maptiler/tileserver-gl
     container_name: openclimatemap-tileserver
     volumes:
       - ./data/tiles:/data/data/tiles
       - ./tileserver_config.json:/data/config.json
     ports:
-      - "127.0.0.1:8080:80"
+      - "127.0.0.1:8080:8080"
     restart: unless-stopped
 
   api:
