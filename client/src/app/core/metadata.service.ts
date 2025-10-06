@@ -131,7 +131,6 @@ export class MetadataService {
   }
 
   private formatYearRangeLabel(start: number, end: number): string {
-    const period = start < 2000 ? 'Historical' : 'Future';
-    return `${start}-${end} (${period})`;
+    return `${start}-${end}`;
   }
 }
