@@ -11,4 +11,5 @@ uvicorn
 
 geotiff==0.2.10
 imagecodecs==2025.3.30
+numcodecs<0.16.0  # to work with geotiff==0.2.10
 pydantic>=2.5.3
