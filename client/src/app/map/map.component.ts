@@ -235,7 +235,6 @@ export class MapComponent implements OnInit {
   debug = !environment.production;
 
   private map: Map | null = null;
-  private readonly control: Control.Layers;
   private rasterLayer: Layer | null = null;
   private vectorLayer: Layer | null = null;
   private isLoadingClickValue = false;
@@ -249,9 +248,6 @@ export class MapComponent implements OnInit {
     private layerBuilder: LayerBuilderService,
     private layerFilter: LayerFilterService,
   ) {
-    this.control = new Control.Layers(undefined, undefined, {
-      collapsed: false,
-    });
     this.isHistoricalYearRange =
       this.metadataService.isHistoricalYearRange.bind(this.metadataService);
   }
@@ -522,7 +518,6 @@ export class MapComponent implements OnInit {
       console.assert(false, 'map is not defined');
       return;
     }
-    this.control.addTo(this.map);
     new Control.Scale().addTo(this.map);
   }
 
