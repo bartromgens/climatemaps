@@ -561,7 +561,7 @@ export class MapComponent implements OnInit {
     // Show loading tooltip
     this.isLoadingClickValue = true;
     this.tooltipManager.createPersistentTooltip(
-      'Loading...',
+      '...',
       event.latlng,
       this.map!,
     );
