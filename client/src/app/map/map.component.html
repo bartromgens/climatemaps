@@ -21,16 +21,6 @@
       [controlsOptions]="controlsOptions"
       (controlsChange)="onControlsChange($event)"
     ></app-map-controls>
-    <div class="row">
-      <div class="column">
-        <app-month-slider
-          (valueChange)="onMonthSelected($event)"
-        ></app-month-slider>
-      </div>
-      <div class="column">
-        <app-year-slider></app-year-slider>
-      </div>
-    </div>
     <app-colorbar
       [colormapUrl]="selectedOption?.climateMap?.colormapUrl || null"
       [displayName]="selectedOption?.climateMap?.getDisplayName() || null"

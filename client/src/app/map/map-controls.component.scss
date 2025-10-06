@@ -16,6 +16,23 @@
   min-width: 150px;
 }
 
+.sliders-row {
+  display: flex;
+  align-items: center;
+}
+
+.sliders-container {
+  display: flex;
+  gap: 24px;
+  align-items: center;
+  width: 100%;
+}
+
+.sliders-container app-month-slider,
+.sliders-container app-year-slider {
+  flex: 1;
+}
+
 .disabled-option {
   opacity: 0.5;
   cursor: not-allowed;
@@ -31,5 +48,11 @@
   .checkbox-field {
     min-width: unset;
     width: 100%;
+  }
+
+  .sliders-container {
+    flex-direction: column;
+    gap: 16px;
+    align-items: stretch;
   }
 }

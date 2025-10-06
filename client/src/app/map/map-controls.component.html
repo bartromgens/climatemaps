@@ -22,31 +22,6 @@
     </mat-select>
   </mat-form-field>
 
-  <mat-form-field 
-    subscriptSizing="dynamic" 
-    class="dropdown-field"
-    *ngIf="shouldShowYearRangeDropdown()"
-  >
-    <mat-label>Year Range</mat-label>
-    <mat-select
-      [value]="controlsData?.selectedYearRange"
-      (selectionChange)="onYearRangeChange($event)"
-    >
-      <mat-option
-        *ngFor="
-          let yearRange of controlsOptions?.yearRanges || [];
-          trackBy: trackByYearRange
-        "
-        [value]="yearRange"
-        [disabled]="!controlsOptions?.availableYearRanges?.includes(yearRange)"
-        [class.disabled-option]="
-          !controlsOptions?.availableYearRanges?.includes(yearRange)
-        "
-      >
-        {{ yearRange.label }}
-      </mat-option>
-    </mat-select>
-  </mat-form-field>
 
   <mat-form-field subscriptSizing="dynamic" class="dropdown-field">
     <mat-label>Resolution</mat-label>
@@ -126,5 +101,17 @@
     >
       Show Difference
     </mat-checkbox>
+  </div>
+</div>
+
+<div class="row sliders-row">
+  <div class="column sliders-container">
+    <app-month-slider
+      [value]="controlsData?.selectedMonth || 1"
+      (valueChange)="onMonthSelected($event)"
+    ></app-month-slider>
+    <app-year-slider
+      (valueChange)="onYearSelected($event)"
+    ></app-year-slider>
   </div>
 </div>

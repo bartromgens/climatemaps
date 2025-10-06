@@ -11,6 +11,8 @@ import {
   ClimateModel,
 } from '../utils/enum';
 import { YearRange } from '../core/metadata.service';
+import { YearSliderComponent } from './year-slider.component';
+import { MonthSliderComponent } from './month-slider.component';
 
 export interface MapControlsData {
   selectedVariableType: ClimateVarKey;
@@ -19,21 +21,22 @@ export interface MapControlsData {
   selectedClimateScenario: ClimateScenario | null;
   selectedClimateModel: ClimateModel | null;
   showDifferenceMap: boolean;
+  selectedMonth: number;
 }
 
 export interface MapControlsOptions {
   variableTypes: ClimateVarKey[];
-  yearRanges: YearRange[];
   resolutions: SpatialResolution[];
   climateScenarios: ClimateScenario[];
   climateModels: ClimateModel[];
   climateVariables: Record<ClimateVarKey, any>;
   availableVariableTypes: ClimateVarKey[];
-  availableYearRanges: YearRange[];
   availableResolutions: SpatialResolution[];
   availableClimateScenarios: ClimateScenario[];
   availableClimateModels: ClimateModel[];
   isHistoricalYearRange: (yearRange: readonly [number, number]) => boolean;
+  yearRanges: YearRange[];
+  availableYearRanges: YearRange[];
 }
 
 @Component({
@@ -45,6 +48,8 @@ export interface MapControlsOptions {
     MatFormFieldModule,
     MatSelectModule,
     MatCheckboxModule,
+    YearSliderComponent,
+    MonthSliderComponent,
   ],
   templateUrl: './map-controls.component.html',
   styleUrl: './map-controls.component.scss',
@@ -61,12 +66,6 @@ export class MapControlsComponent {
     }
   }
 
-  onYearRangeChange(event: any): void {
-    if (this.controlsData) {
-      this.controlsData.selectedYearRange = event.value;
-      this.emitChange();
-    }
-  }
 
   onResolutionChange(event: any): void {
     if (this.controlsData) {
@@ -96,6 +95,22 @@ export class MapControlsComponent {
     }
   }
 
+  onYearSelected(yearRange: YearRange): void {
+    console.log('onYearSelected', yearRange);
+    if (this.controlsData) {
+      this.controlsData.selectedYearRange = yearRange;
+      this.emitChange();
+    }
+  }
+
+  onMonthSelected(month: number): void {
+    console.log('onMonthSelected', month);
+    if (this.controlsData) {
+      this.controlsData.selectedMonth = month;
+      this.emitChange();
+    }
+  }
+
   getResolutionDisplayName(resolution: SpatialResolution): string {
     switch (resolution) {
       case SpatialResolution.MIN10:
@@ -109,10 +124,6 @@ export class MapControlsComponent {
     }
   }
 
-  trackByYearRange(index: number, yearRange: YearRange): string {
-    return `${yearRange.value[0]}-${yearRange.value[1]}`;
-  }
-
   shouldShowFutureControls(): boolean {
     return !!(
       this.controlsData?.selectedYearRange &&
@@ -122,10 +133,6 @@ export class MapControlsComponent {
         this.controlsData.selectedYearRange.value,
       )
     );
-  }
-
-  shouldShowYearRangeDropdown(): boolean {
-    return !!(this.controlsData?.showDifferenceMap || this.controlsData?.selectedYearRange);
   }
 
   shouldShowDifferenceCheckbox(): boolean {

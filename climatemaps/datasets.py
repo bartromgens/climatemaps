@@ -326,7 +326,7 @@ FUTURE_DATA_GROUPS: List[FutureClimateDataConfigGroup] = [
         format=DataFormat.GEOTIFF_WORLDCLIM_CMIP6,
         source="https://www.worldclim.org/data/cmip6/cmip6climate.html",
         resolutions=[SpatialResolution.MIN10],
-        year_ranges=[(2021, 2040), (2041, 2060), (2081, 2100)],
+        year_ranges=[(2021, 2040), (2041, 2060), (2061, 2080), (2081, 2100)],
         climate_scenarios=[
             ClimateScenario.SSP126,
             # ClimateScenario.SSP245,

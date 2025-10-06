@@ -20,8 +20,6 @@ import {
 import 'leaflet.vectorgrid'; // bring in the vectorgrid plugin
 
 import { environment } from '../../environments/environment';
-import { MonthSliderComponent } from './month-slider.component';
-import { YearSliderComponent } from './year-slider.component';
 import {
   MapControlsComponent,
   MapControlsData,
@@ -62,8 +60,6 @@ import { LayerFilterService } from './services/layer-filter.service';
     MatSidenavModule,
     MatButtonModule,
     MatCardModule,
-    MonthSliderComponent,
-    YearSliderComponent,
     MapControlsComponent,
     ColorbarComponent,
   ],
@@ -74,7 +70,9 @@ export class MapComponent implements OnInit {
   private readonly ZOOM_DEFAULT: number = 5;
   layerOptions: LayerOption[] = [];
   selectedOption: LayerOption | undefined;
-  monthSelected = 1;
+  get monthSelected(): number {
+    return this.controlsData.selectedMonth;
+  }
 
   // Climate maps data from backend
   climateMaps: ClimateMap[] = [];
@@ -87,6 +85,7 @@ export class MapComponent implements OnInit {
     selectedClimateScenario: null,
     selectedClimateModel: null,
     showDifferenceMap: false,
+    selectedMonth: 1,
   };
 
   // Controls options for the MapControlsComponent
@@ -292,6 +291,13 @@ export class MapComponent implements OnInit {
     this.updateLayers();
   }
 
+  private isYearRangeAvailable(selectedYearRange: YearRange, availableYearRanges: YearRange[]): boolean {
+    return availableYearRanges.some(availableRange => 
+      availableRange.value[0] === selectedYearRange.value[0] && 
+      availableRange.value[1] === selectedYearRange.value[1]
+    );
+  }
+
   private resetInvalidSelections() {
     const availableYearRanges = this.getAvailableYearRanges();
     const availableResolutions = this.getAvailableResolutions();
@@ -301,7 +307,7 @@ export class MapComponent implements OnInit {
     // Reset year range if not available for current selections
     if (
       this.controlsData.selectedYearRange &&
-      !availableYearRanges.includes(this.controlsData.selectedYearRange)
+      !this.isYearRangeAvailable(this.controlsData.selectedYearRange, availableYearRanges)
     ) {
       this.controlsData.selectedYearRange = availableYearRanges[0] || null;
     }
@@ -416,7 +422,7 @@ export class MapComponent implements OnInit {
 
     if (matchingLayer) {
       this.selectedOption = matchingLayer;
-      console.log('Found matching layer:', matchingLayer.name);
+      console.log('Found matching layer:', matchingLayer.name, matchingLayer.metadata);
     } else {
       // No exact match found - clear current layer
       this.selectedOption = undefined;
@@ -631,11 +637,7 @@ export class MapComponent implements OnInit {
     this.location.replaceState(url.pathname + url.search);
   }
 
-  onMonthSelected(month: number): void {
-    console.log('onMonthSelected', month);
-    this.monthSelected = month;
-    this.updateLayers();
-  }
+
 
   private onVectorLayerHover(e: any): void {
     const properties = e.layer?.properties;
