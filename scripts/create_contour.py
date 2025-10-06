@@ -145,30 +145,66 @@ def main(force_recreate: bool = False, apply_filter: bool = False):
 
 def run_tasks_with_process_pool(tasks, process, num_processes):
     total = len(tasks)
-    with concurrent.futures.ProcessPoolExecutor(max_workers=num_processes) as executor:
-        try:
-            futures = {executor.submit(process, *task): task for task in tasks}
-            for counter, future in enumerate(concurrent.futures.as_completed(futures)):
-                result = future.result()  # May raise if process fails
-                progress = counter / total * 100.0
-                logger.info(f"Completed: {result} | Progress: {int(progress)}%")
-        except KeyboardInterrupt:
-            logger.warning("KeyboardInterrupt received! Attempting to shut down executor...")
-
-            # Shutdown the executor immediately
+    executor = None
+    try:
+        executor = concurrent.futures.ProcessPoolExecutor(max_workers=num_processes)
+        futures = {executor.submit(process, *task): task for task in tasks}
+        for counter, future in enumerate(concurrent.futures.as_completed(futures)):
+            result = future.result()  # May raise if process fails
+            progress = counter / total * 100.0
+            logger.info(f"Completed: {result} | Progress: {int(progress)}%")
+    except KeyboardInterrupt:
+        logger.warning("KeyboardInterrupt received! Attempting to shut down executor...")
+        
+        # Cancel all pending futures
+        for future in futures:
+            future.cancel()
+        
+        # Shutdown the executor immediately
+        if executor:
             executor.shutdown(wait=False, cancel_futures=True)
 
-            # Terminate all child processes (optional but safer)
-            terminate_process_pool_children()
+        # Terminate all child processes
+        terminate_process_pool_children()
 
-            raise  # Re-raise to let caller handle or exit
+        raise  # Re-raise to let caller handle or exit
+    finally:
+        # Ensure executor is properly shut down
+        if executor:
+            executor.shutdown(wait=True)
 
 
 def terminate_process_pool_children():
     """Forcefully kill any subprocesses started by the current process."""
-    for proc in multiprocessing.active_children():
+    children = multiprocessing.active_children()
+    if not children:
+        logger.info("No child processes to terminate.")
+        return
+        
+    logger.info(f"Terminating {len(children)} child processes...")
+    for proc in children:
         logger.info(f"Terminating child process PID={proc.pid}")
         proc.terminate()
+    
+    # Wait for processes to terminate gracefully
+    for proc in children:
+        try:
+            proc.join(timeout=3)  # Wait up to 3 seconds for graceful termination
+        except:
+            pass  # Ignore errors during cleanup
+    
+    # Force kill any remaining processes
+    remaining = [p for p in children if p.is_alive()]
+    if remaining:
+        logger.warning(f"Force killing {len(remaining)} remaining processes...")
+        for proc in remaining:
+            logger.warning(f"Force killing process PID={proc.pid}")
+            proc.kill()
+            try:
+                proc.join(timeout=2)
+            except:
+                pass
+    
     logger.info("All child processes terminated.")
 
 
