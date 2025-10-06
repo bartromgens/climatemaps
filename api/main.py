@@ -9,7 +9,7 @@ from pydantic import BaseModel
 
 from climatemaps.config import ClimateMap
 from climatemaps.settings import settings
-from climatemaps.datasets import ClimateDataConfig, ClimateDifferenceDataConfig
+from climatemaps.datasets import ClimateDifferenceDataConfig
 from climatemaps.data import load_climate_data, load_climate_data_for_difference
 
 app = FastAPI()

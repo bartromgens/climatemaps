@@ -118,10 +118,10 @@ def load_climate_data(data_config: ClimateDataConfig, month: int) -> GeoGrid:
 
         return GeoGrid(lon_range=lon_range, lat_range=lat_range, values=values)
     except FileNotFoundError as e:
-        logger.error(f"Failed to load climate data for {data_config.data_type_slug}, month {month}, file: {data_config.filepath}: {e}")
+        logger.exception(f"Failed to load climate data for {data_config.data_type_slug}, month {month}, file: {data_config.filepath}: {e}")
         raise
     except Exception as e:
-        logger.error(f"Unexpected error loading climate data for {data_config.data_type_slug}, month {month}, file: {data_config.filepath}: {e}")
+        logger.exception(f"Unexpected error loading climate data for {data_config.data_type_slug}, month {month}, file: {data_config.filepath}: {e}")
         raise
 
 
