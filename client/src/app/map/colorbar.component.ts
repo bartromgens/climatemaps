@@ -43,8 +43,9 @@ import { CommonModule } from '@angular/common';
 
       @media (max-width: 768px) {
         .colorbar-container {
-          bottom: 20px;
+          bottom: 10px;
           left: auto;
+          right: 10px;
           max-width: 50px;
         }
       }
