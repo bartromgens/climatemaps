@@ -1,8 +1,16 @@
+mat-toolbar {
+  background-color: white !important;
+  color: #1565c0; /* Dark blue color */
+}
+
 .spacer {
   flex: 1 1 auto;
 }
 
 .app-title-link {
   text-decoration: none;
-  color: inherit;
+  color: #1565c0; /* Dark blue color for the title */
+  font-family: system-ui, -apple-system, sans-serif;
+  font-size: 18px;
+  font-weight: 600;
 }
