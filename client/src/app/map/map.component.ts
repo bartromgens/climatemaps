@@ -233,8 +233,10 @@ export class MapComponent implements OnInit {
     layers: [this.baseLayer],
     zoom: this.ZOOM_DEFAULT,
     center: latLng(52.1, 5.58),
+    zoomControl: false,
   };
   sidebarOpened = false;
+  isMobile = false;
   debug = !environment.production;
 
   private map: Map | null = null;
@@ -256,6 +258,9 @@ export class MapComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.checkMobile();
+    this.setupResizeListener();
+    
     this.route.queryParamMap.subscribe((params) => {
       if (params.has('lat') && params.has('lon') && params.has('zoom')) {
         this.updateLocationZoomFromURL(params);
@@ -537,6 +542,7 @@ export class MapComponent implements OnInit {
       console.assert(false, 'map is not defined');
       return;
     }
+    new Control.Zoom({position: 'topright'}).addTo(this.map);
     new Control.Scale().addTo(this.map);
   }
 
@@ -744,5 +750,28 @@ export class MapComponent implements OnInit {
       return climateVariable.unit;
     }
     return 'unknown';
+  }
+
+  private checkMobile(): void {
+    this.isMobile = window.innerWidth <= 768;
+    if (this.isMobile) {
+      this.sidebarOpened = false;
+    }
+  }
+
+  private setupResizeListener(): void {
+    window.addEventListener('resize', () => {
+      const wasMobile = this.isMobile;
+      this.checkMobile();
+      
+      // If switching from mobile to desktop, close sidebar
+      if (wasMobile && !this.isMobile) {
+        this.sidebarOpened = false;
+      }
+    });
+  }
+
+  toggleSidebar(): void {
+    this.sidebarOpened = !this.sidebarOpened;
   }
 }

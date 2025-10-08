@@ -38,6 +38,28 @@
   cursor: not-allowed;
 }
 
+// Sidebar-specific styling
+:host-context(.sidebar-content) {
+  .controls-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
+  }
+  
+  .dropdown-field,
+  .checkbox-field {
+    min-width: unset;
+    width: 100%;
+    margin-right: 0;
+  }
+
+  .sliders-container {
+    flex-direction: column;
+    gap: 16px;
+    align-items: stretch;
+  }
+}
+
 @media (max-width: 768px) {
   .controls-row {
     flex-direction: column;

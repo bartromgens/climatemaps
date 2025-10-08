@@ -81,3 +81,62 @@
 ::ng-deep .contour-hover-tooltip::before {
   border-top-color: rgba(0, 0, 0, 0.8) !important;
 }
+
+// Mobile toggle button
+.mobile-toggle-button {
+  position: fixed;
+  top: 70px;
+  left: 16px;
+  z-index: 1000;
+  background-color: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+// Sidebar content styling
+.sidebar-content {
+  padding: 16px;
+  height: 100%;
+  overflow-y: auto;
+  position: relative;
+}
+
+// Sidebar close button
+.sidebar-close-button {
+  position: relative;
+  float: right;
+  margin-left: 8px;
+}
+
+
+// Custom sidebar styling
+::ng-deep .custom-sidebar {
+  width: 100vw !important;
+  max-width: 100vw !important;
+}
+
+// Mobile-specific styling
+@media (max-width: 768px) {
+  .mobile-toggle-button {
+    display: block;
+  }
+  
+  .desktop-controls {
+    display: none;
+  }
+  
+  .page-content-wrapper {
+    height: 100vh;
+  }
+  
+}
+
+// Desktop-specific styling
+@media (min-width: 769px) {
+  .mobile-toggle-button {
+    display: none;
+  }
+  
+  ::ng-deep .custom-sidebar {
+    display: none;
+  }
+}

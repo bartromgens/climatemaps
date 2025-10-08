@@ -40,6 +40,13 @@ import { CommonModule } from '@angular/common';
         height: auto;
         display: block;
       }
+
+      @media (max-width: 768px) {
+        .colorbar-container {
+          bottom: 20px;
+          left: auto;
+        }
+      }
     `,
   ],
 })
