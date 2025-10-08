@@ -32,7 +32,7 @@ import { CommonModule } from '@angular/common';
         padding: 10px;
         box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
         z-index: 1000;
-        max-width: 70px;
+        max-width: 60px;
       }
 
       .colorbar-image {
@@ -45,6 +45,7 @@ import { CommonModule } from '@angular/common';
         .colorbar-container {
           bottom: 20px;
           left: auto;
+          max-width: 50px;
         }
       }
     `,
