@@ -4,6 +4,7 @@ import tempfile
 
 import pytest
 import numpy as np
+from PIL import Image
 
 from climatemaps.contour import ContourTileBuilder
 from climatemaps.contour_config import ContourPlotConfig
@@ -28,14 +29,12 @@ class TestContour:
         name = "test"
         expected_colorbar_file = f"{month}_colorbar.png"
         expected_image_file = f"{month}.png"
-        expected_geojson_file = f"{month}.geojson"
         expected_raster_tiles_file = f"{month}_raster.mbtiles"
         expected_vector_tiles_file = f"{month}_vector.mbtiles"
         expected_files = {
-            expected_colorbar_file: "eafbf9435e36abbf4b16512ec57f5ca57954894e4942db8b147c60f9d9b070d3",
-            expected_image_file: "7094f3b47d24f49da3c2b9f2b6720c97f494074f6353ae0691b4f74c25921093",
-            expected_geojson_file: "b164315696323348d514e34b76999e9a83c9bbc217821687bcfaf2fbde4d9b13",
-            expected_raster_tiles_file: "a8a09c479e036df0c1ef61ae6b927f79b626a8322041b2851af8dc90a00667f3",
+            expected_colorbar_file: "c1c96094eb0fabb6d38dd1e4adff2379351d1d80376dbd5e6fc19c61cc5d4e04",
+            expected_image_file: "194e17635d738c43171039ee2389201fb8dbddf35d2ab8b45e0f3f09652669b4",
+            expected_raster_tiles_file: "219a04d48f88699d04e0c838a683a3e913a7933c06d617984064c5b2056983da",
             expected_vector_tiles_file: None,  # This checksum changes each run, no idea why (timestamp?)
         }
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -48,10 +47,25 @@ class TestContour:
                 if checksum_expected is not None:
                     assert checksum_expected == checksum
 
+            geojson_filepath = os.path.join(tmpdir, name, f"{month}.geojson")
+            assert not os.path.exists(geojson_filepath)
+
     @classmethod
-    def _compute_checksum(cls, filepath, algorithm="sha256", chunk_size=8192):
+    def _compute_checksum(
+        cls, filepath: str, algorithm: str = "sha256", chunk_size: int = 8192
+    ) -> str:
+        if filepath.endswith(".png"):
+            return cls._compute_png_checksum(filepath, algorithm)
+
         hash_func = hashlib.new(algorithm)
         with open(filepath, "rb") as f:
             while chunk := f.read(chunk_size):
                 hash_func.update(chunk)
+        return hash_func.hexdigest()
+
+    @classmethod
+    def _compute_png_checksum(cls, filepath: str, algorithm: str = "sha256") -> str:
+        hash_func = hashlib.new(algorithm)
+        with Image.open(filepath) as img:
+            hash_func.update(np.array(img).tobytes())
         return hash_func.hexdigest()
