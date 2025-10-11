@@ -113,13 +113,13 @@ export class MapControlsComponent {
   getResolutionDisplayName(resolution: SpatialResolution): string {
     switch (resolution) {
       case SpatialResolution.MIN30:
-        return 'Very low';
-      case SpatialResolution.MIN10:
         return 'Low';
-      case SpatialResolution.MIN5:
+      case SpatialResolution.MIN10:
         return 'Medium';
-      case SpatialResolution.MIN2_5:
+      case SpatialResolution.MIN5:
         return 'High';
+      case SpatialResolution.MIN2_5:
+        return 'Very High';
       default:
         return resolution;
     }
