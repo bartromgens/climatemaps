@@ -22,6 +22,7 @@ class DataFormat(enum.Enum):
 
 
 class SpatialResolution(enum.Enum):
+    MIN30 = "30m"
     MIN10 = "10m"
     MIN5 = "5m"
     MIN2_5 = "2.5m"
@@ -35,6 +36,8 @@ class ClimateVarKey(enum.Enum):
     WET_DAYS = "WET_DAYS"
     WIND_SPEED = "WIND_SPEED"
     RADIATION = "RADIATION"
+    DIURNAL_TEMP_RANGE = "DIURNAL_TEMP_RANGE"
+    VAPOUR_PRESSURE = "VAPOUR_PRESSURE"
 
 
 class ClimateScenario(enum.Enum):
@@ -98,6 +101,15 @@ CLIMATE_VARIABLES: Dict[ClimateVarKey, ClimateVariable] = {
     ClimateVarKey.RADIATION: ClimateVariable(
         name="Radiation", display_name="Radiation", unit="W/m^2", filename="radiation"
     ),
+    ClimateVarKey.DIURNAL_TEMP_RANGE: ClimateVariable(
+        name="DiurnalTempRange",
+        display_name="Diurnal Temperature Range",
+        unit="°C",
+        filename="diurnaltemprange",
+    ),
+    ClimateVarKey.VAPOUR_PRESSURE: ClimateVariable(
+        name="VapourPressure", display_name="Vapour Pressure", unit="hPa", filename="vapourpressure"
+    ),
 }
 
 
@@ -127,6 +139,16 @@ CLIMATE_CONTOUR_CONFIGS: Dict[ClimateVarKey, ContourPlotConfig] = {
     ),
     ClimateVarKey.RADIATION: ContourPlotConfig(
         level_lower=0, level_upper=300, colormap=plt.cm.jet, title="Radiation", unit="W/m^2"
+    ),
+    ClimateVarKey.DIURNAL_TEMP_RANGE: ContourPlotConfig(
+        level_lower=5,
+        level_upper=20,
+        colormap=plt.cm.jet,
+        title="Diurnal temperature range",
+        unit="C",
+    ),
+    ClimateVarKey.VAPOUR_PRESSURE: ContourPlotConfig(
+        level_lower=1, level_upper=34, colormap=plt.cm.jet, title="Vapour pressure", unit="hPa"
     ),
 }
 
@@ -245,6 +267,7 @@ class ClimateDataConfigGroup:
         for variable_type in self.variable_types:
             for year_range in self.year_ranges:
                 for resolution in self.resolutions:
+                    variable = CLIMATE_VARIABLES[variable_type]
                     config = ClimateDataConfig(
                         variable_type=variable_type,
                         format=self.format,
@@ -253,7 +276,7 @@ class ClimateDataConfigGroup:
                         filepath=self.filepath_template.format(
                             resolution=resolution.value,
                             year_range=year_range,
-                            variable_name=CLIMATE_VARIABLES[variable_type].filename.lower(),
+                            variable_name=variable.filename.lower(),
                         ),
                         conversion_function=self.conversion_function,
                         conversion_factor=self.conversion_factor,
@@ -309,6 +332,43 @@ class FutureClimateDataConfigGroup(ClimateDataConfigGroup):
 #     )
 # ]
 
+IPCC_FILE_ABBREVIATIONS: Dict[ClimateVarKey, str] = {
+    ClimateVarKey.CLOUD_COVER: "cld",
+    ClimateVarKey.DIURNAL_TEMP_RANGE: "dtr",
+    ClimateVarKey.WET_DAYS: "wet",
+    ClimateVarKey.WIND_SPEED: "wnd",
+    ClimateVarKey.RADIATION: "rad",
+    ClimateVarKey.VAPOUR_PRESSURE: "vap",
+    ClimateVarKey.T_MAX: "tmx",
+    ClimateVarKey.T_MIN: "tmn",
+    ClimateVarKey.PRECIPITATION: "pre",
+}
+
+
+@dataclass
+class IPCCClimateDataConfigGroup(ClimateDataConfigGroup):
+    def create_configs(self) -> List[ClimateDataConfig]:
+        configs: List[ClimateDataConfig] = []
+        for variable_type in self.variable_types:
+            for year_range in self.year_ranges:
+                for resolution in self.resolutions:
+                    variable = CLIMATE_VARIABLES[variable_type]
+                    abbr = IPCC_FILE_ABBREVIATIONS[variable_type]
+                    year_code = f"{str(year_range[0])[-2:]}{str(year_range[1])[-2:]}"
+                    config = ClimateDataConfig(
+                        variable_type=variable_type,
+                        format=self.format,
+                        resolution=resolution,
+                        year_range=year_range,
+                        filepath=f"data/raw/{variable.filename}/c{abbr}{year_code}.dat",
+                        conversion_function=self.conversion_function,
+                        conversion_factor=self.conversion_factor,
+                        source=self.source,
+                    )
+                    configs.append(config)
+        return configs
+
+
 HISTORIC_DATA_GROUPS: List[ClimateDataConfigGroup] = [
     ClimateDataConfigGroup(
         variable_types=[ClimateVarKey.T_MAX, ClimateVarKey.T_MIN],
@@ -317,6 +377,32 @@ HISTORIC_DATA_GROUPS: List[ClimateDataConfigGroup] = [
         resolutions=[SpatialResolution.MIN10, SpatialResolution.MIN5],
         year_ranges=[(1970, 2000)],
         filepath_template="data/raw/worldclim/history/wc2.1_{resolution}_{variable_name}",
+    ),
+    IPCCClimateDataConfigGroup(
+        variable_types=[
+            ClimateVarKey.DIURNAL_TEMP_RANGE,
+            ClimateVarKey.WET_DAYS,
+            ClimateVarKey.WIND_SPEED,
+            ClimateVarKey.VAPOUR_PRESSURE,
+        ],
+        format=DataFormat.IPCC_GRID,
+        source="https://www.ipcc-data.org/observ/clim/get_30yr_means.html",
+        resolutions=[SpatialResolution.MIN30],
+        year_ranges=[(1961, 1990)],
+        filepath_template="",
+        conversion_factor=0.1,
+    ),
+    IPCCClimateDataConfigGroup(
+        variable_types=[
+            ClimateVarKey.CLOUD_COVER,
+            ClimateVarKey.RADIATION,
+        ],
+        format=DataFormat.IPCC_GRID,
+        source="https://www.ipcc-data.org/observ/clim/get_30yr_means.html",
+        resolutions=[SpatialResolution.MIN30],
+        year_ranges=[(1961, 1990)],
+        filepath_template="",
+        conversion_factor=1,
     ),
 ]
 
@@ -333,7 +419,11 @@ FUTURE_DATA_GROUPS: List[FutureClimateDataConfigGroup] = [
             ClimateScenario.SSP370,
             ClimateScenario.SSP585,
         ],
-        climate_models=[ClimateModel.EC_EARTH3_VEG, ClimateModel.MPI_ESM1_2_HR, ClimateModel.ACCESS_CM2],
+        climate_models=[
+            ClimateModel.EC_EARTH3_VEG,
+            ClimateModel.MPI_ESM1_2_HR,
+            ClimateModel.ACCESS_CM2,
+        ],
         filepath_template="data/raw/worldclim/future/wc2.1_{resolution}_{variable_name}_{climate_model}_{climate_scenario}_{year_range[0]}-{year_range[1]}.tif",
     ),
 ]
@@ -383,86 +473,3 @@ def create_difference_map_configs() -> List[ClimateDifferenceDataConfig]:
 
 
 DIFFERENCE_DATA_SETS: List[ClimateDifferenceDataConfig] = create_difference_map_configs()
-
-# IPCC_HISTORIC_SETS = [
-#     ClimateMapConfig(
-#         data_type='precipitation',
-#         filepath='data/precipitation/cpre6190.dat',
-#         conversion_factor=0.1,  # (millimetres/day) *10
-#         config=ContourPlotConfig(0.1, 16, colormap=plt.cm.jet_r, title='Precipitation', unit='mm/day', logscale=True),
-#         format=DataFormat.IPCC_GRID,
-#         source="https://www.ipcc-data.org/observ/clim/get_30yr_means.html",
-#     ),
-#     ClimateMapConfig(
-#         data_type='cloud',
-#         filepath='data/cloud/ccld6190.dat',
-#         conversion_factor=1,
-#         config=ContourPlotConfig(0, 100, colormap=plt.cm.jet_r, title='Cloud coverage', unit='%'),
-#         format=DataFormat.IPCC_GRID,
-#         source="https://www.ipcc-data.org/observ/clim/get_30yr_means.html",
-#     ),
-#     ClimateMapConfig(
-#         data_type='mintemp',
-#         filepath='data/mintemp/ctmn6190.dat',
-#         conversion_factor=0.1,
-#         config=ContourPlotConfig(-30, 28, colormap=plt.cm.jet, title='Min. temperature', unit='C'),
-#         format=DataFormat.IPCC_GRID,
-#         source="https://www.ipcc-data.org/observ/clim/get_30yr_means.html",
-#     ),
-#     ClimateMapConfig(
-#         data_type='meantemp',
-#         filepath='data/meantemp/ctmp6190.dat',
-#         conversion_factor=0.1,
-#         config=ContourPlotConfig(-30, 35, colormap=plt.cm.jet, title='Mean temperature', unit='C'),
-#         format=DataFormat.IPCC_GRID,
-#         source="https://www.ipcc-data.org/observ/clim/get_30yr_means.html",
-#     ),
-#     ClimateMapConfig(
-#         data_type='maxtemp',
-#         filepath='data/maxtemp/ctmx6190.dat',
-#         conversion_factor=0.1,
-#         config=ContourPlotConfig(-20, 45, colormap=plt.cm.jet, title='Max. temperature', unit='C'),
-#         format=DataFormat.IPCC_GRID,
-#         source="https://www.ipcc-data.org/observ/clim/get_30yr_means.html",
-#     ),
-#     ClimateMapConfig(
-#         data_type='diurnaltemprange',
-#         filepath='data/diurnaltemprange/cdtr6190.dat',
-#         conversion_factor=0.1,
-#         config=ContourPlotConfig(5, 20, colormap=plt.cm.jet, title='Diurnal temperature range', unit='C'),
-#         format=DataFormat.IPCC_GRID,
-#         source="https://www.ipcc-data.org/observ/clim/get_30yr_means.html",
-#     ),
-#     ClimateMapConfig(
-#         data_type='wetdays',
-#         filepath='data/wetdays/cwet6190.dat',
-#         conversion_factor=0.1,
-#         config=ContourPlotConfig(0, 30, colormap=plt.cm.jet_r, title='Wet days', unit='days'),
-#         format=DataFormat.IPCC_GRID,
-#         source="https://www.ipcc-data.org/observ/clim/get_30yr_means.html",
-#     ),
-#     ClimateMapConfig(
-#         data_type='wind',
-#         filepath='data/wind/cwnd6190.dat',
-#         conversion_factor=0.1,
-#         config=ContourPlotConfig(0, 9, colormap=plt.cm.jet, title='Wind speed', unit='m/s'),
-#         format=DataFormat.IPCC_GRID,
-#         source="https://www.ipcc-data.org/observ/clim/get_30yr_means.html",
-#     ),
-#     ClimateMapConfig(
-#         data_type='radiation',
-#         filepath='data/radiation/crad6190.dat',
-#         conversion_factor=1,
-#         config=ContourPlotConfig(0, 300, colormap=plt.cm.jet, title='Radiation', unit='W/m^2'),
-#         format=DataFormat.IPCC_GRID,
-#         source="https://www.ipcc-data.org/observ/clim/get_30yr_means.html",
-#     ),
-#     ClimateMapConfig(
-#         data_type='vapourpressure',
-#         filepath='data/vapourpressure/cvap6190.dat',
-#         conversion_factor=0.1,
-#         config=ContourPlotConfig(1, 34, colormap=plt.cm.jet, title='Vapour pressure', unit='hPa'),
-#         format=DataFormat.IPCC_GRID,
-#         source="https://www.ipcc-data.org/observ/clim/get_30yr_means.html",
-#     ),
-# ]

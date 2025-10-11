@@ -45,25 +45,24 @@ DIFFERENCE_DATA_SETS_AVAILABLE = DIFFERENCE_DATA_SETS
 
 # Default filter for testing (can be overridden via command line)
 DEFAULT_FILTER = {
-    "variable_type": ClimateVarKey.T_MIN,
-    "resolution": SpatialResolution.MIN10,
+    "variable_type": ClimateVarKey.CLOUD_COVER,
+    "resolution": SpatialResolution.MIN30,
     "climate_scenario": ClimateScenario.SSP126,
     "climate_model": ClimateModel.EC_EARTH3_VEG,
-    "year_range": (2021, 2040),
+    "year_range": (1961, 1990),
 }
 
 
-def _apply_filter(
+def _apply_historicfilter(
     data_sets: List[ClimateDataConfig], filter_criteria: dict
 ) -> List[ClimateDataConfig]:
     """Apply filter criteria to regular climate data sets."""
+    logger.info(f"Applying filter criteria: {filter_criteria}")
     return list(
         filter(
             lambda x: (
                 x.variable_type == filter_criteria["variable_type"]
                 and x.resolution == filter_criteria["resolution"]
-                and getattr(x, "climate_scenario", None) == filter_criteria["climate_scenario"]
-                and getattr(x, "climate_model", None) == filter_criteria["climate_model"]
                 and x.year_range == filter_criteria["year_range"]
             ),
             data_sets,
@@ -71,16 +70,18 @@ def _apply_filter(
     )
 
 
-def _apply_difference_filter(
-    data_sets: List[ClimateDifferenceDataConfig], filter_criteria: dict
-) -> List[ClimateDifferenceDataConfig]:
-    """Apply filter criteria to difference climate data sets."""
+def _apply_future_filter(
+    data_sets: List[ClimateDataConfig], filter_criteria: dict
+) -> List[ClimateDataConfig]:
+    """Apply filter criteria to future climate data sets."""
+    logger.info(f"Applying filter criteria: {filter_criteria}")
     return list(
         filter(
             lambda x: (
                 x.variable_type == filter_criteria["variable_type"]
                 and x.resolution == filter_criteria["resolution"]
                 and x.future_config.climate_scenario == filter_criteria["climate_scenario"]
+                and x.future_config.climate_model == filter_criteria["climate_model"]
                 and x.future_config.year_range == filter_criteria["year_range"]
             ),
             data_sets,
@@ -101,8 +102,10 @@ def main(force_recreate: bool = False, apply_filter: bool = False):
 
     # Process historic data sets
     historic_data_sets = HISTORIC_DATA_SETS_AVAILABLE
+    logger.info(f"Historic data sets: {historic_data_sets}")
     if apply_filter:
-        historic_data_sets = _apply_filter(historic_data_sets, DEFAULT_FILTER)
+        historic_data_sets = _apply_historicfilter(historic_data_sets, DEFAULT_FILTER)
+    logger.info(f"Historic data sets after filter: {historic_data_sets}")
 
     historic_tasks = [
         (contour_config, month, force_recreate)
@@ -115,7 +118,7 @@ def main(force_recreate: bool = False, apply_filter: bool = False):
     # Process future data sets
     future_data_sets = FUTURE_DATA_SETS_AVAILABLE
     if apply_filter:
-        future_data_sets = _apply_filter(future_data_sets, DEFAULT_FILTER)
+        future_data_sets = _apply_future_filter(future_data_sets, DEFAULT_FILTER)
 
     future_tasks = [
         (contour_config, month, force_recreate)
@@ -128,7 +131,7 @@ def main(force_recreate: bool = False, apply_filter: bool = False):
     # Process difference data sets
     difference_data_sets = DIFFERENCE_DATA_SETS_AVAILABLE
     if apply_filter:
-        difference_data_sets = _apply_difference_filter(difference_data_sets, DEFAULT_FILTER)
+        difference_data_sets = _apply_future_filter(difference_data_sets, DEFAULT_FILTER)
 
     difference_tasks = [
         (contour_config, month, force_recreate)
@@ -155,11 +158,11 @@ def run_tasks_with_process_pool(tasks, process, num_processes):
             logger.info(f"Completed: {result} | Progress: {int(progress)}%")
     except KeyboardInterrupt:
         logger.warning("KeyboardInterrupt received! Attempting to shut down executor...")
-        
+
         # Cancel all pending futures
         for future in futures:
             future.cancel()
-        
+
         # Shutdown the executor immediately
         if executor:
             executor.shutdown(wait=False, cancel_futures=True)
@@ -180,19 +183,19 @@ def terminate_process_pool_children():
     if not children:
         logger.info("No child processes to terminate.")
         return
-        
+
     logger.info(f"Terminating {len(children)} child processes...")
     for proc in children:
         logger.info(f"Terminating child process PID={proc.pid}")
         proc.terminate()
-    
+
     # Wait for processes to terminate gracefully
     for proc in children:
         try:
             proc.join(timeout=3)  # Wait up to 3 seconds for graceful termination
         except:
             pass  # Ignore errors during cleanup
-    
+
     # Force kill any remaining processes
     remaining = [p for p in children if p.is_alive()]
     if remaining:
@@ -204,7 +207,7 @@ def terminate_process_pool_children():
                 proc.join(timeout=2)
             except:
                 pass
-    
+
     logger.info("All child processes terminated.")
 
 

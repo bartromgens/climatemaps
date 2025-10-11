@@ -9,6 +9,7 @@ from climatemaps.datasets import (
     ClimateVarKey,
     DataFormat,
     FutureClimateDataConfig,
+    IPCC_FILE_ABBREVIATIONS,
     SpatialResolution,
 )
 from climatemaps.logger import logger
@@ -113,6 +114,44 @@ def _check_future_data_exists(filepath: str) -> bool:
     return Path(filepath).exists()
 
 
+def _check_ipcc_data_exists(filepath: str) -> bool:
+    return Path(filepath).exists()
+
+
+def _get_ipcc_url(variable: ClimateVarKey, year_range: tuple[int, int]) -> str:
+    base_url = "https://www.ipcc-data.org/download_data/obs"
+
+    abbr = IPCC_FILE_ABBREVIATIONS.get(variable)
+    if not abbr:
+        raise ValueError(f"Unsupported IPCC variable: {variable}")
+
+    year_code = f"{str(year_range[0])[-2:]}{str(year_range[1])[-2:]}"
+    filename = f"c{abbr}{year_code}.zip"
+
+    return f"{base_url}/{filename}"
+
+
+def download_ipcc_data(config: ClimateDataConfig) -> None:
+    if _check_ipcc_data_exists(config.filepath):
+        logger.info(f"IPCC data already exists at {config.filepath}")
+        return
+
+    logger.info(f"IPCC data not found at {config.filepath}, downloading...")
+
+    try:
+        url = _get_ipcc_url(config.variable_type, config.year_range)
+    except ValueError as e:
+        logger.error(f"Cannot download data: {e}")
+        raise
+
+    data_path = Path(config.filepath)
+    data_dir = data_path.parent
+    temp_zip = data_dir / f"{data_path.stem}.zip"
+
+    _download_file(url, temp_zip)
+    _extract_zip(temp_zip, data_dir)
+
+
 def download_historical_data(config: ClimateDataConfig) -> None:
     if _check_historical_data_exists(config.filepath):
         logger.info(f"Historical data already exists at {config.filepath}")
@@ -166,6 +205,6 @@ def ensure_data_available(config: ClimateDataConfig) -> None:
         else:
             logger.warning(f"Future data format but not FutureClimateDataConfig: {config}")
     elif config.format == DataFormat.IPCC_GRID:
-        logger.info(f"IPCC_GRID format not supported for auto-download: {config.filepath}")
+        download_ipcc_data(config)
     else:
         logger.warning(f"Unsupported format for auto-download: {config.format}")

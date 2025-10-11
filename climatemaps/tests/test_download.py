@@ -9,6 +9,7 @@ from climatemaps.datasets import (
 from climatemaps.download import (
     _get_worldclim_historical_url,
     _get_worldclim_future_url,
+    _get_ipcc_url,
 )
 
 
@@ -63,3 +64,40 @@ def test_unsupported_future_variable_raises_error() -> None:
             ClimateScenario.SSP126,
             (2021, 2040),
         )
+
+
+def test_ipcc_url_generation() -> None:
+    url = _get_ipcc_url(ClimateVarKey.CLOUD_COVER, (1961, 1990))
+    assert url == "https://www.ipcc-data.org/download_data/obs/ccld6190.zip"
+
+    url = _get_ipcc_url(ClimateVarKey.DIURNAL_TEMP_RANGE, (1961, 1990))
+    assert url == "https://www.ipcc-data.org/download_data/obs/cdtr6190.zip"
+
+    url = _get_ipcc_url(ClimateVarKey.WET_DAYS, (1961, 1990))
+    assert url == "https://www.ipcc-data.org/download_data/obs/cwet6190.zip"
+
+    url = _get_ipcc_url(ClimateVarKey.WIND_SPEED, (1961, 1990))
+    assert url == "https://www.ipcc-data.org/download_data/obs/cwnd6190.zip"
+
+    url = _get_ipcc_url(ClimateVarKey.RADIATION, (1961, 1990))
+    assert url == "https://www.ipcc-data.org/download_data/obs/crad6190.zip"
+
+    url = _get_ipcc_url(ClimateVarKey.VAPOUR_PRESSURE, (1961, 1990))
+    assert url == "https://www.ipcc-data.org/download_data/obs/cvap6190.zip"
+
+    url = _get_ipcc_url(ClimateVarKey.T_MAX, (1961, 1990))
+    assert url == "https://www.ipcc-data.org/download_data/obs/ctmx6190.zip"
+
+    url = _get_ipcc_url(ClimateVarKey.T_MIN, (1961, 1990))
+    assert url == "https://www.ipcc-data.org/download_data/obs/ctmn6190.zip"
+
+    url = _get_ipcc_url(ClimateVarKey.PRECIPITATION, (1961, 1990))
+    assert url == "https://www.ipcc-data.org/download_data/obs/cpre6190.zip"
+
+
+def test_ipcc_url_different_year_ranges() -> None:
+    url = _get_ipcc_url(ClimateVarKey.CLOUD_COVER, (1901, 1930))
+    assert url == "https://www.ipcc-data.org/download_data/obs/ccld0130.zip"
+
+    url = _get_ipcc_url(ClimateVarKey.DIURNAL_TEMP_RANGE, (1931, 1960))
+    assert url == "https://www.ipcc-data.org/download_data/obs/cdtr3160.zip"

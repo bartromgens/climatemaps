@@ -7,7 +7,7 @@ from climatemaps.geogrid import GeoGrid
 from climatemaps.logger import logger
 
 
-def import_climate_data(filepath, monthnr):
+def read_ippc_grid(filepath, monthnr):
     ncols = 720
     nrows = 360
     digits = 5
@@ -103,7 +103,7 @@ def load_climate_data(data_config: ClimateDataConfig, month: int) -> GeoGrid:
         ensure_data_available(data_config)
 
         if data_config.format == DataFormat.IPCC_GRID:
-            lat_range, lon_range, values = import_climate_data(data_config.filepath, month)
+            lat_range, lon_range, values = read_ippc_grid(data_config.filepath, month)
         elif data_config.format == DataFormat.GEOTIFF_WORLDCLIM_CMIP6:
             lon_range, lat_range, values = read_geotiff_future(data_config.filepath, month)
         elif data_config.format == DataFormat.GEOTIFF_WORLDCLIM_HISTORY:
@@ -118,10 +118,14 @@ def load_climate_data(data_config: ClimateDataConfig, month: int) -> GeoGrid:
 
         return GeoGrid(lon_range=lon_range, lat_range=lat_range, values=values)
     except FileNotFoundError as e:
-        logger.exception(f"Failed to load climate data for {data_config.data_type_slug}, month {month}, file: {data_config.filepath}: {e}")
+        logger.exception(
+            f"Failed to load climate data for {data_config.data_type_slug}, month {month}, file: {data_config.filepath}: {e}"
+        )
         raise
     except Exception as e:
-        logger.exception(f"Unexpected error loading climate data for {data_config.data_type_slug}, month {month}, file: {data_config.filepath}: {e}")
+        logger.exception(
+            f"Unexpected error loading climate data for {data_config.data_type_slug}, month {month}, file: {data_config.filepath}: {e}"
+        )
         raise
 
 
