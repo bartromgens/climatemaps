@@ -93,7 +93,8 @@ def get_available_models(
                     available_files.append(filepath)
                     logger.info(f"Downloaded model file: {filepath.name}")
             except Exception as e:
-                logger.exception(f"Failed to download {filepath.name}: {e}")
+                # Not all models are available for all scenarios and variables. Example: https://geodata.ucdavis.edu/cmip6/10m/GFDL-ESM4/
+                logger.error(f"Failed to download {filepath.name}: {e}")
 
     return available_files
 
