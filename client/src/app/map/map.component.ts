@@ -150,20 +150,17 @@ export class MapComponent implements OnInit {
   }
 
   private handleControlsChange(): void {
-    // Reset climate scenario and model for historical data
+    // Set default values for future data if not already set
+    // Note: We keep these values even for historical data so they're remembered
     if (
       this.controlsData.selectedYearRange &&
-      this.isHistoricalYearRange(this.controlsData.selectedYearRange.value)
+      !this.isHistoricalYearRange(this.controlsData.selectedYearRange.value)
     ) {
-      this.controlsData.selectedClimateScenario = null;
-      this.controlsData.selectedClimateModel = null;
-    } else {
-      // Set default values for future data if not already set
       if (!this.controlsData.selectedClimateScenario) {
-        this.controlsData.selectedClimateScenario = ClimateScenario.SSP126;
+        this.controlsData.selectedClimateScenario = ClimateScenario.SSP370;
       }
       if (!this.controlsData.selectedClimateModel) {
-        this.controlsData.selectedClimateModel = ClimateModel.EC_EARTH3_VEG;
+        this.controlsData.selectedClimateModel = ClimateModel.ENSEMBLE_MEAN;
       }
     }
 
@@ -353,24 +350,32 @@ export class MapComponent implements OnInit {
         availableResolutions[0] || SpatialResolution.MIN10;
     }
 
-    // Reset climate scenario if not available for current selections
-    if (
-      this.controlsData.selectedClimateScenario &&
-      !availableClimateScenarios.includes(
-        this.controlsData.selectedClimateScenario,
-      )
-    ) {
-      this.controlsData.selectedClimateScenario =
-        availableClimateScenarios[0] || null;
-    }
+    // Only reset climate scenario/model if we're viewing future data
+    // For historical data, we keep the values so they're remembered
+    const isFutureData =
+      this.controlsData.selectedYearRange &&
+      !this.isHistoricalYearRange(this.controlsData.selectedYearRange.value);
 
-    // Reset climate model if not available for current selections
-    if (
-      this.controlsData.selectedClimateModel &&
-      !availableClimateModels.includes(this.controlsData.selectedClimateModel)
-    ) {
-      this.controlsData.selectedClimateModel =
-        availableClimateModels[0] || null;
+    if (isFutureData) {
+      // Reset climate scenario if not available for current selections
+      if (
+        this.controlsData.selectedClimateScenario &&
+        !availableClimateScenarios.includes(
+          this.controlsData.selectedClimateScenario,
+        )
+      ) {
+        this.controlsData.selectedClimateScenario =
+          availableClimateScenarios[0] || null;
+      }
+
+      // Reset climate model if not available for current selections
+      if (
+        this.controlsData.selectedClimateModel &&
+        !availableClimateModels.includes(this.controlsData.selectedClimateModel)
+      ) {
+        this.controlsData.selectedClimateModel =
+          availableClimateModels[0] || null;
+      }
     }
 
     // Update controls options with fresh data
@@ -764,7 +769,21 @@ export class MapComponent implements OnInit {
   }
 
   private updateUrlWithControls(): void {
-    const urlData = URLUtils.encodeControls(this.controlsData);
+    // For historical data, don't include scenario/model in URL since they're not used
+    const isHistorical =
+      this.controlsData.selectedYearRange &&
+      this.isHistoricalYearRange(this.controlsData.selectedYearRange.value);
+
+    const controlsForUrl = isHistorical
+      ? {
+          ...this.controlsData,
+          selectedClimateScenario: null,
+          selectedClimateModel: null,
+          showDifferenceMap: false,
+        }
+      : this.controlsData;
+
+    const urlData = URLUtils.encodeControls(controlsForUrl);
     URLUtils.updateURLParams(urlData);
   }
 

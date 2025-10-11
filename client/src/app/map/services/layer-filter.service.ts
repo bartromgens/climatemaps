@@ -46,15 +46,26 @@ export class LayerFilterService {
     climateVariables: Record<ClimateVarKey, ClimateVariableConfig>,
   ): YearRange[] {
     return yearRanges.filter((yearRange) => {
-      return climateMaps.some(
-        (map) =>
-          this.matchesYearRange(map, yearRange) &&
-          map.variable.name ===
-            climateVariables[controlsData.selectedVariableType]?.name &&
-          (controlsData.showDifferenceMap
-            ? true
-            : map.isDifferenceMap === controlsData.showDifferenceMap),
-      );
+      return climateMaps.some((map) => {
+        if (!this.matchesYearRange(map, yearRange)) return false;
+        if (
+          map.variable.name !==
+          climateVariables[controlsData.selectedVariableType]?.name
+        )
+          return false;
+
+        // Historical data: ignore showDifferenceMap checkbox, only match non-difference maps
+        const isHistorical =
+          map.climateScenario === null && map.climateModel === null;
+        if (isHistorical) {
+          return !map.isDifferenceMap;
+        }
+
+        // Future data: respect showDifferenceMap checkbox
+        return controlsData.showDifferenceMap
+          ? true
+          : map.isDifferenceMap === controlsData.showDifferenceMap;
+      });
     });
   }
 
@@ -67,16 +78,30 @@ export class LayerFilterService {
   ): SpatialResolution[] {
     if (!controlsData.selectedYearRange) return [];
 
-    const matchingMaps = climateMaps.filter(
-      (map) =>
-        map.variable.name ===
-          climateVariables[controlsData.selectedVariableType]?.name &&
-        this.matchesYearRange(map, controlsData.selectedYearRange!) &&
-        map.isDifferenceMap === controlsData.showDifferenceMap,
+    const isHistorical = isHistoricalYearRange(
+      controlsData.selectedYearRange.value,
     );
 
+    const matchingMaps = climateMaps.filter((map) => {
+      if (
+        map.variable.name !==
+        climateVariables[controlsData.selectedVariableType]?.name
+      )
+        return false;
+      if (!this.matchesYearRange(map, controlsData.selectedYearRange!))
+        return false;
+
+      // For historical data, ignore showDifferenceMap checkbox and only match non-difference maps
+      if (isHistorical) {
+        return !map.isDifferenceMap;
+      }
+
+      // For future data, respect showDifferenceMap checkbox
+      return map.isDifferenceMap === controlsData.showDifferenceMap;
+    });
+
     let filteredMaps = matchingMaps;
-    if (!isHistoricalYearRange(controlsData.selectedYearRange!.value)) {
+    if (!isHistorical) {
       if (controlsData.selectedClimateScenario) {
         filteredMaps = filteredMaps.filter(
           (map) => map.climateScenario === controlsData.selectedClimateScenario,
@@ -101,11 +126,16 @@ export class LayerFilterService {
     climateVariables: Record<ClimateVarKey, ClimateVariableConfig>,
     isHistoricalYearRange: (yearRange: readonly [number, number]) => boolean,
   ): ClimateScenario[] {
-    if (
-      !controlsData.selectedYearRange ||
-      (isHistoricalYearRange(controlsData.selectedYearRange.value) &&
-        !controlsData.showDifferenceMap)
-    ) {
+    if (!controlsData.selectedYearRange) {
+      return [];
+    }
+
+    const isHistorical = isHistoricalYearRange(
+      controlsData.selectedYearRange.value,
+    );
+
+    // Historical data doesn't have climate scenarios
+    if (isHistorical) {
       return [];
     }
 
@@ -129,11 +159,16 @@ export class LayerFilterService {
     climateVariables: Record<ClimateVarKey, ClimateVariableConfig>,
     isHistoricalYearRange: (yearRange: readonly [number, number]) => boolean,
   ): ClimateModel[] {
-    if (
-      !controlsData.selectedYearRange ||
-      (isHistoricalYearRange(controlsData.selectedYearRange.value) &&
-        !controlsData.showDifferenceMap)
-    ) {
+    if (!controlsData.selectedYearRange) {
+      return [];
+    }
+
+    const isHistorical = isHistoricalYearRange(
+      controlsData.selectedYearRange.value,
+    );
+
+    // Historical data doesn't have climate models
+    if (isHistorical) {
       return [];
     }
 
