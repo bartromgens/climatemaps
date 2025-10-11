@@ -18,7 +18,7 @@ from climatemaps.contour_config import ContourPlotConfig
 class DataFormat(enum.Enum):
     GEOTIFF_WORLDCLIM_CMIP6 = "GEOTIFF_WORLDCLIM_CMIP6"
     GEOTIFF_WORLDCLIM_HISTORY = "GEOTIFF_WORLDCLIM_HISTORY"
-    CRU_TS = "CRU_TS"
+    CRU_TS = "CRU_TS"  # Climatic Research Unit (CRU) Time-Series (TS)
 
 
 class SpatialResolution(enum.Enum):
@@ -347,14 +347,13 @@ class CRUTSClimateDataConfigGroup(ClimateDataConfigGroup):
         for variable_type in self.variable_types:
             for year_range in self.year_ranges:
                 for resolution in self.resolutions:
-                    variable = CLIMATE_VARIABLES[variable_type]
                     abbr = CRU_TS_FILE_ABBREVIATIONS[variable_type]
                     config = ClimateDataConfig(
                         variable_type=variable_type,
                         format=self.format,
                         resolution=resolution,
                         year_range=year_range,
-                        filepath=f"data/raw/{variable.filename}/cru_{abbr}_clim_{year_range[0]}-{year_range[1]}",
+                        filepath=f"data/raw/cruts/cru_{abbr}_clim_{year_range[0]}-{year_range[1]}",
                         conversion_function=self.conversion_function,
                         conversion_factor=self.conversion_factor,
                         source=self.source,
