@@ -7,8 +7,8 @@ import rasterio
 
 def _process_coordinate_arrays(transform, width: int, height: int) -> Tuple[np.ndarray, np.ndarray]:
     # Create coordinate arrays using rasterio's transform
-    lon_array = np.linspace(transform.c, transform.c + width * transform.a, width)
-    lat_array = np.linspace(transform.f, transform.f + height * transform.e, height)
+    lon_array = np.linspace(transform.c, transform.c + width * transform.a, width, endpoint=False)
+    lat_array = np.linspace(transform.f, transform.f + height * transform.e, height, endpoint=False)
 
     bin_width = 360.0 / len(lon_array)
     lon_array += bin_width / 2
@@ -18,6 +18,8 @@ def _process_coordinate_arrays(transform, width: int, height: int) -> Tuple[np.n
 
 
 def read_geotiff_future(filepath: str, month: int) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+    assert month > 0 and month <= 12, f"Month must be between 1 and 12, got {month}"
+
     with rasterio.open(filepath) as src:
         array = src.read(month).astype(float)
 
