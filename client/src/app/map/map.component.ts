@@ -432,15 +432,14 @@ export class MapComponent implements OnInit {
         return false;
       }
 
-      // Check if difference map status matches
-      if (metadata.isDifferenceMap !== this.controlsData.showDifferenceMap) {
-        return false;
-      }
-
       // For future data, check climate scenario and model
       if (
         !this.isHistoricalYearRange(this.controlsData.selectedYearRange!.value)
       ) {
+        // Check if difference map status matches (only for future data)
+        if (metadata.isDifferenceMap !== this.controlsData.showDifferenceMap) {
+          return false;
+        }
         if (
           this.controlsData.selectedClimateScenario &&
           metadata.climateScenario !== this.controlsData.selectedClimateScenario
@@ -456,6 +455,10 @@ export class MapComponent implements OnInit {
       } else {
         // For historical data, ensure no climate scenario or model is set
         if (metadata.climateScenario || metadata.climateModel) {
+          return false;
+        }
+        // For historical data, ensure it's not a difference map
+        if (metadata.isDifferenceMap) {
           return false;
         }
       }
