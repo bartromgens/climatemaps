@@ -38,17 +38,9 @@ maps_config: ClimateMapsConfig = get_config()
 
 np.set_printoptions(3, threshold=100, suppress=True)  # .3f
 
-# Available data sets
-HISTORIC_DATA_SETS_AVAILABLE = HISTORIC_DATA_SETS
-FUTURE_DATA_SETS_AVAILABLE = FUTURE_DATA_SETS
-DIFFERENCE_DATA_SETS_AVAILABLE = DIFFERENCE_DATA_SETS
-
 DEFAULT_TEST_SET_HISTORIC = {
-    "variable_type": ClimateVarKey.WET_DAYS,
-    "resolution": SpatialResolution.MIN30,
-    "climate_scenario": ClimateScenario.SSP126,
-    "climate_model": ClimateModel.EC_EARTH3_VEG,
-    "year_range": (1961, 1990),
+    "variable_type": ClimateVarKey.T_MAX,
+    "resolution": SpatialResolution.MIN10,
 }
 
 DEFAULT_TEST_SET_FUTURE = {
@@ -60,148 +52,94 @@ DEFAULT_TEST_SET_FUTURE = {
 }
 
 
-def _apply_historic_test_set(
-    data_sets: List[ClimateDataConfig], test_set_criteria: dict
+def _filter_by_criteria(
+    data_sets: List[ClimateDataConfig], criteria: dict, is_difference: bool = False
 ) -> List[ClimateDataConfig]:
-    """Apply test set criteria to regular climate data sets."""
-    return list(
-        filter(
-            lambda x: (
-                x.variable_type == test_set_criteria["variable_type"]
-                and x.resolution == test_set_criteria["resolution"]
-                and x.year_range == test_set_criteria["year_range"]
-            ),
-            data_sets,
+    def matches(config: ClimateDataConfig) -> bool:
+        if config.variable_type != criteria["variable_type"]:
+            return False
+        if config.resolution != criteria["resolution"]:
+            return False
+
+        if is_difference:
+            return (
+                config.future_config.climate_scenario == criteria.get("climate_scenario")
+                and config.future_config.climate_model == criteria.get("climate_model")
+                and config.future_config.year_range == criteria.get("year_range")
+            )
+
+        year_match = (
+            criteria.get("year_range") is None or config.year_range == criteria["year_range"]
         )
-    )
-
-
-def _apply_future_test_set(
-    data_sets: List[ClimateDataConfig], test_set_criteria: dict
-) -> List[ClimateDataConfig]:
-    """Apply test set criteria to future climate data sets."""
-    return list(
-        filter(
-            lambda x: (
-                x.variable_type == test_set_criteria["variable_type"]
-                and x.resolution == test_set_criteria["resolution"]
-                and x.climate_scenario == test_set_criteria["climate_scenario"]
-                and x.climate_model == test_set_criteria["climate_model"]
-                and x.year_range == test_set_criteria["year_range"]
-            ),
-            data_sets,
+        scenario_match = (
+            criteria.get("climate_scenario") is None
+            or config.climate_scenario == criteria["climate_scenario"]
         )
-    )
-
-
-def _apply_difference_test_set(
-    data_sets: List[ClimateDataConfig], test_set_criteria: dict
-) -> List[ClimateDataConfig]:
-    """Apply test set criteria to difference climate data sets."""
-    return list(
-        filter(
-            lambda x: (
-                x.variable_type == test_set_criteria["variable_type"]
-                and x.resolution == test_set_criteria["resolution"]
-                and x.future_config.climate_scenario == test_set_criteria["climate_scenario"]
-                and x.future_config.climate_model == test_set_criteria["climate_model"]
-                and x.future_config.year_range == test_set_criteria["year_range"]
-            ),
-            data_sets,
+        model_match = (
+            criteria.get("climate_model") is None
+            or config.climate_model == criteria["climate_model"]
         )
-    )
+
+        return year_match and scenario_match and model_match
+
+    return [ds for ds in data_sets if matches(ds)]
 
 
-def main(force_recreate: bool = False, apply_test_set: bool = False):
-    """
-    Main function to create contour tiles for all data set types.
+def _create_tasks_for_datasets(
+    data_sets: List[ClimateDataConfig], month_upper: int, force_recreate: bool, name: str
+) -> List[tuple]:
+    tasks = [
+        (config, month, force_recreate)
+        for config in data_sets
+        for month in range(1, month_upper + 1)
+    ]
+    logger.info(f"Added {len(tasks)} {name} tasks")
+    return tasks
 
-    Args:
-        force_recreate: Force recreation of existing tiles
-        apply_test_set: Whether to apply the default test set for development testing
-    """
-    all_tasks = []
+
+def main(force_recreate: bool = False, apply_test_set: bool = False) -> None:
     month_upper = 1 if settings.DEV_MODE else 12
+    all_tasks = []
 
-    # Process historic data sets
-    historic_data_sets = HISTORIC_DATA_SETS_AVAILABLE
-    if apply_test_set:
-        historic_data_sets = _apply_historic_test_set(historic_data_sets, DEFAULT_TEST_SET_HISTORIC)
-
-    historic_tasks = [
-        (contour_config, month, force_recreate)
-        for contour_config in historic_data_sets
-        for month in range(1, month_upper + 1)
+    dataset_groups = [
+        (HISTORIC_DATA_SETS, DEFAULT_TEST_SET_HISTORIC, False, "historic"),
+        (FUTURE_DATA_SETS, DEFAULT_TEST_SET_FUTURE, False, "future"),
+        (DIFFERENCE_DATA_SETS, DEFAULT_TEST_SET_FUTURE, True, "difference"),
     ]
-    all_tasks.extend(historic_tasks)
-    logger.info(f"Added {len(historic_tasks)} historic tasks")
 
-    # Process future data sets
-    future_data_sets = FUTURE_DATA_SETS_AVAILABLE
-    if apply_test_set:
-        future_data_sets = _apply_future_test_set(future_data_sets, DEFAULT_TEST_SET_FUTURE)
-
-    future_tasks = [
-        (contour_config, month, force_recreate)
-        for contour_config in future_data_sets
-        for month in range(1, month_upper + 1)
-    ]
-    all_tasks.extend(future_tasks)
-    logger.info(f"Added {len(future_tasks)} future tasks")
-
-    # Process difference data sets
-    difference_data_sets = DIFFERENCE_DATA_SETS_AVAILABLE
-    if apply_test_set:
-        difference_data_sets = _apply_difference_test_set(
-            difference_data_sets, DEFAULT_TEST_SET_FUTURE
-        )
-
-    difference_tasks = [
-        (contour_config, month, force_recreate)
-        for contour_config in difference_data_sets
-        for month in range(1, month_upper + 1)
-    ]
-    all_tasks.extend(difference_tasks)
-    logger.info(f"Added {len(difference_tasks)} difference tasks")
+    for datasets, criteria, is_diff, name in dataset_groups:
+        if apply_test_set:
+            datasets = _filter_by_criteria(datasets, criteria, is_diff)
+        all_tasks.extend(_create_tasks_for_datasets(datasets, month_upper, force_recreate, name))
 
     logger.info(f"Processing all data sets with {len(all_tasks)} total tasks")
-    num_processes = settings.CREATE_CONTOUR_PROCESSES
-    run_tasks_with_process_pool(all_tasks, process, num_processes)
+    run_tasks_with_process_pool(all_tasks, process, settings.CREATE_CONTOUR_PROCESSES)
 
 
-def run_tasks_with_process_pool(tasks, process, num_processes):
+def run_tasks_with_process_pool(tasks: List[tuple], process, num_processes: int) -> None:
     total = len(tasks)
     executor = None
     try:
         executor = concurrent.futures.ProcessPoolExecutor(max_workers=num_processes)
         futures = {executor.submit(process, *task): task for task in tasks}
         for counter, future in enumerate(concurrent.futures.as_completed(futures)):
-            result = future.result()  # May raise if process fails
-            progress = counter / total * 100.0
-            logger.info(f"Completed: {result} | Progress: {int(progress)}%")
+            result = future.result()
+            progress = int((counter / total) * 100)
+            logger.info(f"Completed: {result} | Progress: {progress}%")
     except KeyboardInterrupt:
         logger.warning("KeyboardInterrupt received! Attempting to shut down executor...")
-
-        # Cancel all pending futures
         for future in futures:
             future.cancel()
-
-        # Shutdown the executor immediately
         if executor:
             executor.shutdown(wait=False, cancel_futures=True)
-
-        # Terminate all child processes
         terminate_process_pool_children()
-
-        raise  # Re-raise to let caller handle or exit
+        raise
     finally:
-        # Ensure executor is properly shut down
         if executor:
             executor.shutdown(wait=True)
 
 
-def terminate_process_pool_children():
-    """Forcefully kill any subprocesses started by the current process."""
+def terminate_process_pool_children() -> None:
     children = multiprocessing.active_children()
     if not children:
         logger.info("No child processes to terminate.")
@@ -212,14 +150,12 @@ def terminate_process_pool_children():
         logger.info(f"Terminating child process PID={proc.pid}")
         proc.terminate()
 
-    # Wait for processes to terminate gracefully
     for proc in children:
         try:
-            proc.join(timeout=3)  # Wait up to 3 seconds for graceful termination
+            proc.join(timeout=3)
         except:
-            pass  # Ignore errors during cleanup
+            pass
 
-    # Force kill any remaining processes
     remaining = [p for p in children if p.is_alive()]
     if remaining:
         logger.warning(f"Force killing {len(remaining)} remaining processes...")
@@ -234,12 +170,10 @@ def terminate_process_pool_children():
     logger.info("All child processes terminated.")
 
 
-def process(config, month: int, force_recreate: bool):
-    """Process either regular or difference climate data configs."""
+def process(config, month: int, force_recreate: bool) -> str:
     logger.info(f'Creating image and tiles for "{config.data_type_slug}" and month {month}')
 
     try:
-        # Check if files exist using appropriate function
         if isinstance(config, ClimateDifferenceDataConfig):
             files_exist = difference_tile_files_exist(config, month, maps_config)
         else:
@@ -248,54 +182,28 @@ def process(config, month: int, force_recreate: bool):
         if force_recreate or not files_exist:
             _create_contour(config, month)
         else:
-            logger.info(
-                f'Skip creation of "{config.data_type_slug}" - {month} because it already exist'
-            )
-        return f"{config.data_type_slug}-{month}"  # Just an indicator of progress
+            logger.info(f'Skip creation of "{config.data_type_slug}" - {month} (already exists)')
+
+        return f"{config.data_type_slug}-{month}"
     except Exception as e:
         logger.error(f"Failed to process {config.data_type_slug}, month {month}: {e}")
         raise
 
 
-def _create_contour(data_set_config, month: int):
-    """Create contour tiles for either regular or difference climate data."""
+def _create_contour(data_set_config, month: int) -> None:
     if isinstance(data_set_config, ClimateDifferenceDataConfig):
-        _create_difference_contour(data_set_config, month)
+        geo_grid = load_climate_data_for_difference(
+            data_set_config.historical_config, data_set_config.future_config, month
+        )
     else:
-        _create_regular_contour(data_set_config, month)
+        geo_grid = load_climate_data(data_set_config, month)
 
-
-def _create_regular_contour(data_set_config: ClimateDataConfig, month: int):
-    """Create contour tiles for regular climate data."""
-    geo_grid = load_climate_data(data_set_config, month)
     contour_map = ContourTileBuilder(
         data_set_config.contour_config,
         geo_grid=geo_grid,
         zoom_min=maps_config.zoom_min,
         zoom_max=maps_config.zoom_max,
     )
-    contour_map.create_tiles(
-        maps_config.data_dir_out,
-        data_set_config.data_type_slug,
-        month,
-        figure_dpi=maps_config.figure_dpi,
-        zoom_factor=maps_config.zoom_factor,
-    )
-
-
-def _create_difference_contour(data_set_config: ClimateDifferenceDataConfig, month: int):
-    """Create contour tiles for climate difference maps."""
-    difference_grid = load_climate_data_for_difference(
-        data_set_config.historical_config, data_set_config.future_config, month
-    )
-
-    contour_map = ContourTileBuilder(
-        data_set_config.contour_config,
-        geo_grid=difference_grid,
-        zoom_min=maps_config.zoom_min,
-        zoom_max=maps_config.zoom_max,
-    )
-
     contour_map.create_tiles(
         maps_config.data_dir_out,
         data_set_config.data_type_slug,
