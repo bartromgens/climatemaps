@@ -27,16 +27,57 @@ export class LayerFilterService {
     return matchesPrimary || !!matchesAdditional;
   }
 
+  private matchesVariableType(
+    map: ClimateMap,
+    variableType: ClimateVarKey,
+    climateVariables: Record<ClimateVarKey, ClimateVariableConfig>,
+  ): boolean {
+    return map.variable.name === climateVariables[variableType]?.name;
+  }
+
+  private matchesDifferenceMapCriteria(
+    map: ClimateMap,
+    showDifferenceMap: boolean,
+    isHistorical: boolean,
+  ): boolean {
+    if (isHistorical) {
+      return !map.isDifferenceMap;
+    }
+    return map.isDifferenceMap === showDifferenceMap;
+  }
+
+  private getBaseFilteredMaps(
+    climateMaps: ClimateMap[],
+    controlsData: MapControlsData,
+    climateVariables: Record<ClimateVarKey, ClimateVariableConfig>,
+    isHistorical: boolean,
+  ): ClimateMap[] {
+    return climateMaps.filter(
+      (map) =>
+        this.matchesVariableType(
+          map,
+          controlsData.selectedVariableType,
+          climateVariables,
+        ) &&
+        this.matchesYearRange(map, controlsData.selectedYearRange!) &&
+        this.matchesDifferenceMapCriteria(
+          map,
+          controlsData.showDifferenceMap,
+          isHistorical,
+        ),
+    );
+  }
+
   getAvailableVariableTypes(
     climateMaps: ClimateMap[],
     variableTypes: ClimateVarKey[],
     climateVariables: Record<ClimateVarKey, ClimateVariableConfig>,
   ): ClimateVarKey[] {
-    return variableTypes.filter((variableType) => {
-      return climateMaps.some(
-        (map) => map.variable.name === climateVariables[variableType]?.name,
-      );
-    });
+    return variableTypes.filter((variableType) =>
+      climateMaps.some((map) =>
+        this.matchesVariableType(map, variableType, climateVariables),
+      ),
+    );
   }
 
   getAvailableYearRanges(
@@ -45,28 +86,27 @@ export class LayerFilterService {
     controlsData: MapControlsData,
     climateVariables: Record<ClimateVarKey, ClimateVariableConfig>,
   ): YearRange[] {
-    return yearRanges.filter((yearRange) => {
-      return climateMaps.some((map) => {
+    return yearRanges.filter((yearRange) =>
+      climateMaps.some((map) => {
         if (!this.matchesYearRange(map, yearRange)) return false;
         if (
-          map.variable.name !==
-          climateVariables[controlsData.selectedVariableType]?.name
+          !this.matchesVariableType(
+            map,
+            controlsData.selectedVariableType,
+            climateVariables,
+          )
         )
           return false;
 
-        // Historical data: ignore showDifferenceMap checkbox, only match non-difference maps
         const isHistorical =
           map.climateScenario === null && map.climateModel === null;
-        if (isHistorical) {
-          return !map.isDifferenceMap;
-        }
-
-        // Future data: respect showDifferenceMap checkbox
-        return controlsData.showDifferenceMap
-          ? true
-          : map.isDifferenceMap === controlsData.showDifferenceMap;
-      });
-    });
+        return this.matchesDifferenceMapCriteria(
+          map,
+          controlsData.showDifferenceMap,
+          isHistorical,
+        );
+      }),
+    );
   }
 
   getAvailableResolutions(
@@ -82,25 +122,13 @@ export class LayerFilterService {
       controlsData.selectedYearRange.value,
     );
 
-    const matchingMaps = climateMaps.filter((map) => {
-      if (
-        map.variable.name !==
-        climateVariables[controlsData.selectedVariableType]?.name
-      )
-        return false;
-      if (!this.matchesYearRange(map, controlsData.selectedYearRange!))
-        return false;
+    let filteredMaps = this.getBaseFilteredMaps(
+      climateMaps,
+      controlsData,
+      climateVariables,
+      isHistorical,
+    );
 
-      // For historical data, ignore showDifferenceMap checkbox and only match non-difference maps
-      if (isHistorical) {
-        return !map.isDifferenceMap;
-      }
-
-      // For future data, respect showDifferenceMap checkbox
-      return map.isDifferenceMap === controlsData.showDifferenceMap;
-    });
-
-    let filteredMaps = matchingMaps;
     if (!isHistorical) {
       if (controlsData.selectedClimateScenario) {
         filteredMaps = filteredMaps.filter(
@@ -126,25 +154,19 @@ export class LayerFilterService {
     climateVariables: Record<ClimateVarKey, ClimateVariableConfig>,
     isHistoricalYearRange: (yearRange: readonly [number, number]) => boolean,
   ): ClimateScenario[] {
-    if (!controlsData.selectedYearRange) {
-      return [];
-    }
+    if (!controlsData.selectedYearRange) return [];
 
     const isHistorical = isHistoricalYearRange(
       controlsData.selectedYearRange.value,
     );
 
-    // Historical data doesn't have climate scenarios
-    if (isHistorical) {
-      return [];
-    }
+    if (isHistorical) return [];
 
-    const matchingMaps = climateMaps.filter(
-      (map) =>
-        map.variable.name ===
-          climateVariables[controlsData.selectedVariableType]?.name &&
-        this.matchesYearRange(map, controlsData.selectedYearRange!) &&
-        map.isDifferenceMap === controlsData.showDifferenceMap,
+    const matchingMaps = this.getBaseFilteredMaps(
+      climateMaps,
+      controlsData,
+      climateVariables,
+      isHistorical,
     );
 
     return climateScenarios.filter((scenario) =>
@@ -159,28 +181,21 @@ export class LayerFilterService {
     climateVariables: Record<ClimateVarKey, ClimateVariableConfig>,
     isHistoricalYearRange: (yearRange: readonly [number, number]) => boolean,
   ): ClimateModel[] {
-    if (!controlsData.selectedYearRange) {
-      return [];
-    }
+    if (!controlsData.selectedYearRange) return [];
 
     const isHistorical = isHistoricalYearRange(
       controlsData.selectedYearRange.value,
     );
 
-    // Historical data doesn't have climate models
-    if (isHistorical) {
-      return [];
-    }
+    if (isHistorical) return [];
 
-    const matchingMaps = climateMaps.filter(
-      (map) =>
-        map.variable.name ===
-          climateVariables[controlsData.selectedVariableType]?.name &&
-        this.matchesYearRange(map, controlsData.selectedYearRange!) &&
-        map.isDifferenceMap === controlsData.showDifferenceMap,
+    let filteredMaps = this.getBaseFilteredMaps(
+      climateMaps,
+      controlsData,
+      climateVariables,
+      isHistorical,
     );
 
-    let filteredMaps = matchingMaps;
     if (controlsData.selectedClimateScenario) {
       filteredMaps = filteredMaps.filter(
         (map) => map.climateScenario === controlsData.selectedClimateScenario,
