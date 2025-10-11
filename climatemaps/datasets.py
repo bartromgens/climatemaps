@@ -18,7 +18,7 @@ from climatemaps.contour_config import ContourPlotConfig
 class DataFormat(enum.Enum):
     GEOTIFF_WORLDCLIM_CMIP6 = "GEOTIFF_WORLDCLIM_CMIP6"
     GEOTIFF_WORLDCLIM_HISTORY = "GEOTIFF_WORLDCLIM_HISTORY"
-    IPCC_GRID = "IPCC_GRID"
+    CRU_TS = "CRU_TS"
 
 
 class SpatialResolution(enum.Enum):
@@ -34,6 +34,7 @@ class ClimateVarKey(enum.Enum):
     T_MIN = "T_MIN"
     CLOUD_COVER = "CLOUD_COVER"
     WET_DAYS = "WET_DAYS"
+    FROST_DAYS = "FROST_DAYS"
     WIND_SPEED = "WIND_SPEED"
     RADIATION = "RADIATION"
     DIURNAL_TEMP_RANGE = "DIURNAL_TEMP_RANGE"
@@ -96,6 +97,9 @@ CLIMATE_VARIABLES: Dict[ClimateVarKey, ClimateVariable] = {
     ClimateVarKey.WET_DAYS: ClimateVariable(
         name="WetDays", display_name="Wet Days", unit="days", filename="wetdays"
     ),
+    ClimateVarKey.FROST_DAYS: ClimateVariable(
+        name="FrostDays", display_name="Frost Days", unit="days", filename="frostdays"
+    ),
     ClimateVarKey.WIND_SPEED: ClimateVariable(
         name="WindSpeed", display_name="Wind Speed", unit="m/s", filename="wind"
     ),
@@ -134,6 +138,9 @@ CLIMATE_CONTOUR_CONFIGS: Dict[ClimateVarKey, ContourPlotConfig] = {
     ),
     ClimateVarKey.WET_DAYS: ContourPlotConfig(
         level_lower=0, level_upper=30, colormap=plt.cm.jet_r, title="Wet days", unit="days"
+    ),
+    ClimateVarKey.FROST_DAYS: ContourPlotConfig(
+        level_lower=0, level_upper=30, colormap=plt.cm.jet_r, title="Frost days", unit="days"
     ),
     ClimateVarKey.WIND_SPEED: ContourPlotConfig(
         level_lower=0, level_upper=9, colormap=plt.cm.jet, title="Wind speed", unit="m/s"
@@ -321,12 +328,11 @@ class FutureClimateDataConfigGroup(ClimateDataConfigGroup):
         return configs
 
 
-IPCC_FILE_ABBREVIATIONS: Dict[ClimateVarKey, str] = {
+CRU_TS_FILE_ABBREVIATIONS: Dict[ClimateVarKey, str] = {
     ClimateVarKey.CLOUD_COVER: "cld",
     ClimateVarKey.DIURNAL_TEMP_RANGE: "dtr",
     ClimateVarKey.WET_DAYS: "wet",
-    ClimateVarKey.WIND_SPEED: "wnd",
-    ClimateVarKey.RADIATION: "rad",
+    ClimateVarKey.FROST_DAYS: "frs",
     ClimateVarKey.VAPOUR_PRESSURE: "vap",
     ClimateVarKey.T_MAX: "tmx",
     ClimateVarKey.T_MIN: "tmn",
@@ -335,21 +341,20 @@ IPCC_FILE_ABBREVIATIONS: Dict[ClimateVarKey, str] = {
 
 
 @dataclass
-class IPCCClimateDataConfigGroup(ClimateDataConfigGroup):
+class CRUTSClimateDataConfigGroup(ClimateDataConfigGroup):
     def create_configs(self) -> List[ClimateDataConfig]:
         configs: List[ClimateDataConfig] = []
         for variable_type in self.variable_types:
             for year_range in self.year_ranges:
                 for resolution in self.resolutions:
                     variable = CLIMATE_VARIABLES[variable_type]
-                    abbr = IPCC_FILE_ABBREVIATIONS[variable_type]
-                    year_code = f"{str(year_range[0])[-2:]}{str(year_range[1])[-2:]}"
+                    abbr = CRU_TS_FILE_ABBREVIATIONS[variable_type]
                     config = ClimateDataConfig(
                         variable_type=variable_type,
                         format=self.format,
                         resolution=resolution,
                         year_range=year_range,
-                        filepath=f"data/raw/{variable.filename}/c{abbr}{year_code}.dat",
+                        filepath=f"data/raw/{variable.filename}/cru_{abbr}_clim_{year_range[0]}-{year_range[1]}",
                         conversion_function=self.conversion_function,
                         conversion_factor=self.conversion_factor,
                         source=self.source,
@@ -367,31 +372,28 @@ HISTORIC_DATA_GROUPS: List[ClimateDataConfigGroup] = [
         year_ranges=[(1970, 2000)],
         filepath_template="data/raw/worldclim/history/wc2.1_{resolution}_{variable_name}",
     ),
-    IPCCClimateDataConfigGroup(
+    CRUTSClimateDataConfigGroup(
         variable_types=[
             ClimateVarKey.DIURNAL_TEMP_RANGE,
             ClimateVarKey.WET_DAYS,
-            ClimateVarKey.WIND_SPEED,
+            ClimateVarKey.FROST_DAYS,
             ClimateVarKey.VAPOUR_PRESSURE,
         ],
-        format=DataFormat.IPCC_GRID,
-        source="https://www.ipcc-data.org/observ/clim/get_30yr_means.html",
+        format=DataFormat.CRU_TS,
+        source="https://ipcc-browser.ipcc-data.org/browser/dataset/653/0",
         resolutions=[SpatialResolution.MIN30],
         year_ranges=[(1961, 1990)],
         filepath_template="",
         conversion_factor=0.1,
     ),
-    IPCCClimateDataConfigGroup(
-        variable_types=[
-            ClimateVarKey.CLOUD_COVER,
-            ClimateVarKey.RADIATION,
-        ],
-        format=DataFormat.IPCC_GRID,
-        source="https://www.ipcc-data.org/observ/clim/get_30yr_means.html",
+    CRUTSClimateDataConfigGroup(
+        variable_types=[ClimateVarKey.CLOUD_COVER],
+        format=DataFormat.CRU_TS,
+        source="https://ipcc-browser.ipcc-data.org/browser/dataset/653/0",
         resolutions=[SpatialResolution.MIN30],
         year_ranges=[(1961, 1990)],
         filepath_template="",
-        conversion_factor=1,
+        conversion_factor=0.4,
     ),
 ]
 

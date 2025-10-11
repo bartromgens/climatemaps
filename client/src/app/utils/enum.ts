@@ -5,6 +5,7 @@ export enum ClimateVarKey {
   T_MIN = 'T_MIN',
   CLOUD_COVER = 'CLOUD_COVER',
   WET_DAYS = 'WET_DAYS',
+  FROST_DAYS = 'FROST_DAYS',
   WIND_SPEED = 'WIND_SPEED',
   RADIATION = 'RADIATION',
   DIURNAL_TEMP_RANGE = 'DIURNAL_TEMP_RANGE',
@@ -49,7 +50,7 @@ export enum ClimateScenario {
 export enum DataFormat {
   GEOTIFF_WORLDCLIM_CMIP6 = 'GEOTIFF_WORLDCLIM_CMIP6',
   GEOTIFF_WORLDCLIM_HISTORY = 'GEOTIFF_WORLDCLIM_HISTORY',
-  IPCC_GRID = 'IPCC_GRID',
+  CRU_TS = 'CRU_TS',
 }
 
 // Note: Climate variable configurations and year ranges are now dynamically

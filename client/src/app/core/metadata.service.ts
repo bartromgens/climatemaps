@@ -150,6 +150,7 @@ export class MetadataService {
       Tmin: ClimateVarKey.T_MIN,
       CloudCover: ClimateVarKey.CLOUD_COVER,
       WetDays: ClimateVarKey.WET_DAYS,
+      FrostDays: ClimateVarKey.FROST_DAYS,
       WindSpeed: ClimateVarKey.WIND_SPEED,
       Radiation: ClimateVarKey.RADIATION,
       DiurnalTempRange: ClimateVarKey.DIURNAL_TEMP_RANGE,

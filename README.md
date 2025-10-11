@@ -10,7 +10,7 @@ Global monthly climate data visualised on an interactive map with [OpenLayers 3]
 
 ### Historic
 
-- The climate grid data, 30 year averages, is taken from http://www.ipcc-data.org/obs/get_30yr_means.html.
+- The climate grid data, 30 year averages: https://catalogue.ceda.ac.uk/uuid/ec331e93d21347e6bf5fa4b9c68dbd2c/
 - Historic 1970-2000 WorldClim data: https://www.worldclim.org/data/worldclim21.html
 - ERA5 monthly averaged data on single levels from 1940 to present: https://cds.climate.copernicus.eu/datasets/reanalysis-era5-single-levels-monthly-means?tab=overview
 

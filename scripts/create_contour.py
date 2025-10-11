@@ -45,7 +45,7 @@ DIFFERENCE_DATA_SETS_AVAILABLE = DIFFERENCE_DATA_SETS
 
 # Default filter for testing (can be overridden via command line)
 DEFAULT_FILTER = {
-    "variable_type": ClimateVarKey.CLOUD_COVER,
+    "variable_type": ClimateVarKey.FROST_DAYS,
     "resolution": SpatialResolution.MIN30,
     "climate_scenario": ClimateScenario.SSP126,
     "climate_model": ClimateModel.EC_EARTH3_VEG,
@@ -57,7 +57,6 @@ def _apply_historicfilter(
     data_sets: List[ClimateDataConfig], filter_criteria: dict
 ) -> List[ClimateDataConfig]:
     """Apply filter criteria to regular climate data sets."""
-    logger.info(f"Applying filter criteria: {filter_criteria}")
     return list(
         filter(
             lambda x: (
@@ -74,7 +73,6 @@ def _apply_future_filter(
     data_sets: List[ClimateDataConfig], filter_criteria: dict
 ) -> List[ClimateDataConfig]:
     """Apply filter criteria to future climate data sets."""
-    logger.info(f"Applying filter criteria: {filter_criteria}")
     return list(
         filter(
             lambda x: (
@@ -102,10 +100,8 @@ def main(force_recreate: bool = False, apply_filter: bool = False):
 
     # Process historic data sets
     historic_data_sets = HISTORIC_DATA_SETS_AVAILABLE
-    logger.info(f"Historic data sets: {historic_data_sets}")
     if apply_filter:
         historic_data_sets = _apply_historicfilter(historic_data_sets, DEFAULT_FILTER)
-    logger.info(f"Historic data sets after filter: {historic_data_sets}")
 
     historic_tasks = [
         (contour_config, month, force_recreate)

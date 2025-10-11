@@ -9,7 +9,7 @@ from climatemaps.datasets import (
     ClimateVarKey,
     DataFormat,
     FutureClimateDataConfig,
-    IPCC_FILE_ABBREVIATIONS,
+    CRU_TS_FILE_ABBREVIATIONS,
     SpatialResolution,
 )
 from climatemaps.logger import logger
@@ -114,39 +114,48 @@ def _check_future_data_exists(filepath: str) -> bool:
     return Path(filepath).exists()
 
 
-def _check_ipcc_data_exists(filepath: str) -> bool:
-    return Path(filepath).exists()
+def _check_cru_ts_data_exists(filepath: str, year_range: tuple[int, int], abbr: str) -> bool:
+    data_dir = Path(filepath)
+    if not data_dir.exists():
+        return False
+
+    first_month_file = data_dir / f"cru_{abbr}_clim_{year_range[0]}-{year_range[1]}_01.tif"
+    return first_month_file.exists()
 
 
-def _get_ipcc_url(variable: ClimateVarKey, year_range: tuple[int, int]) -> str:
-    base_url = "https://www.ipcc-data.org/download_data/obs"
+def _get_cru_ts_url(variable: ClimateVarKey, year_range: tuple[int, int]) -> str:
+    base_url = "https://dap.ceda.ac.uk/badc/ipcc-ddc/data/obs/cru_ts2_1/clim_30"
 
-    abbr = IPCC_FILE_ABBREVIATIONS.get(variable)
+    abbr = CRU_TS_FILE_ABBREVIATIONS.get(variable)
     if not abbr:
-        raise ValueError(f"Unsupported IPCC variable: {variable}")
+        raise ValueError(f"Unsupported CRU-TS variable: {variable}")
 
-    year_code = f"{str(year_range[0])[-2:]}{str(year_range[1])[-2:]}"
-    filename = f"c{abbr}{year_code}.zip"
+    filename = f"cru_{abbr}_clim_{year_range[0]}-{year_range[1]}.zip"
 
-    return f"{base_url}/{filename}"
+    return f"{base_url}/{abbr}/{filename}"
 
 
-def download_ipcc_data(config: ClimateDataConfig) -> None:
-    if _check_ipcc_data_exists(config.filepath):
-        logger.info(f"IPCC data already exists at {config.filepath}")
+def download_cru_ts_data(config: ClimateDataConfig) -> None:
+    abbr = CRU_TS_FILE_ABBREVIATIONS.get(config.variable_type)
+    if not abbr:
+        raise ValueError(f"Unsupported CRU-TS variable: {config.variable_type}")
+
+    if _check_cru_ts_data_exists(config.filepath, config.year_range, abbr):
+        logger.info(f"CRU-TS data already exists at {config.filepath}")
         return
 
-    logger.info(f"IPCC data not found at {config.filepath}, downloading...")
+    logger.info(f"CRU-TS data not found at {config.filepath}, downloading...")
 
     try:
-        url = _get_ipcc_url(config.variable_type, config.year_range)
+        url = _get_cru_ts_url(config.variable_type, config.year_range)
     except ValueError as e:
         logger.error(f"Cannot download data: {e}")
         raise
 
-    data_path = Path(config.filepath)
-    data_dir = data_path.parent
-    temp_zip = data_dir / f"{data_path.stem}.zip"
+    data_dir = Path(config.filepath)
+    data_dir.mkdir(parents=True, exist_ok=True)
+
+    temp_zip = data_dir / f"cru_{abbr}_clim_{config.year_range[0]}-{config.year_range[1]}.zip"
 
     _download_file(url, temp_zip)
     _extract_zip(temp_zip, data_dir)
@@ -204,7 +213,7 @@ def ensure_data_available(config: ClimateDataConfig) -> None:
             download_future_data(config)
         else:
             logger.warning(f"Future data format but not FutureClimateDataConfig: {config}")
-    elif config.format == DataFormat.IPCC_GRID:
-        download_ipcc_data(config)
+    elif config.format == DataFormat.CRU_TS:
+        download_cru_ts_data(config)
     else:
         logger.warning(f"Unsupported format for auto-download: {config.format}")
