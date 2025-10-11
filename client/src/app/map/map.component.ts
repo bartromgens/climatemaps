@@ -116,8 +116,10 @@ export class MapComponent implements OnInit {
       this.metadataService.getClimateScenarios(climateMaps);
     this.climateModels = this.metadataService.getClimateModels(climateMaps);
 
-    // Set variable types from the climate variables
-    this.variableTypes = Object.keys(this.climateVariables) as ClimateVarKey[];
+    // Set variable types from the climate variables (sorted)
+    this.variableTypes = this.metadataService.getSortedVariableTypes(
+      this.climateVariables,
+    );
 
     // Set default year range if none selected
     if (!this.controlsData.selectedYearRange && this.yearRanges.length > 0) {

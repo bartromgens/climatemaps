@@ -125,6 +125,13 @@ export class MapControlsComponent {
     }
   }
 
+  getClimateModelDisplayName(model: ClimateModel): string {
+    if (model === ClimateModel.ENSEMBLE_MEAN) {
+      return 'Ensemble Mean';
+    }
+    return model.replace(/_/g, '-');
+  }
+
   shouldShowFutureControls(): boolean {
     return !!(
       this.controlsData?.selectedYearRange &&

@@ -57,7 +57,7 @@ class ClimateModel(enum.Enum):
     Climate models used for future climate predictions
     """
 
-    ENSEMBLE_MEAN = "ensemble-mean"
+    ENSEMBLE_MEAN = "ENSEMBLE_MEAN"
     ACCESS_CM2 = "ACCESS_CM2"
     BCC_CSM2_MR = "BCC_CSM2_MR"
     CMCC_ESM2 = "CMCC_ESM2"

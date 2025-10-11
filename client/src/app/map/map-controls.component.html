@@ -22,7 +22,6 @@
     </mat-select>
   </mat-form-field>
 
-
   <mat-form-field subscriptSizing="dynamic" class="dropdown-field">
     <mat-label>Resolution</mat-label>
     <mat-select
@@ -44,10 +43,7 @@
     </mat-select>
   </mat-form-field>
 
-  <mat-form-field
-    subscriptSizing="dynamic"
-    class="dropdown-field"
-  >
+  <mat-form-field subscriptSizing="dynamic" class="dropdown-field">
     <mat-label>Climate Scenario</mat-label>
     <mat-select
       [value]="controlsData?.selectedClimateScenario"
@@ -69,10 +65,7 @@
     </mat-select>
   </mat-form-field>
 
-  <mat-form-field
-    subscriptSizing="dynamic"
-    class="dropdown-field"
-  >
+  <mat-form-field subscriptSizing="dynamic" class="dropdown-field">
     <mat-label>Climate Model</mat-label>
     <mat-select
       [value]="controlsData?.selectedClimateModel"
@@ -87,7 +80,7 @@
           !controlsOptions?.availableClimateModels?.includes(model)
         "
       >
-        {{ model }}
+        {{ getClimateModelDisplayName(model) }}
       </mat-option>
     </mat-select>
   </mat-form-field>

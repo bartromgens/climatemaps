@@ -23,6 +23,51 @@ export interface YearRange {
   providedIn: 'root',
 })
 export class MetadataService {
+  private readonly VARIABLE_ORDER: ClimateVarKey[] = [
+    ClimateVarKey.T_MAX,
+    ClimateVarKey.T_MIN,
+    ClimateVarKey.PRECIPITATION,
+    ClimateVarKey.WET_DAYS,
+    ClimateVarKey.CLOUD_COVER,
+    ClimateVarKey.FROST_DAYS,
+    ClimateVarKey.DIURNAL_TEMP_RANGE,
+    ClimateVarKey.VAPOUR_PRESSURE,
+    ClimateVarKey.RADIATION,
+    ClimateVarKey.WIND_SPEED,
+  ];
+
+  private readonly RESOLUTION_ORDER: SpatialResolution[] = [
+    SpatialResolution.MIN2_5,
+    SpatialResolution.MIN5,
+    SpatialResolution.MIN10,
+    SpatialResolution.MIN30,
+  ];
+
+  private readonly MODEL_ORDER: ClimateModel[] = [
+    ClimateModel.ENSEMBLE_MEAN,
+    ClimateModel.ACCESS_CM2,
+    ClimateModel.BCC_CSM2_MR,
+    ClimateModel.CMCC_ESM2,
+    ClimateModel.EC_EARTH3_VEG,
+    ClimateModel.FIO_ESM_2_0,
+    ClimateModel.GFDL_ESM4,
+    ClimateModel.GISS_E2_1_G,
+    ClimateModel.HADGEM3_GC31_LL,
+    ClimateModel.INM_CM5_0,
+    ClimateModel.IPSL_CM6A_LR,
+    ClimateModel.MIROC6,
+    ClimateModel.MPI_ESM1_2_HR,
+    ClimateModel.MRI_ESM2_0,
+    ClimateModel.UKESM1_0_LL,
+  ];
+
+  private readonly SCENARIO_ORDER: ClimateScenario[] = [
+    ClimateScenario.SSP126,
+    ClimateScenario.SSP245,
+    ClimateScenario.SSP370,
+    ClimateScenario.SSP585,
+  ];
+
   /**
    * Extract unique climate variables from API data
    */
@@ -103,7 +148,9 @@ export class MetadataService {
       resolutions.add(map.resolution);
     });
 
-    return Array.from(resolutions) as SpatialResolution[];
+    const resolutionArray = Array.from(resolutions) as SpatialResolution[];
+
+    return this.sortByOrder(resolutionArray, this.RESOLUTION_ORDER);
   }
 
   /**
@@ -118,7 +165,9 @@ export class MetadataService {
       }
     });
 
-    return Array.from(scenarios) as ClimateScenario[];
+    const scenarioArray = Array.from(scenarios) as ClimateScenario[];
+
+    return this.sortByOrder(scenarioArray, this.SCENARIO_ORDER);
   }
 
   /**
@@ -133,7 +182,16 @@ export class MetadataService {
       }
     });
 
-    return Array.from(models) as ClimateModel[];
+    const modelArray = Array.from(models) as ClimateModel[];
+
+    return this.sortByOrder(modelArray, this.MODEL_ORDER);
+  }
+
+  getSortedVariableTypes(
+    climateVariables: Record<ClimateVarKey, ClimateVariableConfig>,
+  ): ClimateVarKey[] {
+    const variableKeys = Object.keys(climateVariables) as ClimateVarKey[];
+    return this.sortByOrder(variableKeys, this.VARIABLE_ORDER);
   }
 
   /**
@@ -161,5 +219,18 @@ export class MetadataService {
 
   private formatYearRangeLabel(start: number, end: number): string {
     return `${start}-${end}`;
+  }
+
+  private sortByOrder<T>(items: T[], order: T[]): T[] {
+    return items.sort((a, b) => {
+      const indexA = order.indexOf(a);
+      const indexB = order.indexOf(b);
+
+      if (indexA === -1 && indexB === -1) return 0;
+      if (indexA === -1) return 1;
+      if (indexB === -1) return -1;
+
+      return indexA - indexB;
+    });
   }
 }
