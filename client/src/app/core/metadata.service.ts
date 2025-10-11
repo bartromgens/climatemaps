@@ -16,6 +16,7 @@ export interface ClimateVariableConfig {
 export interface YearRange {
   value: [number, number];
   label: string;
+  additionalValues?: [number, number][];
 }
 
 @Injectable({
@@ -55,7 +56,7 @@ export class MetadataService {
       yearRanges.add(key);
     });
 
-    return Array.from(yearRanges)
+    const ranges = Array.from(yearRanges)
       .map((key) => {
         const [start, end] = key.split('-').map(Number);
         return {
@@ -64,6 +65,32 @@ export class MetadataService {
         };
       })
       .sort((a, b) => a.value[0] - b.value[0]);
+
+    const historicalRange1 = ranges.find(
+      (r) => r.value[0] === 1961 && r.value[1] === 1990,
+    );
+    const historicalRange2 = ranges.find(
+      (r) => r.value[0] === 1970 && r.value[1] === 2000,
+    );
+
+    if (historicalRange1 && historicalRange2) {
+      const mergedRange: YearRange = {
+        value: historicalRange1.value,
+        label: `${historicalRange1.label} / ${historicalRange2.label}`,
+        additionalValues: [historicalRange2.value],
+      };
+
+      return ranges
+        .filter(
+          (r) =>
+            !(r.value[0] === 1961 && r.value[1] === 1990) &&
+            !(r.value[0] === 1970 && r.value[1] === 2000),
+        )
+        .concat([mergedRange])
+        .sort((a, b) => a.value[0] - b.value[0]);
+    }
+
+    return ranges;
   }
 
   /**
@@ -125,6 +152,8 @@ export class MetadataService {
       WetDays: ClimateVarKey.WET_DAYS,
       WindSpeed: ClimateVarKey.WIND_SPEED,
       Radiation: ClimateVarKey.RADIATION,
+      DiurnalTempRange: ClimateVarKey.DIURNAL_TEMP_RANGE,
+      VapourPressure: ClimateVarKey.VAPOUR_PRESSURE,
     };
 
     return nameToKey[name] || null;

@@ -1,4 +1,9 @@
-import { ClimateVarKey, SpatialResolution, ClimateScenario, ClimateModel } from './enum';
+import {
+  ClimateVarKey,
+  SpatialResolution,
+  ClimateScenario,
+  ClimateModel,
+} from './enum';
 import { YearRange } from '../core/metadata.service';
 
 export interface URLControlsData {
@@ -49,7 +54,10 @@ export class URLUtils {
     return urlData;
   }
 
-  static decodeControls(urlData: URLControlsData, yearRanges: YearRange[]): {
+  static decodeControls(
+    urlData: URLControlsData,
+    yearRanges: YearRange[],
+  ): {
     variable?: ClimateVarKey;
     resolution?: SpatialResolution;
     scenario?: ClimateScenario;
@@ -60,15 +68,24 @@ export class URLUtils {
   } {
     const decoded: any = {};
 
-    if (urlData.variable && Object.values(ClimateVarKey).includes(urlData.variable)) {
+    if (
+      urlData.variable &&
+      Object.values(ClimateVarKey).includes(urlData.variable)
+    ) {
       decoded.variable = urlData.variable;
     }
 
-    if (urlData.resolution && Object.values(SpatialResolution).includes(urlData.resolution)) {
+    if (
+      urlData.resolution &&
+      Object.values(SpatialResolution).includes(urlData.resolution)
+    ) {
       decoded.resolution = urlData.resolution;
     }
 
-    if (urlData.scenario && Object.values(ClimateScenario).includes(urlData.scenario)) {
+    if (
+      urlData.scenario &&
+      Object.values(ClimateScenario).includes(urlData.scenario)
+    ) {
       decoded.scenario = urlData.scenario;
     }
 
@@ -86,10 +103,19 @@ export class URLUtils {
 
     if (urlData.yearRange) {
       try {
-        const [startYear, endYear] = urlData.yearRange.split('-').map(y => parseInt(y, 10));
-        const yearRange = yearRanges.find(yr => 
-          yr.value[0] === startYear && yr.value[1] === endYear
-        );
+        const [startYear, endYear] = urlData.yearRange
+          .split('-')
+          .map((y) => parseInt(y, 10));
+        const yearRange = yearRanges.find((yr) => {
+          const matchesPrimary =
+            yr.value[0] === startYear && yr.value[1] === endYear;
+          const matchesAdditional = yr.additionalValues?.some(
+            (additionalValue) =>
+              additionalValue[0] === startYear &&
+              additionalValue[1] === endYear,
+          );
+          return matchesPrimary || matchesAdditional;
+        });
         if (yearRange) {
           decoded.yearRange = yearRange;
         }
@@ -103,7 +129,7 @@ export class URLUtils {
 
   static updateURLParams(params: URLControlsData): void {
     const url = new URL(window.location.href);
-    
+
     // Clear existing control parameters
     url.searchParams.delete('variable');
     url.searchParams.delete('resolution');

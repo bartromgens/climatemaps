@@ -19,9 +19,17 @@ export class YearSliderComponent {
     if (!this.value || this.years.length === 0) {
       return 1;
     }
-    const index = this.years.findIndex(year => 
-      year.value[0] === this.value!.value[0] && year.value[1] === this.value!.value[1]
-    );
+    const index = this.years.findIndex((year) => {
+      const matchesPrimary =
+        year.value[0] === this.value!.value[0] &&
+        year.value[1] === this.value!.value[1];
+      const matchesAdditional = year.additionalValues?.some(
+        (additionalValue) =>
+          additionalValue[0] === this.value!.value[0] &&
+          additionalValue[1] === this.value!.value[1],
+      );
+      return matchesPrimary || matchesAdditional;
+    });
     return index >= 0 ? index + 1 : 1;
   }
 

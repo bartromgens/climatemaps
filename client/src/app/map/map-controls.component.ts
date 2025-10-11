@@ -66,7 +66,6 @@ export class MapControlsComponent {
     }
   }
 
-
   onResolutionChange(event: any): void {
     if (this.controlsData) {
       this.controlsData.selectedResolution = event.value;
@@ -113,6 +112,8 @@ export class MapControlsComponent {
 
   getResolutionDisplayName(resolution: SpatialResolution): string {
     switch (resolution) {
+      case SpatialResolution.MIN30:
+        return 'Very low';
       case SpatialResolution.MIN10:
         return 'Low';
       case SpatialResolution.MIN5:

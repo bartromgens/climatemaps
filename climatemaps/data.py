@@ -16,6 +16,7 @@ def read_ippc_grid(filepath, monthnr):
         lines = filein.readlines()
         line_n = 0
         grid_size = 0.50
+        # TODO: check if the coordinates should not be in the middle of the grid cell
         xmin = 0.25 - 180
         xmax = 360.25 - 180
         ymin = -89.75
@@ -60,6 +61,8 @@ def read_ippc_grid(filepath, monthnr):
                     Z_new[i][j - half_size] = Z[i][j]
                 else:
                     Z_new[i][j + half_size] = Z[i][j]
+
+        latrange = numpy.flip(latrange)
 
     return latrange, lonrange, Z_new
 

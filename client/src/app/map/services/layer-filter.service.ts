@@ -13,6 +13,20 @@ import { MapControlsData } from '../map-controls.component';
   providedIn: 'root',
 })
 export class LayerFilterService {
+  private matchesYearRange(map: ClimateMap, yearRange: YearRange): boolean {
+    const matchesPrimary =
+      map.yearRange[0] === yearRange.value[0] &&
+      map.yearRange[1] === yearRange.value[1];
+
+    const matchesAdditional = yearRange.additionalValues?.some(
+      (additionalValue) =>
+        map.yearRange[0] === additionalValue[0] &&
+        map.yearRange[1] === additionalValue[1],
+    );
+
+    return matchesPrimary || !!matchesAdditional;
+  }
+
   getAvailableVariableTypes(
     climateMaps: ClimateMap[],
     variableTypes: ClimateVarKey[],
@@ -34,11 +48,12 @@ export class LayerFilterService {
     return yearRanges.filter((yearRange) => {
       return climateMaps.some(
         (map) =>
-          map.yearRange[0] === yearRange.value[0] &&
-          map.yearRange[1] === yearRange.value[1] &&
+          this.matchesYearRange(map, yearRange) &&
           map.variable.name ===
             climateVariables[controlsData.selectedVariableType]?.name &&
-          (controlsData.showDifferenceMap ? true : map.isDifferenceMap === controlsData.showDifferenceMap),
+          (controlsData.showDifferenceMap
+            ? true
+            : map.isDifferenceMap === controlsData.showDifferenceMap),
       );
     });
   }
@@ -56,8 +71,7 @@ export class LayerFilterService {
       (map) =>
         map.variable.name ===
           climateVariables[controlsData.selectedVariableType]?.name &&
-        map.yearRange[0] === controlsData.selectedYearRange!.value[0] &&
-        map.yearRange[1] === controlsData.selectedYearRange!.value[1] &&
+        this.matchesYearRange(map, controlsData.selectedYearRange!) &&
         map.isDifferenceMap === controlsData.showDifferenceMap,
     );
 
@@ -99,8 +113,7 @@ export class LayerFilterService {
       (map) =>
         map.variable.name ===
           climateVariables[controlsData.selectedVariableType]?.name &&
-        map.yearRange[0] === controlsData.selectedYearRange!.value[0] &&
-        map.yearRange[1] === controlsData.selectedYearRange!.value[1] &&
+        this.matchesYearRange(map, controlsData.selectedYearRange!) &&
         map.isDifferenceMap === controlsData.showDifferenceMap,
     );
 
@@ -128,8 +141,7 @@ export class LayerFilterService {
       (map) =>
         map.variable.name ===
           climateVariables[controlsData.selectedVariableType]?.name &&
-        map.yearRange[0] === controlsData.selectedYearRange!.value[0] &&
-        map.yearRange[1] === controlsData.selectedYearRange!.value[1] &&
+        this.matchesYearRange(map, controlsData.selectedYearRange!) &&
         map.isDifferenceMap === controlsData.showDifferenceMap,
     );
 

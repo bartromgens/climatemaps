@@ -168,7 +168,7 @@ export class MapComponent implements OnInit {
     this.resetInvalidSelections();
     this.findMatchingLayer();
     this.updateLayers();
-    
+
     // Update URL with current control values
     this.updateUrlWithControls();
   }
@@ -260,7 +260,7 @@ export class MapComponent implements OnInit {
   ngOnInit(): void {
     this.checkMobile();
     this.setupResizeListener();
-    
+
     this.route.queryParamMap.subscribe((params) => {
       if (params.has('lat') && params.has('lon') && params.has('zoom')) {
         this.updateLocationZoomFromURL(params);
@@ -309,11 +309,23 @@ export class MapComponent implements OnInit {
     this.updateLayers();
   }
 
-  private isYearRangeAvailable(selectedYearRange: YearRange, availableYearRanges: YearRange[]): boolean {
-    return availableYearRanges.some(availableRange => 
-      availableRange.value[0] === selectedYearRange.value[0] && 
-      availableRange.value[1] === selectedYearRange.value[1]
-    );
+  private isYearRangeAvailable(
+    selectedYearRange: YearRange,
+    availableYearRanges: YearRange[],
+  ): boolean {
+    return availableYearRanges.some((availableRange) => {
+      const matchesPrimary =
+        availableRange.value[0] === selectedYearRange.value[0] &&
+        availableRange.value[1] === selectedYearRange.value[1];
+
+      const matchesAdditional = selectedYearRange.additionalValues?.some(
+        (additionalValue) =>
+          availableRange.value[0] === additionalValue[0] &&
+          availableRange.value[1] === additionalValue[1],
+      );
+
+      return matchesPrimary || matchesAdditional;
+    });
   }
 
   private resetInvalidSelections() {
@@ -325,7 +337,10 @@ export class MapComponent implements OnInit {
     // Reset year range if not available for current selections
     if (
       this.controlsData.selectedYearRange &&
-      !this.isYearRangeAvailable(this.controlsData.selectedYearRange, availableYearRanges)
+      !this.isYearRangeAvailable(
+        this.controlsData.selectedYearRange,
+        availableYearRanges,
+      )
     ) {
       this.controlsData.selectedYearRange = availableYearRanges[0] || null;
     }
@@ -393,12 +408,20 @@ export class MapComponent implements OnInit {
         return false;
       }
 
-      // Check if the year range matches
-      if (
-        metadata.yearRange[0] !==
-          this.controlsData.selectedYearRange!.value[0] ||
-        metadata.yearRange[1] !== this.controlsData.selectedYearRange!.value[1]
-      ) {
+      // Check if the year range matches (including additional values for merged ranges)
+      const matchesPrimaryRange =
+        metadata.yearRange[0] ===
+          this.controlsData.selectedYearRange!.value[0] &&
+        metadata.yearRange[1] === this.controlsData.selectedYearRange!.value[1];
+
+      const matchesAdditionalRange =
+        this.controlsData.selectedYearRange!.additionalValues?.some(
+          (additionalValue) =>
+            metadata.yearRange[0] === additionalValue[0] &&
+            metadata.yearRange[1] === additionalValue[1],
+        );
+
+      if (!matchesPrimaryRange && !matchesAdditionalRange) {
         return false;
       }
 
@@ -440,7 +463,11 @@ export class MapComponent implements OnInit {
 
     if (matchingLayer) {
       this.selectedOption = matchingLayer;
-      console.log('Found matching layer:', matchingLayer.name, matchingLayer.metadata);
+      console.log(
+        'Found matching layer:',
+        matchingLayer.name,
+        matchingLayer.metadata,
+      );
     } else {
       // No exact match found - clear current layer
       this.selectedOption = undefined;
@@ -542,7 +569,7 @@ export class MapComponent implements OnInit {
       console.assert(false, 'map is not defined');
       return;
     }
-    new Control.Zoom({position: 'topright'}).addTo(this.map);
+    new Control.Zoom({ position: 'topright' }).addTo(this.map);
     new Control.Scale().addTo(this.map);
   }
 
@@ -585,11 +612,7 @@ export class MapComponent implements OnInit {
 
     // Show loading tooltip
     this.isLoadingClickValue = true;
-    this.tooltipManager.createPersistentTooltip(
-      '...',
-      event.latlng,
-      this.map!,
-    );
+    this.tooltipManager.createPersistentTooltip('...', event.latlng, this.map!);
 
     // Fetch climate value from API
     this.climateMapService
@@ -668,34 +691,51 @@ export class MapComponent implements OnInit {
       scenario: params.get('scenario') as ClimateScenario,
       model: params.get('model') as ClimateModel,
       difference: params.get('difference') === 'true',
-      month: params.get('month') ? parseInt(params.get('month')!, 10) : undefined,
+      month: params.get('month')
+        ? parseInt(params.get('month')!, 10)
+        : undefined,
       yearRange: params.get('yearRange') || undefined,
     };
 
     const decoded = URLUtils.decodeControls(urlData, this.yearRanges);
     let hasChanges = false;
 
-    if (decoded.variable && decoded.variable !== this.controlsData.selectedVariableType) {
+    if (
+      decoded.variable &&
+      decoded.variable !== this.controlsData.selectedVariableType
+    ) {
       this.controlsData.selectedVariableType = decoded.variable;
       hasChanges = true;
     }
 
-    if (decoded.resolution && decoded.resolution !== this.controlsData.selectedResolution) {
+    if (
+      decoded.resolution &&
+      decoded.resolution !== this.controlsData.selectedResolution
+    ) {
       this.controlsData.selectedResolution = decoded.resolution;
       hasChanges = true;
     }
 
-    if (decoded.scenario !== undefined && decoded.scenario !== this.controlsData.selectedClimateScenario) {
+    if (
+      decoded.scenario !== undefined &&
+      decoded.scenario !== this.controlsData.selectedClimateScenario
+    ) {
       this.controlsData.selectedClimateScenario = decoded.scenario;
       hasChanges = true;
     }
 
-    if (decoded.model !== undefined && decoded.model !== this.controlsData.selectedClimateModel) {
+    if (
+      decoded.model !== undefined &&
+      decoded.model !== this.controlsData.selectedClimateModel
+    ) {
       this.controlsData.selectedClimateModel = decoded.model;
       hasChanges = true;
     }
 
-    if (decoded.difference !== undefined && decoded.difference !== this.controlsData.showDifferenceMap) {
+    if (
+      decoded.difference !== undefined &&
+      decoded.difference !== this.controlsData.showDifferenceMap
+    ) {
       this.controlsData.showDifferenceMap = decoded.difference;
       hasChanges = true;
     }
@@ -705,7 +745,10 @@ export class MapComponent implements OnInit {
       hasChanges = true;
     }
 
-    if (decoded.yearRange && decoded.yearRange !== this.controlsData.selectedYearRange) {
+    if (
+      decoded.yearRange &&
+      decoded.yearRange !== this.controlsData.selectedYearRange
+    ) {
       this.controlsData.selectedYearRange = decoded.yearRange;
       hasChanges = true;
     }
@@ -719,8 +762,6 @@ export class MapComponent implements OnInit {
     const urlData = URLUtils.encodeControls(this.controlsData);
     URLUtils.updateURLParams(urlData);
   }
-
-
 
   private onVectorLayerHover(e: any): void {
     const properties = e.layer?.properties;
@@ -763,7 +804,7 @@ export class MapComponent implements OnInit {
     window.addEventListener('resize', () => {
       const wasMobile = this.isMobile;
       this.checkMobile();
-      
+
       // If switching from mobile to desktop, close sidebar
       if (wasMobile && !this.isMobile) {
         this.sidebarOpened = false;
