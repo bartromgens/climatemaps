@@ -66,7 +66,7 @@ def get_available_models(
 
     for model_enum in INCLUDE_MODELS:
 
-        model_name = model_enum.value.replace("_", "-")
+        model_name = model_enum.filename
         filepath = get_model_filepath(
             base_dir, resolution, variable, model_name, scenario, year_range
         )
@@ -147,7 +147,12 @@ def compute_ensemble_mean(
         logger.info(f"Processed band {band_idx + 1}/{num_bands}")
 
     output_filepath = get_model_filepath(
-        output_dir, resolution, variable, ClimateModel.ENSEMBLE_MEAN.value, scenario, year_range
+        output_dir,
+        resolution,
+        variable,
+        ClimateModel.ENSEMBLE_MEAN.filename,
+        scenario,
+        year_range,
     )
     output_filepath.parent.mkdir(parents=True, exist_ok=True)
 

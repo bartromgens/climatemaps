@@ -73,6 +73,10 @@ class ClimateModel(enum.Enum):
     MRI_ESM2_0 = "MRI_ESM2_0"
     UKESM1_0_LL = "UKESM1_0_LL"
 
+    @property
+    def filename(self) -> str:
+        return self.value.replace("_", "-")
+
 
 class ClimateVariable(BaseModel):
     name: str
@@ -312,7 +316,7 @@ class FutureClimateDataConfigGroup(ClimateDataConfigGroup):
                                     year_range=year_range,
                                     variable_name=CLIMATE_VARIABLES[variable_type].filename.lower(),
                                     climate_scenario=climate_scenario.name.lower(),
-                                    climate_model=climate_model.value.replace("_", "-"),
+                                    climate_model=climate_model.filename,
                                 ),
                                 conversion_function=self.conversion_function,
                                 conversion_factor=self.conversion_factor,

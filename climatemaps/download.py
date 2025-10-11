@@ -63,7 +63,7 @@ def _get_worldclim_future_url(
 
     res_str = resolution_map.get(resolution)
     var_str = variable_map.get(variable)
-    model_str = climate_model.value.replace("_", "-")
+    model_str = climate_model.filename
     scenario_str = climate_scenario.name.lower()
     year_str = f"{year_range[0]}-{year_range[1]}"
 
