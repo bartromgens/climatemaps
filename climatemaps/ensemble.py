@@ -94,7 +94,6 @@ def get_available_models(
                     logger.info(f"Downloaded model file: {filepath.name}")
             except Exception as e:
                 logger.exception(f"Failed to download {filepath.name}: {e}")
-                raise
 
     return available_files
 
