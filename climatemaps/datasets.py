@@ -100,9 +100,6 @@ CLIMATE_VARIABLES: Dict[ClimateVarKey, ClimateVariable] = {
     ClimateVarKey.FROST_DAYS: ClimateVariable(
         name="FrostDays", display_name="Frost Days", unit="days", filename="frostdays"
     ),
-    ClimateVarKey.WIND_SPEED: ClimateVariable(
-        name="WindSpeed", display_name="Wind Speed", unit="m/s", filename="wind"
-    ),
     ClimateVarKey.RADIATION: ClimateVariable(
         name="Radiation", display_name="Radiation", unit="W/m^2", filename="radiation"
     ),
@@ -141,9 +138,6 @@ CLIMATE_CONTOUR_CONFIGS: Dict[ClimateVarKey, ContourPlotConfig] = {
     ),
     ClimateVarKey.FROST_DAYS: ContourPlotConfig(
         level_lower=0, level_upper=30, colormap=plt.cm.jet_r, title="Frost days", unit="days"
-    ),
-    ClimateVarKey.WIND_SPEED: ContourPlotConfig(
-        level_lower=0, level_upper=9, colormap=plt.cm.jet, title="Wind speed", unit="m/s"
     ),
     ClimateVarKey.RADIATION: ContourPlotConfig(
         level_lower=0, level_upper=300, colormap=plt.cm.jet, title="Radiation", unit="W/m^2"
@@ -373,17 +367,34 @@ HISTORIC_DATA_GROUPS: List[ClimateDataConfigGroup] = [
     ),
     CRUTSClimateDataConfigGroup(
         variable_types=[
-            ClimateVarKey.DIURNAL_TEMP_RANGE,
             ClimateVarKey.WET_DAYS,
             ClimateVarKey.FROST_DAYS,
+        ],
+        format=DataFormat.CRU_TS,
+        source="https://ipcc-browser.ipcc-data.org/browser/dataset/653/0",
+        resolutions=[SpatialResolution.MIN30],
+        year_ranges=[(1961, 1990)],
+        conversion_factor=0.124,
+    ),
+    CRUTSClimateDataConfigGroup(
+        variable_types=[
+            ClimateVarKey.DIURNAL_TEMP_RANGE,
+        ],
+        format=DataFormat.CRU_TS,
+        source="https://ipcc-browser.ipcc-data.org/browser/dataset/653/0",
+        resolutions=[SpatialResolution.MIN30],
+        year_ranges=[(1961, 1990)],
+        conversion_factor=0.16,
+    ),
+    CRUTSClimateDataConfigGroup(
+        variable_types=[
             ClimateVarKey.VAPOUR_PRESSURE,
         ],
         format=DataFormat.CRU_TS,
         source="https://ipcc-browser.ipcc-data.org/browser/dataset/653/0",
         resolutions=[SpatialResolution.MIN30],
         year_ranges=[(1961, 1990)],
-        filepath_template="",
-        conversion_factor=0.1,
+        conversion_factor=0.2,
     ),
     CRUTSClimateDataConfigGroup(
         variable_types=[ClimateVarKey.CLOUD_COVER],
@@ -391,7 +402,6 @@ HISTORIC_DATA_GROUPS: List[ClimateDataConfigGroup] = [
         source="https://ipcc-browser.ipcc-data.org/browser/dataset/653/0",
         resolutions=[SpatialResolution.MIN30],
         year_ranges=[(1961, 1990)],
-        filepath_template="",
         conversion_factor=0.4,
     ),
 ]

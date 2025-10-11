@@ -68,36 +68,63 @@ def test_unsupported_future_variable_raises_error() -> None:
 
 def test_ipcc_url_generation() -> None:
     url = _get_cru_ts_url(ClimateVarKey.CLOUD_COVER, (1961, 1990))
-    assert url == "https://www.ipcc-data.org/download_data/obs/ccld6190.zip"
+    assert (
+        url
+        == "https://dap.ceda.ac.uk/badc/ipcc-ddc/data/obs/cru_ts2_1/clim_30/cld/cru_cld_clim_1961-1990.zip"
+    )
 
     url = _get_cru_ts_url(ClimateVarKey.DIURNAL_TEMP_RANGE, (1961, 1990))
-    assert url == "https://www.ipcc-data.org/download_data/obs/cdtr6190.zip"
+    assert (
+        url
+        == "https://dap.ceda.ac.uk/badc/ipcc-ddc/data/obs/cru_ts2_1/clim_30/dtr/cru_dtr_clim_1961-1990.zip"
+    )
 
     url = _get_cru_ts_url(ClimateVarKey.WET_DAYS, (1961, 1990))
-    assert url == "https://www.ipcc-data.org/download_data/obs/cwet6190.zip"
+    assert (
+        url
+        == "https://dap.ceda.ac.uk/badc/ipcc-ddc/data/obs/cru_ts2_1/clim_30/wet/cru_wet_clim_1961-1990.zip"
+    )
 
-    url = _get_cru_ts_url(ClimateVarKey.WIND_SPEED, (1961, 1990))
-    assert url == "https://www.ipcc-data.org/download_data/obs/cwnd6190.zip"
-
-    url = _get_cru_ts_url(ClimateVarKey.RADIATION, (1961, 1990))
-    assert url == "https://www.ipcc-data.org/download_data/obs/crad6190.zip"
+    url = _get_cru_ts_url(ClimateVarKey.FROST_DAYS, (1961, 1990))
+    assert (
+        url
+        == "https://dap.ceda.ac.uk/badc/ipcc-ddc/data/obs/cru_ts2_1/clim_30/frs/cru_frs_clim_1961-1990.zip"
+    )
 
     url = _get_cru_ts_url(ClimateVarKey.VAPOUR_PRESSURE, (1961, 1990))
-    assert url == "https://www.ipcc-data.org/download_data/obs/cvap6190.zip"
+    assert (
+        url
+        == "https://dap.ceda.ac.uk/badc/ipcc-ddc/data/obs/cru_ts2_1/clim_30/vap/cru_vap_clim_1961-1990.zip"
+    )
 
     url = _get_cru_ts_url(ClimateVarKey.T_MAX, (1961, 1990))
-    assert url == "https://www.ipcc-data.org/download_data/obs/ctmx6190.zip"
+    assert (
+        url
+        == "https://dap.ceda.ac.uk/badc/ipcc-ddc/data/obs/cru_ts2_1/clim_30/tmx/cru_tmx_clim_1961-1990.zip"
+    )
 
     url = _get_cru_ts_url(ClimateVarKey.T_MIN, (1961, 1990))
-    assert url == "https://www.ipcc-data.org/download_data/obs/ctmn6190.zip"
+    assert (
+        url
+        == "https://dap.ceda.ac.uk/badc/ipcc-ddc/data/obs/cru_ts2_1/clim_30/tmn/cru_tmn_clim_1961-1990.zip"
+    )
 
     url = _get_cru_ts_url(ClimateVarKey.PRECIPITATION, (1961, 1990))
-    assert url == "https://www.ipcc-data.org/download_data/obs/cpre6190.zip"
+    assert (
+        url
+        == "https://dap.ceda.ac.uk/badc/ipcc-ddc/data/obs/cru_ts2_1/clim_30/pre/cru_pre_clim_1961-1990.zip"
+    )
 
 
 def test_ipcc_url_different_year_ranges() -> None:
     url = _get_cru_ts_url(ClimateVarKey.CLOUD_COVER, (1901, 1930))
-    assert url == "https://www.ipcc-data.org/download_data/obs/ccld0130.zip"
+    assert (
+        url
+        == "https://dap.ceda.ac.uk/badc/ipcc-ddc/data/obs/cru_ts2_1/clim_30/cld/cru_cld_clim_1901-1930.zip"
+    )
 
     url = _get_cru_ts_url(ClimateVarKey.DIURNAL_TEMP_RANGE, (1931, 1960))
-    assert url == "https://www.ipcc-data.org/download_data/obs/cdtr3160.zip"
+    assert (
+        url
+        == "https://dap.ceda.ac.uk/badc/ipcc-ddc/data/obs/cru_ts2_1/clim_30/dtr/cru_dtr_clim_1931-1960.zip"
+    )
