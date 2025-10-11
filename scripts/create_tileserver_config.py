@@ -31,7 +31,7 @@ def main(data_configs: List[ClimateDataConfig]):
         json.dump(config_dev, f, indent=2)
 
     logger.info(
-        f"Tileserver config created for production and dev mode: {filename} and {filename_dev}"
+        f"Tileserver config created for production and dev mode: {filename} ({len(config['data'])} configs) and {filename_dev} ({len(config_dev['data'])} configs)"
     )
 
 
