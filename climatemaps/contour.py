@@ -149,6 +149,10 @@ class ContourTileBuilder:
                 f"Output: {e.output.decode('utf-8', errors='replace')}"
             )
             raise
+        finally:
+            if os.path.exists(contour_image_path):
+                logger.info(f"Removing temporary PNG file: {contour_image_path}")
+                os.remove(contour_image_path)
         logger.info(f"END: creating raster mbtiles:{mbtiles_path}")
 
     @classmethod
