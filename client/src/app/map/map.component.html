@@ -16,7 +16,7 @@
       >
         <mat-icon>close</mat-icon>
       </button>
-      
+
       <app-map-controls
         [controlsData]="controlsData"
         [controlsOptions]="controlsOptions"
@@ -35,7 +35,7 @@
     >
       <mat-icon>tune</mat-icon>
     </button>
-    
+
     <div
       class="page-content-wrapper"
       leaflet
@@ -45,7 +45,7 @@
       (leafletMapMoveEnd)="onMove($event)"
       (leafletMapZoomEnd)="onZoom($event)"
     ></div>
-    
+
     <!-- Desktop controls - only show on desktop -->
     <div *ngIf="!isMobile" class="desktop-controls">
       <app-map-controls
@@ -54,7 +54,7 @@
         (controlsChange)="onControlsChange($event)"
       ></app-map-controls>
     </div>
-    
+
     <app-colorbar
       [colormapUrl]="selectedOption?.climateMap?.colormapUrl || null"
       [displayName]="selectedOption?.climateMap?.getDisplayName() || null"

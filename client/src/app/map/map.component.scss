@@ -107,7 +107,6 @@
   margin-left: 8px;
 }
 
-
 // Custom sidebar styling
 ::ng-deep .custom-sidebar {
   width: 100vw !important;
@@ -119,15 +118,14 @@
   .mobile-toggle-button {
     display: block;
   }
-  
+
   .desktop-controls {
     display: none;
   }
-  
+
   .page-content-wrapper {
     height: 100vh;
   }
-  
 }
 
 // Desktop-specific styling
@@ -135,7 +133,7 @@
   .mobile-toggle-button {
     display: none;
   }
-  
+
   ::ng-deep .custom-sidebar {
     display: none;
   }
