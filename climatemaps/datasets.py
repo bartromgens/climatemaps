@@ -57,11 +57,11 @@ class ClimateModel(enum.Enum):
     Climate models used for future climate predictions
     """
 
+    ENSEMBLE_MEAN = "ensemble-mean"
     ACCESS_CM2 = "ACCESS_CM2"
     BCC_CSM2_MR = "BCC_CSM2_MR"
     CMCC_ESM2 = "CMCC_ESM2"
     EC_EARTH3_VEG = "EC_Earth3_Veg"
-    ENSEMBLE_MEAN = "ensemble-mean"
     FIO_ESM_2_0 = "FIO_ESM_2_0"
     GFDL_ESM4 = "GFDL_ESM4"
     GISS_E2_1_G = "GISS_E2_1_G"
@@ -402,7 +402,7 @@ HISTORIC_DATA_GROUPS: List[ClimateDataConfigGroup] = [
         source="https://ipcc-browser.ipcc-data.org/browser/dataset/653/0",
         resolutions=[SpatialResolution.MIN30],
         year_ranges=[(1961, 1990)],
-        conversion_factor=0.4,
+        conversion_factor=0.4,  # https://www.ipcc-data.org/obs/info/cru10/cru_cld_clim_1901-1910.html
     ),
 ]
 

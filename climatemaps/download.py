@@ -12,6 +12,7 @@ from climatemaps.datasets import (
     CRU_TS_FILE_ABBREVIATIONS,
     SpatialResolution,
 )
+from climatemaps.ensemble import compute_ensemble_mean
 from climatemaps.logger import logger
 
 
@@ -182,9 +183,30 @@ def download_historical_data(config: ClimateDataConfig) -> None:
     _extract_zip(temp_zip, data_dir)
 
 
+def _create_ensemble_mean(config: FutureClimateDataConfig) -> None:
+    logger.info(f"Creating ensemble mean for {config.data_type_slug}")
+
+    base_dir = Path(config.filepath).parent
+    output_dir = base_dir
+
+    compute_ensemble_mean(
+        base_dir=base_dir,
+        resolution=config.resolution,
+        variable=config.variable_type,
+        scenario=config.climate_scenario,
+        year_range=config.year_range,
+        output_dir=output_dir,
+    )
+
+
 def download_future_data(config: FutureClimateDataConfig) -> None:
     if _check_future_data_exists(config.filepath):
         logger.info(f"Future data already exists at {config.filepath}")
+        return
+
+    if config.climate_model == ClimateModel.ENSEMBLE_MEAN:
+        logger.info(f"Ensemble mean requested, creating from available models...")
+        _create_ensemble_mean(config)
         return
 
     logger.info(f"Future data not found at {config.filepath}, downloading...")

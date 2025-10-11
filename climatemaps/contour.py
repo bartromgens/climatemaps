@@ -174,10 +174,11 @@ class ContourTileBuilder:
             norm=self.config.norm,
         )
 
+        geojson_filepath = filepath + ".geojson"
         logger.info("converting matplotlib contour to geojson")
         geojsoncontour.contour_to_geojson(
             contour=contours,
-            geojson_filepath=filepath + ".geojson",
+            geojson_filepath=geojson_filepath,
             unit=self.config.unit,
         )
 
@@ -186,7 +187,7 @@ class ContourTileBuilder:
         mbtiles_filepath = f"{filepath}_vector.mbtiles"
         logger.info(f"converting geojson_to_mbtiles at {mbtiles_filepath}")
         togeojsontiles.geojson_to_mbtiles(
-            filepaths=[filepath + ".geojson", self.world_bounding_box_filepath],
+            filepaths=[geojson_filepath, self.world_bounding_box_filepath],
             tippecanoe_dir=settings.TIPPECANOE_DIR,
             mbtiles_file=mbtiles_filepath,
             minzoom=self.zoom_min,
@@ -196,6 +197,9 @@ class ContourTileBuilder:
             min_detail=7,
             extra_args=["--layer", "contours"],
         )
+
+        logger.info(f"removing temporary geojson file: {geojson_filepath}")
+        os.remove(geojson_filepath)
         logger.info("DONE: create contour mbtiles")
 
     def _create_colorbar_image(self, ax, contour, figure, filepath):

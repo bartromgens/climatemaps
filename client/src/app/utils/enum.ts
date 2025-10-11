@@ -22,6 +22,7 @@ export enum SpatialResolution {
 
 // Climate Model enum matching the backend
 export enum ClimateModel {
+  ENSEMBLE_MEAN = 'ENSEMBLE-MEAN',
   ACCESS_CM2 = 'ACCESS-CM2',
   BCC_CSM2_MR = 'BCC-CSM2-MR',
   CMCC_ESM2 = 'CMCC-ESM2',

@@ -43,65 +43,90 @@ HISTORIC_DATA_SETS_AVAILABLE = HISTORIC_DATA_SETS
 FUTURE_DATA_SETS_AVAILABLE = FUTURE_DATA_SETS
 DIFFERENCE_DATA_SETS_AVAILABLE = DIFFERENCE_DATA_SETS
 
-# Default filter for testing (can be overridden via command line)
-DEFAULT_FILTER = {
-    "variable_type": ClimateVarKey.FROST_DAYS,
+DEFAULT_TEST_SET_HISTORIC = {
+    "variable_type": ClimateVarKey.WET_DAYS,
     "resolution": SpatialResolution.MIN30,
     "climate_scenario": ClimateScenario.SSP126,
     "climate_model": ClimateModel.EC_EARTH3_VEG,
     "year_range": (1961, 1990),
 }
 
+DEFAULT_TEST_SET_FUTURE = {
+    "variable_type": ClimateVarKey.T_MAX,
+    "resolution": SpatialResolution.MIN10,
+    "climate_scenario": ClimateScenario.SSP126,
+    "climate_model": ClimateModel.ENSEMBLE_MEAN,
+    "year_range": (2021, 2040),
+}
 
-def _apply_historicfilter(
-    data_sets: List[ClimateDataConfig], filter_criteria: dict
+
+def _apply_historic_test_set(
+    data_sets: List[ClimateDataConfig], test_set_criteria: dict
 ) -> List[ClimateDataConfig]:
-    """Apply filter criteria to regular climate data sets."""
+    """Apply test set criteria to regular climate data sets."""
     return list(
         filter(
             lambda x: (
-                x.variable_type == filter_criteria["variable_type"]
-                and x.resolution == filter_criteria["resolution"]
-                and x.year_range == filter_criteria["year_range"]
+                x.variable_type == test_set_criteria["variable_type"]
+                and x.resolution == test_set_criteria["resolution"]
+                and x.year_range == test_set_criteria["year_range"]
             ),
             data_sets,
         )
     )
 
 
-def _apply_future_filter(
-    data_sets: List[ClimateDataConfig], filter_criteria: dict
+def _apply_future_test_set(
+    data_sets: List[ClimateDataConfig], test_set_criteria: dict
 ) -> List[ClimateDataConfig]:
-    """Apply filter criteria to future climate data sets."""
+    """Apply test set criteria to future climate data sets."""
     return list(
         filter(
             lambda x: (
-                x.variable_type == filter_criteria["variable_type"]
-                and x.resolution == filter_criteria["resolution"]
-                and x.future_config.climate_scenario == filter_criteria["climate_scenario"]
-                and x.future_config.climate_model == filter_criteria["climate_model"]
-                and x.future_config.year_range == filter_criteria["year_range"]
+                x.variable_type == test_set_criteria["variable_type"]
+                and x.resolution == test_set_criteria["resolution"]
+                and x.climate_scenario == test_set_criteria["climate_scenario"]
+                and x.climate_model == test_set_criteria["climate_model"]
+                and x.year_range == test_set_criteria["year_range"]
             ),
             data_sets,
         )
     )
 
 
-def main(force_recreate: bool = False, apply_filter: bool = False):
+def _apply_difference_test_set(
+    data_sets: List[ClimateDataConfig], test_set_criteria: dict
+) -> List[ClimateDataConfig]:
+    """Apply test set criteria to difference climate data sets."""
+    return list(
+        filter(
+            lambda x: (
+                x.variable_type == test_set_criteria["variable_type"]
+                and x.resolution == test_set_criteria["resolution"]
+                and x.future_config.climate_scenario == test_set_criteria["climate_scenario"]
+                and x.future_config.climate_model == test_set_criteria["climate_model"]
+                and x.future_config.year_range == test_set_criteria["year_range"]
+            ),
+            data_sets,
+        )
+    )
+
+
+def main(force_recreate: bool = False, apply_test_set: bool = False):
     """
     Main function to create contour tiles for all data set types.
 
     Args:
         force_recreate: Force recreation of existing tiles
-        apply_filter: Whether to apply the default filter for development testing
+        apply_test_set: Whether to apply the default test set for development testing
     """
     all_tasks = []
     month_upper = 1 if settings.DEV_MODE else 12
 
     # Process historic data sets
     historic_data_sets = HISTORIC_DATA_SETS_AVAILABLE
-    if apply_filter:
-        historic_data_sets = _apply_historicfilter(historic_data_sets, DEFAULT_FILTER)
+    if apply_test_set:
+        historic_data_sets = _apply_historic_test_set(historic_data_sets, DEFAULT_TEST_SET_HISTORIC)
 
     historic_tasks = [
         (contour_config, month, force_recreate)
@@ -113,8 +138,8 @@ def main(force_recreate: bool = False, apply_filter: bool = False):
 
     # Process future data sets
     future_data_sets = FUTURE_DATA_SETS_AVAILABLE
-    if apply_filter:
-        future_data_sets = _apply_future_filter(future_data_sets, DEFAULT_FILTER)
+    if apply_test_set:
+        future_data_sets = _apply_future_test_set(future_data_sets, DEFAULT_TEST_SET_FUTURE)
 
     future_tasks = [
         (contour_config, month, force_recreate)
@@ -126,8 +151,10 @@ def main(force_recreate: bool = False, apply_filter: bool = False):
 
     # Process difference data sets
     difference_data_sets = DIFFERENCE_DATA_SETS_AVAILABLE
-    if apply_filter:
-        difference_data_sets = _apply_future_filter(difference_data_sets, DEFAULT_FILTER)
+    if apply_test_set:
+        difference_data_sets = _apply_difference_test_set(
+            difference_data_sets, DEFAULT_TEST_SET_FUTURE
+        )
 
     difference_tasks = [
         (contour_config, month, force_recreate)
@@ -289,10 +316,10 @@ if __name__ == "__main__":
         help="Force recreation of resources. Defaults to False.",
     )
     parser.add_argument(
-        "--filter",
+        "--test-set",
         action="store_true",
         default=False,
-        help="Apply default filtering for development testing (process only a subset of data sets).",
+        help="Use default test set for development testing (process only a subset of data sets).",
     )
     args = parser.parse_args()
-    main(force_recreate=args.force_recreate, apply_filter=args.filter)
+    main(force_recreate=args.force_recreate, apply_test_set=args.test_set)
