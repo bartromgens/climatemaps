@@ -60,6 +60,7 @@ class ClimateModel(enum.Enum):
     BCC_CSM2_MR = "BCC_CSM2_MR"
     CMCC_ESM2 = "CMCC_ESM2"
     EC_EARTH3_VEG = "EC_Earth3_Veg"
+    ENSEMBLE_MEAN = "ensemble-mean"
     FIO_ESM_2_0 = "FIO_ESM_2_0"
     GFDL_ESM4 = "GFDL_ESM4"
     GISS_E2_1_G = "GISS_E2_1_G"
@@ -411,6 +412,7 @@ FUTURE_DATA_GROUPS: List[FutureClimateDataConfigGroup] = [
             ClimateModel.EC_EARTH3_VEG,
             ClimateModel.MPI_ESM1_2_HR,
             ClimateModel.ACCESS_CM2,
+            ClimateModel.ENSEMBLE_MEAN,
         ],
         filepath_template="data/raw/worldclim/future/wc2.1_{resolution}_{variable_name}_{climate_model}_{climate_scenario}_{year_range[0]}-{year_range[1]}.tif",
     ),
