@@ -104,9 +104,9 @@ class ContourTileBuilder:
     def _create_raster_mbtiles(cls, filepath):
         contour_image_path = f"{filepath}.png"
         mbtiles_path = f"{filepath}_raster.mbtiles"
+        mbtiles_temp_path = f"{mbtiles_path}.tmp"
         logger.info(f"BEGIN: creating raster mbtiles: {mbtiles_path}")
 
-        # First GDAL translate
         translate_cmd = [
             "gdal_translate",
             "-of",
@@ -119,15 +119,14 @@ class ContourTileBuilder:
             "-a_srs",
             "EPSG:4326",
             contour_image_path,
-            mbtiles_path,
+            mbtiles_temp_path,
         ]
 
-        # Build overviews
         addo_cmd = [
             "gdaladdo",
             "-r",
             "nearest",
-            mbtiles_path,
+            mbtiles_temp_path,
             "2",
             "4",
             "8",
@@ -142,12 +141,17 @@ class ContourTileBuilder:
             logger.debug(f"Running: {' '.join(addo_cmd)}")
             out = subprocess.check_output(addo_cmd, stderr=subprocess.STDOUT)
             logger.info(out.decode("utf-8"))
+
+            logger.info(f"Atomically moving {mbtiles_temp_path} to {mbtiles_path}")
+            os.replace(mbtiles_temp_path, mbtiles_path)
         except subprocess.CalledProcessError as e:
-            # command ran but returned non-zero exit
             logger.error(
                 f"GDAL command failed (exit {e.returncode}): {e.cmd}\n"
                 f"Output: {e.output.decode('utf-8', errors='replace')}"
             )
+            if os.path.exists(mbtiles_temp_path):
+                logger.info(f"Removing incomplete temp file: {mbtiles_temp_path}")
+                os.remove(mbtiles_temp_path)
             raise
         finally:
             if os.path.exists(contour_image_path):
@@ -189,21 +193,35 @@ class ContourTileBuilder:
         assert os.path.exists(self.world_bounding_box_filepath)
 
         mbtiles_filepath = f"{filepath}_vector.mbtiles"
+        mbtiles_temp_filepath = f"{mbtiles_filepath}.tmp"
         logger.info(f"converting geojson_to_mbtiles at {mbtiles_filepath}")
-        togeojsontiles.geojson_to_mbtiles(
-            filepaths=[geojson_filepath, self.world_bounding_box_filepath],
-            tippecanoe_dir=settings.TIPPECANOE_DIR,
-            mbtiles_file=mbtiles_filepath,
-            minzoom=self.zoom_min,
-            maxzoom=self.zoom_max,
-            full_detail=10,
-            lower_detail=9,
-            min_detail=7,
-            extra_args=["--layer", "contours"],
-        )
 
-        logger.info(f"removing temporary geojson file: {geojson_filepath}")
-        os.remove(geojson_filepath)
+        try:
+            togeojsontiles.geojson_to_mbtiles(
+                filepaths=[geojson_filepath, self.world_bounding_box_filepath],
+                tippecanoe_dir=settings.TIPPECANOE_DIR,
+                mbtiles_file=mbtiles_temp_filepath,
+                minzoom=self.zoom_min,
+                maxzoom=self.zoom_max,
+                full_detail=10,
+                lower_detail=9,
+                min_detail=7,
+                extra_args=["--layer", "contours"],
+            )
+
+            logger.info(f"Atomically moving {mbtiles_temp_filepath} to {mbtiles_filepath}")
+            os.replace(mbtiles_temp_filepath, mbtiles_filepath)
+        except Exception as e:
+            logger.error(f"Failed to create vector mbtiles: {e}")
+            if os.path.exists(mbtiles_temp_filepath):
+                logger.info(f"Removing incomplete temp file: {mbtiles_temp_filepath}")
+                os.remove(mbtiles_temp_filepath)
+            raise
+        finally:
+            logger.info(f"removing temporary geojson file: {geojson_filepath}")
+            if os.path.exists(geojson_filepath):
+                os.remove(geojson_filepath)
+
         logger.info("DONE: create contour mbtiles")
 
     def _create_colorbar_image(self, ax, contour, figure, filepath):
