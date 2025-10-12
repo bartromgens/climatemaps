@@ -20,4 +20,4 @@ try:
 except ImportError:
     import warnings
 
-    warnings.warn("No local_settings.py found. Using base settings only.")
+    warnings.warn("No settings_local.py found. Using base settings only.")
