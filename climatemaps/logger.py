@@ -22,7 +22,7 @@ handlers.append(console)
 # debug_file.setLevel(logging.DEBUG)
 # handlers.append(debug_file)
 
-format = "[%(asctime)s] %(levelname)s [%(funcName)s() (%(lineno)s)]: %(message)s"
+format = "[%(asctime)s] %(levelname)s [%(name)s:%(module)s.%(funcName)s():%(lineno)s]: %(message)s"
 date_fmt = "%Y-%m-%d %H:%M:%S"
 formatter = logging.Formatter(format, date_fmt)
 
