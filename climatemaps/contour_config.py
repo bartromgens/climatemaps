@@ -23,20 +23,20 @@ class ContourPlotConfig(BaseModel):
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
     @model_validator(mode="after")
-    def _check_ranges(cls, model: "ContourPlotConfig"):
-        if model.level_upper <= model.level_lower:
+    def _check_ranges(self) -> "ContourPlotConfig":
+        if self.level_upper <= self.level_lower:
             raise ValueError("level_upper must exceed level_lower")
-        if model.log_scale:
-            lt = model.linthresh
-            if model.level_lower <= 0:
+        if self.log_scale:
+            lt = self.linthresh
+            if self.level_lower <= 0:
                 raise ValueError("level_lower must be > 0 for log scale")
-            if model.linthresh <= 0:
+            if self.linthresh <= 0:
                 raise ValueError("linthresh must be > 0 for log scale")
-            if model.level_upper <= -model.linthresh:
+            if self.level_upper <= -self.linthresh:
                 raise ValueError(
                     "Data range cannot lie entirely below -linthresh when using log_scale"
                 )
-        return model
+        return self
 
     @computed_field
     @property
