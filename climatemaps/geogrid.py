@@ -19,26 +19,26 @@ class GeoGrid(BaseModel):
     model_config = ConfigDict(arbitrary_types_allowed=True, frozen=True)
 
     @field_validator("lon_range")
-    def lon_range_must_increase(cls, v, values):
+    def lon_range_must_increase(cls, v: npt.NDArray[np.floating]) -> npt.NDArray[np.floating]:
         if not np.all(np.diff(v) > 0):
             raise ValueError("lon range must be monotonically increasing")
         return v
 
     @field_validator("lat_range")
-    def lat_range_must_increase(cls, v, values):
+    def lat_range_must_increase(cls, v: npt.NDArray[np.floating]) -> npt.NDArray[np.floating]:
         if not np.all(np.diff(v) < 0):
             raise ValueError("lat range must be monotonically decreasing")
         return v
 
     @model_validator(mode="after")
-    def check_array_sizes(cls, model: "GeoGrid"):
-        if model.values.size != model.lon_range.size * model.lat_range.size:
+    def check_array_sizes(self) -> "GeoGrid":
+        if self.values.size != self.lon_range.size * self.lat_range.size:
             raise ValueError("size of values does not match the lat and lon sizes")
-        if model.values.shape[0] != model.lat_range.shape[0]:
+        if self.values.shape[0] != self.lat_range.shape[0]:
             raise ValueError("shape of values does not match the lat size")
-        if model.values.shape[1] != model.lon_range.shape[0]:
+        if self.values.shape[1] != self.lon_range.shape[0]:
             raise ValueError("shape of values does not match the lon size")
-        return model
+        return self
 
     def clipped_values(self, lower: float, upper: float) -> npt.NDArray[np.floating]:
         return np.clip(self.values.astype(float), lower, upper)
