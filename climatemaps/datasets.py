@@ -87,7 +87,7 @@ class ClimateVariable(BaseModel):
 
 CLIMATE_VARIABLES: Dict[ClimateVarKey, ClimateVariable] = {
     ClimateVarKey.PRECIPITATION: ClimateVariable(
-        name="Precipitation", display_name="Precipitation", unit="mm/day", filename="prec"
+        name="Precipitation", display_name="Precipitation", unit="mm/month", filename="prec"
     ),
     ClimateVarKey.T_MAX: ClimateVariable(
         name="Tmax", display_name="Temperature Max", unit="°C", filename="tmax"
@@ -121,11 +121,11 @@ CLIMATE_VARIABLES: Dict[ClimateVarKey, ClimateVariable] = {
 
 CLIMATE_CONTOUR_CONFIGS: Dict[ClimateVarKey, ContourPlotConfig] = {
     ClimateVarKey.PRECIPITATION: ContourPlotConfig(
-        level_lower=0.1,
-        level_upper=16,
-        colormap=plt.cm.jet_r,
+        level_lower=5,
+        level_upper=400,
+        colormap=plt.cm.RdYlBu,
         title="Precipitation",
-        unit="mm/day",
+        unit="mm/month",
         log_scale=True,
     ),
     ClimateVarKey.T_MAX: ContourPlotConfig(
@@ -162,24 +162,23 @@ CLIMATE_CONTOUR_CONFIGS: Dict[ClimateVarKey, ContourPlotConfig] = {
 # Only includes variables that have both historical and future data available
 CLIMATE_DIFFERENCE_CONTOUR_CONFIGS: Dict[ClimateVarKey, ContourPlotConfig] = {
     ClimateVarKey.PRECIPITATION: ContourPlotConfig(
-        level_lower=-5,
-        level_upper=5,
-        colormap=plt.cm.RdBu_r,  # Red-Blue diverging colormap
+        level_lower=-35,
+        level_upper=35,
+        colormap=plt.cm.RdBu,
         title="Precipitation Change",
-        unit="mm/day",
-        log_scale=False,
+        unit="mm/month",
     ),
     ClimateVarKey.T_MAX: ContourPlotConfig(
-        level_lower=-8,
-        level_upper=8,
-        colormap=plt.cm.RdBu_r,
+        level_lower=-6,
+        level_upper=6,
+        colormap=plt.cm.RdYlBu_r,
         title="Max. Temperature Change",
         unit="°C",
     ),
     ClimateVarKey.T_MIN: ContourPlotConfig(
         level_lower=-5,
         level_upper=5,
-        colormap=plt.cm.RdBu_r,
+        colormap=plt.cm.RdYlBu_r,
         title="Min. Temperature Change",
         unit="°C",
     ),
@@ -362,7 +361,7 @@ class CRUTSClimateDataConfigGroup(ClimateDataConfigGroup):
 
 HISTORIC_DATA_GROUPS: List[ClimateDataConfigGroup] = [
     ClimateDataConfigGroup(
-        variable_types=[ClimateVarKey.T_MAX, ClimateVarKey.T_MIN],
+        variable_types=[ClimateVarKey.T_MAX, ClimateVarKey.T_MIN, ClimateVarKey.PRECIPITATION],
         format=DataFormat.GEOTIFF_WORLDCLIM_HISTORY,
         source="https://www.worldclim.org/data/worldclim21.html",
         resolutions=[SpatialResolution.MIN10, SpatialResolution.MIN5],
@@ -416,7 +415,7 @@ FUTURE_DATE_RANGES = [(2021, 2040), (2041, 2060), (2061, 2080), (2081, 2100)]
 
 FUTURE_DATA_GROUPS: List[FutureClimateDataConfigGroup] = [
     FutureClimateDataConfigGroup(
-        variable_types=[ClimateVarKey.T_MIN, ClimateVarKey.T_MAX],
+        variable_types=[ClimateVarKey.T_MIN, ClimateVarKey.T_MAX, ClimateVarKey.PRECIPITATION],
         format=DataFormat.GEOTIFF_WORLDCLIM_CMIP6,
         source="https://www.worldclim.org/data/cmip6/cmip6climate.html",
         resolutions=[SpatialResolution.MIN10, SpatialResolution.MIN5],
@@ -433,7 +432,7 @@ FUTURE_DATA_GROUPS: List[FutureClimateDataConfigGroup] = [
         filepath_template=FUTURE_FILE_TEMPLATE,
     ),
     FutureClimateDataConfigGroup(
-        variable_types=[ClimateVarKey.T_MIN, ClimateVarKey.T_MAX],
+        variable_types=[ClimateVarKey.T_MIN, ClimateVarKey.T_MAX, ClimateVarKey.PRECIPITATION],
         format=DataFormat.GEOTIFF_WORLDCLIM_CMIP6,
         source="https://www.worldclim.org/data/cmip6/cmip6climate.html",
         resolutions=[SpatialResolution.MIN10],

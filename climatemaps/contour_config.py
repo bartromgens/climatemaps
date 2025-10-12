@@ -51,18 +51,14 @@ class ContourPlotConfig(BaseModel):
     @property
     def levels(self) -> np.ndarray:
         if self.log_scale:
-            eps = self.linthresh * 1e-6
-            start = max(self.level_lower, self.linthresh + eps)
-            return np.geomspace(start, self.level_upper, num=self.n_contours)
+            return np.geomspace(self.level_lower, self.level_upper, num=self.n_contours)
         return np.linspace(self.level_lower, self.level_upper, num=self.n_contours)
 
     @computed_field
     @property
     def levels_image(self) -> np.ndarray:
         if self.log_scale:
-            eps = self.linthresh * 1e-6
-            start = max(self.level_lower, self.linthresh + eps)
-            return np.geomspace(start, self.level_upper, num=self.n_contours * 20)
+            return np.geomspace(self.level_lower, self.level_upper, num=self.n_contours * 20)
         return np.linspace(self.level_lower, self.level_upper, num=self.n_contours * 20)
 
     @computed_field

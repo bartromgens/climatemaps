@@ -39,14 +39,14 @@ maps_config: ClimateMapsConfig = get_config()
 np.set_printoptions(3, threshold=100, suppress=True)  # .3f
 
 DEFAULT_TEST_SET_HISTORIC = {
-    "variable_type": ClimateVarKey.T_MAX,
+    "variable_type": ClimateVarKey.PRECIPITATION,
     "resolution": SpatialResolution.MIN10,
 }
 
 DEFAULT_TEST_SET_FUTURE = {
-    "variable_type": ClimateVarKey.T_MAX,
+    "variable_type": ClimateVarKey.PRECIPITATION,
     "resolution": SpatialResolution.MIN10,
-    "climate_scenario": ClimateScenario.SSP126,
+    "climate_scenario": ClimateScenario.SSP370,
     "climate_model": ClimateModel.ENSEMBLE_MEAN,
     "year_range": (2021, 2040),
 }
@@ -97,8 +97,8 @@ def _create_tasks_for_datasets(
     return tasks
 
 
-def main(force_recreate: bool = False, apply_test_set: bool = False) -> None:
-    month_upper = 1 if settings.DEV_MODE else 12
+def main(force_recreate: bool = False, limited_test_set: bool = False) -> None:
+    month_upper = 1 if limited_test_set else 12
     all_tasks = []
 
     dataset_groups = [
@@ -108,7 +108,7 @@ def main(force_recreate: bool = False, apply_test_set: bool = False) -> None:
     ]
 
     for datasets, criteria, is_diff, name in dataset_groups:
-        if apply_test_set:
+        if limited_test_set:
             datasets = _filter_by_criteria(datasets, criteria, is_diff)
         all_tasks.extend(_create_tasks_for_datasets(datasets, month_upper, force_recreate, name))
 
@@ -230,4 +230,4 @@ if __name__ == "__main__":
         help="Use default test set for development testing (process only a subset of data sets).",
     )
     args = parser.parse_args()
-    main(force_recreate=args.force_recreate, apply_test_set=args.test_set)
+    main(force_recreate=args.force_recreate, limited_test_set=args.test_set)
