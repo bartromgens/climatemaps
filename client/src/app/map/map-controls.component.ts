@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
-import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import {
   ClimateVarKey,
   SpatialResolution,
@@ -47,7 +47,7 @@ export interface MapControlsOptions {
     FormsModule,
     MatFormFieldModule,
     MatSelectModule,
-    MatCheckboxModule,
+    MatSlideToggleModule,
     YearSliderComponent,
     MonthSliderComponent,
   ],

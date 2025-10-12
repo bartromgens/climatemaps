@@ -85,7 +85,7 @@ export class MapComponent implements OnInit {
     selectedResolution: SpatialResolution.MIN10,
     selectedClimateScenario: null,
     selectedClimateModel: null,
-    showDifferenceMap: false,
+    showDifferenceMap: true,
     selectedMonth: 1,
   };
 
@@ -700,7 +700,9 @@ export class MapComponent implements OnInit {
       resolution: params.get('resolution') as SpatialResolution,
       scenario: params.get('scenario') as ClimateScenario,
       model: params.get('model') as ClimateModel,
-      difference: params.get('difference') === 'true',
+      difference: params.has('difference')
+        ? params.get('difference') === 'true'
+        : undefined,
       month: params.get('month')
         ? parseInt(params.get('month')!, 10)
         : undefined,
@@ -779,7 +781,6 @@ export class MapComponent implements OnInit {
           ...this.controlsData,
           selectedClimateScenario: null,
           selectedClimateModel: null,
-          showDifferenceMap: false,
         }
       : this.controlsData;
 

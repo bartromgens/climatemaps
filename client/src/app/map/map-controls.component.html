@@ -86,14 +86,14 @@
   </mat-form-field>
 
   <div class="checkbox-field">
-    <mat-checkbox
+    <mat-slide-toggle
       [ngModel]="controlsData?.showDifferenceMap"
       (ngModelChange)="onDifferenceMapChange($event)"
       [disabled]="!shouldShowDifferenceCheckbox()"
       color="primary"
     >
-      Show Difference
-    </mat-checkbox>
+      Show Change
+    </mat-slide-toggle>
   </div>
 </div>
 
