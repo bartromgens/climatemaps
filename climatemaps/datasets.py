@@ -446,6 +446,8 @@ FUTURE_DATA_GROUPS: List[FutureClimateDataConfigGroup] = [
         climate_models=[
             ClimateModel.EC_EARTH3_VEG,
             ClimateModel.ACCESS_CM2,
+            ClimateModel.MPI_ESM1_2_HR,
+            ClimateModel.GFDL_ESM4,
         ],
         filepath_template=FUTURE_FILE_TEMPLATE,
     ),
