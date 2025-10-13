@@ -18,6 +18,7 @@ export interface ClimateValueResponse {
 
 export interface NearestCityResponse {
   city_name: string;
+  country_name: string;
   country_code: string;
   latitude: number;
   longitude: number;

@@ -7,6 +7,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from citipy import citipy
+import pycountry
 
 from climatemaps.config import ClimateMap
 from climatemaps.settings import settings
@@ -92,6 +93,7 @@ def get_climate_value(data_type: str, month: int, lat: float, lon: float):
 
 class NearestCityResponse(BaseModel):
     city_name: str
+    country_name: str
     country_code: str
     latitude: float
     longitude: float
@@ -101,9 +103,20 @@ class NearestCityResponse(BaseModel):
 def get_nearest_city(lat: float, lon: float) -> NearestCityResponse:
     try:
         city = citipy.nearest_city(lat, lon)
+        country_code = city.country_code.upper()
+
+        country_name = country_code
+        try:
+            country = pycountry.countries.get(alpha_2=country_code)
+            if country:
+                country_name = country.name
+        except Exception:
+            pass
+
         return NearestCityResponse(
             city_name=city.city_name,
-            country_code=city.country_code.upper(),
+            country_name=country_name,
+            country_code=country_code,
             latitude=lat,
             longitude=lon,
         )
