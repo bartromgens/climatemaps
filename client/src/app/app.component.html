@@ -8,6 +8,40 @@
 
   <span class="spacer"></span>
 
+  <div class="search-container" *ngIf="!isMobile">
+    <mat-form-field appearance="fill">
+      <mat-icon matPrefix>search</mat-icon>
+      <input
+        type="text"
+        matInput
+        placeholder="Search city or country..."
+        [formControl]="searchControl"
+        [matAutocomplete]="auto"
+      />
+      <button
+        *ngIf="searchControl.value"
+        mat-icon-button
+        matSuffix
+        (click)="clearSearch()"
+        aria-label="Clear"
+      >
+        <mat-icon>close</mat-icon>
+      </button>
+      <mat-autocomplete
+        #auto="matAutocomplete"
+        [displayWith]="displayLocationName"
+        (optionSelected)="onLocationSelected($event.option.value)"
+      >
+        <mat-option
+          *ngFor="let location of filteredLocations$ | async"
+          [value]="location"
+        >
+          {{ location.displayName }}
+        </mat-option>
+      </mat-autocomplete>
+    </mat-form-field>
+  </div>
+
   <nav class="nav-links">
     <a mat-button routerLink="/about">Info</a>
     <a

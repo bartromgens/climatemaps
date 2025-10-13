@@ -12,3 +12,4 @@ pydantic>=2.5.3
 uvicorn>=0.37.0
 citipy>=0.0.6
 pycountry>=24.6.1
+geopy>=2.4.1

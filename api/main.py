@@ -8,6 +8,8 @@ from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from citipy import citipy
 import pycountry
+from geopy.geocoders import Photon
+from geopy.exc import GeocoderTimedOut, GeocoderServiceError
 
 from climatemaps.config import ClimateMap
 from climatemaps.settings import settings
@@ -22,6 +24,8 @@ app.mount("/v1", api)
 climate_maps = [ClimateMap.create(maps_config) for maps_config in settings.DATA_SETS_API]
 
 data_config_map = {config.data_type_slug: config for config in settings.DATA_SETS_API}
+
+geocoder = Photon(user_agent="openclimatemap")
 
 
 @api.get("/climatemap", response_model=List[ClimateMap])
@@ -121,3 +125,78 @@ def get_nearest_city(lat: float, lon: float) -> NearestCityResponse:
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error finding nearest city: {str(e)}")
+
+
+class GeocodingLocation(BaseModel):
+    display_name: str
+    latitude: float
+    longitude: float
+    type: str
+    bounding_box: Optional[List[float]] = None
+
+
+@api.get("/geocode", response_model=List[GeocodingLocation])
+def search_locations(query: str, limit: int = 50) -> List[GeocodingLocation]:
+    if not query or len(query.strip()) < 2:
+        return []
+
+    if limit < 1 or limit > 50:
+        raise HTTPException(status_code=400, detail="Limit must be between 1 and 50")
+
+    try:
+        results = geocoder.geocode(query, exactly_one=False, limit=50, language="en")
+
+        if not results:
+            return []
+
+        locations: List[GeocodingLocation] = []
+
+        for index, result in enumerate(results):
+            if not hasattr(result, "raw"):
+                continue
+
+            raw = result.raw
+            properties = raw.get("properties", {})
+
+            if not _is_city_country_or_town_photon(properties):
+                continue
+
+            location_type = properties.get("type", "").lower()
+            bounding_box = None
+            if "extent" in properties and len(properties["extent"]) == 4:
+                extent = properties["extent"]
+                bounding_box = [extent[1], extent[3], extent[0], extent[2]]
+
+            locations.append(
+                GeocodingLocation(
+                    display_name=result.address,
+                    latitude=result.latitude,
+                    longitude=result.longitude,
+                    type=location_type,
+                    bounding_box=bounding_box,
+                )
+            )
+
+        return locations[:limit]
+
+    except GeocoderTimedOut:
+        raise HTTPException(status_code=504, detail="Geocoding service timed out")
+    except GeocoderServiceError as e:
+        raise HTTPException(status_code=503, detail=f"Geocoding service error: {str(e)}")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error searching locations: {str(e)}")
+
+
+def _is_city_country_or_town_photon(properties: dict) -> bool:
+    location_type = properties.get("type", "").lower()
+
+    allowed_types = [
+        "city",
+        "town",
+        "village",
+        "hamlet",
+        "state",
+        "country",
+    ]
+
+    return location_type in allowed_types

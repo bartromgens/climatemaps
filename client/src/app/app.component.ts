@@ -3,6 +3,16 @@ import { CommonModule } from '@angular/common';
 import { RouterLink, RouterOutlet } from '@angular/router';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatButtonModule } from '@angular/material/button';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
+import { MatInputModule } from '@angular/material/input';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
+import { ReactiveFormsModule, FormControl } from '@angular/forms';
+import { Observable } from 'rxjs';
+import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
+
+import { GeocodingService, LocationSuggestion } from './core/geocoding.service';
+import { MapNavigationService } from './core/map-navigation.service';
 
 @Component({
   selector: 'app-root',
@@ -13,6 +23,11 @@ import { MatButtonModule } from '@angular/material/button';
     RouterLink,
     MatToolbarModule,
     MatButtonModule,
+    MatAutocompleteModule,
+    MatInputModule,
+    MatFormFieldModule,
+    MatIconModule,
+    ReactiveFormsModule,
   ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',
@@ -20,6 +35,22 @@ import { MatButtonModule } from '@angular/material/button';
 export class AppComponent implements OnInit {
   readonly title: string = 'OpenClimateMap';
   isMobile = false;
+  searchControl = new FormControl('');
+  filteredLocations$: Observable<LocationSuggestion[]>;
+
+  constructor(
+    private geocodingService: GeocodingService,
+    private mapNavigationService: MapNavigationService,
+  ) {
+    this.filteredLocations$ = this.searchControl.valueChanges.pipe(
+      debounceTime(300),
+      distinctUntilChanged(),
+      switchMap((value) => {
+        const query = typeof value === 'string' ? value : '';
+        return this.geocodingService.searchLocations(query);
+      }),
+    );
+  }
 
   ngOnInit(): void {
     this.checkMobile();
@@ -32,5 +63,22 @@ export class AppComponent implements OnInit {
 
   private checkMobile(): void {
     this.isMobile = window.innerWidth <= 768;
+  }
+
+  displayLocationName(location: LocationSuggestion | null): string {
+    return location ? location.displayName : '';
+  }
+
+  onLocationSelected(location: LocationSuggestion): void {
+    const zoom = this.geocodingService.getZoomLevelForLocation(location);
+    this.mapNavigationService.navigateToLocation(
+      location.lat,
+      location.lon,
+      zoom,
+    );
+  }
+
+  clearSearch(): void {
+    this.searchControl.setValue('');
   }
 }

@@ -51,6 +51,7 @@ import { LayerFilterService } from './services/layer-filter.service';
 import { URLUtils } from '../utils/url-utils';
 import { ClimateMonthlyPlotComponent } from './climate-monthly-plot.component';
 import { ClimateTimerangePlotComponent } from './climate-timerange-plot.component';
+import { MapNavigationService } from '../core/map-navigation.service';
 
 @Component({
   selector: 'app-map',
@@ -257,6 +258,7 @@ export class MapComponent implements OnInit {
     private tooltipManager: TooltipManagerService,
     private layerBuilder: LayerBuilderService,
     private layerFilter: LayerFilterService,
+    private mapNavigationService: MapNavigationService,
   ) {
     this.isHistoricalYearRange =
       this.metadataService.isHistoricalYearRange.bind(this.metadataService);
@@ -265,6 +267,7 @@ export class MapComponent implements OnInit {
   ngOnInit(): void {
     this.checkMobile();
     this.setupResizeListener();
+    this.setupNavigationListener();
 
     this.route.queryParamMap.subscribe((params) => {
       if (params.has('lat') && params.has('lon') && params.has('zoom')) {
@@ -857,5 +860,17 @@ export class MapComponent implements OnInit {
 
   toggleSidebar(): void {
     this.sidebarOpened = !this.sidebarOpened;
+  }
+
+  private setupNavigationListener(): void {
+    this.mapNavigationService.navigation$.subscribe((request) => {
+      if (this.map) {
+        this.map.setView([request.lat, request.lon], request.zoom, {
+          animate: true,
+          duration: 1.0,
+        });
+        this.updateUrlWithLocationZoom();
+      }
+    });
   }
 }
