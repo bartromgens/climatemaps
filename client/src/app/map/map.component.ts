@@ -49,7 +49,7 @@ import {
 } from './services/layer-builder.service';
 import { LayerFilterService } from './services/layer-filter.service';
 import { URLUtils } from '../utils/url-utils';
-import { TemperaturePlotComponent } from './temperature-plot.component';
+import { ClimateMonthlyPlotComponent } from './climate-monthly-plot.component';
 
 @Component({
   selector: 'app-map',
@@ -64,7 +64,7 @@ import { TemperaturePlotComponent } from './temperature-plot.component';
     MatCardModule,
     MapControlsComponent,
     ColorbarComponent,
-    TemperaturePlotComponent,
+    ClimateMonthlyPlotComponent,
   ],
   templateUrl: './map.component.html',
   styleUrl: './map.component.scss',

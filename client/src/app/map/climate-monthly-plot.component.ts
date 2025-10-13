@@ -39,13 +39,13 @@ interface MonthlyData {
 }
 
 @Component({
-  selector: 'app-temperature-plot',
+  selector: 'app-climate-monthly-plot',
   standalone: true,
   imports: [CommonModule, MatCardModule, MatIconModule, MatButtonModule],
-  templateUrl: './temperature-plot.component.html',
-  styleUrl: './temperature-plot.component.scss',
+  templateUrl: './climate-monthly-plot.component.html',
+  styleUrl: './climate-monthly-plot.component.scss',
 })
-export class TemperaturePlotComponent
+export class ClimateMonthlyPlotComponent
   implements OnChanges, AfterViewInit, OnDestroy
 {
   @Input() plotData: PlotData | null = null;
