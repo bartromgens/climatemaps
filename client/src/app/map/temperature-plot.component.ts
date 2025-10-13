@@ -244,6 +244,7 @@ export class TemperaturePlotComponent
             type: 'linear',
             display: true,
             position: 'right',
+            min: 0,
             title: {
               display: true,
               text: precipLabel,
