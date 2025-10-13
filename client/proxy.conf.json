@@ -5,7 +5,13 @@
     "changeOrigin": true,
     "logLevel": "debug"
   },
-  "/value/": {
+  "/value": {
+    "target": "http://localhost:8000",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "debug"
+  },
+  "/nearest-city": {
     "target": "http://localhost:8000",
     "secure": false,
     "changeOrigin": true,

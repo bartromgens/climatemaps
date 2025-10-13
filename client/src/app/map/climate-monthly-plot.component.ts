@@ -16,7 +16,10 @@ import { MatButtonModule } from '@angular/material/button';
 import { Chart, ChartConfiguration, registerables } from 'chart.js';
 import { forkJoin } from 'rxjs';
 
-import { ClimateMapService } from '../core/climatemap.service';
+import {
+  ClimateMapService,
+  NearestCityResponse,
+} from '../core/climatemap.service';
 import {
   ClimateVarKey,
   CLIMATE_VAR_KEY_TO_NAME,
@@ -58,6 +61,7 @@ export class ClimateMonthlyPlotComponent
   error: string | null = null;
   isVisible = true;
   monthlyData: MonthlyData = { tmax: [], tmin: [], precipitation: [] };
+  cityInfo: NearestCityResponse | null = null;
 
   constructor(
     private climateMapService: ClimateMapService,
@@ -130,6 +134,10 @@ export class ClimateMonthlyPlotComponent
       tmax: forkJoin(tmaxRequests),
       tmin: forkJoin(tminRequests),
       precipitation: forkJoin(precipRequests),
+      city: this.climateMapService.getNearestCity(
+        this.plotData.lat,
+        this.plotData.lon,
+      ),
     }).subscribe({
       next: (results) => {
         this.monthlyData = {
@@ -137,6 +145,7 @@ export class ClimateMonthlyPlotComponent
           tmin: results.tmin.map((r) => r.value),
           precipitation: results.precipitation.map((r) => r.value),
         };
+        this.cityInfo = results.city;
         this.isLoading = false;
         this.cdr.detectChanges();
         setTimeout(() => this.renderChart(), 0);
@@ -282,5 +291,16 @@ export class ClimateMonthlyPlotComponent
   get displayCoordinates(): string {
     if (!this.plotData) return '';
     return `${this.plotData.lat.toFixed(4)}°, ${this.plotData.lon.toFixed(4)}°`;
+  }
+
+  get displayLocation(): string {
+    if (!this.cityInfo) {
+      return this.displayCoordinates;
+    }
+    const cityName = this.cityInfo.city_name
+      .split(' ')
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
+    return `${cityName}, ${this.cityInfo.country_code}`;
   }
 }

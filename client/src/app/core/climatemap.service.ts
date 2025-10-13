@@ -16,6 +16,13 @@ export interface ClimateValueResponse {
   variable_name: string;
 }
 
+export interface NearestCityResponse {
+  city_name: string;
+  country_code: string;
+  latitude: number;
+  longitude: number;
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -40,6 +47,16 @@ export class ClimateMapService {
   ): Observable<ClimateValueResponse> {
     const url = `${environment.apiBaseUrl}/value/${dataType}/${month}`;
     return this.httpClient.get<ClimateValueResponse>(url, {
+      params: { lat: lat.toString(), lon: lon.toString() },
+    });
+  }
+
+  public getNearestCity(
+    lat: number,
+    lon: number,
+  ): Observable<NearestCityResponse> {
+    const url = `${environment.apiBaseUrl}/nearest-city`;
+    return this.httpClient.get<NearestCityResponse>(url, {
       params: { lat: lat.toString(), lon: lon.toString() },
     });
   }

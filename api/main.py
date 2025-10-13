@@ -6,6 +6,7 @@ from fastapi import FastAPI, HTTPException
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
+from citipy import citipy
 
 from climatemaps.config import ClimateMap
 from climatemaps.settings import settings
@@ -87,3 +88,24 @@ def get_climate_value(data_type: str, month: int, lat: float, lon: float):
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error retrieving climate value: {str(e)}")
+
+
+class NearestCityResponse(BaseModel):
+    city_name: str
+    country_code: str
+    latitude: float
+    longitude: float
+
+
+@app.get("/nearest-city", response_model=NearestCityResponse)
+def get_nearest_city(lat: float, lon: float) -> NearestCityResponse:
+    try:
+        city = citipy.nearest_city(lat, lon)
+        return NearestCityResponse(
+            city_name=city.city_name,
+            country_code=city.country_code.upper(),
+            latitude=lat,
+            longitude=lon,
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error finding nearest city: {str(e)}")
