@@ -32,6 +32,7 @@ from climatemaps.datasets import SpatialResolution
 from climatemaps.settings import settings
 from climatemaps.logger import logger
 from climatemaps.tile import tile_files_exist, difference_tile_files_exist
+from climatemaps.download import ensure_data_available
 
 
 maps_config: ClimateMapsConfig = get_config()
@@ -97,9 +98,47 @@ def _create_tasks_for_datasets(
     return tasks
 
 
+def _pre_ensure_all_data_available(data_sets: List[ClimateDataConfig]) -> None:
+    unique_configs = set()
+
+    for config in data_sets:
+        if isinstance(config, ClimateDifferenceDataConfig):
+            unique_configs.add(id(config.historical_config))
+            unique_configs.add(id(config.future_config))
+        else:
+            unique_configs.add(id(config))
+
+    logger.info(f"Pre-downloading/generating data for {len(unique_configs)} unique configurations")
+
+    processed_configs = set()
+    for config in data_sets:
+        if isinstance(config, ClimateDifferenceDataConfig):
+            if id(config.historical_config) not in processed_configs:
+                logger.info(
+                    f"Ensuring data available for historical: {config.historical_config.data_type_slug}"
+                )
+                ensure_data_available(config.historical_config)
+                processed_configs.add(id(config.historical_config))
+
+            if id(config.future_config) not in processed_configs:
+                logger.info(
+                    f"Ensuring data available for future: {config.future_config.data_type_slug}"
+                )
+                ensure_data_available(config.future_config)
+                processed_configs.add(id(config.future_config))
+        else:
+            if id(config) not in processed_configs:
+                logger.info(f"Ensuring data available for: {config.data_type_slug}")
+                ensure_data_available(config)
+                processed_configs.add(id(config))
+
+    logger.info("All data pre-download/generation completed")
+
+
 def main(force_recreate: bool = False, limited_test_set: bool = False) -> None:
     month_upper = 1 if limited_test_set else 12
     all_tasks = []
+    all_datasets = []
 
     dataset_groups = [
         (HISTORIC_DATA_SETS, DEFAULT_TEST_SET_HISTORIC, False, "historic"),
@@ -110,7 +149,11 @@ def main(force_recreate: bool = False, limited_test_set: bool = False) -> None:
     for datasets, criteria, is_diff, name in dataset_groups:
         if limited_test_set:
             datasets = _filter_by_criteria(datasets, criteria, is_diff)
+        all_datasets.extend(datasets)
         all_tasks.extend(_create_tasks_for_datasets(datasets, month_upper, force_recreate, name))
+
+    logger.info("Pre-ensuring all data files exist before multiprocessing")
+    _pre_ensure_all_data_available(all_datasets)
 
     logger.info(f"Processing all data sets with {len(all_tasks)} total tasks")
     run_tasks_with_process_pool(all_tasks, process, settings.CREATE_CONTOUR_PROCESSES)
