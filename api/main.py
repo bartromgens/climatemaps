@@ -23,11 +23,6 @@ climate_maps = [ClimateMap.create(maps_config) for maps_config in settings.DATA_
 
 data_config_map = {config.data_type_slug: config for config in settings.DATA_SETS_API}
 
-# Mount static files colorbars
-tiles_path = Path("data/tiles")
-if tiles_path.exists():
-    app.mount("/data", StaticFiles(directory="data/tiles"), name="tiles")
-
 
 @api.get("/climatemap", response_model=List[ClimateMap])
 def list_climate_map():
@@ -37,6 +32,7 @@ def list_climate_map():
 @api.get("/colorbar/{data_type}/{month}")
 def get_colorbar(data_type: str, month: int):
     """Serve colorbar image for a specific data type and month."""
+    tiles_path = Path("data/tiles")
     colorbar_path = tiles_path / data_type / f"{month}_colorbar.png"
 
     if colorbar_path.exists():
