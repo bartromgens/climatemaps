@@ -1,7 +1,10 @@
 <mat-toolbar>
   <a routerLink="/" class="app-title-link">
-    <span [ngStyle]="{ 'margin-left': '8px' }">{{ title }}</span>
+    <span>{{ title }}</span>
   </a>
+
+  <a mat-button routerLink="/">Map</a>
+  <a mat-button routerLink="/monthly">Monthly Grid</a>
 
   <span class="spacer"></span>
 
