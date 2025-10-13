@@ -17,7 +17,7 @@ from climatemaps.data import load_climate_data, load_climate_data_for_difference
 app = FastAPI()
 
 api = FastAPI()
-app.mount("/api", api)
+app.mount("/v1", api)
 
 climate_maps = [ClimateMap.create(maps_config) for maps_config in settings.DATA_SETS_API]
 

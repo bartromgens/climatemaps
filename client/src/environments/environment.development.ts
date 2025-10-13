@@ -1,6 +1,6 @@
 export const environment = {
   production: false,
-  apiBaseUrl: '/api',
+  apiBaseUrl: '/v1',
   matomoUrl: '',
   matomoSiteId: 0,
 };
