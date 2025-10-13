@@ -1,5 +1,5 @@
-import { Component } from '@angular/core';
-import { CommonModule, NgOptimizedImage } from '@angular/common';
+import { Component, OnInit, HostListener } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { RouterLink, RouterOutlet } from '@angular/router';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatButtonModule } from '@angular/material/button';
@@ -13,11 +13,24 @@ import { MatButtonModule } from '@angular/material/button';
     RouterLink,
     MatToolbarModule,
     MatButtonModule,
-    NgOptimizedImage,
   ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',
 })
-export class AppComponent {
+export class AppComponent implements OnInit {
   readonly title: string = 'OpenClimateMap';
+  isMobile = false;
+
+  ngOnInit(): void {
+    this.checkMobile();
+  }
+
+  @HostListener('window:resize', ['$event'])
+  onResize(): void {
+    this.checkMobile();
+  }
+
+  private checkMobile(): void {
+    this.isMobile = window.innerWidth <= 768;
+  }
 }

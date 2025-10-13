@@ -279,7 +279,7 @@ export class ClimateTimerangePlotComponent
         },
         plugins: {
           legend: {
-            display: true,
+            display: window.innerWidth >= 768,
             position: 'top',
           },
           title: {

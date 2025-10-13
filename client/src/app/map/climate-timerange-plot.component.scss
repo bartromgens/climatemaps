@@ -19,6 +19,10 @@
   width: 100%;
   height: 350px;
   position: relative;
+
+  @media (max-width: 768px) {
+    height: 25vh;
+  }
 }
 
 .loading-container,
@@ -47,4 +51,3 @@ mat-card-title {
 .close-button {
   margin-left: 8px;
 }
-

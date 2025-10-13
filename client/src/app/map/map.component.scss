@@ -1,3 +1,5 @@
+@import "../../styles/variables";
+
 .card-sidebar {
   margin-left: 6px;
   margin-right: 6px;
@@ -95,7 +97,7 @@
 // Sidebar content styling
 .sidebar-content {
   padding: 10px 5px;
-  height: 100%;
+  height: $page-height-mobile;
   overflow-y: auto;
   position: relative;
 }
@@ -124,7 +126,7 @@
   }
 
   .page-content-wrapper {
-    height: 100vh;
+    height: $page-height-mobile;
   }
 }
 

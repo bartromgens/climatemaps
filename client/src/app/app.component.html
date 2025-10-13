@@ -3,8 +3,8 @@
     <span>{{ title }}</span>
   </a>
 
-  <a mat-button routerLink="/">Map</a>
-  <a mat-button routerLink="/monthly">Monthly Grid</a>
+  <a *ngIf="!isMobile" mat-button routerLink="/">Map</a>
+  <a *ngIf="!isMobile" mat-button routerLink="/monthly">Monthly Grid</a>
 
   <span class="spacer"></span>
 
