@@ -7,6 +7,7 @@ import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
+import { MatMenuModule } from '@angular/material/menu';
 import { ReactiveFormsModule, FormControl } from '@angular/forms';
 import { Observable } from 'rxjs';
 import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
@@ -27,6 +28,7 @@ import { MapNavigationService } from './core/map-navigation.service';
     MatInputModule,
     MatFormFieldModule,
     MatIconModule,
+    MatMenuModule,
     ReactiveFormsModule,
   ],
   templateUrl: './app.component.html',
@@ -75,6 +77,7 @@ export class AppComponent implements OnInit {
       location.lat,
       location.lon,
       zoom,
+      !this.isMobile,
     );
   }
 

@@ -5,6 +5,7 @@ export interface NavigationRequest {
   lat: number;
   lon: number;
   zoom: number;
+  generateCharts?: boolean;
 }
 
 @Injectable({
@@ -14,7 +15,12 @@ export class MapNavigationService {
   private navigationSubject = new Subject<NavigationRequest>();
   navigation$ = this.navigationSubject.asObservable();
 
-  navigateToLocation(lat: number, lon: number, zoom: number): void {
-    this.navigationSubject.next({ lat, lon, zoom });
+  navigateToLocation(
+    lat: number,
+    lon: number,
+    zoom: number,
+    generateCharts: boolean = false,
+  ): void {
+    this.navigationSubject.next({ lat, lon, zoom, generateCharts });
   }
 }

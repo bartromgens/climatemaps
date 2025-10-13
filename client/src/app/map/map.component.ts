@@ -870,6 +870,20 @@ export class MapComponent implements OnInit {
           duration: 1.0,
         });
         this.updateUrlWithLocationZoom();
+
+        if (request.generateCharts && this.selectedOption?.metadata?.dataType) {
+          this.plotData = {
+            lat: request.lat,
+            lon: request.lon,
+            dataType: this.selectedOption.metadata.dataType,
+          };
+
+          this.timerangePlotData = {
+            lat: request.lat,
+            lon: request.lon,
+            month: this.monthSelected,
+          };
+        }
       }
     });
   }
