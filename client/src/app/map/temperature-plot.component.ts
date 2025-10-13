@@ -17,6 +17,12 @@ import { Chart, ChartConfiguration, registerables } from 'chart.js';
 import { forkJoin } from 'rxjs';
 
 import { ClimateMapService } from '../core/climatemap.service';
+import {
+  ClimateVarKey,
+  CLIMATE_VAR_KEY_TO_NAME,
+  CLIMATE_VAR_DISPLAY_NAMES,
+  CLIMATE_VAR_UNITS,
+} from '../utils/enum';
 
 Chart.register(...registerables);
 
@@ -24,6 +30,12 @@ interface PlotData {
   lat: number;
   lon: number;
   dataType: string;
+}
+
+interface MonthlyData {
+  tmax: number[];
+  tmin: number[];
+  precipitation: number[];
 }
 
 @Component({
@@ -37,16 +49,14 @@ export class TemperaturePlotComponent
   implements OnChanges, AfterViewInit, OnDestroy
 {
   @Input() plotData: PlotData | null = null;
-  @Input() variableName: string = 'Temperature';
-  @Input() unit: string = '°C';
 
   @ViewChild('chartCanvas', { static: false })
   chartCanvas!: ElementRef<HTMLCanvasElement>;
 
   chart: Chart | null = null;
-  isLoading: boolean = false;
+  isLoading = false;
   error: string | null = null;
-  temperatures: number[] = [];
+  monthlyData: MonthlyData = { tmax: [], tmin: [], precipitation: [] };
 
   constructor(
     private climateMapService: ClimateMapService,
@@ -77,11 +87,36 @@ export class TemperaturePlotComponent
     this.isLoading = true;
     this.error = null;
 
-    const requests = [];
+    const dataTypeTmax = this.getHistoricalDataType(ClimateVarKey.T_MAX);
+    const dataTypeTmin = this.getHistoricalDataType(ClimateVarKey.T_MIN);
+    const dataTypePrecipitation = this.getHistoricalDataType(
+      ClimateVarKey.PRECIPITATION,
+    );
+
+    const tmaxRequests = [];
+    const tminRequests = [];
+    const precipRequests = [];
+
     for (let month = 1; month <= 12; month++) {
-      requests.push(
+      tmaxRequests.push(
         this.climateMapService.getClimateValue(
-          this.plotData.dataType,
+          dataTypeTmax,
+          month,
+          this.plotData.lat,
+          this.plotData.lon,
+        ),
+      );
+      tminRequests.push(
+        this.climateMapService.getClimateValue(
+          dataTypeTmin,
+          month,
+          this.plotData.lat,
+          this.plotData.lon,
+        ),
+      );
+      precipRequests.push(
+        this.climateMapService.getClimateValue(
+          dataTypePrecipitation,
           month,
           this.plotData.lat,
           this.plotData.lon,
@@ -89,23 +124,32 @@ export class TemperaturePlotComponent
       );
     }
 
-    forkJoin(requests).subscribe({
-      next: (responses) => {
-        this.temperatures = responses.map((r) => r.value);
-        if (responses.length > 0) {
-          this.variableName = responses[0].variable_name;
-          this.unit = responses[0].unit;
-        }
+    forkJoin({
+      tmax: forkJoin(tmaxRequests),
+      tmin: forkJoin(tminRequests),
+      precipitation: forkJoin(precipRequests),
+    }).subscribe({
+      next: (results) => {
+        this.monthlyData = {
+          tmax: results.tmax.map((r) => r.value),
+          tmin: results.tmin.map((r) => r.value),
+          precipitation: results.precipitation.map((r) => r.value),
+        };
         this.isLoading = false;
         this.cdr.detectChanges();
         setTimeout(() => this.renderChart(), 0);
       },
       error: (error) => {
         this.isLoading = false;
-        this.error = error.error?.detail || 'Error loading temperature data';
-        console.error('Error loading temperature data:', error);
+        this.error = error.error?.detail || 'Error loading climate data';
+        console.error('Error loading climate data:', error);
       },
     });
+  }
+
+  private getHistoricalDataType(variable: ClimateVarKey): string {
+    const variableName = CLIMATE_VAR_KEY_TO_NAME[variable];
+    return `${variableName}_1970_2000_10m`;
   }
 
   private renderChart(): void {
@@ -131,24 +175,51 @@ export class TemperaturePlotComponent
       'Dec',
     ];
 
+    const tmaxLabel = `${CLIMATE_VAR_DISPLAY_NAMES[ClimateVarKey.T_MAX]} (${CLIMATE_VAR_UNITS[ClimateVarKey.T_MAX]})`;
+    const tminLabel = `${CLIMATE_VAR_DISPLAY_NAMES[ClimateVarKey.T_MIN]} (${CLIMATE_VAR_UNITS[ClimateVarKey.T_MIN]})`;
+    const precipLabel = `${CLIMATE_VAR_DISPLAY_NAMES[ClimateVarKey.PRECIPITATION]} (${CLIMATE_VAR_UNITS[ClimateVarKey.PRECIPITATION]})`;
+
     const config: ChartConfiguration = {
       type: 'line',
       data: {
         labels: monthLabels,
         datasets: [
           {
-            label: `${this.variableName} (${this.unit})`,
-            data: this.temperatures,
-            borderColor: 'rgb(75, 192, 192)',
-            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+            label: tmaxLabel,
+            data: this.monthlyData.tmax,
+            borderColor: 'rgb(255, 99, 132)',
+            backgroundColor: 'rgba(255, 99, 132, 0.3)',
             tension: 0.4,
-            fill: true,
+            fill: '+1',
+            yAxisID: 'y',
+          },
+          {
+            label: tminLabel,
+            data: this.monthlyData.tmin,
+            borderColor: 'rgb(255, 99, 132)',
+            backgroundColor: 'rgba(255, 99, 132, 0.3)',
+            tension: 0.4,
+            fill: false,
+            yAxisID: 'y',
+          },
+          {
+            label: precipLabel,
+            data: this.monthlyData.precipitation,
+            borderColor: 'rgb(54, 162, 235)',
+            backgroundColor: 'rgba(54, 162, 235, 0.2)',
+            tension: 0.4,
+            fill: false,
+            yAxisID: 'y1',
           },
         ],
       },
       options: {
         responsive: true,
         maintainAspectRatio: false,
+        interaction: {
+          mode: 'index',
+          intersect: false,
+        },
         plugins: {
           legend: {
             display: true,
@@ -156,14 +227,29 @@ export class TemperaturePlotComponent
           },
           title: {
             display: true,
-            text: `${this.variableName} by Month`,
+            text: 'Climate Data by Month (10m resolution)',
           },
         },
         scales: {
           y: {
+            type: 'linear',
+            display: true,
+            position: 'left',
             title: {
               display: true,
-              text: `${this.variableName} (${this.unit})`,
+              text: `Temperature (${CLIMATE_VAR_UNITS[ClimateVarKey.T_MAX]})`,
+            },
+          },
+          y1: {
+            type: 'linear',
+            display: true,
+            position: 'right',
+            title: {
+              display: true,
+              text: precipLabel,
+            },
+            grid: {
+              drawOnChartArea: false,
             },
           },
           x: {

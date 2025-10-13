@@ -10,5 +10,5 @@ alwaysApply: true
 - Don't comment the obvious
 - Don't create readmes unless asked
 - Remove duplicate code
-- Keep your summary of change short
+- Keep your summary of change concise
 - Finish your summary with a suggested commit message

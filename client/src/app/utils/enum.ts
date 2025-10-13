@@ -12,6 +12,45 @@ export enum ClimateVarKey {
   VAPOUR_PRESSURE = 'VAPOUR_PRESSURE',
 }
 
+export const CLIMATE_VAR_KEY_TO_NAME: Record<ClimateVarKey, string> = {
+  [ClimateVarKey.T_MAX]: 'tmax',
+  [ClimateVarKey.T_MIN]: 'tmin',
+  [ClimateVarKey.PRECIPITATION]: 'precipitation',
+  [ClimateVarKey.CLOUD_COVER]: 'cloud_cover',
+  [ClimateVarKey.WET_DAYS]: 'wet_days',
+  [ClimateVarKey.FROST_DAYS]: 'frost_days',
+  [ClimateVarKey.WIND_SPEED]: 'wind_speed',
+  [ClimateVarKey.RADIATION]: 'radiation',
+  [ClimateVarKey.DIURNAL_TEMP_RANGE]: 'diurnal_temp_range',
+  [ClimateVarKey.VAPOUR_PRESSURE]: 'vapour_pressure',
+};
+
+export const CLIMATE_VAR_DISPLAY_NAMES: Record<ClimateVarKey, string> = {
+  [ClimateVarKey.T_MAX]: 'Temperature Max',
+  [ClimateVarKey.T_MIN]: 'Temperature Min',
+  [ClimateVarKey.PRECIPITATION]: 'Precipitation',
+  [ClimateVarKey.CLOUD_COVER]: 'Cloud Cover',
+  [ClimateVarKey.WET_DAYS]: 'Wet Days',
+  [ClimateVarKey.FROST_DAYS]: 'Frost Days',
+  [ClimateVarKey.WIND_SPEED]: 'Wind Speed',
+  [ClimateVarKey.RADIATION]: 'Radiation',
+  [ClimateVarKey.DIURNAL_TEMP_RANGE]: 'Diurnal Temperature Range',
+  [ClimateVarKey.VAPOUR_PRESSURE]: 'Vapour Pressure',
+};
+
+export const CLIMATE_VAR_UNITS: Record<ClimateVarKey, string> = {
+  [ClimateVarKey.T_MAX]: '°C',
+  [ClimateVarKey.T_MIN]: '°C',
+  [ClimateVarKey.PRECIPITATION]: 'mm/month',
+  [ClimateVarKey.CLOUD_COVER]: '%',
+  [ClimateVarKey.WET_DAYS]: 'days',
+  [ClimateVarKey.FROST_DAYS]: 'days',
+  [ClimateVarKey.WIND_SPEED]: 'm/s',
+  [ClimateVarKey.RADIATION]: 'W/m²',
+  [ClimateVarKey.DIURNAL_TEMP_RANGE]: '°C',
+  [ClimateVarKey.VAPOUR_PRESSURE]: 'hPa',
+};
+
 // Spatial Resolution enum matching the backend
 export enum SpatialResolution {
   MIN30 = '30m',
