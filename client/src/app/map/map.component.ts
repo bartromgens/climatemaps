@@ -49,6 +49,7 @@ import {
 } from './services/layer-builder.service';
 import { LayerFilterService } from './services/layer-filter.service';
 import { URLUtils } from '../utils/url-utils';
+import { TemperaturePlotComponent } from './temperature-plot.component';
 
 @Component({
   selector: 'app-map',
@@ -63,6 +64,7 @@ import { URLUtils } from '../utils/url-utils';
     MatCardModule,
     MapControlsComponent,
     ColorbarComponent,
+    TemperaturePlotComponent,
   ],
   templateUrl: './map.component.html',
   styleUrl: './map.component.scss',
@@ -242,6 +244,7 @@ export class MapComponent implements OnInit {
   private rasterLayer: Layer | null = null;
   private vectorLayer: Layer | null = null;
   private isLoadingClickValue = false;
+  plotData: { lat: number; lon: number; dataType: string } | null = null;
 
   constructor(
     private route: ActivatedRoute,
@@ -619,6 +622,12 @@ export class MapComponent implements OnInit {
 
     const lat = event.latlng.lat;
     const lon = this.normalizeLongitude(event.latlng.lng);
+
+    this.plotData = {
+      lat,
+      lon,
+      dataType: this.selectedOption.metadata.dataType,
+    };
 
     // Show loading tooltip
     this.isLoadingClickValue = true;

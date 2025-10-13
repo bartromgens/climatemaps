@@ -1,0 +1,16 @@
+<mat-card *ngIf="plotData" class="temperature-plot-card">
+  <mat-card-header>
+    <mat-card-title>Climate Data at {{ displayCoordinates }}</mat-card-title>
+  </mat-card-header>
+  <mat-card-content>
+    <div *ngIf="isLoading" class="loading-container">
+      <p>Loading data...</p>
+    </div>
+    <div *ngIf="error" class="error-container">
+      <p>{{ error }}</p>
+    </div>
+    <div *ngIf="!isLoading && !error" class="chart-container">
+      <canvas #chartCanvas></canvas>
+    </div>
+  </mat-card-content>
+</mat-card>

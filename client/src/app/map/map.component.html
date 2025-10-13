@@ -60,5 +60,7 @@
       [displayName]="selectedOption?.climateMap?.getDisplayName() || null"
       [selectedMonth]="monthSelected"
     ></app-colorbar>
+
+    <app-temperature-plot [plotData]="plotData"></app-temperature-plot>
   </mat-sidenav-content>
 </mat-sidenav-container>
