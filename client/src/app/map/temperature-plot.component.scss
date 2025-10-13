@@ -1,6 +1,6 @@
 .temperature-plot-card {
   position: absolute;
-  bottom: 20px;
+  top: 20px;
   right: 20px;
   width: 500px;
   max-width: calc(100vw - 40px);
@@ -8,7 +8,7 @@
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 
   @media (max-width: 768px) {
-    bottom: 10px;
+    top: 80px;
     right: 10px;
     left: 10px;
     width: auto;
@@ -33,9 +33,17 @@
 
 mat-card-header {
   margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 mat-card-title {
   font-size: 16px;
   font-weight: 500;
+  flex: 1;
+}
+
+.close-button {
+  margin-left: 8px;
 }

@@ -56,6 +56,7 @@ export class TemperaturePlotComponent
   chart: Chart | null = null;
   isLoading = false;
   error: string | null = null;
+  isVisible = true;
   monthlyData: MonthlyData = { tmax: [], tmin: [], precipitation: [] };
 
   constructor(
@@ -72,6 +73,7 @@ export class TemperaturePlotComponent
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['plotData'] && !changes['plotData'].firstChange) {
       if (this.plotData) {
+        this.isVisible = true;
         this.loadData();
       }
     }
@@ -271,6 +273,10 @@ export class TemperaturePlotComponent
       this.chart.destroy();
       this.chart = null;
     }
+  }
+
+  onClose(): void {
+    this.isVisible = false;
   }
 
   get displayCoordinates(): string {
