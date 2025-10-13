@@ -50,6 +50,7 @@ import {
 import { LayerFilterService } from './services/layer-filter.service';
 import { URLUtils } from '../utils/url-utils';
 import { ClimateMonthlyPlotComponent } from './climate-monthly-plot.component';
+import { ClimateTimerangePlotComponent } from './climate-timerange-plot.component';
 
 @Component({
   selector: 'app-map',
@@ -65,6 +66,7 @@ import { ClimateMonthlyPlotComponent } from './climate-monthly-plot.component';
     MapControlsComponent,
     ColorbarComponent,
     ClimateMonthlyPlotComponent,
+    ClimateTimerangePlotComponent,
   ],
   templateUrl: './map.component.html',
   styleUrl: './map.component.scss',
@@ -245,6 +247,7 @@ export class MapComponent implements OnInit {
   private vectorLayer: Layer | null = null;
   private isLoadingClickValue = false;
   plotData: { lat: number; lon: number; dataType: string } | null = null;
+  timerangePlotData: { lat: number; lon: number; month: number } | null = null;
 
   constructor(
     private route: ActivatedRoute,
@@ -627,6 +630,12 @@ export class MapComponent implements OnInit {
       lat,
       lon,
       dataType: this.selectedOption.metadata.dataType,
+    };
+
+    this.timerangePlotData = {
+      lat,
+      lon,
+      month: this.monthSelected,
     };
 
     // Show loading tooltip
