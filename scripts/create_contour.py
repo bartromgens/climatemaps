@@ -74,11 +74,11 @@ def _filter_by_criteria(
         )
         scenario_match = (
             criteria.get("climate_scenario") is None
-            or config.climate_scenario == criteria["climate_scenario"]
+            or getattr(config, "climate_scenario", None) == criteria["climate_scenario"]
         )
         model_match = (
             criteria.get("climate_model") is None
-            or config.climate_model == criteria["climate_model"]
+            or getattr(config, "climate_model", None) == criteria["climate_model"]
         )
 
         return year_match and scenario_match and model_match
@@ -112,11 +112,11 @@ def _pre_ensure_all_data_available(data_sets: List[ClimateDataConfig]) -> None:
 
     processed_configs = set()
     failed_downloads = []
-    
+
     def try_ensure_data(cfg: ClimateDataConfig, description: str) -> None:
         if id(cfg) in processed_configs:
             return
-        
+
         logger.info(f"Ensuring data available for {description}: {cfg.data_type_slug}")
         try:
             ensure_data_available(cfg)
@@ -124,7 +124,7 @@ def _pre_ensure_all_data_available(data_sets: List[ClimateDataConfig]) -> None:
         except Exception as e:
             failed_downloads.append((cfg.data_type_slug, str(e)))
             logger.warning(f"Failed to ensure data for {description} {cfg.data_type_slug}: {e}")
-    
+
     for config in data_sets:
         if isinstance(config, ClimateDifferenceDataConfig):
             try_ensure_data(config.historical_config, "historical")
@@ -136,11 +136,17 @@ def _pre_ensure_all_data_available(data_sets: List[ClimateDataConfig]) -> None:
         logger.error(f"Failed to download/generate {len(failed_downloads)} dataset(s):")
         for data_slug, error in failed_downloads:
             logger.error(f"  - {data_slug}: {error}")
-    
-    logger.info(f"Data pre-download/generation completed ({len(processed_configs)} successful, {len(failed_downloads)} failed)")
+
+    logger.info(
+        f"Data pre-download/generation completed ({len(processed_configs)} successful, {len(failed_downloads)} failed)"
+    )
 
 
-def main(force_recreate: bool = False, limited_test_set: bool = False) -> None:
+def main(
+    force_recreate: bool = False,
+    limited_test_set: bool = False,
+    climate_model: ClimateModel | None = None,
+) -> None:
     month_upper = 1 if limited_test_set else 12
     all_tasks = []
     all_datasets = []
@@ -154,6 +160,9 @@ def main(force_recreate: bool = False, limited_test_set: bool = False) -> None:
     for datasets, criteria, is_diff, name in dataset_groups:
         if limited_test_set:
             datasets = _filter_by_criteria(datasets, criteria, is_diff)
+        if climate_model is not None:
+            criteria_with_model = {**criteria, "climate_model": climate_model}
+            datasets = _filter_by_criteria(datasets, criteria_with_model, is_diff)
         all_datasets.extend(datasets)
         all_tasks.extend(_create_tasks_for_datasets(datasets, month_upper, force_recreate, name))
 
@@ -277,5 +286,21 @@ if __name__ == "__main__":
         default=False,
         help="Use default test set for development testing (process only a subset of data sets).",
     )
+    parser.add_argument(
+        "--climate-model",
+        type=str,
+        default=None,
+        choices=[model.value for model in ClimateModel],
+        help="Process only datasets for a specific climate model (e.g., ENSEMBLE_MEAN, EC_Earth3_Veg).",
+    )
     args = parser.parse_args()
-    main(force_recreate=args.force_recreate, limited_test_set=args.test_set)
+
+    climate_model = None
+    if args.climate_model:
+        climate_model = ClimateModel(args.climate_model)
+
+    main(
+        force_recreate=args.force_recreate,
+        limited_test_set=args.test_set,
+        climate_model=climate_model,
+    )
