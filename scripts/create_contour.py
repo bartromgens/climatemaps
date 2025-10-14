@@ -173,6 +173,7 @@ def main(
     limited_test_set: bool = False,
     climate_model: ClimateModel | None = None,
     if_older_than: datetime | None = None,
+    processes: int = 1,
 ) -> None:
     month_upper = 1 if limited_test_set else 12
     all_tasks = []
@@ -205,7 +206,7 @@ def main(
     _pre_ensure_all_data_available(all_datasets)
 
     logger.info(f"Processing all data sets with {len(all_tasks)} total tasks")
-    run_tasks_with_process_pool(all_tasks, process, settings.CREATE_CONTOUR_PROCESSES)
+    run_tasks_with_process_pool(all_tasks, process, processes)
 
 
 def run_tasks_with_process_pool(tasks: List[tuple], process, num_processes: int) -> None:
@@ -344,6 +345,12 @@ if __name__ == "__main__":
         metavar="YYYY-MM-DD",
         help="Only update tiles if mbtiles files are older than the specified date (format: YYYY-MM-DD).",
     )
+    parser.add_argument(
+        "--processes",
+        type=int,
+        default=1,
+        help="Number of parallel processes to use for tile creation. Defaults to 1.",
+    )
     args = parser.parse_args()
 
     climate_model = None
@@ -362,4 +369,5 @@ if __name__ == "__main__":
         limited_test_set=args.test_set,
         climate_model=climate_model,
         if_older_than=if_older_than,
+        processes=args.processes,
     )
