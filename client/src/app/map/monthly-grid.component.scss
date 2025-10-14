@@ -43,6 +43,7 @@
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   grid-template-rows: repeat(3, 1fr);
+  grid-auto-flow: column;
   width: 100%;
   height: 100%;
   gap: 0;
@@ -60,6 +61,7 @@
   @media (max-width: 480px) {
     grid-template-columns: 1fr;
     grid-template-rows: repeat(12, 1fr);
+    grid-auto-flow: row;
   }
 }
 

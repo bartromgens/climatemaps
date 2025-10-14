@@ -44,6 +44,7 @@ export class MonthlyGridComponent extends BaseMapComponent {
   private readonly DEFAULT_RESOLUTION = SpatialResolution.MIN10;
 
   months: MonthOption[] = [
+    { month: 12, label: 'December' },
     { month: 1, label: 'January' },
     { month: 2, label: 'February' },
     { month: 3, label: 'March' },
@@ -55,7 +56,6 @@ export class MonthlyGridComponent extends BaseMapComponent {
     { month: 9, label: 'September' },
     { month: 10, label: 'October' },
     { month: 11, label: 'November' },
-    { month: 12, label: 'December' },
   ];
   selectedOption: LayerOption | undefined;
 
