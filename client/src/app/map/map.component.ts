@@ -17,31 +17,17 @@ import {
   Map,
   tileLayer,
 } from 'leaflet';
-import 'leaflet.vectorgrid'; // bring in the vectorgrid plugin
+import 'leaflet.vectorgrid';
 
 import { environment } from '../../environments/environment';
-import {
-  MapControlsComponent,
-  MapControlsData,
-  MapControlsOptions,
-} from './map-controls.component';
+import { MapControlsComponent } from './map-controls.component';
 import { ColorbarComponent } from './colorbar.component';
 import {
   ClimateMapService,
   ClimateValueResponse,
 } from '../core/climatemap.service';
-import { ClimateMap } from '../core/climatemap';
-import {
-  MetadataService,
-  ClimateVariableConfig,
-  YearRange,
-} from '../core/metadata.service';
-import {
-  ClimateVarKey,
-  SpatialResolution,
-  ClimateScenario,
-  ClimateModel,
-} from '../utils/enum';
+import { MetadataService } from '../core/metadata.service';
+import { SpatialResolution } from '../utils/enum';
 import { TooltipManagerService } from './services/tooltip-manager.service';
 import {
   LayerBuilderService,
@@ -52,6 +38,7 @@ import { URLUtils } from '../utils/url-utils';
 import { ClimateMonthlyPlotComponent } from './climate-monthly-plot.component';
 import { ClimateTimerangePlotComponent } from './climate-timerange-plot.component';
 import { MapNavigationService } from '../core/map-navigation.service';
+import { BaseMapComponent } from './base-map.component';
 
 @Component({
   selector: 'app-map',
@@ -72,157 +59,30 @@ import { MapNavigationService } from '../core/map-navigation.service';
   templateUrl: './map.component.html',
   styleUrl: './map.component.scss',
 })
-export class MapComponent implements OnInit {
+export class MapComponent extends BaseMapComponent implements OnInit {
   private readonly ZOOM_DEFAULT: number = 5;
-  layerOptions: LayerOption[] = [];
+  private readonly DEFAULT_RESOLUTION = SpatialResolution.MIN10;
+
   selectedOption: LayerOption | undefined;
+
   get monthSelected(): number {
     return this.controlsData.selectedMonth;
   }
 
-  // Climate maps data from backend
-  climateMaps: ClimateMap[] = [];
-
-  // Controls data for the MapControlsComponent
-  controlsData: MapControlsData = {
-    selectedVariableType: ClimateVarKey.T_MAX,
-    selectedYearRange: null,
-    selectedResolution: SpatialResolution.MIN10,
-    selectedClimateScenario: null,
-    selectedClimateModel: null,
-    showDifferenceMap: true,
-    selectedMonth: 1,
-  };
-
-  // Controls options for the MapControlsComponent
-  controlsOptions!: MapControlsOptions;
-
-  // Available options for dropdowns (populated from API data)
-  variableTypes: ClimateVarKey[] = [];
-  yearRanges: YearRange[] = [];
-  resolutions: SpatialResolution[] = [];
-  climateScenarios: ClimateScenario[] = [];
-  climateModels: ClimateModel[] = [];
-
-  // Helper properties
-  climateVariables: Record<ClimateVarKey, ClimateVariableConfig> = {} as Record<
-    ClimateVarKey,
-    ClimateVariableConfig
-  >;
-  isHistoricalYearRange!: (yearRange: readonly [number, number]) => boolean;
-
-  // Populate metadata from API data
-  private populateMetadataFromAPI(climateMaps: ClimateMap[]): void {
-    this.climateVariables =
-      this.metadataService.getClimateVariables(climateMaps);
-    this.yearRanges = this.metadataService.getYearRanges(climateMaps);
-    this.resolutions = this.metadataService.getResolutions(climateMaps);
-    this.climateScenarios =
-      this.metadataService.getClimateScenarios(climateMaps);
-    this.climateModels = this.metadataService.getClimateModels(climateMaps);
-
-    // Set variable types from the climate variables (sorted)
-    this.variableTypes = this.metadataService.getSortedVariableTypes(
-      this.climateVariables,
-    );
-
-    // Set default year range if none selected
+  protected initializeDefaultSelections(): void {
     if (!this.controlsData.selectedYearRange && this.yearRanges.length > 0) {
       this.controlsData.selectedYearRange = this.yearRanges[0];
     }
-
-    // Initialize controls options
-    this.controlsOptions = {
-      variableTypes: this.variableTypes,
-      yearRanges: this.yearRanges,
-      resolutions: this.resolutions,
-      climateScenarios: this.climateScenarios,
-      climateModels: this.climateModels,
-      climateVariables: this.climateVariables,
-      availableVariableTypes: this.getAvailableVariableTypes(),
-      availableYearRanges: this.getAvailableYearRanges(),
-      availableResolutions: this.getAvailableResolutions(),
-      availableClimateScenarios: this.getAvailableClimateScenarios(),
-      availableClimateModels: this.getAvailableClimateModels(),
-      isHistoricalYearRange: this.isHistoricalYearRange,
-    };
   }
 
-  // Method to handle controls changes from MapControlsComponent
-  onControlsChange(newControlsData: MapControlsData): void {
-    this.controlsData = { ...newControlsData };
-    this.handleControlsChange();
-  }
-
-  private handleControlsChange(): void {
-    // Set default values for future data if not already set
-    // Note: We keep these values even for historical data so they're remembered
-    if (
-      this.controlsData.selectedYearRange &&
-      !this.isHistoricalYearRange(this.controlsData.selectedYearRange.value)
-    ) {
-      if (!this.controlsData.selectedClimateScenario) {
-        this.controlsData.selectedClimateScenario = ClimateScenario.SSP370;
-      }
-      if (!this.controlsData.selectedClimateModel) {
-        this.controlsData.selectedClimateModel = ClimateModel.ENSEMBLE_MEAN;
-      }
-    }
-
-    this.resetInvalidSelections();
+  protected onControlsUpdated(): void {
     this.findMatchingLayer();
     this.updateLayers();
-
-    // Update URL with current control values
-    this.updateUrlWithControls();
   }
 
-  // Computed properties for filtering available options based on actual data
-  private getAvailableVariableTypes(): ClimateVarKey[] {
-    return this.layerFilter.getAvailableVariableTypes(
-      this.climateMaps,
-      this.variableTypes,
-      this.climateVariables,
-    );
-  }
-
-  private getAvailableYearRanges(): YearRange[] {
-    return this.layerFilter.getAvailableYearRanges(
-      this.climateMaps,
-      this.yearRanges,
-      this.controlsData,
-      this.climateVariables,
-    );
-  }
-
-  private getAvailableResolutions(): SpatialResolution[] {
-    return this.layerFilter.getAvailableResolutions(
-      this.climateMaps,
-      this.resolutions,
-      this.controlsData,
-      this.climateVariables,
-      this.isHistoricalYearRange,
-    );
-  }
-
-  private getAvailableClimateScenarios(): ClimateScenario[] {
-    return this.layerFilter.getAvailableClimateScenarios(
-      this.climateMaps,
-      this.climateScenarios,
-      this.controlsData,
-      this.climateVariables,
-      this.isHistoricalYearRange,
-    );
-  }
-
-  private getAvailableClimateModels(): ClimateModel[] {
-    return this.layerFilter.getAvailableClimateModels(
-      this.climateMaps,
-      this.climateModels,
-      this.controlsData,
-      this.climateVariables,
-      this.isHistoricalYearRange,
-    );
+  protected onDataLoaded(): void {
+    this.findMatchingLayer();
+    this.updateLayers();
   }
 
   Object = Object;
@@ -239,8 +99,6 @@ export class MapComponent implements OnInit {
     center: latLng(52.1, 5.58),
     zoomControl: false,
   };
-  sidebarOpened = false;
-  isMobile = false;
   debug = !environment.production;
 
   private map: Map | null = null;
@@ -251,20 +109,26 @@ export class MapComponent implements OnInit {
   timerangePlotData: { lat: number; lon: number; month: number } | null = null;
 
   constructor(
-    private route: ActivatedRoute,
-    private location: Location,
-    private climateMapService: ClimateMapService,
-    private metadataService: MetadataService,
+    route: ActivatedRoute,
+    location: Location,
+    climateMapService: ClimateMapService,
+    metadataService: MetadataService,
+    layerBuilder: LayerBuilderService,
+    layerFilter: LayerFilterService,
     private tooltipManager: TooltipManagerService,
-    private layerBuilder: LayerBuilderService,
-    private layerFilter: LayerFilterService,
     private mapNavigationService: MapNavigationService,
   ) {
-    this.isHistoricalYearRange =
-      this.metadataService.isHistoricalYearRange.bind(this.metadataService);
+    super(
+      route,
+      location,
+      climateMapService,
+      metadataService,
+      layerBuilder,
+      layerFilter,
+    );
   }
 
-  ngOnInit(): void {
+  override ngOnInit(): void {
     this.checkMobile();
     this.setupResizeListener();
     this.setupNavigationListener();
@@ -273,25 +137,21 @@ export class MapComponent implements OnInit {
       if (params.has('lat') && params.has('lon') && params.has('zoom')) {
         this.updateLocationZoomFromURL(params);
       }
-      // Read map controls from URL parameters (only if data is loaded)
       if (this.climateMaps.length > 0) {
         this.updateControlsFromURL(params);
       }
     });
+
     this.climateMapService.getClimateMapList().subscribe((climateMaps) => {
       console.log('Loaded climate maps:', climateMaps.length);
       this.climateMaps = climateMaps;
 
-      // Populate metadata from API data
       this.populateMetadataFromAPI(climateMaps);
-
       this.layerOptions = this.layerBuilder.buildLayerOptions(climateMaps);
       console.log('Built layer options:', this.layerOptions.length);
 
-      // Reset selections to ensure they are available
       this.resetInvalidSelections();
 
-      // Update controls from URL parameters after data is loaded
       this.route.queryParamMap.subscribe((params) => {
         this.updateControlsFromURL(params);
       });
@@ -308,41 +168,20 @@ export class MapComponent implements OnInit {
             )
           : false,
       });
-      this.findMatchingLayer();
-      this.updateLayers();
+      this.onDataLoaded();
     });
   }
 
-  onLayerChange() {
+  onLayerChange(): void {
     this.updateLayers();
   }
 
-  private isYearRangeAvailable(
-    selectedYearRange: YearRange,
-    availableYearRanges: YearRange[],
-  ): boolean {
-    return availableYearRanges.some((availableRange) => {
-      const matchesPrimary =
-        availableRange.value[0] === selectedYearRange.value[0] &&
-        availableRange.value[1] === selectedYearRange.value[1];
-
-      const matchesAdditional = selectedYearRange.additionalValues?.some(
-        (additionalValue) =>
-          availableRange.value[0] === additionalValue[0] &&
-          availableRange.value[1] === additionalValue[1],
-      );
-
-      return matchesPrimary || matchesAdditional;
-    });
-  }
-
-  private resetInvalidSelections() {
+  protected resetInvalidSelections(): void {
     const availableYearRanges = this.getAvailableYearRanges();
     const availableResolutions = this.getAvailableResolutions();
     const availableClimateScenarios = this.getAvailableClimateScenarios();
     const availableClimateModels = this.getAvailableClimateModels();
 
-    // Reset year range if not available for current selections
     if (
       this.controlsData.selectedYearRange &&
       !this.isYearRangeAvailable(
@@ -353,20 +192,16 @@ export class MapComponent implements OnInit {
       this.controlsData.selectedYearRange = availableYearRanges[0] || null;
     }
 
-    // Reset resolution if not available for current selections
     if (!availableResolutions.includes(this.controlsData.selectedResolution)) {
       this.controlsData.selectedResolution =
-        availableResolutions[0] || SpatialResolution.MIN10;
+        availableResolutions[0] || this.DEFAULT_RESOLUTION;
     }
 
-    // Only reset climate scenario/model if we're viewing future data
-    // For historical data, we keep the values so they're remembered
     const isFutureData =
       this.controlsData.selectedYearRange &&
       !this.isHistoricalYearRange(this.controlsData.selectedYearRange.value);
 
     if (isFutureData) {
-      // Reset climate scenario if not available for current selections
       if (
         this.controlsData.selectedClimateScenario &&
         !availableClimateScenarios.includes(
@@ -377,7 +212,6 @@ export class MapComponent implements OnInit {
           availableClimateScenarios[0] || null;
       }
 
-      // Reset climate model if not available for current selections
       if (
         this.controlsData.selectedClimateModel &&
         !availableClimateModels.includes(this.controlsData.selectedClimateModel)
@@ -387,98 +221,17 @@ export class MapComponent implements OnInit {
       }
     }
 
-    // Update controls options with fresh data
     this.updateControlsOptions();
   }
 
-  private updateControlsOptions(): void {
-    this.controlsOptions = {
-      ...this.controlsOptions,
-      availableVariableTypes: this.getAvailableVariableTypes(),
-      availableYearRanges: this.getAvailableYearRanges(),
-      availableResolutions: this.getAvailableResolutions(),
-      availableClimateScenarios: this.getAvailableClimateScenarios(),
-      availableClimateModels: this.getAvailableClimateModels(),
-    };
-  }
-
-  private findMatchingLayer() {
+  private findMatchingLayer(): void {
     console.log('Finding matching layer for:', {
       variableType: this.controlsData.selectedVariableType,
       yearRange: this.controlsData.selectedYearRange,
       resolution: this.controlsData.selectedResolution,
     });
 
-    // Find the layer that matches the current selections
-    const matchingLayer = this.layerOptions.find((option) => {
-      if (!option.metadata) {
-        return false;
-      }
-
-      const metadata = option.metadata;
-
-      // Check if the variable type matches
-      const expectedVariableName =
-        this.climateVariables[this.controlsData.selectedVariableType]?.name;
-      if (metadata.variableType !== expectedVariableName) {
-        return false;
-      }
-
-      // Check if the year range matches (including additional values for merged ranges)
-      const matchesPrimaryRange =
-        metadata.yearRange[0] ===
-          this.controlsData.selectedYearRange!.value[0] &&
-        metadata.yearRange[1] === this.controlsData.selectedYearRange!.value[1];
-
-      const matchesAdditionalRange =
-        this.controlsData.selectedYearRange!.additionalValues?.some(
-          (additionalValue) =>
-            metadata.yearRange[0] === additionalValue[0] &&
-            metadata.yearRange[1] === additionalValue[1],
-        );
-
-      if (!matchesPrimaryRange && !matchesAdditionalRange) {
-        return false;
-      }
-
-      // Check if the resolution matches
-      if (metadata.resolution !== this.controlsData.selectedResolution) {
-        return false;
-      }
-
-      // For future data, check climate scenario and model
-      if (
-        !this.isHistoricalYearRange(this.controlsData.selectedYearRange!.value)
-      ) {
-        // Check if difference map status matches (only for future data)
-        if (metadata.isDifferenceMap !== this.controlsData.showDifferenceMap) {
-          return false;
-        }
-        if (
-          this.controlsData.selectedClimateScenario &&
-          metadata.climateScenario !== this.controlsData.selectedClimateScenario
-        ) {
-          return false;
-        }
-        if (
-          this.controlsData.selectedClimateModel &&
-          metadata.climateModel !== this.controlsData.selectedClimateModel
-        ) {
-          return false;
-        }
-      } else {
-        // For historical data, ensure no climate scenario or model is set
-        if (metadata.climateScenario || metadata.climateModel) {
-          return false;
-        }
-        // For historical data, ensure it's not a difference map
-        if (metadata.isDifferenceMap) {
-          return false;
-        }
-      }
-
-      return true;
-    });
+    const matchingLayer = this.findMatchingLayerOption();
 
     if (matchingLayer) {
       this.selectedOption = matchingLayer;
@@ -488,12 +241,10 @@ export class MapComponent implements OnInit {
         matchingLayer.metadata,
       );
     } else {
-      // No exact match found - clear current layer
       this.selectedOption = undefined;
       console.log(
         'No exact match found for current selections - clearing current layer',
       );
-      // Remove any existing layers from the map
       this.removeCurrentLayers();
     }
   }
@@ -696,15 +447,15 @@ export class MapComponent implements OnInit {
   onMove(event: LeafletEvent): void {
     console.log('onMove', event);
     this.update();
-    this.updateUrlWithLocationZoom();
+    this.updateUrlFromMapState();
   }
 
   onZoom(event: LeafletEvent): void {
     console.log('onZoom: level', this.map?.getZoom(), event);
-    this.updateUrlWithLocationZoom();
+    this.updateUrlFromMapState();
   }
 
-  private updateUrlWithLocationZoom(): void {
+  private updateUrlFromMapState(): void {
     if (!this.map) {
       return;
     }
@@ -717,89 +468,7 @@ export class MapComponent implements OnInit {
     this.location.replaceState(url.pathname + url.search);
   }
 
-  private updateControlsFromURL(params: ParamMap): void {
-    // Only update if we have climate maps loaded
-    if (this.climateMaps.length === 0) {
-      return;
-    }
-
-    const urlData = {
-      variable: params.get('variable') as ClimateVarKey,
-      resolution: params.get('resolution') as SpatialResolution,
-      scenario: params.get('scenario') as ClimateScenario,
-      model: params.get('model') as ClimateModel,
-      difference: params.has('difference')
-        ? params.get('difference') === 'true'
-        : undefined,
-      month: params.get('month')
-        ? parseInt(params.get('month')!, 10)
-        : undefined,
-      yearRange: params.get('yearRange') || undefined,
-    };
-
-    const decoded = URLUtils.decodeControls(urlData, this.yearRanges);
-    let hasChanges = false;
-
-    if (
-      decoded.variable &&
-      decoded.variable !== this.controlsData.selectedVariableType
-    ) {
-      this.controlsData.selectedVariableType = decoded.variable;
-      hasChanges = true;
-    }
-
-    if (
-      decoded.resolution &&
-      decoded.resolution !== this.controlsData.selectedResolution
-    ) {
-      this.controlsData.selectedResolution = decoded.resolution;
-      hasChanges = true;
-    }
-
-    if (
-      decoded.scenario !== undefined &&
-      decoded.scenario !== this.controlsData.selectedClimateScenario
-    ) {
-      this.controlsData.selectedClimateScenario = decoded.scenario;
-      hasChanges = true;
-    }
-
-    if (
-      decoded.model !== undefined &&
-      decoded.model !== this.controlsData.selectedClimateModel
-    ) {
-      this.controlsData.selectedClimateModel = decoded.model;
-      hasChanges = true;
-    }
-
-    if (
-      decoded.difference !== undefined &&
-      decoded.difference !== this.controlsData.showDifferenceMap
-    ) {
-      this.controlsData.showDifferenceMap = decoded.difference;
-      hasChanges = true;
-    }
-
-    if (decoded.month && decoded.month !== this.controlsData.selectedMonth) {
-      this.controlsData.selectedMonth = decoded.month;
-      hasChanges = true;
-    }
-
-    if (
-      decoded.yearRange &&
-      decoded.yearRange !== this.controlsData.selectedYearRange
-    ) {
-      this.controlsData.selectedYearRange = decoded.yearRange;
-      hasChanges = true;
-    }
-
-    if (hasChanges) {
-      this.handleControlsChange();
-    }
-  }
-
-  private updateUrlWithControls(): void {
-    // For historical data, don't include scenario/model in URL since they're not used
+  protected updateUrlWithControls(): void {
     const isHistorical =
       this.controlsData.selectedYearRange &&
       this.isHistoricalYearRange(this.controlsData.selectedYearRange.value);
@@ -846,29 +515,6 @@ export class MapComponent implements OnInit {
     return 'unknown';
   }
 
-  private checkMobile(): void {
-    this.isMobile = window.innerWidth <= 768;
-    if (this.isMobile) {
-      this.sidebarOpened = false;
-    }
-  }
-
-  private setupResizeListener(): void {
-    window.addEventListener('resize', () => {
-      const wasMobile = this.isMobile;
-      this.checkMobile();
-
-      // If switching from mobile to desktop, close sidebar
-      if (wasMobile && !this.isMobile) {
-        this.sidebarOpened = false;
-      }
-    });
-  }
-
-  toggleSidebar(): void {
-    this.sidebarOpened = !this.sidebarOpened;
-  }
-
   private setupNavigationListener(): void {
     this.mapNavigationService.navigation$.subscribe((request) => {
       if (this.map) {
@@ -876,7 +522,7 @@ export class MapComponent implements OnInit {
           animate: true,
           duration: 1.0,
         });
-        this.updateUrlWithLocationZoom();
+        this.updateUrlFromMapState();
 
         if (request.generateCharts && this.selectedOption?.metadata?.dataType) {
           this.plotData = {
