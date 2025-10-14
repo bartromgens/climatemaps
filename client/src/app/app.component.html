@@ -35,9 +35,13 @@
   </a>
 
   <a *ngIf="!isMobile" mat-button routerLink="/">Map</a>
-  <a *ngIf="!isMobile" mat-button routerLink="/scenarios">Scenarios</a>
-  <a *ngIf="!isMobile" mat-button routerLink="/monthly">Months</a>
-  <a *ngIf="!isMobile" mat-button routerLink="/yearranges">Year Ranges</a>
+  <a *ngIf="!isMobile" mat-button routerLink="/seasons">Seasons</a>
+  <a *ngIf="!isMobile" mat-button routerLink="/climate-predictions"
+    >Climate Predictions</a
+  >
+  <a *ngIf="!isMobile" mat-button routerLink="/climate-scenarios"
+    >Climate Scenarios</a
+  >
 
   <span class="spacer"></span>
 
@@ -96,17 +100,17 @@
       <mat-icon>map</mat-icon>
       <span>Map</span>
     </a>
-    <a mat-menu-item routerLink="/scenarios">
-      <mat-icon>grid_view</mat-icon>
-      <span>Scenarios</span>
-    </a>
-    <a mat-menu-item routerLink="/monthly">
+    <a mat-menu-item routerLink="/seasons">
       <mat-icon>calendar_month</mat-icon>
-      <span>Months</span>
+      <span>Seasons</span>
     </a>
-    <a mat-menu-item routerLink="/yearranges">
+    <a mat-menu-item routerLink="/climate-predictions">
       <mat-icon>date_range</mat-icon>
-      <span>Year Ranges</span>
+      <span>Climate Predictions</span>
+    </a>
+    <a mat-menu-item routerLink="/climate-scenarios">
+      <mat-icon>grid_view</mat-icon>
+      <span>Climate Scenarios</span>
     </a>
     <a mat-menu-item routerLink="/about">
       <mat-icon>info</mat-icon>

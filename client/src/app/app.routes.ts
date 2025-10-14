@@ -7,8 +7,8 @@ import { YearRangeGridComponent } from './map/yearrange-grid.component';
 
 export const routes: Routes = [
   { path: '', component: MapComponent },
-  { path: 'monthly', component: MonthlyGridComponent },
-  { path: 'scenarios', component: ScenarioGridComponent },
-  { path: 'yearranges', component: YearRangeGridComponent },
+  { path: 'seasons', component: MonthlyGridComponent },
+  { path: 'climate-scenarios', component: ScenarioGridComponent },
+  { path: 'climate-predictions', component: YearRangeGridComponent },
   { path: 'about', component: AboutComponent },
 ];
