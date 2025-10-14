@@ -9,7 +9,7 @@ import { SmallMapComponent } from './small-map.component';
 import { ColorbarComponent } from './colorbar.component';
 import { MapControlsComponent } from './map-controls.component';
 import { ClimateMapService } from '../core/climatemap.service';
-import { MetadataService, YearRange } from '../core/metadata.service';
+import { MetadataService } from '../core/metadata.service';
 import {
   ClimateScenario,
   ClimateModel,
@@ -48,7 +48,7 @@ interface ScenarioOption {
 export class ScenarioGridComponent extends BaseMapComponent {
   private readonly DEFAULT_RESOLUTION = SpatialResolution.MIN10;
   private readonly DEFAULT_MODEL = ClimateModel.ENSEMBLE_MEAN;
-  
+
   scenarios: ScenarioOption[] = [];
 
   constructor(
@@ -77,11 +77,19 @@ export class ScenarioGridComponent extends BaseMapComponent {
 
   protected initializeDefaultSelections(): void {
     if (!this.controlsData.selectedYearRange && this.yearRanges.length > 0) {
-      const futureYearRange = this.yearRanges.find(
+      const futureYearRanges = this.yearRanges.filter(
         (range) => !this.isHistoricalYearRange(range.value),
       );
-      this.controlsData.selectedYearRange =
-        futureYearRange || this.yearRanges[0];
+
+      if (futureYearRanges.length > 0) {
+        const farthestFutureRange = futureYearRanges.reduce(
+          (latest, current) =>
+            current.value[1] > latest.value[1] ? current : latest,
+        );
+        this.controlsData.selectedYearRange = farthestFutureRange;
+      } else {
+        this.controlsData.selectedYearRange = this.yearRanges[0];
+      }
     }
 
     if (!this.controlsData.selectedClimateModel) {
@@ -116,11 +124,19 @@ export class ScenarioGridComponent extends BaseMapComponent {
         availableYearRanges,
       )
     ) {
-      const futureYearRange = availableYearRanges.find(
+      const futureYearRanges = availableYearRanges.filter(
         (range) => !this.isHistoricalYearRange(range.value),
       );
-      this.controlsData.selectedYearRange =
-        futureYearRange || availableYearRanges[0] || null;
+
+      if (futureYearRanges.length > 0) {
+        const farthestFutureRange = futureYearRanges.reduce(
+          (latest, current) =>
+            current.value[1] > latest.value[1] ? current : latest,
+        );
+        this.controlsData.selectedYearRange = farthestFutureRange;
+      } else {
+        this.controlsData.selectedYearRange = availableYearRanges[0] || null;
+      }
     }
 
     if (!availableResolutions.includes(this.controlsData.selectedResolution)) {
