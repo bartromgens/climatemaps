@@ -70,7 +70,7 @@ export class YearRangeGridComponent extends BaseMapComponent {
       layerFilter,
       mapSyncService,
     );
-    this.controlsData.showDifferenceMap = false;
+    this.controlsData.showDifferenceMap = true;
   }
 
   protected onDataLoaded(): void {
