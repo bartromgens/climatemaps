@@ -160,9 +160,15 @@ def main(
     for datasets, criteria, is_diff, name in dataset_groups:
         if limited_test_set:
             datasets = _filter_by_criteria(datasets, criteria, is_diff)
-        if climate_model is not None:
-            criteria_with_model = {**criteria, "climate_model": climate_model}
-            datasets = _filter_by_criteria(datasets, criteria_with_model, is_diff)
+        elif climate_model is not None:
+            if name == "historic":
+                datasets = []
+            elif is_diff:
+                datasets = [
+                    ds for ds in datasets if ds.future_config.climate_model == climate_model
+                ]
+            else:
+                datasets = [ds for ds in datasets if ds.climate_model == climate_model]
         all_datasets.extend(datasets)
         all_tasks.extend(_create_tasks_for_datasets(datasets, month_upper, force_recreate, name))
 
