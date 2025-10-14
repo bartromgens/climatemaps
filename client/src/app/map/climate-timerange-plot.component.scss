@@ -1,8 +1,8 @@
-@import './climate-plot-common.scss';
+@import "./climate-plot-common.scss";
 
 .climate-timerange-plot-card {
   position: absolute;
-  top: 460px;
+  top: 450px;
   right: 20px;
   width: 500px;
   max-width: calc(100vw - 40px);
@@ -10,7 +10,7 @@
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 
   @media (max-width: 768px) {
-    top: 500px;
+    top: 390px;
     right: 10px;
     left: 10px;
     width: auto;
