@@ -8,7 +8,7 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { LeafletModule } from '@bluehalo/ngx-leaflet';
-import { latLng, Layer, Map, tileLayer } from 'leaflet';
+import { control, latLng, Layer, Map, tileLayer } from 'leaflet';
 import 'leaflet.vectorgrid';
 import { Subject, takeUntil } from 'rxjs';
 
@@ -66,6 +66,7 @@ export class SmallMapComponent implements OnInit, OnDestroy, OnChanges {
   @Input() month: number | undefined;
   @Input() customLabel: string | undefined;
   @Input() selectedOption: LayerOption | undefined;
+  @Input() showZoomControl = false;
 
   private map: Map | null = null;
   private rasterLayer: Layer | null = null;
@@ -81,12 +82,7 @@ export class SmallMapComponent implements OnInit, OnDestroy, OnChanges {
     },
   );
 
-  options = {
-    layers: [this.baseLayer],
-    zoom: 5,
-    center: latLng(52.1, 5.58),
-    zoomControl: false,
-  };
+  options: any;
 
   get label(): string {
     return this.customLabel || '';
@@ -94,11 +90,12 @@ export class SmallMapComponent implements OnInit, OnDestroy, OnChanges {
 
   constructor(private mapSyncService: MapSyncService) {
     const initialState = this.mapSyncService.getInitialViewState();
-    this.options.zoom = initialState.zoom;
-    this.options.center = latLng(
-      initialState.center.lat,
-      initialState.center.lng,
-    );
+    this.options = {
+      layers: [this.baseLayer],
+      zoom: initialState.zoom,
+      center: latLng(initialState.center.lat, initialState.center.lng),
+      zoomControl: false,
+    };
   }
 
   ngOnInit(): void {
@@ -122,6 +119,9 @@ export class SmallMapComponent implements OnInit, OnDestroy, OnChanges {
 
   onMapReady(map: Map): void {
     this.map = map;
+    if (this.showZoomControl) {
+      control.zoom({ position: 'bottomleft' }).addTo(map);
+    }
     this.updateLayers();
   }
 

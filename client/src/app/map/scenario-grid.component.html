@@ -37,10 +37,11 @@
     <div class="maps-grid-wrapper">
       <div class="maps-grid">
         <app-small-map
-          *ngFor="let scenarioOption of scenarios"
+          *ngFor="let scenarioOption of scenarios; let first = first"
           [month]="controlsData.selectedMonth"
           [customLabel]="scenarioOption.label"
           [selectedOption]="scenarioOption.option"
+          [showZoomControl]="first"
         ></app-small-map>
       </div>
     </div>

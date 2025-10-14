@@ -37,10 +37,11 @@
     <div class="maps-grid-wrapper">
       <div class="maps-grid">
         <app-small-map
-          *ngFor="let yearRangeOption of yearRangeOptions"
+          *ngFor="let yearRangeOption of yearRangeOptions; let first = first"
           [month]="controlsData.selectedMonth"
           [customLabel]="yearRangeOption.label"
           [selectedOption]="yearRangeOption.option"
+          [showZoomControl]="first"
         ></app-small-map>
       </div>
     </div>
