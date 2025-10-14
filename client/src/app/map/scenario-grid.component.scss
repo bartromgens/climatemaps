@@ -1,0 +1,97 @@
+@import "../../styles/variables";
+
+.custom-sidebar {
+  width: 320px;
+  padding: 20px;
+  background-color: #f8f9fa;
+  overflow-y: auto;
+}
+
+.sidebar-content {
+  position: relative;
+  padding-top: 0;
+}
+
+.sidebar-close-button {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  z-index: 1000;
+}
+
+.mobile-toggle-button {
+  position: fixed;
+  top: 16px;
+  left: 16px;
+  z-index: 1000;
+  background-color: white;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+
+  &:hover {
+    background-color: #f5f5f5;
+  }
+}
+
+.maps-grid-wrapper {
+  height: $page-height;
+  width: 100%;
+  padding: 0;
+  position: relative;
+}
+
+.maps-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-template-rows: repeat(2, 1fr);
+  width: 100%;
+  height: 100%;
+  gap: 0;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+    grid-template-rows: repeat(4, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .mobile-toggle-button {
+    display: block;
+  }
+
+  .desktop-controls {
+    display: none;
+  }
+
+  .maps-grid-wrapper {
+    height: 100vh;
+  }
+}
+
+@media (min-width: 769px) {
+  .mobile-toggle-button {
+    display: none;
+  }
+
+  ::ng-deep .custom-sidebar {
+    display: none;
+  }
+}
+
+:host ::ng-deep {
+  mat-sidenav-container {
+    height: calc(100vh - $navbar-height);
+  }
+
+  mat-sidenav-content {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .leaflet-container {
+    background: #e0e0e0;
+  }
+
+  .leaflet-control-attribution {
+    display: none;
+  }
+}

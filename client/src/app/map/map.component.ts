@@ -578,6 +578,10 @@ export class MapComponent implements OnInit {
       if (this.vectorLayer) {
         this.map?.addLayer(this.vectorLayer);
       }
+
+      setTimeout(() => {
+        this.map?.invalidateSize();
+      }, 0);
     } else {
       console.log('No layer selected - not adding any layers to map');
     }
@@ -684,6 +688,9 @@ export class MapComponent implements OnInit {
   onMapReady(map: Map): void {
     this.map = map;
     this.initializeMap();
+    setTimeout(() => {
+      this.map?.invalidateSize();
+    }, 0);
   }
 
   onMove(event: LeafletEvent): void {

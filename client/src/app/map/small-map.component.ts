@@ -8,7 +8,7 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { LeafletModule } from '@bluehalo/ngx-leaflet';
-import { latLng, Layer, LeafletEvent, Map, tileLayer } from 'leaflet';
+import { latLng, Layer, Map, tileLayer } from 'leaflet';
 import 'leaflet.vectorgrid';
 import { Subject, takeUntil } from 'rxjs';
 
@@ -21,14 +21,14 @@ import { LayerOption } from './services/layer-builder.service';
   imports: [CommonModule, LeafletModule],
   template: `
     <div class="small-map-container">
-      <div class="month-label">{{ monthName }}</div>
+      <div class="map-label">{{ label }}</div>
       <div
         class="map-wrapper"
         leaflet
         [leafletOptions]="options"
         (leafletMapReady)="onMapReady($event)"
-        (leafletMapMoveEnd)="onMove($event)"
-        (leafletMapZoomEnd)="onZoom($event)"
+        (leafletMapMoveEnd)="onMove()"
+        (leafletMapZoomEnd)="onZoom()"
       ></div>
     </div>
   `,
@@ -42,7 +42,7 @@ import { LayerOption } from './services/layer-builder.service';
         box-sizing: border-box;
       }
 
-      .month-label {
+      .map-label {
         position: absolute;
         top: 8px;
         left: 8px;
@@ -63,7 +63,8 @@ import { LayerOption } from './services/layer-builder.service';
   ],
 })
 export class SmallMapComponent implements OnInit, OnDestroy, OnChanges {
-  @Input() month!: number;
+  @Input() month: number | undefined;
+  @Input() customLabel: string | undefined;
   @Input() selectedOption: LayerOption | undefined;
 
   private map: Map | null = null;
@@ -87,25 +88,18 @@ export class SmallMapComponent implements OnInit, OnDestroy, OnChanges {
     zoomControl: false,
   };
 
-  get monthName(): string {
-    const monthNames = [
-      'January',
-      'February',
-      'March',
-      'April',
-      'May',
-      'June',
-      'July',
-      'August',
-      'September',
-      'October',
-      'November',
-      'December',
-    ];
-    return monthNames[this.month - 1] || '';
+  get label(): string {
+    return this.customLabel || '';
   }
 
-  constructor(private mapSyncService: MapSyncService) {}
+  constructor(private mapSyncService: MapSyncService) {
+    const initialState = this.mapSyncService.getInitialViewState();
+    this.options.zoom = initialState.zoom;
+    this.options.center = latLng(
+      initialState.center.lat,
+      initialState.center.lng,
+    );
+  }
 
   ngOnInit(): void {
     this.mapSyncService.viewState$
@@ -131,7 +125,7 @@ export class SmallMapComponent implements OnInit, OnDestroy, OnChanges {
     this.updateLayers();
   }
 
-  onMove(event: LeafletEvent): void {
+  onMove(): void {
     if (!this.isUpdatingFromSync && this.map) {
       const center = this.map.getCenter();
       const zoom = this.map.getZoom();
@@ -142,7 +136,7 @@ export class SmallMapComponent implements OnInit, OnDestroy, OnChanges {
     }
   }
 
-  onZoom(event: LeafletEvent): void {
+  onZoom(): void {
     if (!this.isUpdatingFromSync && this.map) {
       const center = this.map.getCenter();
       const zoom = this.map.getZoom();
@@ -171,7 +165,7 @@ export class SmallMapComponent implements OnInit, OnDestroy, OnChanges {
   private updateLayers(): void {
     this.removeCurrentLayers();
 
-    if (this.selectedOption && this.map) {
+    if (this.selectedOption && this.map && this.month !== undefined) {
       this.rasterLayer = tileLayer(
         `${this.selectedOption.rasterUrl}_${this.month}/{z}/{x}/{y}.png`,
         {
@@ -205,6 +199,10 @@ export class SmallMapComponent implements OnInit, OnDestroy, OnChanges {
       if (this.vectorLayer) {
         this.map.addLayer(this.vectorLayer);
       }
+
+      setTimeout(() => {
+        this.map?.invalidateSize();
+      }, 0);
     }
   }
 

@@ -37,10 +37,10 @@
     <div class="maps-grid-wrapper">
       <div class="maps-grid">
         <app-small-map
-          *ngFor="let monthOption of months"
-          [month]="monthOption.month"
-          [customLabel]="monthOption.label"
-          [selectedOption]="selectedOption"
+          *ngFor="let scenarioOption of scenarios"
+          [month]="controlsData.selectedMonth"
+          [customLabel]="scenarioOption.label"
+          [selectedOption]="scenarioOption.option"
         ></app-small-map>
       </div>
     </div>
@@ -54,9 +54,9 @@
     </div>
 
     <app-colorbar
-      [colormapUrl]="selectedOption?.climateMap?.colormapUrl || null"
-      [displayName]="selectedOption?.climateMap?.getDisplayName() || null"
-      [selectedMonth]="1"
+      [colormapUrl]="colormapUrl"
+      [displayName]="displayName"
+      [selectedMonth]="controlsData.selectedMonth"
     ></app-colorbar>
   </mat-sidenav-content>
 </mat-sidenav-container>

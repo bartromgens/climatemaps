@@ -33,13 +33,14 @@ import { LayerFilterService } from './services/layer-filter.service';
 import { URLUtils } from '../utils/url-utils';
 import { MapSyncService, MapViewState } from './services/map-sync.service';
 
-interface MonthOption {
-  month: number;
+interface ScenarioOption {
+  scenario: ClimateScenario;
   label: string;
+  option: LayerOption | undefined;
 }
 
 @Component({
-  selector: 'app-monthly-grid',
+  selector: 'app-scenario-grid',
   standalone: true,
   imports: [
     CommonModule,
@@ -50,26 +51,12 @@ interface MonthOption {
     ColorbarComponent,
     MapControlsComponent,
   ],
-  templateUrl: './monthly-grid.component.html',
-  styleUrl: './monthly-grid.component.scss',
+  templateUrl: './scenario-grid.component.html',
+  styleUrl: './scenario-grid.component.scss',
 })
-export class MonthlyGridComponent implements OnInit {
-  months: MonthOption[] = [
-    { month: 1, label: 'January' },
-    { month: 2, label: 'February' },
-    { month: 3, label: 'March' },
-    { month: 4, label: 'April' },
-    { month: 5, label: 'May' },
-    { month: 6, label: 'June' },
-    { month: 7, label: 'July' },
-    { month: 8, label: 'August' },
-    { month: 9, label: 'September' },
-    { month: 10, label: 'October' },
-    { month: 11, label: 'November' },
-    { month: 12, label: 'December' },
-  ];
+export class ScenarioGridComponent implements OnInit {
+  scenarios: ScenarioOption[] = [];
   layerOptions: LayerOption[] = [];
-  selectedOption: LayerOption | undefined;
 
   climateMaps: ClimateMap[] = [];
 
@@ -138,7 +125,7 @@ export class MonthlyGridComponent implements OnInit {
         this.updateControlsFromURL(params);
       });
 
-      this.findMatchingLayer();
+      this.findMatchingLayers();
     });
   }
 
@@ -156,7 +143,15 @@ export class MonthlyGridComponent implements OnInit {
     );
 
     if (!this.controlsData.selectedYearRange && this.yearRanges.length > 0) {
-      this.controlsData.selectedYearRange = this.yearRanges[0];
+      const futureYearRange = this.yearRanges.find(
+        (range) => !this.isHistoricalYearRange(range.value),
+      );
+      this.controlsData.selectedYearRange =
+        futureYearRange || this.yearRanges[0];
+    }
+
+    if (!this.controlsData.selectedClimateModel) {
+      this.controlsData.selectedClimateModel = ClimateModel.ENSEMBLE_MEAN;
     }
 
     this.controlsOptions = {
@@ -185,16 +180,13 @@ export class MonthlyGridComponent implements OnInit {
       this.controlsData.selectedYearRange &&
       !this.isHistoricalYearRange(this.controlsData.selectedYearRange.value)
     ) {
-      if (!this.controlsData.selectedClimateScenario) {
-        this.controlsData.selectedClimateScenario = ClimateScenario.SSP370;
-      }
       if (!this.controlsData.selectedClimateModel) {
         this.controlsData.selectedClimateModel = ClimateModel.ENSEMBLE_MEAN;
       }
     }
 
     this.resetInvalidSelections();
-    this.findMatchingLayer();
+    this.findMatchingLayers();
     this.updateUrlWithControls();
   }
 
@@ -267,7 +259,6 @@ export class MonthlyGridComponent implements OnInit {
   private resetInvalidSelections(): void {
     const availableYearRanges = this.getAvailableYearRanges();
     const availableResolutions = this.getAvailableResolutions();
-    const availableClimateScenarios = this.getAvailableClimateScenarios();
     const availableClimateModels = this.getAvailableClimateModels();
 
     if (
@@ -277,7 +268,11 @@ export class MonthlyGridComponent implements OnInit {
         availableYearRanges,
       )
     ) {
-      this.controlsData.selectedYearRange = availableYearRanges[0] || null;
+      const futureYearRange = availableYearRanges.find(
+        (range) => !this.isHistoricalYearRange(range.value),
+      );
+      this.controlsData.selectedYearRange =
+        futureYearRange || availableYearRanges[0] || null;
     }
 
     if (!availableResolutions.includes(this.controlsData.selectedResolution)) {
@@ -290,16 +285,6 @@ export class MonthlyGridComponent implements OnInit {
       !this.isHistoricalYearRange(this.controlsData.selectedYearRange.value);
 
     if (isFutureData) {
-      if (
-        this.controlsData.selectedClimateScenario &&
-        !availableClimateScenarios.includes(
-          this.controlsData.selectedClimateScenario,
-        )
-      ) {
-        this.controlsData.selectedClimateScenario =
-          availableClimateScenarios[0] || null;
-      }
-
       if (
         this.controlsData.selectedClimateModel &&
         !availableClimateModels.includes(this.controlsData.selectedClimateModel)
@@ -323,7 +308,40 @@ export class MonthlyGridComponent implements OnInit {
     };
   }
 
-  private findMatchingLayer(): void {
+  private getScenarioLabel(scenario: ClimateScenario): string {
+    const labels: Record<ClimateScenario, string> = {
+      [ClimateScenario.SSP126]: 'SSP1-2.6 (Low)',
+      [ClimateScenario.SSP245]: 'SSP2-4.5 (Medium)',
+      [ClimateScenario.SSP370]: 'SSP3-7.0 (High)',
+      [ClimateScenario.SSP585]: 'SSP5-8.5 (Very High)',
+    };
+    return labels[scenario] || scenario;
+  }
+
+  private findMatchingLayers(): void {
+    if (
+      !this.controlsData.selectedYearRange ||
+      this.isHistoricalYearRange(this.controlsData.selectedYearRange.value)
+    ) {
+      this.scenarios = [];
+      return;
+    }
+
+    const availableScenarios = this.getAvailableClimateScenarios();
+
+    this.scenarios = availableScenarios.map((scenario) => {
+      const matchingLayer = this.findLayerForScenario(scenario);
+      return {
+        scenario,
+        label: this.getScenarioLabel(scenario),
+        option: matchingLayer,
+      };
+    });
+  }
+
+  private findLayerForScenario(
+    scenario: ClimateScenario,
+  ): LayerOption | undefined {
     const matchingLayer = this.layerOptions.find((option) => {
       if (!option.metadata) {
         return false;
@@ -357,41 +375,25 @@ export class MonthlyGridComponent implements OnInit {
         return false;
       }
 
+      if (metadata.isDifferenceMap !== this.controlsData.showDifferenceMap) {
+        return false;
+      }
+
+      if (metadata.climateScenario !== scenario) {
+        return false;
+      }
+
       if (
-        !this.isHistoricalYearRange(this.controlsData.selectedYearRange!.value)
+        this.controlsData.selectedClimateModel &&
+        metadata.climateModel !== this.controlsData.selectedClimateModel
       ) {
-        if (metadata.isDifferenceMap !== this.controlsData.showDifferenceMap) {
-          return false;
-        }
-        if (
-          this.controlsData.selectedClimateScenario &&
-          metadata.climateScenario !== this.controlsData.selectedClimateScenario
-        ) {
-          return false;
-        }
-        if (
-          this.controlsData.selectedClimateModel &&
-          metadata.climateModel !== this.controlsData.selectedClimateModel
-        ) {
-          return false;
-        }
-      } else {
-        if (metadata.climateScenario || metadata.climateModel) {
-          return false;
-        }
-        if (metadata.isDifferenceMap) {
-          return false;
-        }
+        return false;
       }
 
       return true;
     });
 
-    if (matchingLayer) {
-      this.selectedOption = matchingLayer;
-    } else {
-      this.selectedOption = undefined;
-    }
+    return matchingLayer;
   }
 
   private updateControlsFromURL(params: ParamMap): void {
@@ -429,14 +431,6 @@ export class MonthlyGridComponent implements OnInit {
       decoded.resolution !== this.controlsData.selectedResolution
     ) {
       this.controlsData.selectedResolution = decoded.resolution;
-      hasChanges = true;
-    }
-
-    if (
-      decoded.scenario !== undefined &&
-      decoded.scenario !== this.controlsData.selectedClimateScenario
-    ) {
-      this.controlsData.selectedClimateScenario = decoded.scenario;
       hasChanges = true;
     }
 
@@ -485,7 +479,10 @@ export class MonthlyGridComponent implements OnInit {
           selectedClimateScenario: null,
           selectedClimateModel: null,
         }
-      : this.controlsData;
+      : {
+          ...this.controlsData,
+          selectedClimateScenario: null,
+        };
 
     const urlData = URLUtils.encodeControls(controlsForUrl);
     URLUtils.updateURLParams(urlData);
@@ -511,6 +508,14 @@ export class MonthlyGridComponent implements OnInit {
 
   toggleSidebar(): void {
     this.sidebarOpened = !this.sidebarOpened;
+  }
+
+  get colormapUrl(): string | null {
+    return this.scenarios[0]?.option?.climateMap?.colormapUrl || null;
+  }
+
+  get displayName(): string | null {
+    return this.scenarios[0]?.option?.climateMap?.getDisplayName() || null;
   }
 
   private updateUrlWithLocationZoom(state: MapViewState): void {

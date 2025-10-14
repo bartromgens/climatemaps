@@ -130,6 +130,11 @@ export class URLUtils {
   static updateURLParams(params: URLControlsData): void {
     const url = new URL(window.location.href);
 
+    // Preserve lat, lon, zoom parameters
+    const lat = url.searchParams.get('lat');
+    const lon = url.searchParams.get('lon');
+    const zoom = url.searchParams.get('zoom');
+
     // Clear existing control parameters
     url.searchParams.delete('variable');
     url.searchParams.delete('resolution');
@@ -161,6 +166,11 @@ export class URLUtils {
     if (params.yearRange) {
       url.searchParams.set('yearRange', params.yearRange);
     }
+
+    // Restore lat, lon, zoom if they existed
+    if (lat) url.searchParams.set('lat', lat);
+    if (lon) url.searchParams.set('lon', lon);
+    if (zoom) url.searchParams.set('zoom', zoom);
 
     window.history.replaceState({}, '', url.pathname + url.search);
   }
