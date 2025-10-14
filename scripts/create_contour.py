@@ -111,28 +111,33 @@ def _pre_ensure_all_data_available(data_sets: List[ClimateDataConfig]) -> None:
     logger.info(f"Pre-downloading/generating data for {len(unique_configs)} unique configurations")
 
     processed_configs = set()
+    failed_downloads = []
+    
+    def try_ensure_data(cfg: ClimateDataConfig, description: str) -> None:
+        if id(cfg) in processed_configs:
+            return
+        
+        logger.info(f"Ensuring data available for {description}: {cfg.data_type_slug}")
+        try:
+            ensure_data_available(cfg)
+            processed_configs.add(id(cfg))
+        except Exception as e:
+            failed_downloads.append((cfg.data_type_slug, str(e)))
+            logger.warning(f"Failed to ensure data for {description} {cfg.data_type_slug}: {e}")
+    
     for config in data_sets:
         if isinstance(config, ClimateDifferenceDataConfig):
-            if id(config.historical_config) not in processed_configs:
-                logger.info(
-                    f"Ensuring data available for historical: {config.historical_config.data_type_slug}"
-                )
-                ensure_data_available(config.historical_config)
-                processed_configs.add(id(config.historical_config))
-
-            if id(config.future_config) not in processed_configs:
-                logger.info(
-                    f"Ensuring data available for future: {config.future_config.data_type_slug}"
-                )
-                ensure_data_available(config.future_config)
-                processed_configs.add(id(config.future_config))
+            try_ensure_data(config.historical_config, "historical")
+            try_ensure_data(config.future_config, "future")
         else:
-            if id(config) not in processed_configs:
-                logger.info(f"Ensuring data available for: {config.data_type_slug}")
-                ensure_data_available(config)
-                processed_configs.add(id(config))
+            try_ensure_data(config, "")
 
-    logger.info("All data pre-download/generation completed")
+    if failed_downloads:
+        logger.error(f"Failed to download/generate {len(failed_downloads)} dataset(s):")
+        for data_slug, error in failed_downloads:
+            logger.error(f"  - {data_slug}: {error}")
+    
+    logger.info(f"Data pre-download/generation completed ({len(processed_configs)} successful, {len(failed_downloads)} failed)")
 
 
 def main(force_recreate: bool = False, limited_test_set: bool = False) -> None:
