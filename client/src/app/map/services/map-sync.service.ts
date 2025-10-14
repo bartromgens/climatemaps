@@ -8,8 +8,8 @@ export interface MapViewState {
 }
 
 const DEFAULT_VIEW_STATE: MapViewState = {
-  center: { lat: 52.1, lng: 5.58 },
-  zoom: 5,
+  center: { lat: 20, lng: 5 },
+  zoom: 3,
 };
 
 @Injectable({

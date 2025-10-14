@@ -38,6 +38,7 @@ import { URLUtils } from '../utils/url-utils';
 import { ClimateMonthlyPlotComponent } from './climate-monthly-plot.component';
 import { ClimateTimerangePlotComponent } from './climate-timerange-plot.component';
 import { MapNavigationService } from '../core/map-navigation.service';
+import { MapSyncService } from './services/map-sync.service';
 import { BaseMapComponent } from './base-map.component';
 
 @Component({
@@ -60,7 +61,6 @@ import { BaseMapComponent } from './base-map.component';
   styleUrl: './map.component.scss',
 })
 export class MapComponent extends BaseMapComponent implements OnInit {
-  private readonly ZOOM_DEFAULT: number = 5;
   private readonly DEFAULT_RESOLUTION = SpatialResolution.MIN10;
 
   selectedOption: LayerOption | undefined;
@@ -93,12 +93,7 @@ export class MapComponent extends BaseMapComponent implements OnInit {
       attribution: '...',
     },
   );
-  options = {
-    layers: [this.baseLayer],
-    zoom: this.ZOOM_DEFAULT,
-    center: latLng(52.1, 5.58),
-    zoomControl: false,
-  };
+  options: any;
   debug = !environment.production;
 
   private map: Map | null = null;
@@ -115,6 +110,7 @@ export class MapComponent extends BaseMapComponent implements OnInit {
     metadataService: MetadataService,
     layerBuilder: LayerBuilderService,
     layerFilter: LayerFilterService,
+    mapSyncService: MapSyncService,
     private tooltipManager: TooltipManagerService,
     private mapNavigationService: MapNavigationService,
   ) {
@@ -125,7 +121,16 @@ export class MapComponent extends BaseMapComponent implements OnInit {
       metadataService,
       layerBuilder,
       layerFilter,
+      mapSyncService,
     );
+
+    const initialState = mapSyncService.getInitialViewState();
+    this.options = {
+      layers: [this.baseLayer],
+      zoom: initialState.zoom,
+      center: latLng(initialState.center.lat, initialState.center.lng),
+      zoomControl: false,
+    };
   }
 
   override ngOnInit(): void {
