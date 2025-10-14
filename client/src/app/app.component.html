@@ -37,6 +37,7 @@
   <a *ngIf="!isMobile" mat-button routerLink="/">Map</a>
   <a *ngIf="!isMobile" mat-button routerLink="/scenarios">Scenarios</a>
   <a *ngIf="!isMobile" mat-button routerLink="/monthly">Months</a>
+  <a *ngIf="!isMobile" mat-button routerLink="/yearranges">Year Ranges</a>
 
   <span class="spacer"></span>
 
@@ -91,6 +92,22 @@
         <ng-container *ngTemplateOutlet="autocompleteOptions"></ng-container>
       </mat-autocomplete>
     </div>
+    <a mat-menu-item routerLink="/">
+      <mat-icon>map</mat-icon>
+      <span>Map</span>
+    </a>
+    <a mat-menu-item routerLink="/scenarios">
+      <mat-icon>grid_view</mat-icon>
+      <span>Scenarios</span>
+    </a>
+    <a mat-menu-item routerLink="/monthly">
+      <mat-icon>calendar_month</mat-icon>
+      <span>Months</span>
+    </a>
+    <a mat-menu-item routerLink="/yearranges">
+      <mat-icon>date_range</mat-icon>
+      <span>Year Ranges</span>
+    </a>
     <a mat-menu-item routerLink="/about">
       <mat-icon>info</mat-icon>
       <span>Info</span>
