@@ -120,9 +120,9 @@ export class MetadataService {
 
     if (historicalRange1 && historicalRange2) {
       const mergedRange: YearRange = {
-        value: historicalRange1.value,
-        label: `${historicalRange1.label} / ${historicalRange2.label}`,
-        additionalValues: [historicalRange2.value],
+        value: historicalRange2.value,
+        label: `${historicalRange2.label} / ${historicalRange1.label}`,
+        additionalValues: [historicalRange1.value],
       };
 
       return ranges
