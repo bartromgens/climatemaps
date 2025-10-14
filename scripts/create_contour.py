@@ -4,6 +4,7 @@ import multiprocessing
 import os
 import sys
 import concurrent.futures
+from datetime import datetime
 from typing import List
 
 import numpy as np
@@ -87,10 +88,14 @@ def _filter_by_criteria(
 
 
 def _create_tasks_for_datasets(
-    data_sets: List[ClimateDataConfig], month_upper: int, force_recreate: bool, name: str
+    data_sets: List[ClimateDataConfig],
+    month_upper: int,
+    force_recreate: bool,
+    name: str,
+    if_older_than: datetime | None = None,
 ) -> List[tuple]:
     tasks = [
-        (config, month, force_recreate)
+        (config, month, force_recreate, if_older_than)
         for config in data_sets
         for month in range(1, month_upper + 1)
     ]
@@ -142,10 +147,32 @@ def _pre_ensure_all_data_available(data_sets: List[ClimateDataConfig]) -> None:
     )
 
 
+def _mbtiles_are_older_than_date(
+    config: ClimateDataConfig, month: int, threshold_date: datetime
+) -> bool:
+    directory = os.path.join(maps_config.data_dir_out, config.data_type_slug)
+
+    mbtiles_files = [
+        os.path.join(directory, f"{month}_raster.mbtiles"),
+        os.path.join(directory, f"{month}_vector.mbtiles"),
+    ]
+
+    for file_path in mbtiles_files:
+        if not os.path.isfile(file_path):
+            return True
+
+        file_mtime = datetime.fromtimestamp(os.path.getmtime(file_path))
+        if file_mtime < threshold_date:
+            return True
+
+    return False
+
+
 def main(
     force_recreate: bool = False,
     limited_test_set: bool = False,
     climate_model: ClimateModel | None = None,
+    if_older_than: datetime | None = None,
 ) -> None:
     month_upper = 1 if limited_test_set else 12
     all_tasks = []
@@ -170,7 +197,9 @@ def main(
             else:
                 datasets = [ds for ds in datasets if ds.climate_model == climate_model]
         all_datasets.extend(datasets)
-        all_tasks.extend(_create_tasks_for_datasets(datasets, month_upper, force_recreate, name))
+        all_tasks.extend(
+            _create_tasks_for_datasets(datasets, month_upper, force_recreate, name, if_older_than)
+        )
 
     logger.info("Pre-ensuring all data files exist before multiprocessing")
     _pre_ensure_all_data_available(all_datasets)
@@ -233,7 +262,7 @@ def terminate_process_pool_children() -> None:
     logger.info("All child processes terminated.")
 
 
-def process(config, month: int, force_recreate: bool) -> str:
+def process(config, month: int, force_recreate: bool, if_older_than: datetime | None = None) -> str:
     logger.info(f'Creating image and tiles for "{config.data_type_slug}" and month {month}')
 
     try:
@@ -242,7 +271,16 @@ def process(config, month: int, force_recreate: bool) -> str:
         else:
             files_exist = tile_files_exist(config, month, maps_config)
 
-        if force_recreate or not files_exist:
+        should_create = force_recreate or not files_exist
+
+        if not should_create and if_older_than is not None and files_exist:
+            should_create = _mbtiles_are_older_than_date(config, month, if_older_than)
+            if should_create:
+                logger.info(
+                    f'Recreating "{config.data_type_slug}" - {month} (files older than {if_older_than.date()})'
+                )
+
+        if should_create:
             _create_contour(config, month)
         else:
             logger.info(f'Skip creation of "{config.data_type_slug}" - {month} (already exists)')
@@ -299,14 +337,29 @@ if __name__ == "__main__":
         choices=[model.value for model in ClimateModel],
         help="Process only datasets for a specific climate model (e.g., ENSEMBLE_MEAN, EC_Earth3_Veg).",
     )
+    parser.add_argument(
+        "--if-older-than",
+        type=str,
+        default=None,
+        metavar="YYYY-MM-DD",
+        help="Only update tiles if mbtiles files are older than the specified date (format: YYYY-MM-DD).",
+    )
     args = parser.parse_args()
 
     climate_model = None
     if args.climate_model:
         climate_model = ClimateModel(args.climate_model)
 
+    if_older_than = None
+    if args.if_older_than:
+        try:
+            if_older_than = datetime.strptime(args.if_older_than, "%Y-%m-%d")
+        except ValueError:
+            parser.error(f"Invalid date format: {args.if_older_than}. Expected format: YYYY-MM-DD")
+
     main(
         force_recreate=args.force_recreate,
         limited_test_set=args.test_set,
         climate_model=climate_model,
+        if_older_than=if_older_than,
     )
