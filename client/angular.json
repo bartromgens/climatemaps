@@ -84,6 +84,10 @@
             },
             "development": {
               "buildTarget": "client:build:development"
+            },
+            "production-backend": {
+              "buildTarget": "client:build:development",
+              "proxyConfig": "proxy.conf.prod.json"
             }
           },
           "defaultConfiguration": "development"

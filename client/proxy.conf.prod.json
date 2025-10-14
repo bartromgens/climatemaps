@@ -1,0 +1,8 @@
+{
+  "/v1": {
+    "target": "https://openclimatemap.org/api",
+    "secure": true,
+    "changeOrigin": true,
+    "logLevel": "debug"
+  }
+}

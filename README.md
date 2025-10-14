@@ -104,6 +104,12 @@ In `./client` run:
 ng serve
 ```
 
+Or run against the openclimatemap.org API and tileserver:
+
+```
+ng serve --configuration=production-backend
+```
+
 ### Tests
 
 Run:
