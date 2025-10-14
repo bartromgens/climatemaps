@@ -447,6 +447,20 @@ FUTURE_DATA_GROUPS: List[FutureClimateDataConfigGroup] = [
             ClimateModel.EC_EARTH3_VEG,
             ClimateModel.ACCESS_CM2,
             ClimateModel.MPI_ESM1_2_HR,
+        ],
+        filepath_template=FUTURE_FILE_TEMPLATE,
+    ),
+    FutureClimateDataConfigGroup(
+        variable_types=[ClimateVarKey.T_MIN, ClimateVarKey.T_MAX, ClimateVarKey.PRECIPITATION],
+        format=DataFormat.GEOTIFF_WORLDCLIM_CMIP6,
+        source="https://www.worldclim.org/data/cmip6/cmip6climate.html",
+        resolutions=[SpatialResolution.MIN10],
+        year_ranges=FUTURE_DATE_RANGES,
+        climate_scenarios=[
+            ClimateScenario.SSP126,
+            ClimateScenario.SSP370,
+        ],
+        climate_models=[
             ClimateModel.GFDL_ESM4,
         ],
         filepath_template=FUTURE_FILE_TEMPLATE,
