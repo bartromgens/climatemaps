@@ -163,10 +163,10 @@ export class ScenarioGridComponent extends BaseMapComponent {
 
   private getScenarioLabel(scenario: ClimateScenario): string {
     const labels: Record<ClimateScenario, string> = {
-      [ClimateScenario.SSP126]: 'SSP1-2.6 (Low)',
-      [ClimateScenario.SSP245]: 'SSP2-4.5 (Medium)',
-      [ClimateScenario.SSP370]: 'SSP3-7.0 (High)',
-      [ClimateScenario.SSP585]: 'SSP5-8.5 (Very High)',
+      [ClimateScenario.SSP126]: 'SSP1-2.6 (Strong climate action)',
+      [ClimateScenario.SSP245]: 'SSP2-4.5 (Moderate climate action)',
+      [ClimateScenario.SSP370]: 'SSP3-7.0 (Limited climate action)',
+      [ClimateScenario.SSP585]: 'SSP5-8.5 (Minimal climate action)',
     };
     return labels[scenario] || scenario;
   }
