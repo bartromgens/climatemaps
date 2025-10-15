@@ -40,6 +40,9 @@ import { ClimateTimerangePlotComponent } from './climate-timerange-plot.componen
 import { MapNavigationService } from '../core/map-navigation.service';
 import { MapSyncService } from './services/map-sync.service';
 import { BaseMapComponent } from './base-map.component';
+import { TemperatureUnitService } from '../core/temperature-unit.service';
+import { TemperatureUtils } from '../utils/temperature-utils';
+import { ClimateVarKey } from '../utils/enum';
 
 @Component({
   selector: 'app-map',
@@ -113,6 +116,7 @@ export class MapComponent extends BaseMapComponent implements OnInit {
     mapSyncService: MapSyncService,
     private tooltipManager: TooltipManagerService,
     private mapNavigationService: MapNavigationService,
+    private temperatureUnitService: TemperatureUnitService,
   ) {
     super(
       route,
@@ -433,7 +437,21 @@ export class MapComponent extends BaseMapComponent implements OnInit {
   }
 
   private displayClickValue(latlng: any, response: ClimateValueResponse): void {
-    const displayValue = `${response.value.toFixed(1)} ${response.unit}`;
+    const isTemperature = TemperatureUtils.isTemperatureVariable(
+      this.controlsData.selectedVariableType,
+    );
+    let value = response.value;
+    let unit = response.unit;
+
+    if (isTemperature && unit === '°C') {
+      const currentUnit = this.temperatureUnitService.getUnit();
+      if (currentUnit === '°F') {
+        value = TemperatureUtils.celsiusToFahrenheit(value);
+        unit = '°F';
+      }
+    }
+
+    const displayValue = `${value.toFixed(1)} ${unit}`;
     this.tooltipManager.createPersistentTooltip(
       displayValue,
       latlng,
@@ -493,8 +511,20 @@ export class MapComponent extends BaseMapComponent implements OnInit {
   private onVectorLayerHover(e: any): void {
     const properties = e.layer?.properties;
     if (properties && properties['level-value'] !== undefined && this.map) {
-      const value = properties['level-value'];
-      const unit = this.getCurrentUnit();
+      let value = properties['level-value'];
+      let unit = this.getCurrentUnit();
+
+      const isTemperature = TemperatureUtils.isTemperatureVariable(
+        this.controlsData.selectedVariableType,
+      );
+      if (isTemperature && unit === '°C') {
+        const currentUnit = this.temperatureUnitService.getUnit();
+        if (currentUnit === '°F') {
+          value = TemperatureUtils.celsiusToFahrenheit(value);
+          unit = '°F';
+        }
+      }
+
       const displayValue = `${value.toFixed(1)} ${unit}`;
       this.tooltipManager.createHoverTooltip(displayValue, e.latlng, this.map);
     }

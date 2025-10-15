@@ -16,7 +16,7 @@
         "
       >
         {{ controlsOptions?.climateVariables?.[variableType]?.displayName }} ({{
-          controlsOptions?.climateVariables?.[variableType]?.unit
+          getVariableUnit(variableType)
         }})
       </mat-option>
     </mat-select>

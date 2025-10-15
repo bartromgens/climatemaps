@@ -29,6 +29,11 @@ import {
   ClimateScenario,
   ClimateModel,
 } from '../utils/enum';
+import {
+  TemperatureUnitService,
+  TemperatureUnit,
+} from '../core/temperature-unit.service';
+import { TemperatureUtils } from '../utils/temperature-utils';
 
 Chart.register(...registerables);
 
@@ -67,6 +72,7 @@ export class ClimateTimerangePlotComponent
   isVisible = true;
   timeRangeData: TimeRangeData[] = [];
   cityInfo: NearestCityResponse | null = null;
+  private currentUnit: TemperatureUnit = TemperatureUnit.CELSIUS;
 
   private readonly HISTORICAL_RANGE: [number, number] = [1970, 2000];
   private readonly FUTURE_RANGES: [number, number][] = [
@@ -81,7 +87,15 @@ export class ClimateTimerangePlotComponent
   constructor(
     private climateMapService: ClimateMapService,
     private cdr: ChangeDetectorRef,
-  ) {}
+    private temperatureUnitService: TemperatureUnitService,
+  ) {
+    this.temperatureUnitService.unit$.subscribe((unit) => {
+      this.currentUnit = unit;
+      if (this.chart && this.timeRangeData.length > 0) {
+        this.renderChart();
+      }
+    });
+  }
 
   ngAfterViewInit(): void {
     if (this.plotData) {
@@ -232,8 +246,20 @@ export class ClimateTimerangePlotComponent
 
     const labels = this.timeRangeData.map((d) => d.label);
 
-    const tmaxLabel = `${CLIMATE_VAR_DISPLAY_NAMES[ClimateVarKey.T_MAX]} Change (${CLIMATE_VAR_UNITS[ClimateVarKey.T_MAX]})`;
-    const tminLabel = `${CLIMATE_VAR_DISPLAY_NAMES[ClimateVarKey.T_MIN]} Change (${CLIMATE_VAR_UNITS[ClimateVarKey.T_MIN]})`;
+    const convertedTmax = this.timeRangeData.map((d) =>
+      this.currentUnit === TemperatureUnit.FAHRENHEIT
+        ? TemperatureUtils.celsiusToFahrenheit(d.tmax)
+        : d.tmax,
+    );
+    const convertedTmin = this.timeRangeData.map((d) =>
+      this.currentUnit === TemperatureUnit.FAHRENHEIT
+        ? TemperatureUtils.celsiusToFahrenheit(d.tmin)
+        : d.tmin,
+    );
+
+    const tempUnit = this.currentUnit;
+    const tmaxLabel = `${CLIMATE_VAR_DISPLAY_NAMES[ClimateVarKey.T_MAX]} Change (${tempUnit})`;
+    const tminLabel = `${CLIMATE_VAR_DISPLAY_NAMES[ClimateVarKey.T_MIN]} Change (${tempUnit})`;
     const precipLabel = `${CLIMATE_VAR_DISPLAY_NAMES[ClimateVarKey.PRECIPITATION]} Change (${CLIMATE_VAR_UNITS[ClimateVarKey.PRECIPITATION]})`;
 
     const config: ChartConfiguration = {
@@ -243,7 +269,7 @@ export class ClimateTimerangePlotComponent
         datasets: [
           {
             label: tmaxLabel,
-            data: this.timeRangeData.map((d) => d.tmax),
+            data: convertedTmax,
             borderColor: 'rgb(255, 99, 132)',
             backgroundColor: 'rgba(255, 99, 132, 0.2)',
             tension: 0.4,
@@ -252,7 +278,7 @@ export class ClimateTimerangePlotComponent
           },
           {
             label: tminLabel,
-            data: this.timeRangeData.map((d) => d.tmin),
+            data: convertedTmin,
             borderColor: 'rgb(255, 159, 64)',
             backgroundColor: 'rgba(255, 159, 64, 0.2)',
             tension: 0.4,
@@ -294,7 +320,7 @@ export class ClimateTimerangePlotComponent
             position: 'left',
             title: {
               display: true,
-              text: `Temperature Change (${CLIMATE_VAR_UNITS[ClimateVarKey.T_MAX]})`,
+              text: `Temperature Change (${tempUnit})`,
             },
           },
           y1: {

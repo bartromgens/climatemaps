@@ -54,15 +54,39 @@
     </mat-autocomplete>
   </div>
 
-  <nav class="nav-links" *ngIf="!isMobile">
-    <a mat-button routerLink="/about">Info</a>
-    <a
-      mat-button
-      href="https://github.com/bartromgens/climatemaps"
-      target="_blank"
-      >Code</a
+  <a *ngIf="!isMobile" mat-button routerLink="/about">Info</a>
+  <a
+    *ngIf="!isMobile"
+    mat-icon-button
+    href="https://github.com/bartromgens/climatemaps"
+    target="_blank"
+    aria-label="GitHub"
+  >
+    <mat-icon svgIcon="github"></mat-icon>
+  </a>
+  <button
+    *ngIf="!isMobile"
+    mat-icon-button
+    [matMenuTriggerFor]="settingsMenu"
+    aria-label="Settings"
+    class="settings-button"
+  >
+    <mat-icon>settings</mat-icon>
+  </button>
+
+  <mat-menu #settingsMenu="matMenu">
+    <div
+      class="settings-menu-content"
+      (click)="$event.stopPropagation()"
+      (keydown)="$event.stopPropagation()"
+      tabindex="0"
     >
-  </nav>
+      <div class="settings-section">
+        <span class="settings-label">Temperature Unit</span>
+        <app-temperature-unit-selector></app-temperature-unit-selector>
+      </div>
+    </div>
+  </mat-menu>
 
   <button
     *ngIf="isMobile"
@@ -122,9 +146,20 @@
       href="https://github.com/bartromgens/climatemaps"
       target="_blank"
     >
-      <mat-icon>code</mat-icon>
-      <span>Code</span>
+      <mat-icon svgIcon="github"></mat-icon>
+      <span>GitHub</span>
     </a>
+    <div
+      class="mobile-settings-container"
+      (click)="$event.stopPropagation()"
+      (keydown)="$event.stopPropagation()"
+      tabindex="0"
+    >
+      <div class="settings-section">
+        <span class="settings-label">Temperature Unit</span>
+        <app-temperature-unit-selector></app-temperature-unit-selector>
+      </div>
+    </div>
   </mat-menu>
 </mat-toolbar>
 

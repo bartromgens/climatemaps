@@ -12,5 +12,5 @@ alwaysApply: true
 - Don't comment the obvious
 - Don't create readmes unless asked
 - As last step, review your changes and remove duplicate code
-- Write a concise summary of the change
-- End with a suggested commit message that clearly reflects the change and why it was made
+- Keep your summary of change concise
+- End your summary with a suggested commit message

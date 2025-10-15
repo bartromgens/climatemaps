@@ -7,6 +7,42 @@ mat-toolbar {
   flex: 1 1 auto;
 }
 
+.settings-button {
+  margin-left: 4px;
+}
+
+.settings-menu-content {
+  padding: 16px;
+  min-width: 220px;
+}
+
+.settings-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.settings-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: rgba(0, 0, 0, 0.6);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.mobile-settings-container {
+  padding: 16px;
+  border-top: 1px solid rgba(0, 0, 0, 0.12);
+  margin-top: 8px;
+}
+
+.mobile-settings-container .settings-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+}
+
 .app-title-link {
   text-decoration: none;
   color: #1565c0;

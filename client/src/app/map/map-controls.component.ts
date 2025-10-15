@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -14,6 +14,8 @@ import {
 import { YearRange } from '../core/metadata.service';
 import { YearSliderComponent } from './year-slider.component';
 import { MonthSliderComponent } from './month-slider.component';
+import { TemperatureUnitService } from '../core/temperature-unit.service';
+import { TemperatureUtils } from '../utils/temperature-utils';
 
 export interface MapControlsData {
   selectedVariableType: ClimateVarKey;
@@ -55,10 +57,34 @@ export interface MapControlsOptions {
   templateUrl: './map-controls.component.html',
   styleUrl: './map-controls.component.scss',
 })
-export class MapControlsComponent {
+export class MapControlsComponent implements OnInit {
   @Input() controlsData: MapControlsData | undefined;
   @Input() controlsOptions: MapControlsOptions | undefined;
   @Output() controlsChange = new EventEmitter<MapControlsData>();
+  temperatureUnit = '°C';
+
+  constructor(private temperatureUnitService: TemperatureUnitService) {}
+
+  ngOnInit(): void {
+    this.temperatureUnitService.unit$.subscribe((unit) => {
+      this.temperatureUnit = unit;
+    });
+  }
+
+  getVariableUnit(variableType: ClimateVarKey): string {
+    const climateVariable =
+      this.controlsOptions?.climateVariables?.[variableType];
+    if (!climateVariable) {
+      return '';
+    }
+
+    const isTemperature = TemperatureUtils.isTemperatureVariable(variableType);
+    if (isTemperature && climateVariable.unit === '°C') {
+      return this.temperatureUnit;
+    }
+
+    return climateVariable.unit;
+  }
 
   onVariableTypeChange(event: any): void {
     if (this.controlsData) {
