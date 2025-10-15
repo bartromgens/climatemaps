@@ -19,6 +19,7 @@ import { LayerFilterService } from './services/layer-filter.service';
 import { URLUtils } from '../utils/url-utils';
 import { MapSyncService } from './services/map-sync.service';
 import { BaseMapComponent } from './base-map.component';
+import { SeoService } from '../core/seo.service';
 
 interface MonthOption {
   month: number;
@@ -43,6 +44,36 @@ interface MonthOption {
 export class MonthlyGridComponent extends BaseMapComponent {
   private readonly DEFAULT_RESOLUTION = SpatialResolution.MIN10;
 
+  constructor(
+    route: ActivatedRoute,
+    location: Location,
+    climateMapService: ClimateMapService,
+    metadataService: MetadataService,
+    layerBuilder: LayerBuilderService,
+    layerFilter: LayerFilterService,
+    mapSyncService: MapSyncService,
+    private seoService: SeoService,
+  ) {
+    super(
+      route,
+      location,
+      climateMapService,
+      metadataService,
+      layerBuilder,
+      layerFilter,
+      mapSyncService,
+    );
+    this.seoService.updateMetaTags({
+      title:
+        'Seasonal Climate Maps - Monthly Temperature & Precipitation Patterns',
+      description:
+        'View seasonal climate maps showing monthly temperature and precipitation patterns across the globe. Compare climate data by month for different time periods and scenarios.',
+      keywords:
+        'seasonal climate map, monthly climate, temperature by month, precipitation by season, seasonal weather patterns',
+      url: '/seasons',
+    });
+  }
+
   months: MonthOption[] = [
     { month: 12, label: 'December' },
     { month: 1, label: 'January' },
@@ -58,26 +89,6 @@ export class MonthlyGridComponent extends BaseMapComponent {
     { month: 11, label: 'November' },
   ];
   selectedOption: LayerOption | undefined;
-
-  constructor(
-    route: ActivatedRoute,
-    location: Location,
-    climateMapService: ClimateMapService,
-    metadataService: MetadataService,
-    layerBuilder: LayerBuilderService,
-    layerFilter: LayerFilterService,
-    mapSyncService: MapSyncService,
-  ) {
-    super(
-      route,
-      location,
-      climateMapService,
-      metadataService,
-      layerBuilder,
-      layerFilter,
-      mapSyncService,
-    );
-  }
 
   protected onDataLoaded(): void {
     this.findMatchingLayer();

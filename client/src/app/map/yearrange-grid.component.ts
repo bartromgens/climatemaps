@@ -23,6 +23,7 @@ import { LayerFilterService } from './services/layer-filter.service';
 import { URLUtils } from '../utils/url-utils';
 import { MapSyncService } from './services/map-sync.service';
 import { BaseMapComponent } from './base-map.component';
+import { SeoService } from '../core/seo.service';
 
 interface YearRangeOption {
   yearRange: YearRange;
@@ -60,6 +61,7 @@ export class YearRangeGridComponent extends BaseMapComponent {
     layerBuilder: LayerBuilderService,
     layerFilter: LayerFilterService,
     mapSyncService: MapSyncService,
+    private seoService: SeoService,
   ) {
     super(
       route,
@@ -71,6 +73,15 @@ export class YearRangeGridComponent extends BaseMapComponent {
       mapSyncService,
     );
     this.controlsData.showDifferenceMap = true;
+    this.seoService.updateMetaTags({
+      title:
+        'Climate Predictions Timeline - Historical to Future Climate Change',
+      description:
+        'View climate predictions across different time periods from 1970-2000 to 2081-2100. Compare how temperature and precipitation are projected to change over time under different climate scenarios.',
+      keywords:
+        'climate predictions, future climate, climate timeline, temperature change, climate change over time, historical climate, future projections',
+      url: '/climate-predictions',
+    });
   }
 
   protected onDataLoaded(): void {

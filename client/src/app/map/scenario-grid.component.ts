@@ -24,6 +24,7 @@ import { LayerFilterService } from './services/layer-filter.service';
 import { URLUtils } from '../utils/url-utils';
 import { MapSyncService } from './services/map-sync.service';
 import { BaseMapComponent } from './base-map.component';
+import { SeoService } from '../core/seo.service';
 
 interface ScenarioOption {
   scenario: ClimateScenario;
@@ -60,6 +61,7 @@ export class ScenarioGridComponent extends BaseMapComponent {
     layerBuilder: LayerBuilderService,
     layerFilter: LayerFilterService,
     mapSyncService: MapSyncService,
+    private seoService: SeoService,
   ) {
     super(
       route,
@@ -70,6 +72,15 @@ export class ScenarioGridComponent extends BaseMapComponent {
       layerFilter,
       mapSyncService,
     );
+    this.seoService.updateMetaTags({
+      title:
+        'Climate Scenarios Comparison - SSP126 SSP245 SSP370 SSP585 Projections',
+      description:
+        'Compare different CMIP6 climate scenarios (SSP1-2.6, SSP2-4.5, SSP3-7.0, SSP5-8.5) side by side. Visualize future temperature and precipitation changes under different emission pathways.',
+      keywords:
+        'climate scenarios, SSP scenarios, climate projections, CMIP6, emission scenarios, climate change comparison, SSP126, SSP245, SSP370, SSP585',
+      url: '/climate-scenarios',
+    });
   }
 
   protected onDataLoaded(): void {

@@ -43,6 +43,7 @@ import { BaseMapComponent } from './base-map.component';
 import { TemperatureUnitService } from '../core/temperature-unit.service';
 import { TemperatureUtils } from '../utils/temperature-utils';
 import { ClimateVarKey } from '../utils/enum';
+import { SeoService } from '../core/seo.service';
 
 @Component({
   selector: 'app-map',
@@ -117,6 +118,7 @@ export class MapComponent extends BaseMapComponent implements OnInit {
     private tooltipManager: TooltipManagerService,
     private mapNavigationService: MapNavigationService,
     private temperatureUnitService: TemperatureUnitService,
+    private seoService: SeoService,
   ) {
     super(
       route,
@@ -138,6 +140,7 @@ export class MapComponent extends BaseMapComponent implements OnInit {
   }
 
   override ngOnInit(): void {
+    this.seoService.setDefaultMetaTags();
     this.checkMobile();
     this.setupResizeListener();
     this.setupNavigationListener();
