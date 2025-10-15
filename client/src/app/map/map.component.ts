@@ -6,6 +6,7 @@ import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatCardModule } from '@angular/material/card';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
 
 import { LeafletModule } from '@bluehalo/ngx-leaflet';
 import {
@@ -42,8 +43,9 @@ import { MapSyncService } from './services/map-sync.service';
 import { BaseMapComponent } from './base-map.component';
 import { TemperatureUnitService } from '../core/temperature-unit.service';
 import { TemperatureUtils } from '../utils/temperature-utils';
-import { ClimateVarKey } from '../utils/enum';
 import { SeoService } from '../core/seo.service';
+import { ToastService } from '../core/toast.service';
+import { ClimateVariableHelperService } from '../core/climate-variable-helper.service';
 
 @Component({
   selector: 'app-map',
@@ -56,6 +58,7 @@ import { SeoService } from '../core/seo.service';
     MatSidenavModule,
     MatButtonModule,
     MatCardModule,
+    MatSnackBarModule,
     MapControlsComponent,
     ColorbarComponent,
     ClimateMonthlyPlotComponent,
@@ -80,11 +83,30 @@ export class MapComponent extends BaseMapComponent implements OnInit {
   }
 
   protected onControlsUpdated(): void {
+    this.checkAndShowFuturePredictionWarning();
     this.findMatchingLayer();
     this.updateLayers();
   }
 
+  private checkAndShowFuturePredictionWarning(): void {
+    if (
+      !this.climateVariableHelper.hasFuturePredictions(
+        this.controlsData.selectedVariableType,
+      )
+    ) {
+      const variableDisplayName =
+        this.climateVariables[this.controlsData.selectedVariableType]
+          ?.displayName || this.controlsData.selectedVariableType;
+
+      this.toastService.showInfo(
+        `No future predictions available for ${variableDisplayName}. Only historical data is available for this variable.`,
+        6000,
+      );
+    }
+  }
+
   protected onDataLoaded(): void {
+    this.checkAndShowFuturePredictionWarning();
     this.findMatchingLayer();
     this.updateLayers();
   }
@@ -119,6 +141,8 @@ export class MapComponent extends BaseMapComponent implements OnInit {
     private mapNavigationService: MapNavigationService,
     private temperatureUnitService: TemperatureUnitService,
     private seoService: SeoService,
+    private toastService: ToastService,
+    private climateVariableHelper: ClimateVariableHelperService,
   ) {
     super(
       route,
