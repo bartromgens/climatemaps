@@ -86,6 +86,13 @@ export enum ClimateScenario {
   SSP585 = 'SSP585',
 }
 
+export const CLIMATE_SCENARIO_DISPLAY_NAMES: Record<ClimateScenario, string> = {
+  [ClimateScenario.SSP126]: 'Strong climate action (SSP1-2.6)',
+  [ClimateScenario.SSP245]: 'Moderate climate action (SSP2-4.5)',
+  [ClimateScenario.SSP370]: 'Limited climate action (SSP3-7.0)',
+  [ClimateScenario.SSP585]: 'Minimal climate action (SSP5-8.5)',
+};
+
 // Data format enum matching the backend
 export enum DataFormat {
   GEOTIFF_WORLDCLIM_CMIP6 = 'GEOTIFF_WORLDCLIM_CMIP6',

@@ -9,6 +9,7 @@ import {
   SpatialResolution,
   ClimateScenario,
   ClimateModel,
+  CLIMATE_SCENARIO_DISPLAY_NAMES,
 } from '../utils/enum';
 import { YearRange } from '../core/metadata.service';
 import { YearSliderComponent } from './year-slider.component';
@@ -123,6 +124,10 @@ export class MapControlsComponent {
       default:
         return resolution;
     }
+  }
+
+  getClimateScenarioDisplayName(scenario: ClimateScenario): string {
+    return CLIMATE_SCENARIO_DISPLAY_NAMES[scenario] || scenario;
   }
 
   getClimateModelDisplayName(model: ClimateModel): string {
