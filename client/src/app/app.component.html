@@ -20,15 +20,6 @@
   </mat-form-field>
 </ng-template>
 
-<ng-template #autocompleteOptions>
-  <mat-option
-    *ngFor="let location of filteredLocations$ | async"
-    [value]="location"
-  >
-    {{ location.displayName }}
-  </mat-option>
-</ng-template>
-
 <mat-toolbar>
   <a routerLink="/" class="app-title-link">
     <span>{{ title }}</span>
@@ -54,7 +45,12 @@
       [displayWith]="displayLocationName"
       (optionSelected)="onLocationSelected($event.option.value)"
     >
-      <ng-container *ngTemplateOutlet="autocompleteOptions"></ng-container>
+      <mat-option
+        *ngFor="let location of filteredLocations$ | async"
+        [value]="location"
+      >
+        {{ location.displayName }}
+      </mat-option>
     </mat-autocomplete>
   </div>
 
@@ -93,7 +89,12 @@
         [displayWith]="displayLocationName"
         (optionSelected)="onLocationSelected($event.option.value)"
       >
-        <ng-container *ngTemplateOutlet="autocompleteOptions"></ng-container>
+        <mat-option
+          *ngFor="let location of filteredLocations$ | async"
+          [value]="location"
+        >
+          {{ location.displayName }}
+        </mat-option>
       </mat-autocomplete>
     </div>
     <a mat-menu-item routerLink="/">
