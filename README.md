@@ -4,7 +4,13 @@ Global monthly climate data visualised on an interactive map with [OpenLayers 3]
 
 ## Demo
 
-**http://climatemaps.romgens.com**
+**[openclimatemap.org](https://openclimatemap.org)**
+
+## TODO
+
+- Make more clear what the user is looking at on the landing page (Month selected, historic (not live))
+- Disable future year ranges if they are not available, in addition to the toast warning
+- Add explanation of climate scenarios
 
 ## Data
 
