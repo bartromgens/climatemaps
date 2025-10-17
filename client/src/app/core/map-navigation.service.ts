@@ -19,7 +19,7 @@ export class MapNavigationService {
     lat: number,
     lon: number,
     zoom: number,
-    generateCharts: boolean = false,
+    generateCharts = false,
   ): void {
     this.navigationSubject.next({ lat, lon, zoom, generateCharts });
   }

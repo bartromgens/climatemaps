@@ -106,6 +106,7 @@
     <app-year-slider
       [value]="controlsData?.selectedYearRange || null"
       [years]="controlsOptions?.yearRanges || []"
+      [disabled]="shouldDisableYearSlider()"
       (valueChange)="onYearSelected($event)"
     ></app-year-slider>
   </div>

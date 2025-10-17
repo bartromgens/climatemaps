@@ -14,6 +14,7 @@ export class YearSliderComponent {
   @Output() valueChange = new EventEmitter<YearRange>();
   @Input() value: YearRange | null = null;
   @Input() years: YearRange[] = [];
+  @Input() disabled = false;
 
   get sliderValue(): number {
     if (!this.value || this.years.length === 0) {

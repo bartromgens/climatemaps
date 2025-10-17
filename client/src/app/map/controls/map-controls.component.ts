@@ -16,6 +16,7 @@ import { YearSliderComponent } from './year-slider.component';
 import { MonthSliderComponent } from './month-slider.component';
 import { TemperatureUnitService } from '../../core/temperature-unit.service';
 import { TemperatureUtils } from '../../utils/temperature-utils';
+import { ClimateVariableHelperService } from '../../core/climate-variable-helper.service';
 
 export interface MapControlsData {
   selectedVariableType: ClimateVarKey;
@@ -63,7 +64,10 @@ export class MapControlsComponent implements OnInit {
   @Output() controlsChange = new EventEmitter<MapControlsData>();
   temperatureUnit = '°C';
 
-  constructor(private temperatureUnitService: TemperatureUnitService) {}
+  constructor(
+    private temperatureUnitService: TemperatureUnitService,
+    private climateVariableHelper: ClimateVariableHelperService,
+  ) {}
 
   ngOnInit(): void {
     this.temperatureUnitService.unit$.subscribe((unit) => {
@@ -182,6 +186,15 @@ export class MapControlsComponent implements OnInit {
       !this.controlsOptions.isHistoricalYearRange(
         this.controlsData.selectedYearRange.value,
       )
+    );
+  }
+
+  shouldDisableYearSlider(): boolean {
+    if (!this.controlsData?.selectedVariableType) {
+      return false;
+    }
+    return !this.climateVariableHelper.hasFuturePredictions(
+      this.controlsData.selectedVariableType,
     );
   }
 

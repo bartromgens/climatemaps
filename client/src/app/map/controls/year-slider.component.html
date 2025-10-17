@@ -4,6 +4,7 @@
   [max]="years.length"
   step="1"
   [displayWith]="displayWith"
+  [disabled]="disabled"
 >
   <input matSliderThumb [value]="sliderValue" (valueChange)="onInput($event)" />
 </mat-slider>
