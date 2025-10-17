@@ -20,7 +20,7 @@ import {
 } from './services/layer-builder.service';
 import { LayerFilterService } from './services/layer-filter.service';
 import { URLUtils } from '../utils/url-utils';
-import { MapControlsData, MapControlsOptions } from './map-controls.component';
+import { MapControlsData, MapControlsOptions } from './controls/map-controls.component';
 import { MapSyncService, MapViewState } from './services/map-sync.service';
 
 @Directive()

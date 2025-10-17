@@ -21,7 +21,7 @@ import {
 import 'leaflet.vectorgrid';
 
 import { environment } from '../../environments/environment';
-import { MapControlsComponent } from './map-controls.component';
+import { MapControlsComponent } from './controls/map-controls.component';
 import { ColorbarComponent } from './colorbar.component';
 import {
   ClimateMapService,
@@ -36,8 +36,8 @@ import {
 } from './services/layer-builder.service';
 import { LayerFilterService } from './services/layer-filter.service';
 import { URLUtils } from '../utils/url-utils';
-import { ClimateMonthlyPlotComponent } from './climate-monthly-plot.component';
-import { ClimateTimerangePlotComponent } from './climate-timerange-plot.component';
+import { ClimateMonthlyPlotComponent } from './plot/climate-monthly-plot.component';
+import { ClimateTimerangePlotComponent } from './plot/climate-timerange-plot.component';
 import { MapNavigationService } from '../core/map-navigation.service';
 import { MapSyncService } from './services/map-sync.service';
 import { BaseMapComponent } from './base-map.component';

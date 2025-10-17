@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { MatSliderModule } from '@angular/material/slider';
 import { CommonModule } from '@angular/common';
-import { YearRange } from '../core/metadata.service';
+import { YearRange } from '../../core/metadata.service';
 
 @Component({
   selector: 'app-year-slider',

@@ -20,7 +20,7 @@ import {
   ClimateMapService,
   NearestCityResponse,
   ClimateValueResponse,
-} from '../core/climatemap.service';
+} from '../../core/climatemap.service';
 import {
   ClimateVarKey,
   CLIMATE_VAR_KEY_TO_NAME,
@@ -28,12 +28,12 @@ import {
   CLIMATE_VAR_UNITS,
   ClimateScenario,
   ClimateModel,
-} from '../utils/enum';
+} from '../../utils/enum';
 import {
   TemperatureUnitService,
   TemperatureUnit,
-} from '../core/temperature-unit.service';
-import { TemperatureUtils } from '../utils/temperature-utils';
+} from '../../core/temperature-unit.service';
+import { TemperatureUtils } from '../../utils/temperature-utils';
 
 Chart.register(...registerables);
 

@@ -5,21 +5,21 @@ import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 
-import { SmallMapComponent } from './small-map.component';
-import { ColorbarComponent } from './colorbar.component';
-import { MapControlsComponent } from './map-controls.component';
-import { ClimateMapService } from '../core/climatemap.service';
-import { MetadataService } from '../core/metadata.service';
-import { SpatialResolution } from '../utils/enum';
+import { SmallMapComponent } from '../controls/small-map.component';
+import { ColorbarComponent } from '../colorbar.component';
+import { MapControlsComponent } from '../controls/map-controls.component';
+import { ClimateMapService } from '../../core/climatemap.service';
+import { MetadataService } from '../../core/metadata.service';
+import { SpatialResolution } from '../../utils/enum';
 import {
   LayerBuilderService,
   LayerOption,
-} from './services/layer-builder.service';
-import { LayerFilterService } from './services/layer-filter.service';
-import { URLUtils } from '../utils/url-utils';
-import { MapSyncService } from './services/map-sync.service';
-import { BaseMapComponent } from './base-map.component';
-import { SeoService } from '../core/seo.service';
+} from '../services/layer-builder.service';
+import { LayerFilterService } from '../services/layer-filter.service';
+import { URLUtils } from '../../utils/url-utils';
+import { MapSyncService } from '../services/map-sync.service';
+import { BaseMapComponent } from '../base-map.component';
+import { SeoService } from '../../core/seo.service';
 
 interface MonthOption {
   month: number;

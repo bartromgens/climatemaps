@@ -10,12 +10,12 @@ import {
   ClimateScenario,
   ClimateModel,
   CLIMATE_SCENARIO_DISPLAY_NAMES,
-} from '../utils/enum';
-import { YearRange } from '../core/metadata.service';
+} from '../../utils/enum';
+import { YearRange } from '../../core/metadata.service';
 import { YearSliderComponent } from './year-slider.component';
 import { MonthSliderComponent } from './month-slider.component';
-import { TemperatureUnitService } from '../core/temperature-unit.service';
-import { TemperatureUtils } from '../utils/temperature-utils';
+import { TemperatureUnitService } from '../../core/temperature-unit.service';
+import { TemperatureUtils } from '../../utils/temperature-utils';
 
 export interface MapControlsData {
   selectedVariableType: ClimateVarKey;

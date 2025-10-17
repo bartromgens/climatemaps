@@ -12,8 +12,8 @@ import { control, latLng, Layer, Map, tileLayer } from 'leaflet';
 import 'leaflet.vectorgrid';
 import { Subject, takeUntil } from 'rxjs';
 
-import { MapSyncService, MapViewState } from './services/map-sync.service';
-import { LayerOption } from './services/layer-builder.service';
+import { MapSyncService, MapViewState } from '../services/map-sync.service';
+import { LayerOption } from '../services/layer-builder.service';
 
 @Component({
   selector: 'app-small-map',

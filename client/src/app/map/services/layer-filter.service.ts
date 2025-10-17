@@ -7,7 +7,7 @@ import {
   ClimateModel,
 } from '../../utils/enum';
 import { ClimateVariableConfig, YearRange } from '../../core/metadata.service';
-import { MapControlsData } from '../map-controls.component';
+import { MapControlsData } from '../controls/map-controls.component';
 
 @Injectable({
   providedIn: 'root',

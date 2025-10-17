@@ -1,9 +1,9 @@
 import { Routes } from '@angular/router';
 import { AboutComponent } from './about.component';
 import { MapComponent } from './map';
-import { MonthlyGridComponent } from './map/monthly-grid.component';
-import { ScenarioGridComponent } from './map/scenario-grid.component';
-import { YearRangeGridComponent } from './map/yearrange-grid.component';
+import { MonthlyGridComponent } from './map/grid/monthly-grid.component';
+import { ScenarioGridComponent } from './map/grid/scenario-grid.component';
+import { YearRangeGridComponent } from './map/grid/yearrange-grid.component';
 
 export const routes: Routes = [
   { path: '', component: MapComponent },

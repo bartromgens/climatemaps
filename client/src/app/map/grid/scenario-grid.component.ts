@@ -5,26 +5,26 @@ import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 
-import { SmallMapComponent } from './small-map.component';
-import { ColorbarComponent } from './colorbar.component';
-import { MapControlsComponent } from './map-controls.component';
-import { ClimateMapService } from '../core/climatemap.service';
-import { MetadataService } from '../core/metadata.service';
+import { SmallMapComponent } from '../controls/small-map.component';
+import { ColorbarComponent } from '../colorbar.component';
+import { MapControlsComponent } from '../controls/map-controls.component';
+import { ClimateMapService } from '../../core/climatemap.service';
+import { MetadataService } from '../../core/metadata.service';
 import {
   ClimateScenario,
   ClimateModel,
   SpatialResolution,
   CLIMATE_SCENARIO_DISPLAY_NAMES,
-} from '../utils/enum';
+} from '../../utils/enum';
 import {
   LayerBuilderService,
   LayerOption,
-} from './services/layer-builder.service';
-import { LayerFilterService } from './services/layer-filter.service';
-import { URLUtils } from '../utils/url-utils';
-import { MapSyncService } from './services/map-sync.service';
-import { BaseMapComponent } from './base-map.component';
-import { SeoService } from '../core/seo.service';
+} from '../services/layer-builder.service';
+import { LayerFilterService } from '../services/layer-filter.service';
+import { URLUtils } from '../../utils/url-utils';
+import { MapSyncService } from '../services/map-sync.service';
+import { BaseMapComponent } from '../base-map.component';
+import { SeoService } from '../../core/seo.service';
 
 interface ScenarioOption {
   scenario: ClimateScenario;
@@ -232,3 +232,4 @@ export class ScenarioGridComponent extends BaseMapComponent {
     return this.scenarios[0]?.option?.climateMap?.getDisplayName() || null;
   }
 }
+
