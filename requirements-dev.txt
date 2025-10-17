@@ -1,0 +1,2 @@
+black==25.9.0
+pytest

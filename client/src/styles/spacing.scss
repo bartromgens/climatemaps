@@ -1,0 +1,41 @@
+// Define spacing scale
+$spacings: (
+  0: 0,
+  1: 4px,
+  2: 8px,
+  3: 16px,
+  4: 24px,
+  5: 32px,
+);
+
+// Define margin and padding sides
+$sides: (
+  "": "",
+  "t": "top",
+  "r": "right",
+  "b": "bottom",
+  "l": "left",
+);
+
+// Margin and padding classes generator
+@each $index, $size in $spacings {
+  // Generate margin classes
+  .m-#{$index} {
+    margin: $size !important;
+  }
+
+  .p-#{$index} {
+    padding: $size !important;
+  }
+
+  // Generate individual side margin and padding classes
+  @each $short, $side in $sides {
+    .m#{$short}-#{$index} {
+      margin-#{$side}: $size !important;
+    }
+
+    .p#{$short}-#{$index} {
+      padding-#{$side}: $size !important;
+    }
+  }
+}

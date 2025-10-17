@@ -1,0 +1,9 @@
+[tool.pytest.ini_options]
+minversion = "7.0"
+testpaths = ["climatemaps/tests"]
+log_cli = true
+log_cli_level = "WARNING"
+
+[tool.black]
+line-length = 100
+target-version = ['py310']

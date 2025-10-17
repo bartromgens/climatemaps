@@ -1,0 +1,15 @@
+<mat-slider
+  showTickMarks
+  [min]="1"
+  [max]="years.length"
+  step="1"
+  [displayWith]="displayWith"
+>
+  <input matSliderThumb [value]="sliderValue" (valueChange)="onInput($event)" />
+</mat-slider>
+
+<div class="year-labels">
+  <span *ngFor="let year of years; let i = index">
+    {{ year.label }}
+  </span>
+</div>

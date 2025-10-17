@@ -1,0 +1,24 @@
+<mat-card *ngIf="plotData && isVisible" class="climate-monthly-plot-card">
+  <mat-card-header>
+    <mat-card-title>{{ displayLocation }}</mat-card-title>
+    <button
+      mat-icon-button
+      class="close-button"
+      (click)="onClose()"
+      [attr.aria-label]="'Close plot'"
+    >
+      <mat-icon>close</mat-icon>
+    </button>
+  </mat-card-header>
+  <mat-card-content>
+    <div *ngIf="isLoading" class="loading-container">
+      <p>Loading data...</p>
+    </div>
+    <div *ngIf="error" class="error-container">
+      <p>{{ error }}</p>
+    </div>
+    <div *ngIf="!isLoading && !error" class="chart-container">
+      <canvas #chartCanvas></canvas>
+    </div>
+  </mat-card-content>
+</mat-card>

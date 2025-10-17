@@ -1,0 +1,22 @@
+services:
+  tileserver:
+    image: maptiler/tileserver-gl
+    container_name: openclimatemap-tileserver
+    volumes:
+      - ./data/tiles:/data/data/tiles
+      - ./tileserver_config.json:/data/config.json
+    ports:
+      - "127.0.0.1:8080:8080"
+    restart: unless-stopped
+
+  api:
+    build:
+      context: .
+      dockerfile: api/Dockerfile
+    container_name: openclimatemap-api
+    volumes:
+      - ./data/tiles:/app/data/tiles
+      - ./data/raw:/app/data/raw
+    ports:
+      - "127.0.0.1:8000:8000"
+    restart: unless-stopped

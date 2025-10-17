@@ -1,0 +1,69 @@
+<mat-sidenav-container>
+  <mat-sidenav
+    #sidenav
+    [mode]="isMobile ? 'over' : 'side'"
+    [(opened)]="sidebarOpened"
+    class="custom-sidebar"
+  >
+    <div class="sidebar-content">
+      <!-- Close button inside sidebar -->
+      <button
+        *ngIf="isMobile"
+        mat-icon-button
+        class="sidebar-close-button"
+        (click)="toggleSidebar()"
+        [attr.aria-label]="'Close sidebar'"
+      >
+        <mat-icon>close</mat-icon>
+      </button>
+
+      <app-map-controls
+        [controlsData]="controlsData"
+        [controlsOptions]="controlsOptions"
+        (controlsChange)="onControlsChange($event)"
+      ></app-map-controls>
+    </div>
+  </mat-sidenav>
+  <mat-sidenav-content>
+    <!-- Mobile toggle button -->
+    <button
+      *ngIf="isMobile && !sidebarOpened"
+      mat-icon-button
+      class="mobile-toggle-button"
+      (click)="toggleSidebar()"
+      [attr.aria-label]="'Open sidebar'"
+    >
+      <mat-icon>tune</mat-icon>
+    </button>
+
+    <div
+      class="page-content-wrapper"
+      leaflet
+      [leafletOptions]="options"
+      (leafletClick)="onMapClick($event)"
+      (leafletMapReady)="onMapReady($event)"
+      (leafletMapMoveEnd)="onMove($event)"
+      (leafletMapZoomEnd)="onZoom($event)"
+    ></div>
+
+    <!-- Desktop controls - only show on desktop -->
+    <div *ngIf="!isMobile" class="desktop-controls">
+      <app-map-controls
+        [controlsData]="controlsData"
+        [controlsOptions]="controlsOptions"
+        (controlsChange)="onControlsChange($event)"
+      ></app-map-controls>
+    </div>
+
+    <app-colorbar
+      [colormapUrl]="selectedOption?.climateMap?.colormapUrl || null"
+      [displayName]="selectedOption?.climateMap?.getDisplayName() || null"
+      [selectedMonth]="monthSelected"
+    ></app-colorbar>
+
+    <app-climate-monthly-plot [plotData]="plotData"></app-climate-monthly-plot>
+    <app-climate-timerange-plot
+      [plotData]="timerangePlotData"
+    ></app-climate-timerange-plot>
+  </mat-sidenav-content>
+</mat-sidenav-container>

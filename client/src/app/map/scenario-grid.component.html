@@ -1,0 +1,63 @@
+<mat-sidenav-container>
+  <mat-sidenav
+    #sidenav
+    [mode]="isMobile ? 'over' : 'side'"
+    [(opened)]="sidebarOpened"
+    class="custom-sidebar"
+  >
+    <div class="sidebar-content">
+      <button
+        *ngIf="isMobile"
+        mat-icon-button
+        class="sidebar-close-button"
+        (click)="toggleSidebar()"
+        [attr.aria-label]="'Close sidebar'"
+      >
+        <mat-icon>close</mat-icon>
+      </button>
+
+      <app-map-controls
+        [controlsData]="controlsData"
+        [controlsOptions]="controlsOptions"
+        (controlsChange)="onControlsChange($event)"
+      ></app-map-controls>
+    </div>
+  </mat-sidenav>
+  <mat-sidenav-content>
+    <button
+      *ngIf="isMobile && !sidebarOpened"
+      mat-icon-button
+      class="mobile-toggle-button"
+      (click)="toggleSidebar()"
+      [attr.aria-label]="'Open sidebar'"
+    >
+      <mat-icon>tune</mat-icon>
+    </button>
+
+    <div class="maps-grid-wrapper">
+      <div class="maps-grid">
+        <app-small-map
+          *ngFor="let scenarioOption of scenarios; let first = first"
+          [month]="controlsData.selectedMonth"
+          [customLabel]="scenarioOption.label"
+          [selectedOption]="scenarioOption.option"
+          [showZoomControl]="first"
+        ></app-small-map>
+      </div>
+    </div>
+
+    <div *ngIf="!isMobile" class="desktop-controls">
+      <app-map-controls
+        [controlsData]="controlsData"
+        [controlsOptions]="controlsOptions"
+        (controlsChange)="onControlsChange($event)"
+      ></app-map-controls>
+    </div>
+
+    <app-colorbar
+      [colormapUrl]="colormapUrl"
+      [displayName]="displayName"
+      [selectedMonth]="controlsData.selectedMonth"
+    ></app-colorbar>
+  </mat-sidenav-content>
+</mat-sidenav-container>

@@ -1,0 +1,20 @@
+.month-labels {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  font-size: 1rem;
+  color: rgba(0, 0, 0, 0.6);
+
+  span {
+    /* ensure text centers under each tick */
+    width: 0;
+    flex-grow: 1;
+    text-align: center;
+  }
+}
+
+mat-slider {
+  margin-left: calc(100% / 24);
+  margin-right: calc(100% / 24);
+  display: flex;
+}

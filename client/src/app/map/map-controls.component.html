@@ -1,0 +1,112 @@
+<div class="row controls-row">
+  <mat-form-field subscriptSizing="dynamic" class="dropdown-field">
+    <mat-label>Variable</mat-label>
+    <mat-select
+      [value]="controlsData?.selectedVariableType"
+      (selectionChange)="onVariableTypeChange($event)"
+    >
+      <mat-option
+        *ngFor="let variableType of controlsOptions?.variableTypes || []"
+        [value]="variableType"
+        [disabled]="
+          !controlsOptions?.availableVariableTypes?.includes(variableType)
+        "
+        [class.disabled-option]="
+          !controlsOptions?.availableVariableTypes?.includes(variableType)
+        "
+      >
+        {{ controlsOptions?.climateVariables?.[variableType]?.displayName }} ({{
+          getVariableUnit(variableType)
+        }})
+      </mat-option>
+    </mat-select>
+  </mat-form-field>
+
+  <mat-form-field subscriptSizing="dynamic" class="dropdown-field">
+    <mat-label>Resolution</mat-label>
+    <mat-select
+      [value]="controlsData?.selectedResolution"
+      (selectionChange)="onResolutionChange($event)"
+    >
+      <mat-option
+        *ngFor="let resolution of controlsOptions?.resolutions || []"
+        [value]="resolution"
+        [disabled]="
+          !controlsOptions?.availableResolutions?.includes(resolution)
+        "
+        [class.disabled-option]="
+          !controlsOptions?.availableResolutions?.includes(resolution)
+        "
+      >
+        {{ getResolutionDisplayName(resolution) }}
+      </mat-option>
+    </mat-select>
+  </mat-form-field>
+
+  <mat-form-field subscriptSizing="dynamic" class="dropdown-field">
+    <mat-label>Climate Scenario</mat-label>
+    <mat-select
+      [value]="controlsData?.selectedClimateScenario"
+      (selectionChange)="onClimateScenarioChange($event)"
+      [disabled]="!shouldShowFutureControls()"
+    >
+      <mat-option
+        *ngFor="let scenario of controlsOptions?.climateScenarios || []"
+        [value]="scenario"
+        [disabled]="
+          !controlsOptions?.availableClimateScenarios?.includes(scenario)
+        "
+        [class.disabled-option]="
+          !controlsOptions?.availableClimateScenarios?.includes(scenario)
+        "
+      >
+        {{ getClimateScenarioDisplayName(scenario) }}
+      </mat-option>
+    </mat-select>
+  </mat-form-field>
+
+  <mat-form-field subscriptSizing="dynamic" class="dropdown-field">
+    <mat-label>Climate Model</mat-label>
+    <mat-select
+      [value]="controlsData?.selectedClimateModel"
+      (selectionChange)="onClimateModelChange($event)"
+      [disabled]="!shouldShowFutureControls()"
+    >
+      <mat-option
+        *ngFor="let model of controlsOptions?.climateModels || []"
+        [value]="model"
+        [disabled]="!controlsOptions?.availableClimateModels?.includes(model)"
+        [class.disabled-option]="
+          !controlsOptions?.availableClimateModels?.includes(model)
+        "
+      >
+        {{ getClimateModelDisplayName(model) }}
+      </mat-option>
+    </mat-select>
+  </mat-form-field>
+
+  <div class="checkbox-field">
+    <mat-slide-toggle
+      [ngModel]="controlsData?.showDifferenceMap"
+      (ngModelChange)="onDifferenceMapChange($event)"
+      [disabled]="!shouldShowDifferenceCheckbox()"
+      color="primary"
+    >
+      Show Change
+    </mat-slide-toggle>
+  </div>
+</div>
+
+<div class="row sliders-row">
+  <div class="column sliders-container">
+    <app-month-slider
+      [value]="controlsData?.selectedMonth || 1"
+      (valueChange)="onMonthSelected($event)"
+    ></app-month-slider>
+    <app-year-slider
+      [value]="controlsData?.selectedYearRange || null"
+      [years]="controlsOptions?.yearRanges || []"
+      (valueChange)="onYearSelected($event)"
+    ></app-year-slider>
+  </div>
+</div>

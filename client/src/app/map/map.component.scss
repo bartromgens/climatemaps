@@ -1,0 +1,142 @@
+@import "../../styles/variables";
+
+.card-sidebar {
+  margin-left: 6px;
+  margin-right: 6px;
+  margin-bottom: 6px;
+}
+
+.loading-overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(255, 255, 255, 0.8);
+  padding: 20px;
+  border-radius: 10px;
+  text-align: center;
+  z-index: 1000;
+}
+
+.row {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  width: 100%;
+}
+
+.controls-row {
+  flex-wrap: nowrap;
+  overflow-x: auto;
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.dropdown-field {
+  flex: 1;
+  margin-right: 16px;
+  min-width: 200px;
+}
+
+.dropdown-field:last-child {
+  margin-right: 0;
+}
+
+.checkbox-field {
+  margin-bottom: 0;
+  padding: 8px 0;
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+// Styling for disabled dropdown options
+::ng-deep .disabled-option {
+  color: #999 !important;
+  opacity: 0.6 !important;
+  cursor: not-allowed !important;
+}
+
+::ng-deep .disabled-option:hover {
+  background-color: transparent !important;
+}
+
+// Styling for contour hover tooltip
+::ng-deep .contour-hover-tooltip {
+  background-color: rgba(0, 0, 0, 0.8) !important;
+  color: white !important;
+  border: 1px solid #333 !important;
+  border-radius: 4px !important;
+  padding: 8px 12px !important;
+  font-size: 16px !important;
+  font-weight: 500 !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3) !important;
+  pointer-events: none !important;
+  z-index: 1000 !important;
+}
+
+::ng-deep .contour-hover-tooltip::before {
+  border-top-color: rgba(0, 0, 0, 0.8) !important;
+}
+
+// Mobile toggle button
+.mobile-toggle-button {
+  position: fixed;
+  top: 70px;
+  left: 16px;
+  z-index: 1000;
+  background-color: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+// Sidebar content styling
+.sidebar-content {
+  padding: 10px 5px;
+  height: $page-height-mobile;
+  overflow-y: auto;
+  position: relative;
+}
+
+// Sidebar close button
+.sidebar-close-button {
+  position: relative;
+  float: right;
+  margin-left: 8px;
+}
+
+// Custom sidebar styling
+::ng-deep .custom-sidebar {
+  width: 100vw !important;
+  max-width: 100vw !important;
+}
+
+// Mobile-specific styling
+@media (max-width: 768px) {
+  .mobile-toggle-button {
+    display: block;
+  }
+
+  .desktop-controls {
+    display: none;
+  }
+
+  .page-content-wrapper {
+    height: $page-height-mobile;
+  }
+}
+
+// Desktop-specific styling
+@media (min-width: 769px) {
+  .mobile-toggle-button {
+    display: none;
+  }
+
+  ::ng-deep .custom-sidebar {
+    display: none;
+  }
+}

@@ -1,107 +1,53 @@
 import numpy
-import math
+
+from climatemaps.datasets import ClimateDataConfig, DataFormat, FutureClimateDataConfig
+from climatemaps.download import ensure_data_available
+from climatemaps.geotiff import read_geotiff_future, read_geotiff_history, read_geotiff_cru_ts
+from climatemaps.geogrid import GeoGrid
+from climatemaps.logger import logger
 
 
-def import_climate_data(filepath, monthnr, factor_to_SI=1):
-    ncols = 720
-    nrows = 360
-    digits = 5
+def load_climate_data(data_config: ClimateDataConfig, month: int) -> GeoGrid:
+    try:
+        ensure_data_available(data_config)
 
-    with open(filepath, 'r') as filein:
-        lines = filein.readlines()
-        line_n = 0
-        grid_size = 0.50
-        xmin = 0.25-180
-        xmax = 360.25-180
-        ymin = -89.75
-        ymax = 90.25
+        if data_config.format == DataFormat.CRU_TS:
+            lon_range, lat_range, values = read_geotiff_cru_ts(data_config.filepath, month)
+        elif data_config.format == DataFormat.GEOTIFF_WORLDCLIM_CMIP6:
+            lon_range, lat_range, values = read_geotiff_future(data_config.filepath, month)
+        elif data_config.format == DataFormat.GEOTIFF_WORLDCLIM_HISTORY:
+            lon_range, lat_range, values = read_geotiff_history(data_config.filepath, month)
+        else:
+            raise ValueError(f"Unsupported data format: {data_config.format}")
 
-        lonrange = numpy.arange(xmin, xmax, grid_size)
-        latrange = numpy.arange(ymin, ymax, grid_size)
-        Z = numpy.zeros((int(latrange.shape[0]), int(lonrange.shape[0])))
-        # print(len(lonrange))
-        # print(len(latrange))
+        values = values * data_config.conversion_factor
 
-        i = 0
-        rown = 0
+        if data_config.conversion_function is not None:
+            values = data_config.conversion_function(values, month)
 
-        for line in lines:
-            line_n += 1
-            if line_n < 3:  # skip header
-                continue
-            if rown < (monthnr-1)*nrows or rown >= monthnr*nrows:  # read one month
-                rown += 1
-                continue
-
-            value = ''
-            counter = 1
-            j = 0
-            for char in line:
-                value += char
-                if counter % digits == 0:
-                    value = float(value)
-                    if value == -9999:
-                        value = numpy.nan
-                    Z[i][j] = value * factor_to_SI
-                    value = ''
-                    j += 1
-                counter += 1
-            i += 1
-            rown += 1
-
-        Z_new = numpy.zeros((int(latrange.shape[0]), int(lonrange.shape[0])))
-        half_size = int(Z.shape[1]/2)
-        for i in range(0, Z.shape[0]):
-            for j in range(0, Z.shape[1]):
-                if lonrange[j] >= 0.0:
-                    Z_new[i][j-half_size] = Z[i][j]
-                else:
-                    Z_new[i][j+half_size] = Z[i][j]
-
-    return latrange, lonrange, Z_new
+        return GeoGrid(lon_range=lon_range, lat_range=lat_range, values=values)
+    except FileNotFoundError as e:
+        logger.exception(
+            f"Failed to load climate data for {data_config.data_type_slug}, month {month}, file: {data_config.filepath}: {e}"
+        )
+        raise
+    except Exception as e:
+        logger.exception(
+            f"Unexpected error loading climate data for {data_config.data_type_slug}, month {month}, file: {data_config.filepath}: {e}"
+        )
+        raise
 
 
-def import_ascii_grid_generic(filepath, no_data_value=9e+20):
-    with open(filepath, 'r') as filein:
-        lines = filein.readlines()
-        line_n = 0
-        grid_size = 0.083333333
-        xmin = -180.0
-        xmax = 180.0
-        ymin = -90.0
-        ymax = 90.0
+def load_climate_data_for_difference(
+    historical_config: ClimateDataConfig, future_config: FutureClimateDataConfig, month: int
+) -> GeoGrid:
+    historical_grid = load_climate_data(historical_config, month)
+    future_grid = load_climate_data(future_config, month)
 
-        lonrange = numpy.arange(xmin, xmax, grid_size)
-        latrange = numpy.arange(ymin, ymax, grid_size)
-        Z = numpy.zeros((int(latrange.shape[0]), int(lonrange.shape[0])))
+    # Ensure coordinate arrays match
+    if not numpy.allclose(historical_grid.lon_range, future_grid.lon_range) or not numpy.allclose(
+        historical_grid.lat_range, future_grid.lat_range
+    ):
+        raise ValueError("Coordinate arrays don't match between historical and future data")
 
-        i = 0
-        for line in lines:
-            line_n += 1
-            if line_n < 7:  # skip header
-                continue
-
-            j = 0
-            values = line.split()
-            for value in values:
-                value = float(value)
-                if value == no_data_value:
-                    value = numpy.nan
-                Z[i][j] = value
-                j += 1
-            i += 1
-
-    print('import_ascii_grid_generic() - END')
-    return latrange, lonrange, Z
-
-
-def geographic_to_web_mercator(x_lon, y_lat):
-    if abs(x_lon) <= 180 and abs(y_lat) < 90:
-        num = x_lon * 0.017453292519943295
-        x = 6378137.0 * num
-        a = y_lat * 0.017453292519943295
-        x_mercator = x
-        y_mercator = 3189068.5 * math.log((1.0 + math.sin(a)) / (1.0 - math.sin(a)))
-        return x_mercator, y_mercator
-    else:
-        print('Invalid coordinate values for conversion')
+    return future_grid.difference(historical_grid)

@@ -1,24 +1,59 @@
 # climatemaps
+
 Global monthly climate data visualised on an interactive map with [OpenLayers 3](https://github.com/openlayers/ol3).
 
 ## Demo
-**http://climatemaps.romgens.com**
+
+**[openclimatemap.org](https://openclimatemap.org)**
+
+## TODO
+
+- Make more clear what the user is looking at on the landing page (Month selected, historic (not live))
+- Disable future year ranges if they are not available, in addition to the toast warning
+- Add explanation of climate scenarios
 
 ## Data
-The climate grid data, 30 year averages, is taken from http://www.ipcc-data.org/obs/get_30yr_means.html.
 
-## Dependencies
+### Historic
+
+- The climate grid data, 30 year averages: https://catalogue.ceda.ac.uk/uuid/ec331e93d21347e6bf5fa4b9c68dbd2c/
+- Historic 1970-2000 WorldClim data: https://www.worldclim.org/data/worldclim21.html
+- ERA5 monthly averaged data on single levels from 1940 to present: https://cds.climate.copernicus.eu/datasets/reanalysis-era5-single-levels-monthly-means?tab=overview
+
+### Projections (predictions)
+
+- Copernicus Climate Data Store - CMIP6 climate projections:
+  https://cds.climate.copernicus.eu/datasets/projections-cmip6?tab=download
+
+#### Downscaled (increasing the spatial resolution)
+
+- WorldClim: Downscaled CMIP5 and CMIP6 model outputs for 2021–2100: https://www.worldclim.org/data/cmip6/cmip6_clim5m.html
+- NASA NEX-GDDP-CMIP6 (~25 km resolution): https://registry.opendata.aws/nex-gddp-cmip6/
+- CHELSA (~1km resolution): https://chelsa-climate.org/
+
+### Visualizations
+
+- https://interactive-atlas.ipcc.ch/
+
+## Development
+
+### Dependencies
 
 ##### GDAL
-GDAL is needed for the gdal2tiles.py script that creates map-tiles from a single images (matplotlib plot).
 
-Install dependencies,
+GDAL is needed for the gdal2tiles.py script that creates map-tiles from a single image (matplotlib plot).
+
+Install GDAL with conda to prevent the need to install a hugh number of system level dependencies:
+
 ```bash
-conda install -c conda-forge gdal==3.8.3
+conda install -c conda-forge gdal==3.11.0
 ```
 
 ##### Tippecanoe
+
 **WARNING**: tippecanoe 1.19.1 is the latest version that produces valid GeoJSON due to issue https://github.com/mapbox/tippecanoe/issues/652
+
+TODO: migrate to active fork https://github.com/felt/tippecanoe
 
 ```bash
 sudo apt install libsqlite3-dev
@@ -29,17 +64,96 @@ make -j
 make install
 ```
 
-## Create contour data
-Run:
+#### tileserver-gl
+
 ```bash
-python ./bin/create_contour.py
+npm install -g tileserver-gl
 ```
 
-to create GeoJSON (.geojson) and image (png) tiles.
+### Run
 
-## Run
+#### Create contour data
+
+Run:
+
+```bash
+python scrips/create_contour.py
+```
+
+to create contour and raster mbtiles.
+
+#### Create tileserver config
+
+```bash
+python scripts/create_tileserver_config.py
+```
+
+to generate the tileserver config.
+
+#### Run the backend (FastAPI server)
+
 ```bash
 uvicorn api.main:app --reload
 ```
 
-The maps are now available at http://localhost:8000/index.html
+#### Run the tileserver (tileserver-gl)
+
+```bash
+tileserver-gl --config tileserver_config_dev.json --port 8080
+```
+
+#### Run the client (Angular)
+
+In `./client` run:
+
+```bash
+ng serve
+```
+
+Or run against the openclimatemap.org API and tileserver:
+
+```
+ng serve --configuration=production-backend
+```
+
+### Tests
+
+Run:
+
+```bash
+pytest
+```
+
+## Build and deploy (to openclimatemap.org)
+
+### Everything
+
+Build and deploy client and backend:
+
+```bash
+bash scripts/deploy.sh
+```
+
+TODO: include create tiles, create config and upload tiles
+
+### Client
+
+Deploy the client angular app:
+
+```bash
+bash scripts/deploy_client.sh
+```
+
+### API and TileServer
+
+```bash
+bash scripts/deploy_backend.sh
+```
+
+### Upload tiles (optional)
+
+If you have locally created tiles, upload them to the server with:
+
+```bash
+rsync -avP data/tiles openclimatemap.org:/home/bart/climatemaps/data/
+```
