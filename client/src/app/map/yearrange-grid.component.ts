@@ -142,14 +142,18 @@ export class YearRangeGridComponent extends BaseMapComponent {
   private findMatchingLayers(): void {
     const availableYearRanges = this.getAvailableYearRanges();
 
-    this.yearRangeOptions = availableYearRanges.map((yearRange) => {
-      const matchingLayer = this.findLayerForYearRange(yearRange);
-      return {
-        yearRange,
-        label: this.getYearRangeLabel(yearRange),
-        option: matchingLayer,
-      };
-    });
+    this.yearRangeOptions = availableYearRanges
+      .filter((yearRange) => {
+        return !(yearRange.value[0] === 1970 && yearRange.value[1] === 2000);
+      })
+      .map((yearRange) => {
+        const matchingLayer = this.findLayerForYearRange(yearRange);
+        return {
+          yearRange,
+          label: this.getYearRangeLabel(yearRange),
+          option: matchingLayer,
+        };
+      });
   }
 
   private findLayerForYearRange(yearRange: YearRange): LayerOption | undefined {
