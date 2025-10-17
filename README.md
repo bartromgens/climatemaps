@@ -1,16 +1,12 @@
 # climatemaps
 
-Global monthly climate data visualised on an interactive map with [OpenLayers 3](https://github.com/openlayers/ol3).
+An interactive web application for visualizing global historical climate data and future climate projections. It show temperature, precipitation, and other climate variables with support for multiple climate scenarios (SSP1-2.6, SSP2-4.5, SSP3-7.0, SSP5-8.5) and time periods (2020-2100).
+
+![Precipitation predictions example](data/images/precipitation_predications_example.png)
 
 ## Demo
 
 **[openclimatemap.org](https://openclimatemap.org)**
-
-## TODO
-
-- Make more clear what the user is looking at on the landing page (Month selected, historic (not live))
-- Disable future year ranges if they are not available, in addition to the toast warning
-- Add explanation of climate scenarios
 
 ## Data
 
@@ -157,3 +153,9 @@ If you have locally created tiles, upload them to the server with:
 ```bash
 rsync -avP data/tiles openclimatemap.org:/home/bart/climatemaps/data/
 ```
+
+### TODO
+
+- Make more clear what the user is looking at on the landing page (Month selected, historic (not live))
+- Disable future year ranges if they are not available, in addition to the toast warning
+- Add explanation of climate scenarios
