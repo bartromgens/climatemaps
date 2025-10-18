@@ -23,9 +23,10 @@ import 'leaflet.vectorgrid';
 import { environment } from '../../environments/environment';
 import { MapControlsComponent } from './controls/map-controls.component';
 import { VariableSelectorOverlayComponent } from './controls/variable-selector-overlay.component';
+import { MobileDateControlOverlayComponent } from './controls/mobile-date-control-overlay.component';
 import { ColorbarComponent } from './colorbar.component';
 import { ClimateMapService } from '../core/climatemap.service';
-import { MetadataService } from '../core/metadata.service';
+import { MetadataService, YearRange } from '../core/metadata.service';
 import { SpatialResolution, ClimateVarKey } from '../utils/enum';
 import { TooltipManagerService } from './services/tooltip-manager.service';
 import { VectorLayerTooltipService } from './services/vector-layer-tooltip.service';
@@ -60,6 +61,7 @@ import { ClimateVariableHelperService } from '../core/climate-variable-helper.se
     MatSnackBarModule,
     MapControlsComponent,
     VariableSelectorOverlayComponent,
+    MobileDateControlOverlayComponent,
     ColorbarComponent,
     ClimateMonthlyPlotComponent,
     ClimateTimerangePlotComponent,
@@ -584,6 +586,16 @@ export class MapComponent extends BaseMapComponent implements OnInit {
 
   onVariableChange(variableType: ClimateVarKey): void {
     this.controlsData.selectedVariableType = variableType;
+    this.onControlsChange(this.controlsData);
+  }
+
+  onMonthChange(month: number): void {
+    this.controlsData.selectedMonth = month;
+    this.onControlsChange(this.controlsData);
+  }
+
+  onYearRangeChange(yearRange: YearRange): void {
+    this.controlsData.selectedYearRange = yearRange;
     this.onControlsChange(this.controlsData);
   }
 }
