@@ -33,6 +33,9 @@
   <a *ngIf="!isMobile" mat-button routerLink="/climate-scenarios"
     >Climate Scenarios</a
   >
+  <a *ngIf="!isMobile" mat-button routerLink="/climate-matrix"
+    >Climate Matrix</a
+  >
 
   <span class="spacer"></span>
 
@@ -136,6 +139,10 @@
     <a mat-menu-item routerLink="/climate-scenarios">
       <mat-icon>grid_view</mat-icon>
       <span>Climate Scenarios</span>
+    </a>
+    <a mat-menu-item routerLink="/climate-matrix">
+      <mat-icon>table_chart</mat-icon>
+      <span>Climate Matrix</span>
     </a>
     <a mat-menu-item routerLink="/about">
       <mat-icon>info</mat-icon>

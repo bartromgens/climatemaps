@@ -21,7 +21,7 @@ import { LayerOption } from '../services/layer-builder.service';
   imports: [CommonModule, LeafletModule],
   template: `
     <div class="small-map-container">
-      <div class="map-label">{{ label }}</div>
+      <div class="map-label" *ngIf="label">{{ label }}</div>
       <div
         class="map-wrapper"
         leaflet

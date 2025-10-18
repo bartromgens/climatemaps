@@ -1,0 +1,83 @@
+<mat-sidenav-container>
+  <mat-sidenav
+    #sidenav
+    [mode]="isMobile ? 'over' : 'side'"
+    [(opened)]="sidebarOpened"
+    class="custom-sidebar"
+  >
+    <div class="sidebar-content">
+      <button
+        *ngIf="isMobile"
+        mat-icon-button
+        class="sidebar-close-button"
+        (click)="toggleSidebar()"
+        [attr.aria-label]="'Close sidebar'"
+      >
+        <mat-icon>close</mat-icon>
+      </button>
+
+      <app-map-controls
+        [controlsData]="controlsData"
+        [controlsOptions]="controlsOptions"
+        (controlsChange)="onControlsChange($event)"
+      ></app-map-controls>
+    </div>
+  </mat-sidenav>
+  <mat-sidenav-content>
+    <button
+      *ngIf="isMobile && !sidebarOpened"
+      mat-icon-button
+      class="mobile-toggle-button"
+      (click)="toggleSidebar()"
+      [attr.aria-label]="'Open sidebar'"
+    >
+      <mat-icon>tune</mat-icon>
+    </button>
+
+    <div class="maps-grid-wrapper">
+      <div class="column-headers">
+        <div class="row-header-spacer"></div>
+        <div *ngFor="let yearRange of futureYearRanges" class="column-header">
+          {{ getYearRangeLabel(yearRange) }}
+        </div>
+      </div>
+
+      <div class="maps-grid-container">
+        <div
+          *ngFor="let scenario of scenarios; let scenarioIndex = index"
+          class="grid-row"
+        >
+          <div class="row-header">
+            {{ getScenarioLabel(scenario) }}
+          </div>
+          <div class="row-maps">
+            <app-small-map
+              *ngFor="
+                let cell of getCellsForScenario(scenario);
+                let first = first;
+                let cellIndex = index
+              "
+              [month]="controlsData.selectedMonth"
+              [selectedOption]="cell.option"
+              [showZoomControl]="scenarioIndex === 0 && cellIndex === 0"
+            ></app-small-map>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div *ngIf="!isMobile" class="desktop-controls">
+      <app-map-controls
+        [controlsData]="controlsData"
+        [controlsOptions]="controlsOptions"
+        (controlsChange)="onControlsChange($event)"
+      ></app-map-controls>
+    </div>
+
+    <app-colorbar
+      [colormapUrl]="colormapUrl"
+      [displayName]="displayName"
+      [selectedMonth]="controlsData.selectedMonth"
+    ></app-colorbar>
+  </mat-sidenav-content>
+</mat-sidenav-container>
