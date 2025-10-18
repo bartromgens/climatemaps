@@ -121,7 +121,7 @@ export class MetadataService {
     if (historicalRange1 && historicalRange2) {
       const mergedRange: YearRange = {
         value: historicalRange2.value,
-        label: `${historicalRange2.label} / ${historicalRange1.label}`,
+        label: '1970-2000',
         additionalValues: [historicalRange1.value],
       };
 
@@ -218,6 +218,10 @@ export class MetadataService {
   }
 
   private formatYearRangeLabel(start: number, end: number): string {
+    // Show "1970-2000" for all historic date ranges
+    if (start < 2000) {
+      return '1970-2000';
+    }
     return `${start}-${end}`;
   }
 

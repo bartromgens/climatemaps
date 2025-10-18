@@ -11,7 +11,7 @@ import { YearRange } from '../../core/metadata.service';
   styleUrl: './mobile-date-control-overlay.component.scss',
 })
 export class MobileDateControlOverlayComponent {
-  @Input() selectedMonth: number = 1;
+  @Input() selectedMonth = 1;
   @Input() selectedYearRange: YearRange | null = null;
   @Input() yearRanges: YearRange[] = [];
   @Output() monthChange = new EventEmitter<number>();
