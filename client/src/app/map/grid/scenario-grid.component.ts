@@ -25,6 +25,7 @@ import { URLUtils } from '../../utils/url-utils';
 import { MapSyncService } from '../services/map-sync.service';
 import { BaseMapComponent } from '../base-map.component';
 import { SeoService } from '../../core/seo.service';
+import { ToastService } from '../../core/toast.service';
 
 interface ScenarioOption {
   scenario: ClimateScenario;
@@ -60,6 +61,7 @@ export class ScenarioGridComponent extends BaseMapComponent {
     metadataService: MetadataService,
     layerBuilder: LayerBuilderService,
     layerFilter: LayerFilterService,
+    toastService: ToastService,
     mapSyncService: MapSyncService,
     private seoService: SeoService,
   ) {
@@ -70,6 +72,7 @@ export class ScenarioGridComponent extends BaseMapComponent {
       metadataService,
       layerBuilder,
       layerFilter,
+      toastService,
       mapSyncService,
     );
     this.seoService.updateMetaTags({
@@ -232,4 +235,3 @@ export class ScenarioGridComponent extends BaseMapComponent {
     return this.scenarios[0]?.option?.climateMap?.getDisplayName() || null;
   }
 }
-

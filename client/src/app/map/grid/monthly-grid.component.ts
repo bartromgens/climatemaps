@@ -20,6 +20,7 @@ import { URLUtils } from '../../utils/url-utils';
 import { MapSyncService } from '../services/map-sync.service';
 import { BaseMapComponent } from '../base-map.component';
 import { SeoService } from '../../core/seo.service';
+import { ToastService } from '../../core/toast.service';
 
 interface MonthOption {
   month: number;
@@ -51,6 +52,7 @@ export class MonthlyGridComponent extends BaseMapComponent {
     metadataService: MetadataService,
     layerBuilder: LayerBuilderService,
     layerFilter: LayerFilterService,
+    toastService: ToastService,
     mapSyncService: MapSyncService,
     private seoService: SeoService,
   ) {
@@ -61,6 +63,7 @@ export class MonthlyGridComponent extends BaseMapComponent {
       metadataService,
       layerBuilder,
       layerFilter,
+      toastService,
       mapSyncService,
     );
     this.seoService.updateMetaTags({

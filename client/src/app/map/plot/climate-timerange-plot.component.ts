@@ -318,7 +318,7 @@ export class ClimateTimerangePlotComponent
           },
           title: {
             display: true,
-            text: `Climate Change Over Time (${this.getMonthName(this.plotData?.month || 1)})`,
+            text: this.getChartTitle(),
           },
         },
         scales: {
@@ -399,5 +399,16 @@ export class ClimateTimerangePlotComponent
       'December',
     ];
     return monthNames[month - 1] || '';
+  }
+
+  private getChartTitle(): string {
+    const monthName = this.getMonthName(this.plotData?.month || 1);
+    const scenario = this.climateScenario || this.DEFAULT_SCENARIO;
+    const model = this.climateModel || this.DEFAULT_MODEL;
+
+    const scenarioText = scenario.toUpperCase();
+    const modelText = model.replace('_', ' ').toUpperCase();
+
+    return `Climate Change Over Time (${monthName}) - ${scenarioText} - ${modelText}`;
   }
 }
