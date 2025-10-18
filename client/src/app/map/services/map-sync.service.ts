@@ -1,10 +1,16 @@
 import { Injectable } from '@angular/core';
 import { ParamMap } from '@angular/router';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 
 export interface MapViewState {
   center: { lat: number; lng: number };
   zoom: number;
+}
+
+export interface MapClickEvent {
+  lat: number;
+  lng: number;
+  timestamp: number;
 }
 
 const DEFAULT_CENTER = { lat: 20, lng: 5 };
@@ -28,6 +34,9 @@ export class MapSyncService {
     getDefaultViewState(),
   );
   viewState$ = this.viewStateSubject.asObservable();
+
+  private clickEventSubject = new Subject<MapClickEvent>();
+  clickEvent$ = this.clickEventSubject.asObservable();
 
   updateViewState(state: MapViewState): void {
     this.viewStateSubject.next(state);
@@ -58,5 +67,13 @@ export class MapSyncService {
         });
       }
     }
+  }
+
+  broadcastClick(lat: number, lng: number): void {
+    this.clickEventSubject.next({
+      lat,
+      lng,
+      timestamp: Date.now(),
+    });
   }
 }

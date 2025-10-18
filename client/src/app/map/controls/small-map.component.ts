@@ -12,8 +12,15 @@ import { control, latLng, Layer, Map, tileLayer } from 'leaflet';
 import 'leaflet.vectorgrid';
 import { Subject, takeUntil } from 'rxjs';
 
-import { MapSyncService, MapViewState } from '../services/map-sync.service';
+import {
+  MapSyncService,
+  MapViewState,
+  MapClickEvent,
+} from '../services/map-sync.service';
 import { LayerOption } from '../services/layer-builder.service';
+import { TooltipManagerService } from '../services/tooltip-manager.service';
+import { VectorLayerTooltipService } from '../services/vector-layer-tooltip.service';
+import { MapClickHandlerService } from '../services/map-click-handler.service';
 
 @Component({
   selector: 'app-small-map',
@@ -21,12 +28,13 @@ import { LayerOption } from '../services/layer-builder.service';
   imports: [CommonModule, LeafletModule],
   template: `
     <div class="small-map-container">
-      <div class="map-label">{{ label }}</div>
+      <div class="map-label" *ngIf="label">{{ label }}</div>
       <div
         class="map-wrapper"
         leaflet
         [leafletOptions]="options"
         (leafletMapReady)="onMapReady($event)"
+        (leafletClick)="onMapClick($event)"
         (leafletMapMoveEnd)="onMove()"
         (leafletMapZoomEnd)="onZoom()"
       ></div>
@@ -73,6 +81,7 @@ export class SmallMapComponent implements OnInit, OnDestroy, OnChanges {
   private vectorLayer: Layer | null = null;
   private destroy$ = new Subject<void>();
   private isUpdatingFromSync = false;
+  private lastClickTimestamp = 0;
 
   private baseLayer = tileLayer(
     'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
@@ -88,7 +97,12 @@ export class SmallMapComponent implements OnInit, OnDestroy, OnChanges {
     return this.customLabel || '';
   }
 
-  constructor(private mapSyncService: MapSyncService) {
+  constructor(
+    private mapSyncService: MapSyncService,
+    private tooltipManager: TooltipManagerService,
+    private vectorLayerTooltip: VectorLayerTooltipService,
+    private mapClickHandler: MapClickHandlerService,
+  ) {
     const initialState = this.mapSyncService.getInitialViewState();
     this.options = {
       layers: [this.baseLayer],
@@ -103,6 +117,12 @@ export class SmallMapComponent implements OnInit, OnDestroy, OnChanges {
       .pipe(takeUntil(this.destroy$))
       .subscribe((state) => {
         this.syncViewState(state);
+      });
+
+    this.mapSyncService.clickEvent$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((clickEvent) => {
+        this.handleSyncedClick(clickEvent);
       });
   }
 
@@ -187,11 +207,19 @@ export class SmallMapComponent implements OnInit, OnDestroy, OnChanges {
               opacity: 0.8,
             }),
           },
-          interactive: false,
+          interactive: true,
           maxNativeZoom: this.selectedOption.vectorMaxZoom,
           maxZoom: 18,
         },
       );
+
+      this.vectorLayer?.on('mouseover', (e: any) => {
+        this.onVectorLayerHover(e);
+      });
+
+      this.vectorLayer?.on('mouseout', () => {
+        this.onVectorLayerMouseOut();
+      });
 
       if (this.rasterLayer) {
         this.map.addLayer(this.rasterLayer);
@@ -215,5 +243,81 @@ export class SmallMapComponent implements OnInit, OnDestroy, OnChanges {
       this.map.removeLayer(this.vectorLayer);
       this.vectorLayer = null;
     }
+    if (this.map) {
+      this.tooltipManager.removeAllTooltips(this.map);
+    }
+  }
+
+  private onVectorLayerHover(e: any): void {
+    if (!this.map) {
+      return;
+    }
+
+    const variableType = this.selectedOption?.metadata?.variableType || '';
+    const unit = this.selectedOption?.climateMap?.variable?.unit || '';
+
+    this.vectorLayerTooltip.handleVectorLayerHover(
+      e,
+      this.map,
+      variableType,
+      unit,
+    );
+  }
+
+  private onVectorLayerMouseOut(): void {
+    if (this.map) {
+      this.vectorLayerTooltip.handleVectorLayerMouseOut(this.map);
+    }
+  }
+
+  onMapClick(event: any): void {
+    if (
+      !this.selectedOption?.metadata?.dataType ||
+      !this.map ||
+      this.month === undefined
+    ) {
+      return;
+    }
+
+    const variableType = this.selectedOption.metadata.variableType || '';
+
+    this.lastClickTimestamp = Date.now();
+    this.mapSyncService.broadcastClick(event.latlng.lat, event.latlng.lng);
+
+    this.mapClickHandler.handleMapClick(
+      event,
+      this.map,
+      this.selectedOption.metadata.dataType,
+      this.month,
+      variableType,
+    );
+  }
+
+  private handleSyncedClick(clickEvent: MapClickEvent): void {
+    if (
+      Math.abs(clickEvent.timestamp - this.lastClickTimestamp) < 100 ||
+      !this.map ||
+      !this.selectedOption?.metadata?.dataType ||
+      this.month === undefined
+    ) {
+      return;
+    }
+
+    const variableType = this.selectedOption.metadata.variableType || '';
+
+    const syntheticEvent = {
+      latlng: {
+        lat: clickEvent.lat,
+        lng: clickEvent.lng,
+      },
+    };
+
+    this.mapClickHandler.handleMapClick(
+      syntheticEvent,
+      this.map,
+      this.selectedOption.metadata.dataType,
+      this.month,
+      variableType,
+    );
   }
 }

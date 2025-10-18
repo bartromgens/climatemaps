@@ -23,13 +23,12 @@ import 'leaflet.vectorgrid';
 import { environment } from '../../environments/environment';
 import { MapControlsComponent } from './controls/map-controls.component';
 import { ColorbarComponent } from './colorbar.component';
-import {
-  ClimateMapService,
-  ClimateValueResponse,
-} from '../core/climatemap.service';
+import { ClimateMapService } from '../core/climatemap.service';
 import { MetadataService } from '../core/metadata.service';
 import { SpatialResolution } from '../utils/enum';
 import { TooltipManagerService } from './services/tooltip-manager.service';
+import { VectorLayerTooltipService } from './services/vector-layer-tooltip.service';
+import { MapClickHandlerService } from './services/map-click-handler.service';
 import {
   LayerBuilderService,
   LayerOption,
@@ -42,7 +41,6 @@ import { MapNavigationService } from '../core/map-navigation.service';
 import { MapSyncService } from './services/map-sync.service';
 import { BaseMapComponent } from './base-map.component';
 import { TemperatureUnitService } from '../core/temperature-unit.service';
-import { TemperatureUtils } from '../utils/temperature-utils';
 import { SeoService } from '../core/seo.service';
 import { ToastService } from '../core/toast.service';
 import { ClimateVariableHelperService } from '../core/climate-variable-helper.service';
@@ -125,7 +123,6 @@ export class MapComponent extends BaseMapComponent implements OnInit {
   private map: Map | null = null;
   private rasterLayer: Layer | null = null;
   private vectorLayer: Layer | null = null;
-  private isLoadingClickValue = false;
   plotData: { lat: number; lon: number; dataType: string } | null = null;
   timerangePlotData: { lat: number; lon: number; month: number } | null = null;
 
@@ -139,6 +136,8 @@ export class MapComponent extends BaseMapComponent implements OnInit {
     toastService: ToastService,
     mapSyncService: MapSyncService,
     private tooltipManager: TooltipManagerService,
+    private vectorLayerTooltip: VectorLayerTooltipService,
+    private mapClickHandler: MapClickHandlerService,
     private mapNavigationService: MapNavigationService,
     private temperatureUnitService: TemperatureUnitService,
     private seoService: SeoService,
@@ -413,22 +412,16 @@ export class MapComponent extends BaseMapComponent implements OnInit {
     this.map?.setView([lat, lon], zoom);
   }
 
-  private normalizeLongitude(lon: number): number {
-    while (lon > 180) lon -= 360;
-    while (lon < -180) lon += 360;
-    return lon;
-  }
-
   onMapClick(event: LeafletMouseEvent): void {
     console.log('mapClick', event);
 
-    if (!this.selectedOption?.metadata?.dataType) {
+    if (!this.selectedOption?.metadata?.dataType || !this.map) {
       console.log('No layer selected, skipping click handler');
       return;
     }
 
     const lat = event.latlng.lat;
-    const lon = this.normalizeLongitude(event.latlng.lng);
+    const lon = event.latlng.lng;
 
     this.plotData = {
       lat,
@@ -442,57 +435,12 @@ export class MapComponent extends BaseMapComponent implements OnInit {
       month: this.monthSelected,
     };
 
-    // Show loading tooltip
-    this.isLoadingClickValue = true;
-    this.tooltipManager.createPersistentTooltip('...', event.latlng, this.map!);
-
-    // Fetch climate value from API
-    this.climateMapService
-      .getClimateValue(
-        this.selectedOption.metadata.dataType,
-        this.monthSelected,
-        lat,
-        lon,
-      )
-      .subscribe({
-        next: (response: ClimateValueResponse) => {
-          this.isLoadingClickValue = false;
-          this.displayClickValue(event.latlng, response);
-        },
-        error: (error) => {
-          this.isLoadingClickValue = false;
-          console.error('Error fetching climate value:', error);
-
-          const errorMessage = error.error?.detail || 'Error loading value';
-          this.tooltipManager.createPersistentTooltip(
-            errorMessage,
-            event.latlng,
-            this.map!,
-          );
-        },
-      });
-  }
-
-  private displayClickValue(latlng: any, response: ClimateValueResponse): void {
-    const isTemperature = TemperatureUtils.isTemperatureVariable(
+    this.mapClickHandler.handleMapClick(
+      event,
+      this.map,
+      this.selectedOption.metadata.dataType,
+      this.monthSelected,
       this.controlsData.selectedVariableType,
-    );
-    let value = response.value;
-    let unit = response.unit;
-
-    if (isTemperature && unit === '°C') {
-      const currentUnit = this.temperatureUnitService.getUnit();
-      if (currentUnit === '°F') {
-        value = TemperatureUtils.celsiusToFahrenheit(value);
-        unit = '°F';
-      }
-    }
-
-    const displayValue = `${value.toFixed(1)} ${unit}`;
-    this.tooltipManager.createPersistentTooltip(
-      displayValue,
-      latlng,
-      this.map!,
     );
   }
 
@@ -546,30 +494,22 @@ export class MapComponent extends BaseMapComponent implements OnInit {
   }
 
   private onVectorLayerHover(e: any): void {
-    const properties = e.layer?.properties;
-    if (properties && properties['level-value'] !== undefined && this.map) {
-      let value = properties['level-value'];
-      let unit = this.getCurrentUnit();
-
-      const isTemperature = TemperatureUtils.isTemperatureVariable(
-        this.controlsData.selectedVariableType,
-      );
-      if (isTemperature && unit === '°C') {
-        const currentUnit = this.temperatureUnitService.getUnit();
-        if (currentUnit === '°F') {
-          value = TemperatureUtils.celsiusToFahrenheit(value);
-          unit = '°F';
-        }
-      }
-
-      const displayValue = `${value.toFixed(1)} ${unit}`;
-      this.tooltipManager.createHoverTooltip(displayValue, e.latlng, this.map);
+    if (!this.map) {
+      return;
     }
+
+    const unit = this.getCurrentUnit();
+    this.vectorLayerTooltip.handleVectorLayerHover(
+      e,
+      this.map,
+      this.controlsData.selectedVariableType,
+      unit,
+    );
   }
 
   private onVectorLayerMouseOut(): void {
     if (this.map) {
-      this.tooltipManager.removeHoverTooltip(this.map);
+      this.vectorLayerTooltip.handleVectorLayerMouseOut(this.map);
     }
   }
 
