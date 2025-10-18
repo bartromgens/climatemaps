@@ -135,16 +135,16 @@ CLIMATE_CONTOUR_CONFIGS: Dict[ClimateVarKey, ContourPlotConfig] = {
         level_lower=-30, level_upper=28, colormap=plt.cm.jet, title="Min. temperature", unit="C"
     ),
     ClimateVarKey.CLOUD_COVER: ContourPlotConfig(
-        level_lower=0, level_upper=100, colormap=plt.cm.jet_r, title="Cloud coverage", unit="%"
+        level_lower=0, level_upper=100, colormap=plt.cm.RdYlBu, title="Cloud coverage", unit="%"
     ),
     ClimateVarKey.WET_DAYS: ContourPlotConfig(
-        level_lower=0, level_upper=30, colormap=plt.cm.jet_r, title="Wet days", unit="days"
+        level_lower=0, level_upper=30, colormap=plt.cm.RdYlBu, title="Wet days", unit="days"
     ),
     ClimateVarKey.FROST_DAYS: ContourPlotConfig(
-        level_lower=0, level_upper=30, colormap=plt.cm.jet_r, title="Frost days", unit="days"
+        level_lower=0, level_upper=30, colormap=plt.cm.RdYlBu, title="Frost days", unit="days"
     ),
     ClimateVarKey.RADIATION: ContourPlotConfig(
-        level_lower=0, level_upper=300, colormap=plt.cm.jet, title="Radiation", unit="W/m^2"
+        level_lower=0, level_upper=300, colormap=plt.cm.RdYlBu_r, title="Radiation", unit="W/m^2"
     ),
     ClimateVarKey.DIURNAL_TEMP_RANGE: ContourPlotConfig(
         level_lower=5,
