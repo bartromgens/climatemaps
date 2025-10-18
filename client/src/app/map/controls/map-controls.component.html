@@ -1,3 +1,18 @@
+<div class="row sliders-row">
+  <div class="column sliders-container">
+    <app-month-slider
+      [value]="controlsData?.selectedMonth || 1"
+      (valueChange)="onMonthSelected($event)"
+    ></app-month-slider>
+    <app-year-slider
+      [value]="controlsData?.selectedYearRange || null"
+      [years]="controlsOptions?.yearRanges || []"
+      [disabled]="shouldDisableYearSlider()"
+      (valueChange)="onYearSelected($event)"
+    ></app-year-slider>
+  </div>
+</div>
+
 <div class="row controls-row">
   <mat-form-field
     *ngIf="!hideVariableSelector"
@@ -98,20 +113,5 @@
     >
       Show Change
     </mat-slide-toggle>
-  </div>
-</div>
-
-<div class="row sliders-row">
-  <div class="column sliders-container">
-    <app-month-slider
-      [value]="controlsData?.selectedMonth || 1"
-      (valueChange)="onMonthSelected($event)"
-    ></app-month-slider>
-    <app-year-slider
-      [value]="controlsData?.selectedYearRange || null"
-      [years]="controlsOptions?.yearRanges || []"
-      [disabled]="shouldDisableYearSlider()"
-      (valueChange)="onYearSelected($event)"
-    ></app-year-slider>
   </div>
 </div>
