@@ -78,6 +78,10 @@
 :host ::ng-deep {
   mat-sidenav-container {
     height: calc(100vh - $navbar-height);
+
+    @media (max-width: 768px) {
+      height: calc(100vh - $mobile-slider-height);
+    }
   }
 
   mat-sidenav-content {

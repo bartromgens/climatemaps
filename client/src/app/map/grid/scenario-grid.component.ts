@@ -9,8 +9,9 @@ import { SmallMapComponent } from '../controls/small-map.component';
 import { ColorbarComponent } from '../colorbar.component';
 import { MapControlsComponent } from '../controls/map-controls.component';
 import { MobileHamburgerMenuComponent } from '../controls/mobile-hamburger-menu.component';
+import { MobileDateControlOverlayComponent } from '../controls/mobile-date-control-overlay.component';
 import { ClimateMapService } from '../../core/climatemap.service';
-import { MetadataService } from '../../core/metadata.service';
+import { MetadataService, YearRange } from '../../core/metadata.service';
 import {
   ClimateScenario,
   ClimateModel,
@@ -46,6 +47,7 @@ interface ScenarioOption {
     ColorbarComponent,
     MapControlsComponent,
     MobileHamburgerMenuComponent,
+    MobileDateControlOverlayComponent,
   ],
   templateUrl: './scenario-grid.component.html',
   styleUrl: './scenario-grid.component.scss',
@@ -235,5 +237,10 @@ export class ScenarioGridComponent extends BaseMapComponent {
 
   get displayName(): string | null {
     return this.scenarios[0]?.option?.climateMap?.getDisplayName() || null;
+  }
+
+  onYearRangeChange(yearRange: YearRange): void {
+    this.controlsData.selectedYearRange = yearRange;
+    this.onControlsChange(this.controlsData);
   }
 }

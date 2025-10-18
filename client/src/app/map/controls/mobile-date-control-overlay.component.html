@@ -1,7 +1,7 @@
 <div class="mobile-controls-overlay">
   <div class="overlay-content">
     <!-- Year Range Selector -->
-    <div class="control-row">
+    <div class="control-row" *ngIf="!hideYearSelector">
       <div class="overlay-label">Year</div>
       <mat-slider
         [min]="1"

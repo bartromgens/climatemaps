@@ -11,6 +11,7 @@ import { YearRange } from '../../core/metadata.service';
   styleUrl: './mobile-date-control-overlay.component.scss',
   host: {
     '[class.month-hidden]': 'hideMonthSelector',
+    '[class.year-hidden]': 'hideYearSelector',
   },
 })
 export class MobileDateControlOverlayComponent {
@@ -18,6 +19,7 @@ export class MobileDateControlOverlayComponent {
   @Input() selectedYearRange: YearRange | null = null;
   @Input() yearRanges: YearRange[] = [];
   @Input() hideMonthSelector = false;
+  @Input() hideYearSelector = false;
   @Output() monthChange = new EventEmitter<number>();
   @Output() yearRangeChange = new EventEmitter<YearRange>();
 

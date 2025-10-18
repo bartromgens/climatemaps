@@ -31,6 +31,10 @@
   min-height: 48px;
 }
 
+:host(.year-hidden) .overlay-content {
+  min-height: 48px;
+}
+
 .control-row {
   display: flex;
   align-items: center;

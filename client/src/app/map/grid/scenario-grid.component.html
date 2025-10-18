@@ -38,6 +38,14 @@
       [isMobile]="isMobile"
     ></app-mobile-hamburger-menu>
 
+    <app-mobile-date-control-overlay
+      [selectedMonth]="controlsData.selectedMonth"
+      [selectedYearRange]="controlsData.selectedYearRange"
+      [yearRanges]="yearRanges"
+      [hideMonthSelector]="true"
+      (yearRangeChange)="onYearRangeChange($event)"
+    ></app-mobile-date-control-overlay>
+
     <div class="maps-grid-wrapper">
       <div class="maps-grid">
         <app-small-map
