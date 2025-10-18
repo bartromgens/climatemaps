@@ -25,6 +25,7 @@ import { MapControlsComponent } from './controls/map-controls.component';
 import { VariableSelectorOverlayComponent } from './controls/variable-selector-overlay.component';
 import { MobileDateControlOverlayComponent } from './controls/mobile-date-control-overlay.component';
 import { ColorbarComponent } from './colorbar.component';
+import { MobileHamburgerMenuComponent } from './controls/mobile-hamburger-menu.component';
 import { ClimateMapService } from '../core/climatemap.service';
 import { MetadataService, YearRange } from '../core/metadata.service';
 import { SpatialResolution, ClimateVarKey } from '../utils/enum';
@@ -66,6 +67,7 @@ import { CoordinateUtils } from '../utils/coordinate-utils';
     ColorbarComponent,
     ClimateMonthlyPlotComponent,
     ClimateTimerangePlotComponent,
+    MobileHamburgerMenuComponent,
   ],
   templateUrl: './map.component.html',
   styleUrl: './map.component.scss',

@@ -16,7 +16,7 @@
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(10px);
   border-radius: 0;
-  padding: 8px 20px;
+  padding: 4px 15px;
   box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.15);
   pointer-events: auto;
   display: flex;
@@ -25,6 +25,14 @@
   width: 100%;
   box-sizing: border-box;
   min-height: 96px;
+}
+
+:host(.month-hidden) .overlay-content {
+  min-height: 48px;
+}
+
+:host(.year-hidden) .overlay-content {
+  min-height: 48px;
 }
 
 .control-row {
