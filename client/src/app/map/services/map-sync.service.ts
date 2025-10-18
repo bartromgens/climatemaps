@@ -7,17 +7,25 @@ export interface MapViewState {
   zoom: number;
 }
 
-const DEFAULT_VIEW_STATE: MapViewState = {
-  center: { lat: 20, lng: 5 },
-  zoom: 3,
-};
+const DEFAULT_CENTER = { lat: 20, lng: 5 };
+const DEFAULT_ZOOM_LOW_RES = 3;
+const DEFAULT_ZOOM_HIGH_RES = 4;
+const LARGE_SCREEN_WIDTH = 1920;
+
+function getDefaultViewState(): MapViewState {
+  const isLargeScreen = window.innerWidth > LARGE_SCREEN_WIDTH;
+  return {
+    center: DEFAULT_CENTER,
+    zoom: isLargeScreen ? DEFAULT_ZOOM_HIGH_RES : DEFAULT_ZOOM_LOW_RES,
+  };
+}
 
 @Injectable({
   providedIn: 'root',
 })
 export class MapSyncService {
   private viewStateSubject = new BehaviorSubject<MapViewState>(
-    DEFAULT_VIEW_STATE,
+    getDefaultViewState(),
   );
   viewState$ = this.viewStateSubject.asObservable();
 
