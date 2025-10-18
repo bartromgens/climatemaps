@@ -97,11 +97,16 @@
 
     &:hover:not(.disabled),
     &.selected {
-      width: 120px;
+      width: 40px;
     }
 
     &.disabled:hover {
       width: 40px;
+    }
+
+    .variable-name {
+      opacity: 0 !important;
+      width: 0 !important;
     }
   }
 }
