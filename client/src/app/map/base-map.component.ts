@@ -20,8 +20,12 @@ import {
 } from './services/layer-builder.service';
 import { LayerFilterService } from './services/layer-filter.service';
 import { URLUtils } from '../utils/url-utils';
-import { MapControlsData, MapControlsOptions } from './controls/map-controls.component';
+import {
+  MapControlsData,
+  MapControlsOptions,
+} from './controls/map-controls.component';
 import { MapSyncService, MapViewState } from './services/map-sync.service';
+import { ToastService } from '../core/toast.service';
 
 @Directive()
 export abstract class BaseMapComponent implements OnInit {
@@ -62,6 +66,7 @@ export abstract class BaseMapComponent implements OnInit {
     protected metadataService: MetadataService,
     protected layerBuilder: LayerBuilderService,
     protected layerFilter: LayerFilterService,
+    protected toastService: ToastService,
     protected mapSyncService?: MapSyncService,
   ) {
     this.isHistoricalYearRange =
@@ -87,17 +92,26 @@ export abstract class BaseMapComponent implements OnInit {
       });
     }
 
-    this.climateMapService.getClimateMapList().subscribe((climateMaps) => {
-      this.climateMaps = climateMaps;
-      this.populateMetadataFromAPI(climateMaps);
-      this.layerOptions = this.layerBuilder.buildLayerOptions(climateMaps);
-      this.resetInvalidSelections();
+    this.climateMapService.getClimateMapList().subscribe({
+      next: (climateMaps) => {
+        this.climateMaps = climateMaps;
+        this.populateMetadataFromAPI(climateMaps);
+        this.layerOptions = this.layerBuilder.buildLayerOptions(climateMaps);
+        this.resetInvalidSelections();
 
-      this.route.queryParamMap.subscribe((params) => {
-        this.updateControlsFromURL(params);
-      });
+        this.route.queryParamMap.subscribe((params) => {
+          this.updateControlsFromURL(params);
+        });
 
-      this.onDataLoaded();
+        this.onDataLoaded();
+      },
+      error: (error) => {
+        console.error('Failed to load climate maps:', error);
+        this.toastService.showError(
+          'Failed to load climate data from backend. Please check your connection and try again.',
+          10000,
+        );
+      },
     });
   }
 

@@ -33,9 +33,14 @@ export class ClimateMapService {
   public getClimateMapList(): Observable<ClimateMap[]> {
     const url = `${environment.apiBaseUrl}/climatemap`;
     return new Observable<ClimateMap[]>((observer) => {
-      this.httpClient.get<ClimateMapResource[]>(url).subscribe((resources) => {
-        observer.next(ClimateMap.fromResources(resources));
-        observer.complete();
+      this.httpClient.get<ClimateMapResource[]>(url).subscribe({
+        next: (resources) => {
+          observer.next(ClimateMap.fromResources(resources));
+          observer.complete();
+        },
+        error: (error) => {
+          observer.error(error);
+        },
       });
     });
   }

@@ -136,12 +136,12 @@ export class MapComponent extends BaseMapComponent implements OnInit {
     metadataService: MetadataService,
     layerBuilder: LayerBuilderService,
     layerFilter: LayerFilterService,
+    toastService: ToastService,
     mapSyncService: MapSyncService,
     private tooltipManager: TooltipManagerService,
     private mapNavigationService: MapNavigationService,
     private temperatureUnitService: TemperatureUnitService,
     private seoService: SeoService,
-    private toastService: ToastService,
     private climateVariableHelper: ClimateVariableHelperService,
   ) {
     super(
@@ -151,6 +151,7 @@ export class MapComponent extends BaseMapComponent implements OnInit {
       metadataService,
       layerBuilder,
       layerFilter,
+      toastService,
       mapSyncService,
     );
 
@@ -178,33 +179,42 @@ export class MapComponent extends BaseMapComponent implements OnInit {
       }
     });
 
-    this.climateMapService.getClimateMapList().subscribe((climateMaps) => {
-      console.log('Loaded climate maps:', climateMaps.length);
-      this.climateMaps = climateMaps;
+    this.climateMapService.getClimateMapList().subscribe({
+      next: (climateMaps) => {
+        console.log('Loaded climate maps:', climateMaps.length);
+        this.climateMaps = climateMaps;
 
-      this.populateMetadataFromAPI(climateMaps);
-      this.layerOptions = this.layerBuilder.buildLayerOptions(climateMaps);
-      console.log('Built layer options:', this.layerOptions.length);
+        this.populateMetadataFromAPI(climateMaps);
+        this.layerOptions = this.layerBuilder.buildLayerOptions(climateMaps);
+        console.log('Built layer options:', this.layerOptions.length);
 
-      this.resetInvalidSelections();
+        this.resetInvalidSelections();
 
-      this.route.queryParamMap.subscribe((params) => {
-        this.updateControlsFromURL(params);
-      });
+        this.route.queryParamMap.subscribe((params) => {
+          this.updateControlsFromURL(params);
+        });
 
-      console.log('Initial selections:', {
-        variableType: this.controlsData.selectedVariableType,
-        yearRange: this.controlsData.selectedYearRange?.value,
-        resolution: this.controlsData.selectedResolution,
-        climateScenario: this.controlsData.selectedClimateScenario,
-        climateModel: this.controlsData.selectedClimateModel,
-        isHistorical: this.controlsData.selectedYearRange
-          ? this.isHistoricalYearRange(
-              this.controlsData.selectedYearRange.value,
-            )
-          : false,
-      });
-      this.onDataLoaded();
+        console.log('Initial selections:', {
+          variableType: this.controlsData.selectedVariableType,
+          yearRange: this.controlsData.selectedYearRange?.value,
+          resolution: this.controlsData.selectedResolution,
+          climateScenario: this.controlsData.selectedClimateScenario,
+          climateModel: this.controlsData.selectedClimateModel,
+          isHistorical: this.controlsData.selectedYearRange
+            ? this.isHistoricalYearRange(
+                this.controlsData.selectedYearRange.value,
+              )
+            : false,
+        });
+        this.onDataLoaded();
+      },
+      error: (error) => {
+        console.error('Failed to load climate maps:', error);
+        this.toastService.showError(
+          'Failed to load climate data from backend. Please check your connection and try again.',
+          10000,
+        );
+      },
     });
   }
 

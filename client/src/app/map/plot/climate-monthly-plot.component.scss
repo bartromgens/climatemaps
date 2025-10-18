@@ -1,18 +1,11 @@
 @import './climate-plot-common.scss';
 
 .climate-monthly-plot-card {
-  position: absolute;
-  top: 20px;
-  right: 20px;
   width: 500px;
-  max-width: calc(100vw - 40px);
-  z-index: 1000;
+  max-width: 100%;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 
   @media (max-width: 768px) {
-    top: 80px;
-    right: 10px;
-    left: 10px;
-    width: auto;
+    width: 100%;
   }
 }

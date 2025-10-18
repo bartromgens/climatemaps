@@ -62,6 +62,8 @@ export class ClimateTimerangePlotComponent
   implements OnChanges, AfterViewInit, OnDestroy
 {
   @Input() plotData: PlotData | null = null;
+  @Input() climateScenario: ClimateScenario | null = null;
+  @Input() climateModel: ClimateModel | null = null;
 
   @ViewChild('chartCanvas', { static: false })
   chartCanvas!: ElementRef<HTMLCanvasElement>;
@@ -104,7 +106,11 @@ export class ClimateTimerangePlotComponent
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['plotData'] && !changes['plotData'].firstChange) {
+    if (
+      (changes['plotData'] && !changes['plotData'].firstChange) ||
+      (changes['climateScenario'] && !changes['climateScenario'].firstChange) ||
+      (changes['climateModel'] && !changes['climateModel'].firstChange)
+    ) {
       if (this.plotData) {
         this.isVisible = true;
         this.loadData();
@@ -228,8 +234,10 @@ export class ClimateTimerangePlotComponent
     const resolution = '10m';
 
     if (isFuture) {
-      const scenario = this.DEFAULT_SCENARIO.toLowerCase();
-      const model = this.DEFAULT_MODEL.toLowerCase();
+      const scenario = (
+        this.climateScenario || this.DEFAULT_SCENARIO
+      ).toLowerCase();
+      const model = (this.climateModel || this.DEFAULT_MODEL).toLowerCase();
       return `${variableName}_${yearRange[0]}_${yearRange[1]}_${resolution}_${scenario}_${model}`;
     } else {
       return `${variableName}_${yearRange[0]}_${yearRange[1]}_${resolution}`;
@@ -310,7 +318,7 @@ export class ClimateTimerangePlotComponent
           },
           title: {
             display: true,
-            text: `Climate Change Over Time (${this.getMonthName(this.plotData?.month || 1)})`,
+            text: this.getChartTitle(),
           },
         },
         scales: {
@@ -391,5 +399,16 @@ export class ClimateTimerangePlotComponent
       'December',
     ];
     return monthNames[month - 1] || '';
+  }
+
+  private getChartTitle(): string {
+    const monthName = this.getMonthName(this.plotData?.month || 1);
+    const scenario = this.climateScenario || this.DEFAULT_SCENARIO;
+    const model = this.climateModel || this.DEFAULT_MODEL;
+
+    const scenarioText = scenario.toUpperCase();
+    const modelText = model.replace('_', ' ').toUpperCase();
+
+    return `Climate Change Over Time (${monthName}) - ${scenarioText} - ${modelText}`;
   }
 }
