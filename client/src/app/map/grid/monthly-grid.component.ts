@@ -10,9 +10,10 @@ import { ColorbarComponent } from '../colorbar.component';
 import { MapControlsComponent } from '../controls/map-controls.component';
 import { MobileHamburgerMenuComponent } from '../controls/mobile-hamburger-menu.component';
 import { MobileDateControlOverlayComponent } from '../controls/mobile-date-control-overlay.component';
+import { VariableSelectorOverlayComponent } from '../controls/variable-selector-overlay.component';
 import { ClimateMapService } from '../../core/climatemap.service';
 import { MetadataService, YearRange } from '../../core/metadata.service';
-import { SpatialResolution } from '../../utils/enum';
+import { SpatialResolution, ClimateVarKey } from '../../utils/enum';
 import {
   LayerBuilderService,
   LayerOption,
@@ -42,6 +43,7 @@ interface MonthOption {
     MapControlsComponent,
     MobileHamburgerMenuComponent,
     MobileDateControlOverlayComponent,
+    VariableSelectorOverlayComponent,
   ],
   templateUrl: './monthly-grid.component.html',
   styleUrl: './monthly-grid.component.scss',
@@ -165,6 +167,11 @@ export class MonthlyGridComponent extends BaseMapComponent {
 
   onYearRangeChange(yearRange: YearRange): void {
     this.controlsData.selectedYearRange = yearRange;
+    this.onControlsChange(this.controlsData);
+  }
+
+  onVariableChange(variableType: ClimateVarKey): void {
+    this.controlsData.selectedVariableType = variableType;
     this.onControlsChange(this.controlsData);
   }
 
