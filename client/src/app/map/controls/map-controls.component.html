@@ -1,5 +1,9 @@
 <div class="row controls-row">
-  <mat-form-field subscriptSizing="dynamic" class="dropdown-field">
+  <mat-form-field
+    *ngIf="!hideVariableSelector"
+    subscriptSizing="dynamic"
+    class="dropdown-field"
+  >
     <mat-label>Variable</mat-label>
     <mat-select
       [value]="controlsData?.selectedVariableType"

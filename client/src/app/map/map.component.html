@@ -49,11 +49,20 @@
     <!-- Month and Year Range Display -->
     <div class="map-info-display" *ngIf="controlsData.selectedYearRange">
       <div class="info-value">
-        {{ climateVariables[controlsData.selectedVariableType]?.displayName }} -
+        {{ climateVariables[controlsData.selectedVariableType].displayName }} -
         {{ getMonthName(monthSelected) }}
         {{ formatYearRange(controlsData.selectedYearRange.value) }}
       </div>
     </div>
+
+    <!-- Desktop variable selector overlay -->
+    <app-variable-selector-overlay
+      *ngIf="!isMobile"
+      [selectedVariableType]="controlsData.selectedVariableType"
+      [availableVariableTypes]="controlsOptions.availableVariableTypes"
+      [climateVariables]="climateVariables"
+      (variableChange)="onVariableChange($event)"
+    ></app-variable-selector-overlay>
 
     <!-- Desktop controls - only show on desktop -->
     <div *ngIf="!isMobile" class="desktop-controls">

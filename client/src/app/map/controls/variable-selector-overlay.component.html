@@ -1,0 +1,15 @@
+<div class="variable-selector-overlay">
+  <button
+    *ngFor="let variable of variables"
+    class="variable-button"
+    [class.selected]="isSelected(variable.key)"
+    [class.disabled]="!isAvailable(variable.key)"
+    [disabled]="!isAvailable(variable.key)"
+    [matTooltip]="getTooltip(variable.key)"
+    matTooltipPosition="left"
+    (click)="onVariableClick(variable.key)"
+  >
+    <div class="variable-icon">{{ variable.icon }}</div>
+    <div class="variable-name">{{ variable.shortName }}</div>
+  </button>
+</div>
