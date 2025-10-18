@@ -23,8 +23,9 @@ An interactive web application for visualizing global historical climate data an
 
 - https://interactive-atlas.ipcc.ch/
 - ERA5 monthly averaged data on single levels from 1940 to present: https://cds.climate.copernicus.eu/datasets/reanalysis-era5-single-levels-monthly-means?tab=overview
+- ERA5 post-processed daily statistics on single levels from 1940 to present: https://cds.climate.copernicus.eu/datasets/derived-era5-single-levels-daily-statistics?tab=overview
 - Copernicus Climate Data Store - CMIP6 climate projections:
-  https://cds.climate.copernicus.eu/datasets/projections-cmip6?tab=download
+  https://cds.climate.copernicus.eu/datasets/projections-cmip6?tab=overview
 - NASA NEX-GDDP-CMIP6 (~25 km resolution): https://registry.opendata.aws/nex-gddp-cmip6/
 - CHELSA (~1km resolution): https://chelsa-climate.org/
 
