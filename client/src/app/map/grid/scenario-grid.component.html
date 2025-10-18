@@ -46,7 +46,7 @@
       </div>
     </div>
 
-    <div *ngIf="!isMobile">
+    <div *ngIf="!isMobile" class="desktop-controls-overlay">
       <app-map-controls
         [controlsData]="controlsData"
         [controlsOptions]="controlsOptions"
@@ -61,4 +61,3 @@
     ></app-colorbar>
   </mat-sidenav-content>
 </mat-sidenav-container>
-

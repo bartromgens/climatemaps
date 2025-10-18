@@ -1,13 +1,12 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
-import { MatTooltipModule } from '@angular/material/tooltip';
 import { ClimateVarKey } from '../../utils/enum';
 
 @Component({
   selector: 'app-variable-selector-overlay',
   standalone: true,
-  imports: [CommonModule, MatButtonModule, MatTooltipModule],
+  imports: [CommonModule, MatButtonModule],
   templateUrl: './variable-selector-overlay.component.html',
   styleUrl: './variable-selector-overlay.component.scss',
 })
@@ -21,21 +20,37 @@ export class VariableSelectorOverlayComponent {
     key: ClimateVarKey;
     icon: string;
     shortName: string;
+    isSvg?: boolean;
   }[] = [
     {
       key: ClimateVarKey.T_MAX,
-      icon: '🌡️',
-      shortName: 'Tmax',
+      icon: 'assets/thermometer-hot.svg',
+      shortName: 'Temp. Max',
+      isSvg: true,
     },
     {
       key: ClimateVarKey.T_MIN,
-      icon: '❄️',
-      shortName: 'Tmin',
+      icon: 'assets/thermometer-cold.svg',
+      shortName: 'Temp. Min',
+      isSvg: true,
     },
     {
       key: ClimateVarKey.PRECIPITATION,
-      icon: '💧',
-      shortName: 'Precip.',
+      icon: 'assets/precipitation.svg',
+      shortName: 'Precipitation',
+      isSvg: true,
+    },
+    {
+      key: ClimateVarKey.CLOUD_COVER,
+      icon: 'assets/cloud-cover.svg',
+      shortName: 'Cloud Cover',
+      isSvg: true,
+    },
+    {
+      key: ClimateVarKey.WET_DAYS,
+      icon: 'assets/wet-days.svg',
+      shortName: 'Wet Days',
+      isSvg: true,
     },
   ];
 
@@ -51,13 +66,5 @@ export class VariableSelectorOverlayComponent {
 
   isSelected(variableType: ClimateVarKey): boolean {
     return this.selectedVariableType === variableType;
-  }
-
-  getTooltip(variableType: ClimateVarKey): string {
-    const variable = this.climateVariables?.[variableType];
-    if (variable) {
-      return `${variable.displayName} (${variable.unit})`;
-    }
-    return '';
   }
 }

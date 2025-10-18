@@ -163,7 +163,6 @@
   }
 }
 
-
 // Mobile-specific styling
 @media (max-width: 768px) {
   .mobile-toggle-button {
@@ -176,6 +175,13 @@
 
   .page-content-wrapper {
     height: $page-height-mobile;
+  }
+}
+
+// Zoom controls positioning - desktop only
+@media (min-width: 769px) {
+  ::ng-deep .leaflet-control-zoom {
+    top: 80px !important;
   }
 }
 

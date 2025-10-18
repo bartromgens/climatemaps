@@ -390,7 +390,12 @@ export class MapComponent extends BaseMapComponent implements OnInit {
       console.assert(false, 'map is not defined');
       return;
     }
-    new Control.Zoom({ position: 'topright' }).addTo(this.map);
+
+    // Position zoom controls based on screen size
+    const isMobile = window.innerWidth <= 768;
+    const zoomPosition = isMobile ? 'topright' : 'topleft';
+
+    new Control.Zoom({ position: zoomPosition }).addTo(this.map);
     new Control.Scale().addTo(this.map);
   }
 

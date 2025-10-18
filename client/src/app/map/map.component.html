@@ -55,9 +55,8 @@
       </div>
     </div>
 
-    <!-- Desktop variable selector overlay -->
+    <!-- Variable selector overlay -->
     <app-variable-selector-overlay
-      *ngIf="!isMobile"
       [selectedVariableType]="controlsData.selectedVariableType"
       [availableVariableTypes]="controlsOptions.availableVariableTypes"
       [climateVariables]="climateVariables"
@@ -65,7 +64,7 @@
     ></app-variable-selector-overlay>
 
     <!-- Desktop controls - only show on desktop -->
-    <div *ngIf="!isMobile">
+    <div *ngIf="!isMobile" class="desktop-controls-overlay">
       <app-map-controls
         [controlsData]="controlsData"
         [controlsOptions]="controlsOptions"
