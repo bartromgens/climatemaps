@@ -396,11 +396,12 @@ export class MapComponent extends BaseMapComponent implements OnInit {
       return;
     }
 
-    // Position zoom controls based on screen size
     const isMobile = window.innerWidth <= 768;
-    const zoomPosition = isMobile ? 'topleft' : 'topleft';
 
-    new Control.Zoom({ position: zoomPosition }).addTo(this.map);
+    if (!isMobile) {
+      new Control.Zoom({ position: 'topleft' }).addTo(this.map);
+    }
+
     new Control.Scale().addTo(this.map);
   }
 

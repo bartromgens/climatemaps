@@ -139,7 +139,8 @@ export class SmallMapComponent implements OnInit, OnDestroy, OnChanges {
 
   onMapReady(map: Map): void {
     this.map = map;
-    if (this.showZoomControl) {
+    const isMobile = window.innerWidth <= 768;
+    if (this.showZoomControl && !isMobile) {
       control.zoom({ position: 'bottomleft' }).addTo(map);
     }
     this.updateLayers();
