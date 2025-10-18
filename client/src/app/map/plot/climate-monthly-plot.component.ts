@@ -25,12 +25,15 @@ import {
   CLIMATE_VAR_KEY_TO_NAME,
   CLIMATE_VAR_DISPLAY_NAMES,
   CLIMATE_VAR_UNITS,
+  ClimateScenario,
+  ClimateModel,
 } from '../../utils/enum';
 import {
   TemperatureUnitService,
   TemperatureUnit,
 } from '../../core/temperature-unit.service';
 import { TemperatureUtils } from '../../utils/temperature-utils';
+import { YearRange } from '../../core/metadata.service';
 
 Chart.register(...registerables);
 
@@ -57,6 +60,9 @@ export class ClimateMonthlyPlotComponent
   implements OnChanges, AfterViewInit, OnDestroy
 {
   @Input() plotData: PlotData | null = null;
+  @Input() yearRange: YearRange | null = null;
+  @Input() climateScenario: ClimateScenario | null = null;
+  @Input() climateModel: ClimateModel | null = null;
 
   @ViewChild('chartCanvas', { static: false })
   chartCanvas!: ElementRef<HTMLCanvasElement>;
@@ -89,7 +95,12 @@ export class ClimateMonthlyPlotComponent
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['plotData'] && !changes['plotData'].firstChange) {
+    if (
+      (changes['plotData'] && !changes['plotData'].firstChange) ||
+      (changes['yearRange'] && !changes['yearRange'].firstChange) ||
+      (changes['climateScenario'] && !changes['climateScenario'].firstChange) ||
+      (changes['climateModel'] && !changes['climateModel'].firstChange)
+    ) {
       if (this.plotData) {
         this.isVisible = true;
         this.loadData();
@@ -102,16 +113,14 @@ export class ClimateMonthlyPlotComponent
   }
 
   private loadData(): void {
-    if (!this.plotData) return;
+    if (!this.plotData || !this.yearRange) return;
 
     this.isLoading = true;
     this.error = null;
 
-    const dataTypeTmax = this.getHistoricalDataType(ClimateVarKey.T_MAX);
-    const dataTypeTmin = this.getHistoricalDataType(ClimateVarKey.T_MIN);
-    const dataTypePrecipitation = this.getHistoricalDataType(
-      ClimateVarKey.PRECIPITATION,
-    );
+    const dataTypeTmax = this.getDataType(ClimateVarKey.T_MAX);
+    const dataTypeTmin = this.getDataType(ClimateVarKey.T_MIN);
+    const dataTypePrecipitation = this.getDataType(ClimateVarKey.PRECIPITATION);
 
     const tmaxRequests = [];
     const tminRequests = [];
@@ -172,9 +181,21 @@ export class ClimateMonthlyPlotComponent
     });
   }
 
-  private getHistoricalDataType(variable: ClimateVarKey): string {
+  private getDataType(variable: ClimateVarKey): string {
+    if (!this.yearRange) return '';
+
     const variableName = CLIMATE_VAR_KEY_TO_NAME[variable];
-    return `${variableName}_1970_2000_10m`;
+    const [startYear, endYear] = this.yearRange.value;
+    const resolution = '10m';
+    const isFuture = startYear >= 2000;
+
+    if (isFuture && this.climateScenario && this.climateModel) {
+      const scenario = this.climateScenario.toLowerCase();
+      const model = this.climateModel.toLowerCase();
+      return `${variableName}_${startYear}_${endYear}_${resolution}_${scenario}_${model}`;
+    } else {
+      return `${variableName}_${startYear}_${endYear}_${resolution}`;
+    }
   }
 
   private renderChart(): void {
@@ -264,7 +285,7 @@ export class ClimateMonthlyPlotComponent
           },
           title: {
             display: true,
-            text: 'Climate Data by Month (10m resolution)',
+            text: this.getChartTitle(),
           },
         },
         scales: {
@@ -328,5 +349,17 @@ export class ClimateMonthlyPlotComponent
       .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
       .join(' ');
     return `${cityName}, ${this.cityInfo.country_name}`;
+  }
+
+  private getChartTitle(): string {
+    const yearRangeText = this.yearRange
+      ? `${this.yearRange.value[0]}-${this.yearRange.value[1]}`
+      : '';
+
+    const scenarioText = this.climateScenario
+      ? ` - ${this.climateScenario.toUpperCase()}`
+      : '';
+
+    return `Climate Data by Month (10m resolution) ${yearRangeText}${scenarioText}`;
   }
 }

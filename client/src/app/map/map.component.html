@@ -61,7 +61,12 @@
       [selectedMonth]="monthSelected"
     ></app-colorbar>
 
-    <app-climate-monthly-plot [plotData]="plotData"></app-climate-monthly-plot>
+    <app-climate-monthly-plot
+      [plotData]="plotData"
+      [yearRange]="controlsData.selectedYearRange"
+      [climateScenario]="controlsData.selectedClimateScenario"
+      [climateModel]="controlsData.selectedClimateModel"
+    ></app-climate-monthly-plot>
     <app-climate-timerange-plot
       [plotData]="timerangePlotData"
     ></app-climate-timerange-plot>
