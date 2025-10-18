@@ -93,7 +93,7 @@
 
 :host ::ng-deep {
   mat-sidenav-container {
-    height: calc(100vh - $navbar-height);
+    height: calc(100vh - 48px);
   }
 
   mat-sidenav-content {

@@ -9,11 +9,15 @@ import { YearRange } from '../../core/metadata.service';
   imports: [CommonModule, MatSliderModule],
   templateUrl: './mobile-date-control-overlay.component.html',
   styleUrl: './mobile-date-control-overlay.component.scss',
+  host: {
+    '[class.month-hidden]': 'hideMonthSelector',
+  },
 })
 export class MobileDateControlOverlayComponent {
   @Input() selectedMonth = 1;
   @Input() selectedYearRange: YearRange | null = null;
   @Input() yearRanges: YearRange[] = [];
+  @Input() hideMonthSelector = false;
   @Output() monthChange = new EventEmitter<number>();
   @Output() yearRangeChange = new EventEmitter<YearRange>();
 

@@ -20,7 +20,7 @@
     </div>
 
     <!-- Month Selector -->
-    <div class="control-row">
+    <div class="control-row" *ngIf="!hideMonthSelector">
       <div class="overlay-label">Month</div>
       <mat-slider
         [min]="1"
