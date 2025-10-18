@@ -135,7 +135,7 @@ CLIMATE_CONTOUR_CONFIGS: Dict[ClimateVarKey, ContourPlotConfig] = {
         level_lower=-30, level_upper=28, colormap=plt.cm.jet, title="Min. temperature", unit="C"
     ),
     ClimateVarKey.CLOUD_COVER: ContourPlotConfig(
-        level_lower=0, level_upper=100, colormap=plt.cm.jet_r, title="Cloud coverage", unit="%"
+        level_lower=0, level_upper=100, colormap=plt.cm.RdYlBu, title="Cloud coverage", unit="%"
     ),
     ClimateVarKey.WET_DAYS: ContourPlotConfig(
         level_lower=0, level_upper=30, colormap=plt.cm.jet_r, title="Wet days", unit="days"
@@ -367,6 +367,15 @@ HISTORIC_DATA_GROUPS: List[ClimateDataConfigGroup] = [
         resolutions=[SpatialResolution.MIN10, SpatialResolution.MIN5],
         year_ranges=[(1970, 2000)],
         filepath_template="data/raw/worldclim/history/wc2.1_{resolution}_{variable_name}",
+    ),
+    ClimateDataConfigGroup(
+        variable_types=[ClimateVarKey.CLOUD_COVER],
+        format=DataFormat.GEOTIFF_WORLDCLIM_HISTORY,
+        source="https://cds.climate.copernicus.eu/datasets/reanalysis-era5-single-levels-monthly-means",
+        resolutions=[SpatialResolution.MIN2_5],
+        year_ranges=[(1970, 2000)],
+        filepath_template="data/raw/era5/era5_2.5m_tcc",
+        conversion_factor=100,  # Convert from fraction to percentage
     ),
     CRUTSClimateDataConfigGroup(
         variable_types=[

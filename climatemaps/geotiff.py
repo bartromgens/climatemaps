@@ -10,9 +10,10 @@ def _process_coordinate_arrays(transform, width: int, height: int) -> Tuple[np.n
     lon_array = np.linspace(transform.c, transform.c + width * transform.a, width, endpoint=False)
     lat_array = np.linspace(transform.f, transform.f + height * transform.e, height, endpoint=False)
 
-    bin_width = 360.0 / len(lon_array)
-    lon_array += bin_width / 2
-    lat_array -= bin_width / 2
+    bin_width_lon = 360.0 / len(lon_array)
+    bin_width_lat = 180.0 / len(lat_array)
+    lon_array += bin_width_lon / 2
+    lat_array -= bin_width_lat / 2
 
     return lon_array, lat_array
 

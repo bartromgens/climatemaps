@@ -83,37 +83,33 @@ class GeoGrid(BaseModel):
         return self.lon_range[-1]
 
     @property
-    def bin_width(self):
-        assert self.bin_width_lon == self.bin_width_lat
-        return self.bin_width_lon
-
     @property
-    def bin_width_lon(self):
+    def bin_width_lon(self) -> float:
         return 360.0 / len(self.lon_range)
 
     @property
-    def bin_width_lat(self):
+    def bin_width_lat(self) -> float:
         return 180.0 / len(self.lat_range)
 
     @property
-    def llcrnrlon(self):
+    def llcrnrlon(self) -> float:
         """lower left corner longitude"""
-        return self.lon_min - self.bin_width / 2
+        return self.lon_min - self.bin_width_lon / 2
 
     @property
-    def llcrnrlat(self):
+    def llcrnrlat(self) -> float:
         """lower left corner latitude"""
-        return self.lat_min - self.bin_width / 2
+        return self.lat_min - self.bin_width_lat / 2
 
     @property
-    def urcrnrlon(self):
+    def urcrnrlon(self) -> float:
         """upper right corner longitude"""
-        return self.lon_max + self.bin_width / 2
+        return self.lon_max + self.bin_width_lon / 2
 
     @property
-    def urcrnrlat(self):
+    def urcrnrlat(self) -> float:
         """upper right corner latitude"""
-        return self.lat_max + self.bin_width / 2
+        return self.lat_max + self.bin_width_lat / 2
 
     def get_value_at_coordinate(self, lon: float, lat: float) -> float:
         if lon < self.lon_min or lon > self.lon_max:
