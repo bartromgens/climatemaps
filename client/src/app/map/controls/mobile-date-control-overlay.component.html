@@ -1,0 +1,41 @@
+<div class="mobile-controls-overlay">
+  <div class="overlay-content">
+    <!-- Year Range Selector -->
+    <div class="control-row">
+      <div class="overlay-label">Year</div>
+      <mat-slider
+        [min]="1"
+        [max]="yearRanges.length"
+        [step]="1"
+        [displayWith]="displayYearWith"
+        class="year-slider"
+      >
+        <input
+          matSliderThumb
+          [value]="sliderValue"
+          (valueChange)="onYearRangeChange($event)"
+        />
+      </mat-slider>
+      <div class="year-display">{{ displayYearWith(sliderValue) }}</div>
+    </div>
+
+    <!-- Month Selector -->
+    <div class="control-row">
+      <div class="overlay-label">Month</div>
+      <mat-slider
+        [min]="1"
+        [max]="12"
+        [step]="1"
+        [displayWith]="displayWith"
+        class="month-slider"
+      >
+        <input
+          matSliderThumb
+          [value]="selectedMonth"
+          (valueChange)="onMonthChange($event)"
+        />
+      </mat-slider>
+      <div class="month-display">{{ displayWith(selectedMonth) }}</div>
+    </div>
+  </div>
+</div>

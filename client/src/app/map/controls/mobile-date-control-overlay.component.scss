@@ -1,0 +1,62 @@
+.mobile-controls-overlay {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  display: none;
+  pointer-events: none;
+
+  @media (max-width: 768px) {
+    display: block;
+  }
+}
+
+.overlay-content {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 0;
+  padding: 8px 20px;
+  box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.15);
+  pointer-events: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+  box-sizing: border-box;
+  min-height: 96px;
+}
+
+.control-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: 40px;
+}
+
+.overlay-label {
+  font-size: 11px;
+  font-weight: 500;
+  color: #2c3e50;
+  white-space: nowrap;
+  min-width: 40px;
+}
+
+.year-slider,
+.month-slider {
+  flex: 1;
+  min-width: 0;
+}
+
+.year-display,
+.month-display {
+  font-size: 11px;
+  font-weight: 600;
+  color: #2196f3;
+  min-width: 60px;
+  text-align: center;
+}
+
+.year-display {
+  min-width: 80px;
+}

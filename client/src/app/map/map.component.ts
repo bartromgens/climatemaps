@@ -22,10 +22,12 @@ import 'leaflet.vectorgrid';
 
 import { environment } from '../../environments/environment';
 import { MapControlsComponent } from './controls/map-controls.component';
+import { VariableSelectorOverlayComponent } from './controls/variable-selector-overlay.component';
+import { MobileDateControlOverlayComponent } from './controls/mobile-date-control-overlay.component';
 import { ColorbarComponent } from './colorbar.component';
 import { ClimateMapService } from '../core/climatemap.service';
-import { MetadataService } from '../core/metadata.service';
-import { SpatialResolution } from '../utils/enum';
+import { MetadataService, YearRange } from '../core/metadata.service';
+import { SpatialResolution, ClimateVarKey } from '../utils/enum';
 import { TooltipManagerService } from './services/tooltip-manager.service';
 import { VectorLayerTooltipService } from './services/vector-layer-tooltip.service';
 import { MapClickHandlerService } from './services/map-click-handler.service';
@@ -58,6 +60,8 @@ import { ClimateVariableHelperService } from '../core/climate-variable-helper.se
     MatCardModule,
     MatSnackBarModule,
     MapControlsComponent,
+    VariableSelectorOverlayComponent,
+    MobileDateControlOverlayComponent,
     ColorbarComponent,
     ClimateMonthlyPlotComponent,
     ClimateTimerangePlotComponent,
@@ -388,7 +392,12 @@ export class MapComponent extends BaseMapComponent implements OnInit {
       console.assert(false, 'map is not defined');
       return;
     }
-    new Control.Zoom({ position: 'topright' }).addTo(this.map);
+
+    // Position zoom controls based on screen size
+    const isMobile = window.innerWidth <= 768;
+    const zoomPosition = isMobile ? 'topright' : 'topleft';
+
+    new Control.Zoom({ position: zoomPosition }).addTo(this.map);
     new Control.Scale().addTo(this.map);
   }
 
@@ -551,5 +560,42 @@ export class MapComponent extends BaseMapComponent implements OnInit {
         }
       }
     });
+  }
+
+  getMonthName(month: number): string {
+    const monthNames = [
+      'January',
+      'February',
+      'March',
+      'April',
+      'May',
+      'June',
+      'July',
+      'August',
+      'September',
+      'October',
+      'November',
+      'December',
+    ];
+    return monthNames[month - 1] || '';
+  }
+
+  formatYearRange(yearRange: readonly [number, number]): string {
+    return `${yearRange[0]}-${yearRange[1]}`;
+  }
+
+  onVariableChange(variableType: ClimateVarKey): void {
+    this.controlsData.selectedVariableType = variableType;
+    this.onControlsChange(this.controlsData);
+  }
+
+  onMonthChange(month: number): void {
+    this.controlsData.selectedMonth = month;
+    this.onControlsChange(this.controlsData);
+  }
+
+  onYearRangeChange(yearRange: YearRange): void {
+    this.controlsData.selectedYearRange = yearRange;
+    this.onControlsChange(this.controlsData);
   }
 }

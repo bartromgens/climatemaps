@@ -1,0 +1,20 @@
+<div class="variable-selector-overlay">
+  <button
+    *ngFor="let variable of variables"
+    class="variable-button"
+    [class.selected]="isSelected(variable.key)"
+    [class.disabled]="!isAvailable(variable.key)"
+    [disabled]="!isAvailable(variable.key)"
+    (click)="onVariableClick(variable.key)"
+  >
+    <div class="variable-icon">
+      <img
+        *ngIf="variable.isSvg"
+        [src]="variable.icon"
+        [alt]="variable.shortName"
+      />
+      <span *ngIf="!variable.isSvg">{{ variable.icon }}</span>
+    </div>
+    <div class="variable-name">{{ variable.shortName }}</div>
+  </button>
+</div>

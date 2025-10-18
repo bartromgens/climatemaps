@@ -46,8 +46,34 @@
       (leafletMapZoomEnd)="onZoom($event)"
     ></div>
 
+    <!-- Month and Year Range Display -->
+    <div class="map-info-display" *ngIf="controlsData.selectedYearRange">
+      <div class="info-value">
+        {{ climateVariables[controlsData.selectedVariableType].displayName }} -
+        {{ getMonthName(monthSelected) }}
+        {{ formatYearRange(controlsData.selectedYearRange.value) }}
+      </div>
+    </div>
+
+    <!-- Variable selector overlay -->
+    <app-variable-selector-overlay
+      [selectedVariableType]="controlsData.selectedVariableType"
+      [availableVariableTypes]="controlsOptions.availableVariableTypes"
+      [climateVariables]="climateVariables"
+      (variableChange)="onVariableChange($event)"
+    ></app-variable-selector-overlay>
+
+    <!-- Mobile date control overlay (mobile only) -->
+    <app-mobile-date-control-overlay
+      [selectedMonth]="controlsData.selectedMonth"
+      [selectedYearRange]="controlsData.selectedYearRange"
+      [yearRanges]="yearRanges"
+      (monthChange)="onMonthChange($event)"
+      (yearRangeChange)="onYearRangeChange($event)"
+    ></app-mobile-date-control-overlay>
+
     <!-- Desktop controls - only show on desktop -->
-    <div *ngIf="!isMobile" class="desktop-controls">
+    <div *ngIf="!isMobile" class="desktop-controls-overlay">
       <app-map-controls
         [controlsData]="controlsData"
         [controlsOptions]="controlsOptions"

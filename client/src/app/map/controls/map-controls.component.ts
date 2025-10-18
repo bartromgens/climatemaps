@@ -61,6 +61,7 @@ export interface MapControlsOptions {
 export class MapControlsComponent implements OnInit {
   @Input() controlsData: MapControlsData | undefined;
   @Input() controlsOptions: MapControlsOptions | undefined;
+  @Input() hideVariableSelector: boolean = false;
   @Output() controlsChange = new EventEmitter<MapControlsData>();
   temperatureUnit = '°C';
 
