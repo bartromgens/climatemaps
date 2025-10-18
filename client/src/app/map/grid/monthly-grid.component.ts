@@ -8,6 +8,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { SmallMapComponent } from '../controls/small-map.component';
 import { ColorbarComponent } from '../colorbar.component';
 import { MapControlsComponent } from '../controls/map-controls.component';
+import { MobileHamburgerMenuComponent } from '../controls/mobile-hamburger-menu.component';
 import { ClimateMapService } from '../../core/climatemap.service';
 import { MetadataService } from '../../core/metadata.service';
 import { SpatialResolution } from '../../utils/enum';
@@ -38,6 +39,7 @@ interface MonthOption {
     SmallMapComponent,
     ColorbarComponent,
     MapControlsComponent,
+    MobileHamburgerMenuComponent,
   ],
   templateUrl: './monthly-grid.component.html',
   styleUrl: './monthly-grid.component.scss',

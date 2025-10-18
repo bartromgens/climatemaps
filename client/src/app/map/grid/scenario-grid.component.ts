@@ -8,6 +8,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { SmallMapComponent } from '../controls/small-map.component';
 import { ColorbarComponent } from '../colorbar.component';
 import { MapControlsComponent } from '../controls/map-controls.component';
+import { MobileHamburgerMenuComponent } from '../controls/mobile-hamburger-menu.component';
 import { ClimateMapService } from '../../core/climatemap.service';
 import { MetadataService } from '../../core/metadata.service';
 import {
@@ -44,6 +45,7 @@ interface ScenarioOption {
     SmallMapComponent,
     ColorbarComponent,
     MapControlsComponent,
+    MobileHamburgerMenuComponent,
   ],
   templateUrl: './scenario-grid.component.html',
   styleUrl: './scenario-grid.component.scss',
