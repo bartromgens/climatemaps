@@ -552,4 +552,26 @@ export class MapComponent extends BaseMapComponent implements OnInit {
       }
     });
   }
+
+  getMonthName(month: number): string {
+    const monthNames = [
+      'January',
+      'February',
+      'March',
+      'April',
+      'May',
+      'June',
+      'July',
+      'August',
+      'September',
+      'October',
+      'November',
+      'December',
+    ];
+    return monthNames[month - 1] || '';
+  }
+
+  formatYearRange(yearRange: readonly [number, number]): string {
+    return `${yearRange[0]}-${yearRange[1]}`;
+  }
 }

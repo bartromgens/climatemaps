@@ -46,6 +46,15 @@
       (leafletMapZoomEnd)="onZoom($event)"
     ></div>
 
+    <!-- Month and Year Range Display -->
+    <div class="map-info-display" *ngIf="controlsData.selectedYearRange">
+      <div class="info-value">
+        {{ climateVariables[controlsData.selectedVariableType]?.displayName }} -
+        {{ getMonthName(monthSelected) }}
+        {{ formatYearRange(controlsData.selectedYearRange.value) }}
+      </div>
+    </div>
+
     <!-- Desktop controls - only show on desktop -->
     <div *ngIf="!isMobile" class="desktop-controls">
       <app-map-controls
