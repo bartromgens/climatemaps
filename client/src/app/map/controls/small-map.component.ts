@@ -14,6 +14,8 @@ import { Subject, takeUntil } from 'rxjs';
 
 import { MapSyncService, MapViewState } from '../services/map-sync.service';
 import { LayerOption } from '../services/layer-builder.service';
+import { TooltipManagerService } from '../services/tooltip-manager.service';
+import { VectorLayerTooltipService } from '../services/vector-layer-tooltip.service';
 
 @Component({
   selector: 'app-small-map',
@@ -88,7 +90,11 @@ export class SmallMapComponent implements OnInit, OnDestroy, OnChanges {
     return this.customLabel || '';
   }
 
-  constructor(private mapSyncService: MapSyncService) {
+  constructor(
+    private mapSyncService: MapSyncService,
+    private tooltipManager: TooltipManagerService,
+    private vectorLayerTooltip: VectorLayerTooltipService,
+  ) {
     const initialState = this.mapSyncService.getInitialViewState();
     this.options = {
       layers: [this.baseLayer],
@@ -187,11 +193,19 @@ export class SmallMapComponent implements OnInit, OnDestroy, OnChanges {
               opacity: 0.8,
             }),
           },
-          interactive: false,
+          interactive: true,
           maxNativeZoom: this.selectedOption.vectorMaxZoom,
           maxZoom: 18,
         },
       );
+
+      this.vectorLayer?.on('mouseover', (e: any) => {
+        this.onVectorLayerHover(e);
+      });
+
+      this.vectorLayer?.on('mouseout', () => {
+        this.onVectorLayerMouseOut();
+      });
 
       if (this.rasterLayer) {
         this.map.addLayer(this.rasterLayer);
@@ -214,6 +228,31 @@ export class SmallMapComponent implements OnInit, OnDestroy, OnChanges {
     if (this.vectorLayer && this.map) {
       this.map.removeLayer(this.vectorLayer);
       this.vectorLayer = null;
+    }
+    if (this.map) {
+      this.tooltipManager.removeAllTooltips(this.map);
+    }
+  }
+
+  private onVectorLayerHover(e: any): void {
+    if (!this.map) {
+      return;
+    }
+
+    const variableType = this.selectedOption?.metadata?.variableType || '';
+    const unit = this.selectedOption?.climateMap?.variable?.unit || '';
+
+    this.vectorLayerTooltip.handleVectorLayerHover(
+      e,
+      this.map,
+      variableType,
+      unit,
+    );
+  }
+
+  private onVectorLayerMouseOut(): void {
+    if (this.map) {
+      this.vectorLayerTooltip.handleVectorLayerMouseOut(this.map);
     }
   }
 }

@@ -190,12 +190,4 @@ export class ScenarioYearRangeGridComponent extends BaseMapComponent {
   get displayName(): string | null {
     return this.gridCells[0]?.option?.climateMap?.getDisplayName() || null;
   }
-
-  get scenarioCount(): number {
-    return this.scenarios.length;
-  }
-
-  get yearRangeCount(): number {
-    return this.futureYearRanges.length;
-  }
 }

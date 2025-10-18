@@ -30,6 +30,7 @@ import {
 import { MetadataService } from '../core/metadata.service';
 import { SpatialResolution } from '../utils/enum';
 import { TooltipManagerService } from './services/tooltip-manager.service';
+import { VectorLayerTooltipService } from './services/vector-layer-tooltip.service';
 import {
   LayerBuilderService,
   LayerOption,
@@ -139,6 +140,7 @@ export class MapComponent extends BaseMapComponent implements OnInit {
     toastService: ToastService,
     mapSyncService: MapSyncService,
     private tooltipManager: TooltipManagerService,
+    private vectorLayerTooltip: VectorLayerTooltipService,
     private mapNavigationService: MapNavigationService,
     private temperatureUnitService: TemperatureUnitService,
     private seoService: SeoService,
@@ -546,30 +548,22 @@ export class MapComponent extends BaseMapComponent implements OnInit {
   }
 
   private onVectorLayerHover(e: any): void {
-    const properties = e.layer?.properties;
-    if (properties && properties['level-value'] !== undefined && this.map) {
-      let value = properties['level-value'];
-      let unit = this.getCurrentUnit();
-
-      const isTemperature = TemperatureUtils.isTemperatureVariable(
-        this.controlsData.selectedVariableType,
-      );
-      if (isTemperature && unit === '°C') {
-        const currentUnit = this.temperatureUnitService.getUnit();
-        if (currentUnit === '°F') {
-          value = TemperatureUtils.celsiusToFahrenheit(value);
-          unit = '°F';
-        }
-      }
-
-      const displayValue = `${value.toFixed(1)} ${unit}`;
-      this.tooltipManager.createHoverTooltip(displayValue, e.latlng, this.map);
+    if (!this.map) {
+      return;
     }
+
+    const unit = this.getCurrentUnit();
+    this.vectorLayerTooltip.handleVectorLayerHover(
+      e,
+      this.map,
+      this.controlsData.selectedVariableType,
+      unit,
+    );
   }
 
   private onVectorLayerMouseOut(): void {
     if (this.map) {
-      this.tooltipManager.removeHoverTooltip(this.map);
+      this.vectorLayerTooltip.handleVectorLayerMouseOut(this.map);
     }
   }
 
