@@ -20,26 +20,20 @@
   </mat-form-field>
 </ng-template>
 
-<mat-toolbar>
+<mat-toolbar *ngIf="!isMobile">
   <a routerLink="/" class="app-title-link">
     <span>{{ title }}</span>
   </a>
 
-  <a *ngIf="!isMobile" mat-button routerLink="/">Map</a>
-  <a *ngIf="!isMobile" mat-button routerLink="/seasons">Seasons</a>
-  <a *ngIf="!isMobile" mat-button routerLink="/climate-predictions"
-    >Climate Predictions</a
-  >
-  <a *ngIf="!isMobile" mat-button routerLink="/climate-scenarios"
-    >Climate Scenarios</a
-  >
-  <a *ngIf="!isMobile" mat-button routerLink="/climate-matrix"
-    >Climate Matrix</a
-  >
+  <a mat-button routerLink="/">Map</a>
+  <a mat-button routerLink="/seasons">Seasons</a>
+  <a mat-button routerLink="/climate-predictions">Climate Predictions</a>
+  <a mat-button routerLink="/climate-scenarios">Climate Scenarios</a>
+  <a mat-button routerLink="/climate-matrix">Climate Matrix</a>
 
   <span class="spacer"></span>
 
-  <div class="search-container" *ngIf="!isMobile">
+  <div class="search-container">
     <ng-container
       *ngTemplateOutlet="searchField; context: { autocomplete: auto }"
     ></ng-container>
@@ -57,9 +51,8 @@
     </mat-autocomplete>
   </div>
 
-  <a *ngIf="!isMobile" mat-button routerLink="/about">About</a>
+  <a mat-button routerLink="/about">About</a>
   <a
-    *ngIf="!isMobile"
     mat-icon-button
     href="https://github.com/bartromgens/climatemaps"
     target="_blank"
@@ -68,7 +61,6 @@
     <mat-icon svgIcon="github"></mat-icon>
   </a>
   <button
-    *ngIf="!isMobile"
     mat-icon-button
     [matMenuTriggerFor]="settingsMenu"
     aria-label="Settings"
@@ -90,84 +82,86 @@
       </div>
     </div>
   </mat-menu>
-
-  <button
-    *ngIf="isMobile"
-    mat-icon-button
-    [matMenuTriggerFor]="mobileMenu"
-    aria-label="Menu"
-  >
-    <mat-icon>menu</mat-icon>
-  </button>
-
-  <mat-menu #mobileMenu="matMenu" class="mobile-menu">
-    <div
-      class="mobile-search-container"
-      (click)="$event.stopPropagation()"
-      (keydown)="$event.stopPropagation()"
-      tabindex="0"
-      role="search"
-    >
-      <ng-container
-        *ngTemplateOutlet="searchField; context: { autocomplete: autoMobile }"
-      ></ng-container>
-      <mat-autocomplete
-        #autoMobile="matAutocomplete"
-        [displayWith]="displayLocationName"
-        (optionSelected)="onLocationSelected($event.option.value)"
-      >
-        <mat-option
-          *ngFor="let location of filteredLocations$ | async"
-          [value]="location"
-        >
-          {{ location.displayName }}
-        </mat-option>
-      </mat-autocomplete>
-    </div>
-    <a mat-menu-item routerLink="/">
-      <mat-icon>map</mat-icon>
-      <span>Map</span>
-    </a>
-    <a mat-menu-item routerLink="/seasons">
-      <mat-icon>calendar_month</mat-icon>
-      <span>Seasons</span>
-    </a>
-    <a mat-menu-item routerLink="/climate-predictions">
-      <mat-icon>date_range</mat-icon>
-      <span>Climate Predictions</span>
-    </a>
-    <a mat-menu-item routerLink="/climate-scenarios">
-      <mat-icon>grid_view</mat-icon>
-      <span>Climate Scenarios</span>
-    </a>
-    <a mat-menu-item routerLink="/climate-matrix">
-      <mat-icon>table_chart</mat-icon>
-      <span>Climate Matrix</span>
-    </a>
-    <a mat-menu-item routerLink="/about">
-      <mat-icon>info</mat-icon>
-      <span>About</span>
-    </a>
-    <a
-      mat-menu-item
-      href="https://github.com/bartromgens/climatemaps"
-      target="_blank"
-    >
-      <mat-icon svgIcon="github"></mat-icon>
-      <span>GitHub</span>
-    </a>
-    <div
-      class="mobile-settings-container"
-      (click)="$event.stopPropagation()"
-      (keydown)="$event.stopPropagation()"
-      tabindex="0"
-    >
-      <div class="settings-section">
-        <span class="settings-label">Temperature Unit</span>
-        <app-temperature-unit-selector></app-temperature-unit-selector>
-      </div>
-    </div>
-  </mat-menu>
 </mat-toolbar>
+
+<!-- Mobile hamburger menu button -->
+<button
+  *ngIf="isMobile"
+  mat-icon-button
+  class="mobile-hamburger-button"
+  [matMenuTriggerFor]="mobileMenu"
+  aria-label="Menu"
+>
+  <mat-icon>menu</mat-icon>
+</button>
+
+<mat-menu #mobileMenu="matMenu" class="mobile-menu">
+  <div
+    class="mobile-search-container"
+    (click)="$event.stopPropagation()"
+    (keydown)="$event.stopPropagation()"
+    tabindex="0"
+    role="search"
+  >
+    <ng-container
+      *ngTemplateOutlet="searchField; context: { autocomplete: autoMobile }"
+    ></ng-container>
+    <mat-autocomplete
+      #autoMobile="matAutocomplete"
+      [displayWith]="displayLocationName"
+      (optionSelected)="onLocationSelected($event.option.value)"
+    >
+      <mat-option
+        *ngFor="let location of filteredLocations$ | async"
+        [value]="location"
+      >
+        {{ location.displayName }}
+      </mat-option>
+    </mat-autocomplete>
+  </div>
+  <a mat-menu-item routerLink="/">
+    <mat-icon>map</mat-icon>
+    <span>Map</span>
+  </a>
+  <a mat-menu-item routerLink="/seasons">
+    <mat-icon>calendar_month</mat-icon>
+    <span>Seasons</span>
+  </a>
+  <a mat-menu-item routerLink="/climate-predictions">
+    <mat-icon>date_range</mat-icon>
+    <span>Climate Predictions</span>
+  </a>
+  <a mat-menu-item routerLink="/climate-scenarios">
+    <mat-icon>grid_view</mat-icon>
+    <span>Climate Scenarios</span>
+  </a>
+  <a mat-menu-item routerLink="/climate-matrix">
+    <mat-icon>table_chart</mat-icon>
+    <span>Climate Matrix</span>
+  </a>
+  <a mat-menu-item routerLink="/about">
+    <mat-icon>info</mat-icon>
+    <span>About</span>
+  </a>
+  <a
+    mat-menu-item
+    href="https://github.com/bartromgens/climatemaps"
+    target="_blank"
+  >
+    <mat-icon svgIcon="github"></mat-icon>
+    <span>GitHub</span>
+  </a>
+  <div
+    class="mobile-settings-container"
+    (click)="$event.stopPropagation()"
+    (keydown)="$event.stopPropagation()"
+    tabindex="0"
+  >
+    <div class="settings-section">
+      <span class="settings-label">Temperature Unit</span>
+      <app-temperature-unit-selector></app-temperature-unit-selector>
+    </div>
+  </div>
+</mat-menu>
 
 <router-outlet></router-outlet>

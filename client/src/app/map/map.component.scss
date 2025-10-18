@@ -69,7 +69,7 @@
 // Mobile toggle button
 .mobile-toggle-button {
   position: fixed;
-  top: 70px;
+  top: 16px;
   left: 16px;
   z-index: 1000;
   background-color: white;
@@ -178,8 +178,14 @@
   }
 }
 
-// Zoom controls positioning - desktop only
+// Zoom controls positioning
 @media (min-width: 769px) {
+  ::ng-deep .leaflet-control-zoom {
+    top: 80px !important;
+  }
+}
+
+@media (max-width: 768px) {
   ::ng-deep .leaflet-control-zoom {
     top: 80px !important;
   }
