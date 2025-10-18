@@ -69,6 +69,8 @@
     ></app-climate-monthly-plot>
     <app-climate-timerange-plot
       [plotData]="timerangePlotData"
+      [climateScenario]="controlsData.selectedClimateScenario"
+      [climateModel]="controlsData.selectedClimateModel"
     ></app-climate-timerange-plot>
   </mat-sidenav-content>
 </mat-sidenav-container>
