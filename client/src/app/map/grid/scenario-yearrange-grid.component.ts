@@ -9,6 +9,7 @@ import { SmallMapComponent } from '../controls/small-map.component';
 import { ColorbarComponent } from '../colorbar.component';
 import { MapControlsComponent } from '../controls/map-controls.component';
 import { MobileHamburgerMenuComponent } from '../controls/mobile-hamburger-menu.component';
+import { VariableSelectorOverlayComponent } from '../controls/variable-selector-overlay.component';
 import { ClimateMapService } from '../../core/climatemap.service';
 import { MetadataService, YearRange } from '../../core/metadata.service';
 import {
@@ -16,6 +17,7 @@ import {
   ClimateModel,
   SpatialResolution,
   CLIMATE_SCENARIO_DISPLAY_NAMES,
+  ClimateVarKey,
 } from '../../utils/enum';
 import {
   LayerBuilderService,
@@ -46,6 +48,7 @@ interface GridCell {
     ColorbarComponent,
     MapControlsComponent,
     MobileHamburgerMenuComponent,
+    VariableSelectorOverlayComponent,
   ],
   templateUrl: './scenario-yearrange-grid.component.html',
   styleUrl: './scenario-yearrange-grid.component.scss',
@@ -191,5 +194,10 @@ export class ScenarioYearRangeGridComponent extends BaseMapComponent {
 
   get displayName(): string | null {
     return this.gridCells[0]?.option?.climateMap?.getDisplayName() || null;
+  }
+
+  onVariableChange(variableType: ClimateVarKey): void {
+    this.controlsData.selectedVariableType = variableType;
+    this.onControlsChange(this.controlsData);
   }
 }

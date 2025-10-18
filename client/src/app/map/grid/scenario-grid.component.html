@@ -38,6 +38,13 @@
       [isMobile]="isMobile"
     ></app-mobile-hamburger-menu>
 
+    <app-variable-selector-overlay
+      [selectedVariableType]="controlsData.selectedVariableType"
+      [availableVariableTypes]="controlsOptions.availableVariableTypes"
+      [climateVariables]="climateVariables"
+      (variableChange)="onVariableChange($event)"
+    ></app-variable-selector-overlay>
+
     <app-mobile-date-control-overlay
       [selectedMonth]="controlsData.selectedMonth"
       [selectedYearRange]="controlsData.selectedYearRange"
