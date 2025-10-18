@@ -8,6 +8,7 @@ import { TooltipManagerService } from './tooltip-manager.service';
 import { TemperatureUnitService } from '../../core/temperature-unit.service';
 import { TemperatureUtils } from '../../utils/temperature-utils';
 import { ClimateVarKey } from '../../utils/enum';
+import { CoordinateUtils } from '../../utils/coordinate-utils';
 
 @Injectable({
   providedIn: 'root',
@@ -28,7 +29,7 @@ export class MapClickHandlerService {
     onSuccess?: (response: ClimateValueResponse) => void,
   ): void {
     const lat = event.latlng.lat;
-    const lon = this.normalizeLongitude(event.latlng.lng);
+    const lon = CoordinateUtils.normalizeLongitude(event.latlng.lng);
 
     this.tooltipManager.createPersistentTooltip('...', event.latlng, map);
 
@@ -74,11 +75,5 @@ export class MapClickHandlerService {
 
     const displayValue = `${value.toFixed(1)} ${unit}`;
     this.tooltipManager.createPersistentTooltip(displayValue, latlng, map);
-  }
-
-  private normalizeLongitude(lon: number): number {
-    while (lon > 180) lon -= 360;
-    while (lon < -180) lon += 360;
-    return lon;
   }
 }

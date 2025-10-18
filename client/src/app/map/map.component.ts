@@ -46,6 +46,7 @@ import { TemperatureUnitService } from '../core/temperature-unit.service';
 import { SeoService } from '../core/seo.service';
 import { ToastService } from '../core/toast.service';
 import { ClimateVariableHelperService } from '../core/climate-variable-helper.service';
+import { CoordinateUtils } from '../utils/coordinate-utils';
 
 @Component({
   selector: 'app-map',
@@ -430,7 +431,7 @@ export class MapComponent extends BaseMapComponent implements OnInit {
     }
 
     const lat = event.latlng.lat;
-    const lon = event.latlng.lng;
+    const lon = CoordinateUtils.normalizeLongitude(event.latlng.lng);
 
     this.plotData = {
       lat,
@@ -548,13 +549,13 @@ export class MapComponent extends BaseMapComponent implements OnInit {
         if (request.generateCharts && this.selectedOption?.metadata?.dataType) {
           this.plotData = {
             lat: request.lat,
-            lon: request.lon,
+            lon: CoordinateUtils.normalizeLongitude(request.lon),
             dataType: this.selectedOption.metadata.dataType,
           };
 
           this.timerangePlotData = {
             lat: request.lat,
-            lon: request.lon,
+            lon: CoordinateUtils.normalizeLongitude(request.lon),
             month: this.monthSelected,
           };
         }

@@ -51,7 +51,7 @@ export class TooltipManagerService {
 
     const timeoutId = window.setTimeout(() => {
       this.removeClickTooltip(map);
-    }, 5000);
+    }, 8000);
     this.clickTooltipTimeouts.set(map, timeoutId);
   }
 
