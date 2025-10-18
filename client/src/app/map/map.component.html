@@ -65,7 +65,7 @@
     ></app-variable-selector-overlay>
 
     <!-- Desktop controls - only show on desktop -->
-    <div *ngIf="!isMobile" class="desktop-controls">
+    <div *ngIf="!isMobile">
       <app-map-controls
         [controlsData]="controlsData"
         [controlsOptions]="controlsOptions"

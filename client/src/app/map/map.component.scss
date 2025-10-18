@@ -163,37 +163,6 @@
   }
 }
 
-// Desktop controls styling
-.desktop-controls {
-  position: absolute;
-  bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 1000;
-  background: rgba(255, 255, 255, 0.9);
-  padding: 12px 16px;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-  backdrop-filter: blur(8px);
-  max-width: calc(100% - 40px);
-
-  ::ng-deep .controls-row {
-    margin-bottom: 8px;
-  }
-
-  ::ng-deep .sliders-row {
-    margin-top: 0;
-  }
-
-  ::ng-deep .dropdown-field {
-    min-width: 140px;
-  }
-
-  @media (max-width: 1200px) {
-    width: 80%;
-    max-width: 80%;
-  }
-}
 
 // Mobile-specific styling
 @media (max-width: 768px) {

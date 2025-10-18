@@ -5,7 +5,7 @@
   z-index: 1000;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
   pointer-events: none;
   max-height: calc(100vh - 100px);
   overflow-y: auto;
@@ -19,72 +19,70 @@
   @media (max-width: 768px) {
     top: 80px;
     right: 10px;
-    gap: 6px;
+    gap: 5px;
   }
 }
 
 .variable-button {
   pointer-events: auto;
   display: flex;
-  flex-direction: column;
+  flex-direction: row-reverse;
   align-items: center;
-  justify-content: center;
-  width: 65px;
-  height: 65px;
-  padding: 8px;
-  background: rgba(255, 255, 255, 0.88);
+  justify-content: space-between;
+  gap: 8px;
+  width: auto;
+  min-width: 120px;
+  height: 36px;
+  padding: 6px 10px 6px 14px;
+  background: rgba(255, 255, 255, 0.55);
   border: none;
-  border-radius: 12px;
+  border-radius: 20px;
   cursor: pointer;
   transition: all 0.2s ease;
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.18);
   backdrop-filter: blur(10px);
 
   &:hover:not(.disabled) {
-    background: rgba(255, 255, 255, 0.95);
-    transform: scale(1.08) translateX(-3px);
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+    background: rgba(255, 255, 255, 0.7);
+    transform: scale(1.05) translateX(-3px);
   }
 
   &.selected {
-    background: rgba(33, 150, 243, 0.92);
+    background: rgba(33, 150, 243, 0.65);
     color: white;
-    box-shadow: 0 4px 14px rgba(33, 150, 243, 0.45);
-    transform: scale(1.05);
 
     .variable-name {
       color: white;
     }
 
     &:hover {
-      background: rgba(33, 150, 243, 0.95);
-      transform: scale(1.08) translateX(-3px);
+      background: rgba(33, 150, 243, 0.8);
+      transform: scale(1.05) translateX(-3px);
     }
   }
 
   &.disabled {
     opacity: 0.35;
     cursor: not-allowed;
-    background: rgba(255, 255, 255, 0.65);
+    background: rgba(255, 255, 255, 0.4);
 
     &:hover {
       transform: none;
-      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.18);
     }
   }
 
   @media (max-width: 768px) {
-    width: 55px;
-    height: 55px;
-    padding: 6px;
+    min-width: 100px;
+    height: 32px;
+    padding: 5px 8px 5px 12px;
+    gap: 6px;
   }
 }
 
 .variable-icon {
-  font-size: 24px;
+  font-size: 22px;
   line-height: 1;
-  margin-bottom: 4px;
   filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
+  flex-shrink: 0;
 
   @media (max-width: 768px) {
     font-size: 20px;
@@ -92,19 +90,19 @@
 }
 
 .variable-name {
-  font-size: 10px;
-  font-weight: 600;
-  text-align: center;
-  line-height: 1.1;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1;
   color: #2c3e50;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 100%;
-  letter-spacing: 0.2px;
+  letter-spacing: 0.3px;
+  flex: 1;
+  text-align: left;
 
   @media (max-width: 768px) {
-    font-size: 8px;
+    font-size: 11px;
   }
 }
 
