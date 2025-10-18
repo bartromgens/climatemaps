@@ -5,13 +5,14 @@ import { Map, Tooltip } from 'leaflet';
   providedIn: 'root',
 })
 export class TooltipManagerService {
-  private hoverTooltip: Tooltip | null = null;
-  private clickTooltip: Tooltip | null = null;
+  private hoverTooltips = new WeakMap<Map, Tooltip>();
+  private clickTooltips = new WeakMap<Map, Tooltip>();
+  private clickTooltipTimeouts = new WeakMap<Map, number>();
 
   createHoverTooltip(content: string, latlng: any, map: Map): void {
     this.removeHoverTooltip(map);
 
-    this.hoverTooltip = new Tooltip({
+    const tooltip = new Tooltip({
       content: content,
       className: 'contour-hover-tooltip',
       direction: 'top',
@@ -19,21 +20,23 @@ export class TooltipManagerService {
       opacity: 0.9,
     });
 
-    this.hoverTooltip.setLatLng(latlng);
-    this.hoverTooltip.addTo(map);
+    tooltip.setLatLng(latlng);
+    tooltip.addTo(map);
+    this.hoverTooltips.set(map, tooltip);
   }
 
   removeHoverTooltip(map: Map): void {
-    if (this.hoverTooltip) {
-      map.removeLayer(this.hoverTooltip);
-      this.hoverTooltip = null;
+    const tooltip = this.hoverTooltips.get(map);
+    if (tooltip) {
+      map.removeLayer(tooltip);
+      this.hoverTooltips.delete(map);
     }
   }
 
   createPersistentTooltip(content: string, latlng: any, map: Map): void {
     this.removeClickTooltip(map);
 
-    this.clickTooltip = new Tooltip({
+    const tooltip = new Tooltip({
       content: content,
       className: 'contour-hover-tooltip',
       direction: 'top',
@@ -42,14 +45,27 @@ export class TooltipManagerService {
       permanent: true,
     });
 
-    this.clickTooltip.setLatLng(latlng);
-    this.clickTooltip.addTo(map);
+    tooltip.setLatLng(latlng);
+    tooltip.addTo(map);
+    this.clickTooltips.set(map, tooltip);
+
+    const timeoutId = window.setTimeout(() => {
+      this.removeClickTooltip(map);
+    }, 5000);
+    this.clickTooltipTimeouts.set(map, timeoutId);
   }
 
   removeClickTooltip(map: Map): void {
-    if (this.clickTooltip) {
-      map.removeLayer(this.clickTooltip);
-      this.clickTooltip = null;
+    const timeoutId = this.clickTooltipTimeouts.get(map);
+    if (timeoutId) {
+      window.clearTimeout(timeoutId);
+      this.clickTooltipTimeouts.delete(map);
+    }
+
+    const tooltip = this.clickTooltips.get(map);
+    if (tooltip) {
+      map.removeLayer(tooltip);
+      this.clickTooltips.delete(map);
     }
   }
 
