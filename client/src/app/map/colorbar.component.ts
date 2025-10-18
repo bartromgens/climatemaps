@@ -25,8 +25,8 @@ import { CommonModule } from '@angular/common';
     `
       .colorbar-container {
         position: fixed;
-        bottom: 180px;
-        right: 20px;
+        bottom: 220px;
+        left: 14px;
         background: rgba(255, 255, 255, 0.4);
         border-radius: 8px;
         padding: 10px;
@@ -43,10 +43,12 @@ import { CommonModule } from '@angular/common';
 
       @media (max-width: 768px) {
         .colorbar-container {
-          bottom: 115px;
-          left: auto;
-          right: 5px;
+          bottom: 105px;
+          right: auto;
+          left: 5px;
           max-width: 50px;
+          background: rgba(255, 255, 255, 0);
+          box-shadow: 0 2px 10px rgba(0, 0, 0, 0);
         }
       }
     `,
