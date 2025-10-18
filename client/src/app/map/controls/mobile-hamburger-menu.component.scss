@@ -2,7 +2,7 @@
 .mobile-hamburger-button {
   position: fixed;
   top: 16px;
-  right: 16px;
+  right: 10px;
   z-index: 2000;
   background-color: white;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
@@ -13,7 +13,7 @@
 ::ng-deep .mobile-menu {
   .mobile-search-container {
     padding: 8px 16px;
-    margin-bottom: 8px;
+    margin-bottom: 10px;
 
     mat-form-field {
       width: 100%;
