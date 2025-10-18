@@ -360,6 +360,6 @@ export class ClimateMonthlyPlotComponent
       ? ` - ${this.climateScenario.toUpperCase()}`
       : '';
 
-    return `Climate Data by Month (10m resolution) ${yearRangeText}${scenarioText}`;
+    return `Climate by Month ${yearRangeText}${scenarioText}`;
   }
 }
