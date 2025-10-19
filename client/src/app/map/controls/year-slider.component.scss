@@ -1,25 +1,5 @@
-:host {
-  display: block;
-  height: 96px;
-}
+@import './slider-common.scss';
 
 .year-labels {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 10px;
-  font-size: 1rem;
-  color: rgba(0, 0, 0, 0.6);
-
-  span {
-    /* ensure text centers under each tick */
-    width: 0;
-    flex-grow: 1;
-    text-align: center;
-  }
-}
-
-mat-slider {
-  margin-left: 10%;
-  margin-right: 10%;
-  display: flex;
+  @extend .slider-labels;
 }

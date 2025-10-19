@@ -1,0 +1,38 @@
+// Shared styles for slider components
+:host {
+  display: block;
+  height: 96px;
+}
+
+.slider-labels {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  font-size: 1rem;
+  font-weight: bold;
+  color: rgba(0, 0, 0, 0.6);
+
+  span {
+    /* ensure text centers under each tick */
+    width: 0;
+    flex-grow: 1;
+    text-align: center;
+  }
+}
+
+mat-slider {
+  margin-left: 10%;
+  margin-right: 10%;
+  display: flex;
+}
+
+// Month slider specific margins for 12 months
+:host(.month-slider) mat-slider {
+  margin-left: calc(100% / 24);
+  margin-right: calc(100% / 24);
+}
+
+// Hide sliders in mobile sidebar (tune menu)
+:host-context(.sidebar-content) {
+  display: none !important;
+}

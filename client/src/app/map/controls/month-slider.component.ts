@@ -9,6 +9,9 @@ import { MatomoTracker } from 'ngx-matomo-client';
   imports: [CommonModule, MatSliderModule],
   templateUrl: './month-slider.component.html',
   styleUrls: ['./month-slider.component.scss'],
+  host: {
+    class: 'month-slider',
+  },
 })
 export class MonthSliderComponent {
   private readonly tracker = inject(MatomoTracker);
