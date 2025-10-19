@@ -103,6 +103,11 @@
     font-weight: 600;
     color: #333;
 
+    .change-indicator {
+      color: #2e7d32; // Dark green for change indicator
+      font-weight: 700;
+    }
+
     .prediction-indicator {
       color: #ab3ce7;
       margin-left: 4px;
