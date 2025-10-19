@@ -1,7 +1,8 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, inject, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { ClimateVarKey } from '../../utils/enum';
+import { MatomoTracker } from 'ngx-matomo-client';
 
 @Component({
   selector: 'app-variable-selector-overlay',
@@ -11,6 +12,8 @@ import { ClimateVarKey } from '../../utils/enum';
   styleUrl: './variable-selector-overlay.component.scss',
 })
 export class VariableSelectorOverlayComponent {
+  private readonly tracker = inject(MatomoTracker);
+
   @Input() selectedVariableType: ClimateVarKey | undefined;
   @Input() availableVariableTypes: ClimateVarKey[] = [];
   @Input() climateVariables?: Record<ClimateVarKey, any>;
@@ -57,6 +60,14 @@ export class VariableSelectorOverlayComponent {
   onVariableClick(variableType: ClimateVarKey): void {
     if (this.isAvailable(variableType)) {
       this.variableChange.emit(variableType);
+
+      const variable = this.variables.find((v) => v.key === variableType);
+      const variableName = variable?.shortName || variableType;
+      this.tracker.trackEvent(
+        'Variable Selection',
+        'Variable Change (Overlay)',
+        variableName,
+      );
     }
   }
 

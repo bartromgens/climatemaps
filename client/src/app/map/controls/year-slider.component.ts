@@ -1,7 +1,8 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, inject, Input, Output } from '@angular/core';
 import { MatSliderModule } from '@angular/material/slider';
 import { CommonModule } from '@angular/common';
 import { YearRange } from '../../core/metadata.service';
+import { MatomoTracker } from 'ngx-matomo-client';
 
 @Component({
   selector: 'app-year-slider',
@@ -11,6 +12,8 @@ import { YearRange } from '../../core/metadata.service';
   styleUrls: ['./year-slider.component.scss'],
 })
 export class YearSliderComponent {
+  private readonly tracker = inject(MatomoTracker);
+
   @Output() valueChange = new EventEmitter<YearRange>();
   @Input() value: YearRange | null = null;
   @Input() years: YearRange[] = [];
@@ -37,7 +40,15 @@ export class YearSliderComponent {
   onInput(value: number) {
     console.log('onInput', value);
     if (this.years.length > 0 && value >= 1 && value <= this.years.length) {
-      this.valueChange.emit(this.years[value - 1]);
+      const selectedYear = this.years[value - 1];
+      this.valueChange.emit(selectedYear);
+
+      this.tracker.trackEvent(
+        'Slider Control',
+        'Year Range Change',
+        selectedYear.label,
+        value,
+      );
     }
   }
 

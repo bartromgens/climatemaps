@@ -1,7 +1,8 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, inject, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatSliderModule } from '@angular/material/slider';
 import { YearRange } from '../../core/metadata.service';
+import { MatomoTracker } from 'ngx-matomo-client';
 
 @Component({
   selector: 'app-mobile-date-control-overlay',
@@ -15,6 +16,8 @@ import { YearRange } from '../../core/metadata.service';
   },
 })
 export class MobileDateControlOverlayComponent {
+  private readonly tracker = inject(MatomoTracker);
+
   @Input() selectedMonth = 1;
   @Input() selectedYearRange: YearRange | null = null;
   @Input() yearRanges: YearRange[] = [];
@@ -59,6 +62,13 @@ export class MobileDateControlOverlayComponent {
   onMonthChange(value: number): void {
     this.selectedMonth = value;
     this.monthChange.emit(value);
+
+    this.tracker.trackEvent(
+      'Slider Control',
+      'Month Change (Mobile)',
+      this.months[value - 1],
+      value,
+    );
   }
 
   onYearRangeChange(value: number): void {
@@ -67,7 +77,15 @@ export class MobileDateControlOverlayComponent {
       value >= 1 &&
       value <= this.yearRanges.length
     ) {
-      this.yearRangeChange.emit(this.yearRanges[value - 1]);
+      const selectedYear = this.yearRanges[value - 1];
+      this.yearRangeChange.emit(selectedYear);
+
+      this.tracker.trackEvent(
+        'Slider Control',
+        'Year Range Change (Mobile)',
+        selectedYear.label,
+        value,
+      );
     }
   }
 

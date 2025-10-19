@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, ParamMap } from '@angular/router';
@@ -48,6 +48,7 @@ import { SeoService } from '../core/seo.service';
 import { ToastService } from '../core/toast.service';
 import { ClimateVariableHelperService } from '../core/climate-variable-helper.service';
 import { CoordinateUtils } from '../utils/coordinate-utils';
+import { MatomoTracker } from 'ngx-matomo-client';
 
 @Component({
   selector: 'app-map',
@@ -73,6 +74,7 @@ import { CoordinateUtils } from '../utils/coordinate-utils';
   styleUrl: './map.component.scss',
 })
 export class MapComponent extends BaseMapComponent implements OnInit {
+  private readonly tracker = inject(MatomoTracker);
   private readonly DEFAULT_RESOLUTION = SpatialResolution.MIN10;
 
   selectedOption: LayerOption | undefined;
@@ -591,6 +593,14 @@ export class MapComponent extends BaseMapComponent implements OnInit {
   onVariableChange(variableType: ClimateVarKey): void {
     this.controlsData.selectedVariableType = variableType;
     this.onControlsChange(this.controlsData);
+
+    const variableName =
+      this.climateVariables[variableType]?.displayName || variableType;
+    this.tracker.trackEvent(
+      'Variable Selection',
+      'Variable Change (Map)',
+      variableName,
+    );
   }
 
   onMonthChange(month: number): void {

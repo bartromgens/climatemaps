@@ -1,4 +1,11 @@
-import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
+import {
+  Component,
+  inject,
+  Input,
+  Output,
+  EventEmitter,
+  OnInit,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -17,6 +24,7 @@ import { MonthSliderComponent } from './month-slider.component';
 import { TemperatureUnitService } from '../../core/temperature-unit.service';
 import { TemperatureUtils } from '../../utils/temperature-utils';
 import { ClimateVariableHelperService } from '../../core/climate-variable-helper.service';
+import { MatomoTracker } from 'ngx-matomo-client';
 
 export interface MapControlsData {
   selectedVariableType: ClimateVarKey;
@@ -59,9 +67,11 @@ export interface MapControlsOptions {
   styleUrl: './map-controls.component.scss',
 })
 export class MapControlsComponent implements OnInit {
+  private readonly tracker = inject(MatomoTracker);
+
   @Input() controlsData: MapControlsData | undefined;
   @Input() controlsOptions: MapControlsOptions | undefined;
-  @Input() hideVariableSelector: boolean = false;
+  @Input() hideVariableSelector = false;
   @Output() controlsChange = new EventEmitter<MapControlsData>();
   temperatureUnit = '°C';
 
@@ -95,6 +105,15 @@ export class MapControlsComponent implements OnInit {
     if (this.controlsData) {
       this.controlsData.selectedVariableType = event.value;
       this.emitChange();
+
+      const variableName =
+        this.controlsOptions?.climateVariables?.[event.value as ClimateVarKey]
+          ?.displayName || event.value;
+      this.tracker.trackEvent(
+        'Variable Selection',
+        'Variable Change',
+        variableName,
+      );
     }
   }
 
@@ -102,6 +121,13 @@ export class MapControlsComponent implements OnInit {
     if (this.controlsData) {
       this.controlsData.selectedResolution = event.value;
       this.emitChange();
+
+      const resolutionName = this.getResolutionDisplayName(event.value);
+      this.tracker.trackEvent(
+        'Control Selection',
+        'Resolution Change',
+        resolutionName,
+      );
     }
   }
 
@@ -109,6 +135,13 @@ export class MapControlsComponent implements OnInit {
     if (this.controlsData) {
       this.controlsData.selectedClimateScenario = event.value;
       this.emitChange();
+
+      const scenarioName = this.getClimateScenarioDisplayName(event.value);
+      this.tracker.trackEvent(
+        'Control Selection',
+        'Climate Scenario Change',
+        scenarioName,
+      );
     }
   }
 
@@ -116,6 +149,13 @@ export class MapControlsComponent implements OnInit {
     if (this.controlsData) {
       this.controlsData.selectedClimateModel = event.value;
       this.emitChange();
+
+      const modelName = this.getClimateModelDisplayName(event.value);
+      this.tracker.trackEvent(
+        'Control Selection',
+        'Climate Model Change',
+        modelName,
+      );
     }
   }
 
@@ -123,6 +163,13 @@ export class MapControlsComponent implements OnInit {
     if (this.controlsData) {
       this.controlsData.showDifferenceMap = event;
       this.emitChange();
+
+      this.tracker.trackEvent(
+        'Control Selection',
+        'Difference Map Toggle',
+        event ? 'Enabled' : 'Disabled',
+        event ? 1 : 0,
+      );
     }
   }
 

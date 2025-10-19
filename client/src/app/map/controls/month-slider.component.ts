@@ -1,6 +1,7 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, inject, Input, Output } from '@angular/core';
 import { MatSliderModule } from '@angular/material/slider';
 import { CommonModule } from '@angular/common';
+import { MatomoTracker } from 'ngx-matomo-client';
 
 @Component({
   selector: 'app-month-slider',
@@ -10,6 +11,8 @@ import { CommonModule } from '@angular/common';
   styleUrls: ['./month-slider.component.scss'],
 })
 export class MonthSliderComponent {
+  private readonly tracker = inject(MatomoTracker);
+
   @Output() valueChange = new EventEmitter<number>();
   @Input() value = 1;
 
@@ -32,6 +35,13 @@ export class MonthSliderComponent {
     console.log('onInput', value);
     this.value = value;
     this.valueChange.emit(value);
+
+    this.tracker.trackEvent(
+      'Slider Control',
+      'Month Change',
+      this.months[value - 1],
+      value,
+    );
   }
 
   displayWith = (val: number) => {
