@@ -1,6 +1,5 @@
 $navbar-height: 64px;
-$navbar-height-mobile: 56px;
-$page-height: calc(100vh - $navbar-height - 160px);
-$page-height-mobile: calc(100vh - $navbar-height-mobile);
-$sidebar-width: 250px;
 $mobile-slider-height: 48px;
+$page-height: calc(100vh - $navbar-height - 160px);
+$page-height-mobile: calc(100vh - 2*$mobile-slider-height);
+$sidebar-width: 250px;
