@@ -4,6 +4,7 @@
     <div class="control-row" *ngIf="!hideYearSelector">
       <div class="overlay-label">Year</div>
       <mat-slider
+        showTickMarks
         [min]="1"
         [max]="yearRanges.length"
         [step]="1"
@@ -34,6 +35,7 @@
     <div class="control-row" *ngIf="!hideMonthSelector">
       <div class="overlay-label">Month</div>
       <mat-slider
+        showTickMarks
         [min]="1"
         [max]="12"
         [step]="1"
