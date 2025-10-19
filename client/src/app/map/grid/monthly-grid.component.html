@@ -40,7 +40,7 @@
 
     <app-variable-selector-overlay
       [selectedVariableType]="controlsData.selectedVariableType"
-      [availableVariableTypes]="controlsOptions.availableVariableTypes"
+      [availableVariableTypes]="controlsOptions?.availableVariableTypes || []"
       [climateVariables]="climateVariables"
       (variableChange)="onVariableChange($event)"
     ></app-variable-selector-overlay>

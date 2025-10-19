@@ -11,6 +11,6 @@ alwaysApply: true
 - Don't add docstrings to functions
 - Don't comment the obvious
 - Don't create readmes unless asked
-- As last step, review your changes and remove duplicate code
-- Keep your summary of change concise
+- At the end, always review the changes and remove duplicate code
+- Keep your summary of changes concise
 - End your summary with a suggested commit message

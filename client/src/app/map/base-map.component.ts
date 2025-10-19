@@ -42,7 +42,7 @@ export abstract class BaseMapComponent implements OnInit {
     selectedMonth: 1,
   };
 
-  controlsOptions!: MapControlsOptions;
+  controlsOptions: MapControlsOptions | undefined;
 
   variableTypes: ClimateVarKey[] = [];
   yearRanges: YearRange[] = [];
@@ -247,6 +247,9 @@ export abstract class BaseMapComponent implements OnInit {
   protected abstract resetInvalidSelections(): void;
 
   protected updateControlsOptions(): void {
+    if (!this.controlsOptions) {
+      return;
+    }
     this.controlsOptions = {
       ...this.controlsOptions,
       availableVariableTypes: this.getAvailableVariableTypes(),

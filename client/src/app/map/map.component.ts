@@ -26,6 +26,7 @@ import { VariableSelectorOverlayComponent } from './controls/variable-selector-o
 import { MobileDateControlOverlayComponent } from './controls/mobile-date-control-overlay.component';
 import { ColorbarComponent } from './colorbar.component';
 import { MobileHamburgerMenuComponent } from './controls/mobile-hamburger-menu.component';
+import { ShowChangeToggleOverlayComponent } from './controls/show-change-toggle-overlay.component';
 import { ClimateMapService } from '../core/climatemap.service';
 import { MetadataService, YearRange } from '../core/metadata.service';
 import { SpatialResolution, ClimateVarKey } from '../utils/enum';
@@ -67,6 +68,7 @@ import { MatomoTracker } from 'ngx-matomo-client';
     ColorbarComponent,
     ClimatePlotsComponent,
     MobileHamburgerMenuComponent,
+    ShowChangeToggleOverlayComponent,
   ],
   templateUrl: './map.component.html',
   styleUrl: './map.component.scss',
@@ -736,6 +738,42 @@ export class MapComponent extends BaseMapComponent implements OnInit {
     }
     return !this.isHistoricalYearRange(
       this.controlsData.selectedYearRange.value,
+    );
+  }
+
+  shouldShowDifferenceCheckbox(): boolean {
+    return !!(
+      this.controlsData?.selectedYearRange &&
+      this.controlsOptions?.isHistoricalYearRange &&
+      this.controlsData.selectedYearRange.value &&
+      !this.controlsOptions.isHistoricalYearRange(
+        this.controlsData.selectedYearRange.value,
+      )
+    );
+  }
+
+  onShowChangeToggle(showChange: boolean): void {
+    this.controlsData.showDifferenceMap = showChange;
+    this.onControlsChange(this.controlsData);
+
+    // Show toast message
+    if (showChange) {
+      this.toastService.showInfo(
+        'Map now shows the predicted change between historical and future climate data',
+        4000,
+      );
+    } else {
+      this.toastService.showInfo(
+        'Map now shows the predicted absolute values',
+        4000,
+      );
+    }
+
+    this.tracker.trackEvent(
+      'Control Selection',
+      'Difference Map Toggle (Mobile)',
+      showChange ? 'Enabled' : 'Disabled',
+      showChange ? 1 : 0,
     );
   }
 }

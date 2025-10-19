@@ -40,6 +40,13 @@
       [isMobile]="isMobile"
     ></app-mobile-hamburger-menu>
 
+    <!-- Show change toggle -->
+    <app-show-change-toggle-overlay
+      [isActive]="controlsData.showDifferenceMap"
+      [disabled]="!shouldShowDifferenceCheckbox()"
+      (toggleChange)="onShowChangeToggle($event)"
+    ></app-show-change-toggle-overlay>
+
     <div
       class="page-content-wrapper"
       leaflet
@@ -54,7 +61,12 @@
     <div class="map-info-display" *ngIf="controlsData.selectedYearRange">
       <div class="info-value">
         {{ climateVariables[controlsData.selectedVariableType].displayName
-        }}<span *ngIf="controlsData.showDifferenceMap" class="change-indicator">
+        }}<span
+          *ngIf="
+            controlsData.showDifferenceMap && shouldShowDifferenceCheckbox()
+          "
+          class="change-indicator"
+        >
           Change</span
         >
         -
@@ -69,7 +81,7 @@
     <!-- Variable selector overlay -->
     <app-variable-selector-overlay
       [selectedVariableType]="controlsData.selectedVariableType"
-      [availableVariableTypes]="controlsOptions.availableVariableTypes"
+      [availableVariableTypes]="controlsOptions?.availableVariableTypes || []"
       [climateVariables]="climateVariables"
       (variableChange)="onVariableChange($event)"
     ></app-variable-selector-overlay>

@@ -103,15 +103,4 @@
       </mat-option>
     </mat-select>
   </mat-form-field>
-
-  <div class="checkbox-field">
-    <mat-slide-toggle
-      [ngModel]="controlsData?.showDifferenceMap"
-      (ngModelChange)="onDifferenceMapChange($event)"
-      [disabled]="!shouldShowDifferenceCheckbox()"
-      color="primary"
-    >
-      Show Change
-    </mat-slide-toggle>
-  </div>
 </div>

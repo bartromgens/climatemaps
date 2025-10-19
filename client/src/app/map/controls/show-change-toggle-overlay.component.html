@@ -1,0 +1,13 @@
+<button
+  class="show-change-toggle-overlay"
+  [class.active]="isActive"
+  [class.disabled]="disabled"
+  [disabled]="disabled"
+  (click)="onToggleClick()"
+  [attr.aria-label]="isActive ? 'Show absolute values' : 'Show change'"
+  title="{{ isActive ? 'Show absolute values' : 'Show change' }}"
+>
+  <div class="toggle-icon">
+    <span class="delta-symbol">{{ isActive ? "Δ" : "Δ" }}</span>
+  </div>
+</button>
