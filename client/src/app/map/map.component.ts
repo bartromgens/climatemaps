@@ -483,6 +483,8 @@ export class MapComponent extends BaseMapComponent implements OnInit {
     this.initializeMap();
     setTimeout(() => {
       this.map?.invalidateSize();
+      // Set initial resolution based on zoom level
+      this.handleZoomBasedResolutionChange();
     }, 0);
   }
 
@@ -497,6 +499,7 @@ export class MapComponent extends BaseMapComponent implements OnInit {
     console.log('onZoom: level', this.map?.getZoom(), event);
     this.updateUrlFromMapState();
     this.clearTooltips();
+    this.handleZoomBasedResolutionChange();
   }
 
   private updateUrlFromMapState(): void {
@@ -661,6 +664,61 @@ export class MapComponent extends BaseMapComponent implements OnInit {
   private clearDesktopPlots(): void {
     this.plotData = null;
     this.timerangePlotData = null;
+  }
+
+  private handleZoomBasedResolutionChange(): void {
+    if (!this.map) {
+      return;
+    }
+
+    const currentZoom = this.map.getZoom();
+    const targetResolution = this.getResolutionForZoom(currentZoom);
+
+    // Only switch resolution if we have a different resolution available and it's different from current
+    if (
+      targetResolution &&
+      targetResolution !== this.controlsData.selectedResolution
+    ) {
+      const availableResolutions = this.getAvailableResolutions();
+
+      if (availableResolutions.includes(targetResolution)) {
+        console.log(
+          `Switching to ${targetResolution} resolution for zoom level ${currentZoom}`,
+        );
+        this.controlsData.selectedResolution = targetResolution;
+        this.findMatchingLayer();
+        this.updateLayers();
+        this.updateUrlWithControls();
+      }
+    }
+  }
+
+  private getResolutionForZoom(zoom: number): SpatialResolution | null {
+    // Switch to high resolution when zoom >= 6
+    if (zoom >= 6) {
+      // Try to find the highest available resolution
+      const availableResolutions = this.getAvailableResolutions();
+
+      // Order resolutions from highest to lowest resolution
+      const resolutionOrder = [
+        SpatialResolution.MIN2_5,
+        SpatialResolution.MIN5,
+        SpatialResolution.MIN10,
+        SpatialResolution.MIN30,
+      ];
+
+      // Find the highest available resolution
+      for (const resolution of resolutionOrder) {
+        if (availableResolutions.includes(resolution)) {
+          return resolution;
+        }
+      }
+    } else {
+      // For zoom < 6, use the default resolution (10m)
+      return SpatialResolution.MIN10;
+    }
+
+    return null;
   }
 
   shouldDisableYearSlider(): boolean {
