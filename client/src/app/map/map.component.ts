@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, ViewChild } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, ParamMap } from '@angular/router';
@@ -38,8 +38,7 @@ import {
 } from './services/layer-builder.service';
 import { LayerFilterService } from './services/layer-filter.service';
 import { URLUtils } from '../utils/url-utils';
-import { ClimateMonthlyPlotComponent } from './plot/climate-monthly-plot.component';
-import { ClimateTimerangePlotComponent } from './plot/climate-timerange-plot.component';
+import { ClimatePlotsComponent } from './plot/climate-plots.component';
 import { MapNavigationService } from '../core/map-navigation.service';
 import { MapSyncService } from './services/map-sync.service';
 import { BaseMapComponent } from './base-map.component';
@@ -66,14 +65,15 @@ import { MatomoTracker } from 'ngx-matomo-client';
     VariableSelectorOverlayComponent,
     MobileDateControlOverlayComponent,
     ColorbarComponent,
-    ClimateMonthlyPlotComponent,
-    ClimateTimerangePlotComponent,
+    ClimatePlotsComponent,
     MobileHamburgerMenuComponent,
   ],
   templateUrl: './map.component.html',
   styleUrl: './map.component.scss',
 })
 export class MapComponent extends BaseMapComponent implements OnInit {
+  @ViewChild('climatePlots') climatePlots!: ClimatePlotsComponent;
+
   private readonly tracker = inject(MatomoTracker);
   private readonly DEFAULT_RESOLUTION = SpatialResolution.MIN10;
 
@@ -93,6 +93,7 @@ export class MapComponent extends BaseMapComponent implements OnInit {
     this.checkAndShowFuturePredictionWarning();
     this.findMatchingLayer();
     this.updateLayers();
+    this.climatePlots?.clearMobileState();
   }
 
   private checkAndShowFuturePredictionWarning(): void {
@@ -437,18 +438,7 @@ export class MapComponent extends BaseMapComponent implements OnInit {
     const lat = event.latlng.lat;
     const lon = CoordinateUtils.normalizeLongitude(event.latlng.lng);
 
-    this.plotData = {
-      lat,
-      lon,
-      dataType: this.selectedOption.metadata.dataType,
-    };
-
-    this.timerangePlotData = {
-      lat,
-      lon,
-      month: this.monthSelected,
-    };
-
+    // Always handle tooltip display (works on both mobile and desktop)
     this.mapClickHandler.handleMapClick(
       event,
       this.map,
@@ -456,6 +446,27 @@ export class MapComponent extends BaseMapComponent implements OnInit {
       this.monthSelected,
       this.controlsData.selectedVariableType,
     );
+
+    const plotData = {
+      lat,
+      lon,
+      dataType: this.selectedOption.metadata.dataType,
+    };
+
+    const timerangePlotData = {
+      lat,
+      lon,
+      month: this.monthSelected,
+    };
+
+    if (this.isMobile) {
+      // On mobile, delegate to ClimatePlotsComponent
+      this.climatePlots.onMapClick(plotData, timerangePlotData);
+    } else {
+      // On desktop, show plots directly as before
+      this.plotData = plotData;
+      this.timerangePlotData = timerangePlotData;
+    }
   }
 
   onMapReady(map: Map): void {
@@ -470,11 +481,13 @@ export class MapComponent extends BaseMapComponent implements OnInit {
     console.log('onMove', event);
     this.update();
     this.updateUrlFromMapState();
+    this.clearTooltips();
   }
 
   onZoom(event: LeafletEvent): void {
     console.log('onZoom: level', this.map?.getZoom(), event);
     this.updateUrlFromMapState();
+    this.clearTooltips();
   }
 
   private updateUrlFromMapState(): void {
@@ -551,17 +564,26 @@ export class MapComponent extends BaseMapComponent implements OnInit {
         this.updateUrlFromMapState();
 
         if (request.generateCharts && this.selectedOption?.metadata?.dataType) {
-          this.plotData = {
+          const plotData = {
             lat: request.lat,
             lon: CoordinateUtils.normalizeLongitude(request.lon),
             dataType: this.selectedOption.metadata.dataType,
           };
 
-          this.timerangePlotData = {
+          const timerangePlotData = {
             lat: request.lat,
             lon: CoordinateUtils.normalizeLongitude(request.lon),
             month: this.monthSelected,
           };
+
+          if (this.isMobile) {
+            // On mobile, delegate to ClimatePlotsComponent
+            this.climatePlots.onMapClick(plotData, timerangePlotData);
+          } else {
+            // On desktop, show plots directly
+            this.plotData = plotData;
+            this.timerangePlotData = timerangePlotData;
+          }
         }
       }
     });
@@ -610,5 +632,24 @@ export class MapComponent extends BaseMapComponent implements OnInit {
   onYearRangeChange(yearRange: YearRange): void {
     this.controlsData.selectedYearRange = yearRange;
     this.onControlsChange(this.controlsData);
+  }
+
+  onPlotDataRequested(event: { plotData: any; timerangePlotData: any }): void {
+    this.plotData = event.plotData;
+    this.timerangePlotData = event.timerangePlotData;
+  }
+
+  private clearTooltips(): void {
+    if (this.map) {
+      this.tooltipManager.removeAllTooltips(this.map);
+    }
+    // Clear both mobile and desktop plots when map moves
+    this.climatePlots?.clearMobileState();
+    this.clearDesktopPlots();
+  }
+
+  private clearDesktopPlots(): void {
+    this.plotData = null;
+    this.timerangePlotData = null;
   }
 }

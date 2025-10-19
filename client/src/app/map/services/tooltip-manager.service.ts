@@ -7,7 +7,6 @@ import { Map, Tooltip } from 'leaflet';
 export class TooltipManagerService {
   private hoverTooltips = new WeakMap<Map, Tooltip>();
   private clickTooltips = new WeakMap<Map, Tooltip>();
-  private clickTooltipTimeouts = new WeakMap<Map, number>();
 
   createHoverTooltip(content: string, latlng: any, map: Map): void {
     this.removeHoverTooltip(map);
@@ -48,20 +47,9 @@ export class TooltipManagerService {
     tooltip.setLatLng(latlng);
     tooltip.addTo(map);
     this.clickTooltips.set(map, tooltip);
-
-    const timeoutId = window.setTimeout(() => {
-      this.removeClickTooltip(map);
-    }, 8000);
-    this.clickTooltipTimeouts.set(map, timeoutId);
   }
 
   removeClickTooltip(map: Map): void {
-    const timeoutId = this.clickTooltipTimeouts.get(map);
-    if (timeoutId) {
-      window.clearTimeout(timeoutId);
-      this.clickTooltipTimeouts.delete(map);
-    }
-
     const tooltip = this.clickTooltips.get(map);
     if (tooltip) {
       map.removeLayer(tooltip);

@@ -1,0 +1,58 @@
+<!-- Mobile plot button -->
+<div
+  *ngIf="isMobile && showMobilePlotButton"
+  class="mobile-plot-button-container"
+>
+  <button
+    mat-raised-button
+    color="primary"
+    class="mobile-plot-button"
+    (click)="onShowMobilePlots()"
+  >
+    <mat-icon>show_chart</mat-icon>
+    Show Climate Graphs
+  </button>
+</div>
+
+<!-- Desktop plots -->
+<div *ngIf="!isMobile" class="climate-plots-container">
+  <app-climate-monthly-plot
+    [plotData]="plotData"
+    [yearRange]="yearRange"
+    [climateScenario]="climateScenario"
+    [climateModel]="climateModel"
+  ></app-climate-monthly-plot>
+  <app-climate-timerange-plot
+    [plotData]="timerangePlotData"
+    [climateScenario]="climateScenario"
+    [climateModel]="climateModel"
+  ></app-climate-timerange-plot>
+</div>
+
+<!-- Mobile plots (full screen overlay) -->
+<div *ngIf="isMobile && showMobilePlots" class="mobile-plots-overlay">
+  <div class="mobile-plots-header">
+    <h3>Climate Data at Selected Location</h3>
+    <button
+      mat-icon-button
+      class="close-button"
+      (click)="onCloseMobilePlots()"
+      [attr.aria-label]="'Close plots'"
+    >
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+  <div class="mobile-plots-content">
+    <app-climate-monthly-plot
+      [plotData]="plotData"
+      [yearRange]="yearRange"
+      [climateScenario]="climateScenario"
+      [climateModel]="climateModel"
+    ></app-climate-monthly-plot>
+    <app-climate-timerange-plot
+      [plotData]="timerangePlotData"
+      [climateScenario]="climateScenario"
+      [climateModel]="climateModel"
+    ></app-climate-timerange-plot>
+  </div>
+</div>
