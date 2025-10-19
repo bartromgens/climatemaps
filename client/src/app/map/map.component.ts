@@ -78,6 +78,7 @@ export class MapComponent extends BaseMapComponent implements OnInit {
   private readonly DEFAULT_RESOLUTION = SpatialResolution.MIN10;
 
   selectedOption: LayerOption | undefined;
+  private previousVariableType: ClimateVarKey | null = null;
 
   get monthSelected(): number {
     return this.controlsData.selectedMonth;
@@ -90,27 +91,35 @@ export class MapComponent extends BaseMapComponent implements OnInit {
   }
 
   protected onControlsUpdated(): void {
-    this.checkAndShowFuturePredictionWarning();
     this.findMatchingLayer();
     this.updateLayers();
     this.climatePlots?.clearMobileState();
   }
 
   private checkAndShowFuturePredictionWarning(): void {
-    if (
-      !this.climateVariableHelper.hasFuturePredictions(
-        this.controlsData.selectedVariableType,
-      )
-    ) {
-      const variableDisplayName =
-        this.climateVariables[this.controlsData.selectedVariableType]
-          ?.displayName || this.controlsData.selectedVariableType;
+    const currentVariableType = this.controlsData.selectedVariableType;
 
-      this.toastService.showInfo(
-        `No future predictions available for ${variableDisplayName}. Only historical data is available for this variable.`,
-        6000,
-      );
+    // Only show warning if variable has actually changed
+    if (
+      this.previousVariableType !== null &&
+      this.previousVariableType !== currentVariableType
+    ) {
+      if (
+        !this.climateVariableHelper.hasFuturePredictions(currentVariableType)
+      ) {
+        const variableDisplayName =
+          this.climateVariables[currentVariableType]?.displayName ||
+          currentVariableType;
+
+        this.toastService.showInfo(
+          `No future predictions available for ${variableDisplayName}`,
+          6000,
+        );
+      }
     }
+
+    // Update the previous variable type for next comparison
+    this.previousVariableType = currentVariableType;
   }
 
   protected onDataLoaded(): void {
@@ -613,6 +622,7 @@ export class MapComponent extends BaseMapComponent implements OnInit {
 
   onVariableChange(variableType: ClimateVarKey): void {
     this.controlsData.selectedVariableType = variableType;
+    this.checkAndShowFuturePredictionWarning();
     this.onControlsChange(this.controlsData);
 
     const variableName =
@@ -651,5 +661,14 @@ export class MapComponent extends BaseMapComponent implements OnInit {
   private clearDesktopPlots(): void {
     this.plotData = null;
     this.timerangePlotData = null;
+  }
+
+  shouldDisableYearSlider(): boolean {
+    if (!this.controlsData?.selectedVariableType) {
+      return false;
+    }
+    return !this.climateVariableHelper.hasFuturePredictions(
+      this.controlsData.selectedVariableType,
+    );
   }
 }

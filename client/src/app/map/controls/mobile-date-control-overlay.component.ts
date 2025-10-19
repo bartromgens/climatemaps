@@ -23,6 +23,7 @@ export class MobileDateControlOverlayComponent {
   @Input() yearRanges: YearRange[] = [];
   @Input() hideMonthSelector = false;
   @Input() hideYearSelector = false;
+  @Input() disabled = false;
   @Output() monthChange = new EventEmitter<number>();
   @Output() yearRangeChange = new EventEmitter<YearRange>();
 
