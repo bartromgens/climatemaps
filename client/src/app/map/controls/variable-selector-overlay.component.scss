@@ -34,7 +34,7 @@
   height: 44px;
   padding: 0;
   padding-right: 44px;
-  background: rgba(255, 255, 255, 0.85);
+  background: rgba(255, 255, 255, 1);
   border: none;
   border-radius: 22px;
   cursor: pointer;
@@ -43,11 +43,11 @@
   overflow: hidden;
   position: relative;
   margin-left: auto;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 
   &:hover:not(.disabled) {
     width: 150px;
     background: rgba(255, 255, 255, 0.95);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 
     .variable-name {
       opacity: 1;
@@ -59,7 +59,6 @@
     width: 150px;
     background: rgba(33, 150, 243, 0.85);
     color: white;
-    box-shadow: 0 2px 8px rgba(33, 150, 243, 0.3);
 
     .variable-name {
       color: white;
@@ -69,7 +68,6 @@
 
     &:hover {
       background: rgba(33, 150, 243, 0.95);
-      box-shadow: 0 3px 12px rgba(33, 150, 243, 0.4);
     }
   }
 
