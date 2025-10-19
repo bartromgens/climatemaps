@@ -1,7 +1,7 @@
 import { Component, inject, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatSliderModule } from '@angular/material/slider';
-import { YearRange } from '../../core/metadata.service';
+import { YearRange, MetadataService } from '../../core/metadata.service';
 import { MatomoTracker } from 'ngx-matomo-client';
 
 @Component({
@@ -17,6 +17,7 @@ import { MatomoTracker } from 'ngx-matomo-client';
 })
 export class MobileDateControlOverlayComponent {
   private readonly tracker = inject(MatomoTracker);
+  private readonly metadataService = inject(MetadataService);
 
   @Input() selectedMonth = 1;
   @Input() selectedYearRange: YearRange | null = null;
@@ -104,4 +105,8 @@ export class MobileDateControlOverlayComponent {
     }
     return '';
   };
+
+  isHistoricalYearRange(yearRange: YearRange): boolean {
+    return this.metadataService.isHistoricalYearRange(yearRange.value);
+  }
 }

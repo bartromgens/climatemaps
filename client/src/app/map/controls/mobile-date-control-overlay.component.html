@@ -17,7 +17,17 @@
           (valueChange)="onYearRangeChange($event)"
         />
       </mat-slider>
-      <div class="year-display">{{ displayYearWith(sliderValue) }}</div>
+      <div
+        class="year-display"
+        [class.historical]="
+          selectedYearRange && isHistoricalYearRange(selectedYearRange)
+        "
+        [class.prediction]="
+          selectedYearRange && !isHistoricalYearRange(selectedYearRange)
+        "
+      >
+        {{ displayYearWith(sliderValue) }}
+      </div>
     </div>
 
     <!-- Month Selector -->

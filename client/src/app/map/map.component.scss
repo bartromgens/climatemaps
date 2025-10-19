@@ -99,9 +99,14 @@
   }
 
   .info-value {
-    font-size: 14px;
+    font-size: 15px;
     font-weight: 600;
     color: #333;
+
+    .prediction-indicator {
+      color: #ab3ce7;
+      margin-left: 4px;
+    }
   }
 
   @media (max-width: 768px) {
@@ -109,6 +114,8 @@
     left: 50%;
     transform: translateX(-50%);
     padding: 10px 14px;
+    min-width: calc(100vw - 180px);
+    max-width: calc(100vw - 150px);
 
     .info-label {
       font-size: 10px;

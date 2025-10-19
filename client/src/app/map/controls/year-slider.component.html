@@ -10,7 +10,11 @@
 </mat-slider>
 
 <div class="year-labels">
-  <span *ngFor="let year of years; let i = index">
+  <span
+    *ngFor="let year of years; let i = index"
+    [class.historical]="isHistoricalYearRange(year)"
+    [class.prediction]="!isHistoricalYearRange(year)"
+  >
     {{ year.label }}
   </span>
 </div>

@@ -1,7 +1,7 @@
 import { Component, EventEmitter, inject, Input, Output } from '@angular/core';
 import { MatSliderModule } from '@angular/material/slider';
 import { CommonModule } from '@angular/common';
-import { YearRange } from '../../core/metadata.service';
+import { YearRange, MetadataService } from '../../core/metadata.service';
 import { MatomoTracker } from 'ngx-matomo-client';
 
 @Component({
@@ -13,6 +13,7 @@ import { MatomoTracker } from 'ngx-matomo-client';
 })
 export class YearSliderComponent {
   private readonly tracker = inject(MatomoTracker);
+  private readonly metadataService = inject(MetadataService);
 
   @Output() valueChange = new EventEmitter<YearRange>();
   @Input() value: YearRange | null = null;
@@ -58,4 +59,8 @@ export class YearSliderComponent {
     }
     return '';
   };
+
+  isHistoricalYearRange(yearRange: YearRange): boolean {
+    return this.metadataService.isHistoricalYearRange(yearRange.value);
+  }
 }

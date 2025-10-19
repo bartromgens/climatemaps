@@ -7,7 +7,7 @@ alwaysApply: true
 - Active the climatemaps conda environment before running python commands
 - Add mypy type hints
 - The FastAPI dev backend is available at localhost:8000
-- The Angular dev application is available at localhost:4200
+- The Angular development server is already running and available at localhost:4200
 - Don't add docstrings to functions
 - Don't comment the obvious
 - Don't create readmes unless asked

@@ -2,4 +2,12 @@
 
 .year-labels {
   @extend .slider-labels;
+
+  .historical {
+    color: #2196f3; // Blue for historical data
+  }
+
+  .prediction {
+    color: #ab3ce7; // Purple for predictions
+  }
 }

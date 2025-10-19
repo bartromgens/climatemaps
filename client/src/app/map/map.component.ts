@@ -729,4 +729,13 @@ export class MapComponent extends BaseMapComponent implements OnInit {
       this.controlsData.selectedVariableType,
     );
   }
+
+  isPredictionYearRange(): boolean {
+    if (!this.controlsData?.selectedYearRange) {
+      return false;
+    }
+    return !this.isHistoricalYearRange(
+      this.controlsData.selectedYearRange.value,
+    );
+  }
 }
