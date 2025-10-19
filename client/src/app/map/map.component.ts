@@ -402,9 +402,8 @@ export class MapComponent extends BaseMapComponent implements OnInit {
 
     if (!isMobile) {
       new Control.Zoom({ position: 'topleft' }).addTo(this.map);
+      new Control.Scale().addTo(this.map);
     }
-
-    new Control.Scale().addTo(this.map);
   }
 
   private update(): void {
