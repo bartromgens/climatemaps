@@ -5,12 +5,14 @@ import {
   OnDestroy,
   OnChanges,
   SimpleChanges,
+  inject,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { LeafletModule } from '@bluehalo/ngx-leaflet';
 import { control, latLng, Layer, Map, tileLayer } from 'leaflet';
 import 'leaflet.vectorgrid';
 import { Subject, takeUntil } from 'rxjs';
+import { MatomoTracker } from 'ngx-matomo-client';
 
 import {
   MapSyncService,
@@ -82,6 +84,7 @@ export class SmallMapComponent implements OnInit, OnDestroy, OnChanges {
   private destroy$ = new Subject<void>();
   private isUpdatingFromSync = false;
   private lastClickTimestamp = 0;
+  private readonly tracker = inject(MatomoTracker);
 
   private baseLayer = tileLayer(
     'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
@@ -165,6 +168,13 @@ export class SmallMapComponent implements OnInit, OnDestroy, OnChanges {
         center: { lat: center.lat, lng: center.lng },
         zoom,
       });
+
+      this.tracker.trackEvent(
+        'Map Interaction',
+        'Zoom (Small Map)',
+        `Level ${zoom}`,
+        zoom,
+      );
     }
   }
 

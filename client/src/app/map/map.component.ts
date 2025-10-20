@@ -502,6 +502,16 @@ export class MapComponent extends BaseMapComponent implements OnInit {
     this.updateUrlFromMapState();
     this.clearTooltips();
     this.handleZoomBasedResolutionChange();
+
+    const zoomLevel = this.map?.getZoom();
+    if (zoomLevel !== undefined) {
+      this.tracker.trackEvent(
+        'Map Interaction',
+        'Zoom',
+        `Level ${zoomLevel}`,
+        zoomLevel,
+      );
+    }
   }
 
   private updateUrlFromMapState(): void {
