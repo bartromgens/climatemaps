@@ -21,6 +21,7 @@ An interactive web application for visualizing global historical climate data an
 
 ### Other (not used)
 
+- CHELSA Climatologies at high resolution for the earth’s land surface areas: https://chelsa-climate.org/downloads/
 - https://interactive-atlas.ipcc.ch/
 - ERA5 monthly averaged data on single levels from 1940 to present: https://cds.climate.copernicus.eu/datasets/reanalysis-era5-single-levels-monthly-means?tab=overview
 - ERA5 post-processed daily statistics on single levels from 1940 to present: https://cds.climate.copernicus.eu/datasets/derived-era5-single-levels-daily-statistics?tab=overview
@@ -151,7 +152,3 @@ If you have locally created tiles, upload them to the server with:
 ```bash
 rsync -avP data/tiles openclimatemap.org:/home/bart/climatemaps/data/
 ```
-
-### TODO
-
-- Add explanation of climate scenarios
