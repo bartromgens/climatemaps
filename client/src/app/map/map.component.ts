@@ -588,26 +588,29 @@ export class MapComponent extends BaseMapComponent implements OnInit {
         this.updateUrlFromMapState();
 
         if (request.generateCharts && this.selectedOption?.metadata?.dataType) {
-          const plotData = {
-            lat: request.lat,
-            lon: CoordinateUtils.normalizeLongitude(request.lon),
-            dataType: this.selectedOption.metadata.dataType,
-          };
+          // Wait for map animation to complete before generating plots
+          setTimeout(() => {
+            const plotData = {
+              lat: request.lat,
+              lon: CoordinateUtils.normalizeLongitude(request.lon),
+              dataType: this.selectedOption!.metadata!.dataType,
+            };
 
-          const timerangePlotData = {
-            lat: request.lat,
-            lon: CoordinateUtils.normalizeLongitude(request.lon),
-            month: this.monthSelected,
-          };
+            const timerangePlotData = {
+              lat: request.lat,
+              lon: CoordinateUtils.normalizeLongitude(request.lon),
+              month: this.monthSelected,
+            };
 
-          if (this.isMobile) {
-            // On mobile, delegate to ClimatePlotsComponent
-            this.climatePlots.onMapClick(plotData, timerangePlotData);
-          } else {
-            // On desktop, show plots directly
-            this.plotData = plotData;
-            this.timerangePlotData = timerangePlotData;
-          }
+            if (this.isMobile) {
+              // On mobile, delegate to ClimatePlotsComponent
+              this.climatePlots.onMapClick(plotData, timerangePlotData);
+            } else {
+              // On desktop, show plots directly
+              this.plotData = plotData;
+              this.timerangePlotData = timerangePlotData;
+            }
+          }, 1200); // Wait for map animation to complete (1.0s duration + buffer)
         }
       }
     });
