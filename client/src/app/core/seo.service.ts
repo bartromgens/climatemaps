@@ -58,7 +58,7 @@ export class SeoService {
       title:
         '"OpenClimateMap - Interactive Global Climate Maps | Temperature & Precipitation"',
       description:
-        'OpenClimateMap visualizes historical and future climate data, including temperature and precipitation changes based on CMIP6 climate scenarios. Explore interactive maps showing temperature trends and climate projections.',
+        'Explore historical and future global climate data, including temperature and precipitation changes based on CMIP6 climate scenarios. Explore interactive maps showing temperature trends and climate projections on a global map.',
       keywords:
         'climate map, temperature map, climate change, climate data, CMIP6, SSP scenarios, WorldClim, temperature projections, climate visualization, global warming',
       url: '/',
