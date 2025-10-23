@@ -1,14 +1,14 @@
 @import "../../../styles/overlay-button.scss";
 
 :host {
-  bottom: 200px;
+  bottom: 250px;
   right: 20px;
 
   @media (max-width: 768px) {
-    bottom: 130px;
+    bottom: 180px;
   }
 }
 
-.show-change-toggle-overlay {
+.contour-toggle-overlay {
   @extend .overlay-toggle-button;
 }

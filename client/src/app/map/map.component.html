@@ -40,6 +40,13 @@
       [isMobile]="isMobile"
     ></app-mobile-hamburger-menu>
 
+    <!-- Contour lines toggle -->
+    <app-contour-toggle-overlay
+      [isActive]="controlsData.showContourLines"
+      [disabled]="!selectedOption"
+      (toggleChange)="onContourToggle($event)"
+    ></app-contour-toggle-overlay>
+
     <!-- Show change toggle -->
     <app-show-change-toggle-overlay
       [isActive]="controlsData.showDifferenceMap"

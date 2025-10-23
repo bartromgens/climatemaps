@@ -1,0 +1,88 @@
+// Shared styles for overlay toggle buttons
+:host {
+  position: fixed !important;
+  z-index: 1000;
+  display: block;
+  width: 40px;
+  height: 40px;
+  margin: 0;
+  padding: 0;
+  pointer-events: none;
+
+  @media (max-width: 768px) {
+    right: 10px;
+  }
+}
+
+.overlay-toggle-button {
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  padding-right: 40px;
+  background: rgba(255, 255, 255, 1);
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  backdrop-filter: blur(10px);
+  overflow: hidden;
+  margin: 0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  pointer-events: auto;
+
+  &:hover:not(.disabled) {
+    background: rgba(255, 255, 255, 0.95);
+  }
+
+  &.active {
+    background: rgba(33, 150, 243, 0.85);
+    color: white;
+
+    &:hover {
+      background: rgba(33, 150, 243, 0.95);
+    }
+  }
+
+  &.disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+    background: rgba(255, 255, 255, 0.4);
+  }
+
+  .toggle-icon {
+    font-size: 20px;
+    line-height: 1;
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    position: absolute;
+    right: 0;
+    top: 0;
+
+    .symbol {
+      color: #666;
+      font-size: 18px;
+      font-weight: bold;
+      font-family: "Arial", sans-serif;
+      line-height: 1;
+    }
+  }
+
+  &.active .toggle-icon {
+    filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.2));
+
+    .symbol {
+      color: white;
+    }
+  }
+}
