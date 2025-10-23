@@ -1,0 +1,20 @@
+User-agent: *
+Allow: /
+
+# Sitemap location
+Sitemap: https://openclimatemap.org/sitemap.xml
+
+# Allow main application pages
+Allow: /seasons
+Allow: /climate-scenarios
+Allow: /climate-predictions
+Allow: /climate-matrix
+Allow: /about
+
+# Disallow API endpoints and internal files
+Disallow: /api/
+Disallow: /tiles/
+Disallow: /assets/
+Disallow: /*.json$
+Disallow: /*.js$
+Disallow: /*.css$
