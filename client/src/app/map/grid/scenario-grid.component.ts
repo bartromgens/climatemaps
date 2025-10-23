@@ -84,7 +84,7 @@ export class ScenarioGridComponent extends BaseMapComponent {
     );
     this.seoService.updateMetaTags({
       title:
-        'Climate Scenarios Comparison - SSP126 SSP245 SSP370 SSP585 Projections',
+        'Climate Change Scenarios Comparison Maps - SSP1-2.6, SSP2-4.5, SSP3-7.0, SSP5-8.5 Projections',
       description:
         'Compare different CMIP6 climate scenarios (SSP1-2.6, SSP2-4.5, SSP3-7.0, SSP5-8.5) side by side. Visualize future temperature and precipitation changes under different emission pathways.',
       keywords:

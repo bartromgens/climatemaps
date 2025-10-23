@@ -85,7 +85,7 @@ export class YearRangeGridComponent extends BaseMapComponent {
     this.controlsData.showDifferenceMap = true;
     this.seoService.updateMetaTags({
       title:
-        'Climate Predictions Timeline - Historical to Future Climate Change',
+        'Climate Change Maps - Historical to Future Climate Change Projections on a Global Map',
       description:
         'View climate predictions across different time periods from 1970-2000 to 2081-2100. Compare how temperature and precipitation are projected to change over time under different climate scenarios.',
       keywords:

@@ -90,7 +90,7 @@ export class ScenarioYearRangeGridComponent extends BaseMapComponent {
     );
     this.seoService.updateMetaTags({
       title:
-        'Climate Scenarios & Time Periods Matrix - Compare Future Projections',
+        'Climate Scenarios & Time Periods Maps - Compare Future Projections on a Map Grid',
       description:
         'Compare climate projections across different scenarios (SSP1-2.6, SSP2-4.5, SSP3-7.0, SSP5-8.5) and time periods. View how temperature and precipitation changes vary by scenario and decade.',
       keywords:
