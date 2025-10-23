@@ -39,6 +39,7 @@ export abstract class BaseMapComponent implements OnInit {
     selectedClimateScenario: null,
     selectedClimateModel: null,
     showDifferenceMap: true,
+    showContourLines: true,
     selectedMonth: 1,
   };
 

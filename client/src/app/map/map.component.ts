@@ -27,6 +27,7 @@ import { MobileDateControlOverlayComponent } from './controls/mobile-date-contro
 import { ColorbarComponent } from './colorbar.component';
 import { MobileHamburgerMenuComponent } from './controls/mobile-hamburger-menu.component';
 import { ShowChangeToggleOverlayComponent } from './controls/show-change-toggle-overlay.component';
+import { ContourToggleOverlayComponent } from './controls/contour-toggle-overlay.component';
 import { ClimateMapService } from '../core/climatemap.service';
 import { MetadataService, YearRange } from '../core/metadata.service';
 import { SpatialResolution, ClimateVarKey } from '../utils/enum';
@@ -69,6 +70,7 @@ import { MatomoTracker } from 'ngx-matomo-client';
     ClimatePlotsComponent,
     MobileHamburgerMenuComponent,
     ShowChangeToggleOverlayComponent,
+    ContourToggleOverlayComponent,
   ],
   templateUrl: './map.component.html',
   styleUrl: './map.component.scss',
@@ -78,6 +80,8 @@ export class MapComponent extends BaseMapComponent implements OnInit {
 
   private readonly tracker = inject(MatomoTracker);
   private readonly DEFAULT_RESOLUTION = SpatialResolution.MIN10;
+
+  environment = environment;
 
   selectedOption: LayerOption | undefined;
   private previousVariableType: ClimateVarKey | null = null;
@@ -392,7 +396,7 @@ export class MapComponent extends BaseMapComponent implements OnInit {
       if (this.rasterLayer) {
         this.map?.addLayer(this.rasterLayer);
       }
-      if (this.vectorLayer) {
+      if (this.vectorLayer && this.controlsData.showContourLines) {
         this.map?.addLayer(this.vectorLayer);
       }
 
@@ -770,6 +774,41 @@ export class MapComponent extends BaseMapComponent implements OnInit {
         this.controlsData.selectedYearRange.value,
       )
     );
+  }
+
+  onContourToggle(showContour: boolean): void {
+    this.controlsData.showContourLines = showContour;
+    this.updateVectorLayerVisibility();
+
+    // Show toast message
+    if (showContour) {
+      this.toastService.showInfo('Contour lines are now visible', 3000);
+    } else {
+      this.toastService.showInfo('Contour lines are now hidden', 3000);
+    }
+
+    this.tracker.trackEvent(
+      'Control Selection',
+      'Contour Lines Toggle',
+      showContour ? 'Enabled' : 'Disabled',
+      showContour ? 1 : 0,
+    );
+  }
+
+  private updateVectorLayerVisibility(): void {
+    if (!this.map || !this.vectorLayer) {
+      return;
+    }
+
+    if (this.controlsData.showContourLines) {
+      if (!this.map.hasLayer(this.vectorLayer)) {
+        this.map.addLayer(this.vectorLayer);
+      }
+    } else {
+      if (this.map.hasLayer(this.vectorLayer)) {
+        this.map.removeLayer(this.vectorLayer);
+      }
+    }
   }
 
   onShowChangeToggle(showChange: boolean): void {

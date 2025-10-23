@@ -33,6 +33,7 @@ export interface MapControlsData {
   selectedClimateScenario: ClimateScenario | null;
   selectedClimateModel: ClimateModel | null;
   showDifferenceMap: boolean;
+  showContourLines: boolean;
   selectedMonth: number;
 }
 

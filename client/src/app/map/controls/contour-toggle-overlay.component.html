@@ -1,0 +1,13 @@
+<button
+  class="contour-toggle-overlay"
+  [class.active]="isActive"
+  [class.disabled]="disabled"
+  [disabled]="disabled"
+  (click)="onToggleClick()"
+  [attr.aria-label]="isActive ? 'Hide contour lines' : 'Show contour lines'"
+  title="{{ isActive ? 'Hide contour lines' : 'Show contour lines' }}"
+>
+  <div class="toggle-icon">
+    <span class="symbol">{{ isActive ? "⊞" : "⊞" }}</span>
+  </div>
+</button>
