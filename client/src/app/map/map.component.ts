@@ -189,10 +189,18 @@ export class MapComponent extends BaseMapComponent implements OnInit {
   }
 
   override ngOnInit(): void {
-    this.seoService.setDefaultMetaTags();
     this.checkMobile();
     this.setupResizeListener();
     this.setupNavigationListener();
+
+    // Handle route data for variable-specific routes
+    this.route.data.subscribe((data) => {
+      if (data['variable'] && data['title']) {
+        this.setVariableSpecificSEO(data['variable'], data['title']);
+      } else {
+        this.seoService.setDefaultMetaTags();
+      }
+    });
 
     this.route.queryParamMap.subscribe((params) => {
       if (params.has('lat') && params.has('lon') && params.has('zoom')) {
@@ -216,6 +224,17 @@ export class MapComponent extends BaseMapComponent implements OnInit {
 
         this.route.queryParamMap.subscribe((params) => {
           this.updateControlsFromURL(params);
+        });
+
+        // Handle route data for variable-specific routes
+        this.route.data.subscribe((data) => {
+          if (data['variable']) {
+            const variableKey = data['variable'] as ClimateVarKey;
+            if (this.variableTypes.includes(variableKey)) {
+              this.controlsData.selectedVariableType = variableKey;
+              this.onLayerChange();
+            }
+          }
         });
 
         console.log('Initial selections:', {
@@ -834,5 +853,23 @@ export class MapComponent extends BaseMapComponent implements OnInit {
       showChange ? 'Enabled' : 'Disabled',
       showChange ? 1 : 0,
     );
+  }
+
+  private setVariableSpecificSEO(variable: string, title: string): void {
+    const variableKey = variable as ClimateVarKey;
+    const variableName =
+      this.climateVariables?.[variableKey]?.displayName ||
+      variable.toLowerCase();
+
+    const seoTitle = `${title} - OpenClimateMap`;
+    const description = `Explore interactive ${title.toLowerCase()} showing ${variableName.toLowerCase()} data. View historical and future climate projections with detailed temperature and precipitation maps.`;
+    const keywords = `${title.toLowerCase()}, ${variableName.toLowerCase()}, climate map, temperature map, precipitation map, climate data, climate change, CMIP6, climate visualization`;
+
+    this.seoService.updateMetaTags({
+      title: seoTitle,
+      description: description,
+      keywords: keywords,
+      url: `/${variable.toLowerCase()}`,
+    });
   }
 }
