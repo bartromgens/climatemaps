@@ -42,6 +42,7 @@
 
     <!-- Contour lines toggle -->
     <app-contour-toggle-overlay
+      *ngIf="!environment.production"
       [isActive]="controlsData.showContourLines"
       [disabled]="!selectedOption"
       (toggleChange)="onContourToggle($event)"

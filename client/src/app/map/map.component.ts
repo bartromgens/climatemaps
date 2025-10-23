@@ -81,6 +81,8 @@ export class MapComponent extends BaseMapComponent implements OnInit {
   private readonly tracker = inject(MatomoTracker);
   private readonly DEFAULT_RESOLUTION = SpatialResolution.MIN10;
 
+  environment = environment;
+
   selectedOption: LayerOption | undefined;
   private previousVariableType: ClimateVarKey | null = null;
 
