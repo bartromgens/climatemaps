@@ -56,7 +56,7 @@ export class SeoService {
   setDefaultMetaTags(): void {
     this.updateMetaTags({
       title:
-        '"OpenClimateMap - Interactive Global Climate Maps | Temperature & Precipitation"',
+        'OpenClimateMap - Interactive Global Climate Maps | Temperature & Precipitation',
       description:
         'Explore historical and future global climate data, including temperature and precipitation changes based on CMIP6 climate scenarios. Explore interactive maps showing temperature trends and climate projections on a global map.',
       keywords:
