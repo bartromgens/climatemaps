@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { ReactiveFormsModule, FormControl } from '@angular/forms';
@@ -11,6 +11,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { DomSanitizer } from '@angular/platform-browser';
 import { Observable } from 'rxjs';
 import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
+import { MatomoTracker } from 'ngx-matomo-client';
 import {
   GeocodingService,
   LocationSuggestion,
@@ -41,6 +42,7 @@ export class MobileHamburgerMenuComponent {
 
   searchControl = new FormControl('');
   filteredLocations$: Observable<LocationSuggestion[]>;
+  private readonly tracker = inject(MatomoTracker);
 
   constructor(
     private geocodingService: GeocodingService,
@@ -74,6 +76,12 @@ export class MobileHamburgerMenuComponent {
       location.lon,
       zoom,
       !this.isMobile,
+    );
+
+    this.tracker.trackEvent(
+      'Search',
+      'Location Selected',
+      location.displayName,
     );
   }
 

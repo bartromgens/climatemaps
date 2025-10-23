@@ -1,4 +1,4 @@
-import { Component, OnInit, HostListener } from '@angular/core';
+import { Component, OnInit, HostListener, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink, RouterOutlet } from '@angular/router';
 import { MatToolbarModule } from '@angular/material/toolbar';
@@ -12,6 +12,7 @@ import { ReactiveFormsModule, FormControl } from '@angular/forms';
 import { DomSanitizer } from '@angular/platform-browser';
 import { Observable } from 'rxjs';
 import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
+import { MatomoTracker } from 'ngx-matomo-client';
 
 import { GeocodingService, LocationSuggestion } from './core/geocoding.service';
 import { MapNavigationService } from './core/map-navigation.service';
@@ -42,6 +43,7 @@ export class AppComponent implements OnInit {
   isMobile = false;
   searchControl = new FormControl('');
   filteredLocations$: Observable<LocationSuggestion[]>;
+  private readonly tracker = inject(MatomoTracker);
 
   constructor(
     private geocodingService: GeocodingService,
@@ -88,6 +90,12 @@ export class AppComponent implements OnInit {
       location.lon,
       zoom,
       !this.isMobile,
+    );
+
+    this.tracker.trackEvent(
+      'Search',
+      'Location Selected',
+      location.displayName,
     );
   }
 

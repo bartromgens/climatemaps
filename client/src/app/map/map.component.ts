@@ -449,6 +449,13 @@ export class MapComponent extends BaseMapComponent implements OnInit {
     const lat = event.latlng.lat;
     const lon = CoordinateUtils.normalizeLongitude(event.latlng.lng);
 
+    // Track map click with Matomo
+    this.tracker.trackEvent(
+      'Map Interaction',
+      'Map Click',
+      `${lat.toFixed(4)},${lon.toFixed(4)}`,
+    );
+
     // Always handle tooltip display (works on both mobile and desktop)
     this.mapClickHandler.handleMapClick(
       event,

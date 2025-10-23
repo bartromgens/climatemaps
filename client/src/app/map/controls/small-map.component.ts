@@ -292,6 +292,13 @@ export class SmallMapComponent implements OnInit, OnDestroy, OnChanges {
 
     const variableType = this.selectedOption.metadata.variableType || '';
 
+    // Track map click with Matomo
+    this.tracker.trackEvent(
+      'Map Interaction',
+      'Small Map Click',
+      `${event.latlng.lat.toFixed(4)},${event.latlng.lng.toFixed(4)}`,
+    );
+
     this.lastClickTimestamp = Date.now();
     this.mapSyncService.broadcastClick(event.latlng.lat, event.latlng.lng);
 

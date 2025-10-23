@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input, Output, EventEmitter, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -6,6 +6,7 @@ import { ClimateMonthlyPlotComponent } from './climate-monthly-plot.component';
 import { ClimateTimerangePlotComponent } from './climate-timerange-plot.component';
 import { YearRange } from '../../core/metadata.service';
 import { ClimateScenario, ClimateModel } from '../../utils/enum';
+import { MatomoTracker } from 'ngx-matomo-client';
 
 export interface PlotData {
   lat: number;
@@ -33,6 +34,8 @@ export interface TimerangePlotData {
   styleUrl: './climate-plots.component.scss',
 })
 export class ClimatePlotsComponent {
+  private readonly tracker = inject(MatomoTracker);
+
   @Input() isMobile = false;
   @Input() plotData: PlotData | null = null;
   @Input() timerangePlotData: TimerangePlotData | null = null;
@@ -73,6 +76,13 @@ export class ClimatePlotsComponent {
 
   onShowMobilePlots(): void {
     if (this.mobilePlotData && this.mobileTimerangePlotData) {
+      this.tracker.trackEvent(
+        'Mobile Interface',
+        'Show Climate Graphs',
+        'Button Click',
+        1,
+      );
+
       this.plotDataRequested.emit({
         plotData: this.mobilePlotData,
         timerangePlotData: this.mobileTimerangePlotData,
