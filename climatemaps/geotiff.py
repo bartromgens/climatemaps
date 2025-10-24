@@ -7,12 +7,14 @@ import rasterio
 
 def _process_coordinate_arrays(transform, width: int, height: int) -> Tuple[np.ndarray, np.ndarray]:
     # Create coordinate arrays using rasterio's transform
+    # The transform gives us the coordinates of the pixel centers
     lon_array = np.linspace(transform.c, transform.c + width * transform.a, width, endpoint=False)
     lat_array = np.linspace(transform.f, transform.f + height * transform.e, height, endpoint=False)
 
-    bin_width = 360.0 / len(lon_array)
-    lon_array += bin_width / 2
-    lat_array -= bin_width / 2
+    # For regular grids, we can use the transform parameters directly
+    # transform.a is the pixel width in longitude, transform.e is the pixel height in latitude
+    lon_array += transform.a / 2  # Shift to pixel center
+    lat_array += transform.e / 2  # Shift to pixel center
 
     return lon_array, lat_array
 
@@ -52,6 +54,25 @@ def read_geotiff_cru_ts(filepath: str, month: int) -> Tuple[np.ndarray, np.ndarr
 
         array[array == 254] = np.nan  # NoData value
         array[array <= -9000] = np.nan  # Invalid values
+
+        lon_array, lat_array = _process_coordinate_arrays(src.transform, src.width, src.height)
+
+    return lon_array, lat_array, array
+
+
+def read_geotiff_chelsa(filepath: str, month: int) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """
+    Read CHELSA data. CHELSA files contain monthly data in separate bands.
+    """
+    assert month > 0 and month <= 12, f"Month must be between 1 and 12, got {month}"
+
+    with rasterio.open(filepath) as src:
+        # CHELSA files have monthly data in separate bands
+        array = src.read(month).astype(float)
+
+        # Handle NoData values (typically -9999 or similar)
+        array[array <= -9999] = np.nan
+        array[array == -32768] = np.nan  # Common NoData value
 
         lon_array, lat_array = _process_coordinate_arrays(src.transform, src.width, src.height)
 

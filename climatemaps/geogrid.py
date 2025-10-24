@@ -84,7 +84,14 @@ class GeoGrid(BaseModel):
 
     @property
     def bin_width(self):
-        assert self.bin_width_lon == self.bin_width_lat
+        # Use a small tolerance for high-resolution grids like CHELSA
+        tolerance = 1e-5
+        width_diff = abs(self.bin_width_lon - self.bin_width_lat)
+        assert width_diff < tolerance, (
+            f"Longitude and latitude bin widths must be approximately equal for regular grid. "
+            f"Got lon_width={self.bin_width_lon:.6f}, lat_width={self.bin_width_lat:.6f} "
+            f"(difference={width_diff:.8f}). Grid dimensions: {len(self.lon_range)} x {len(self.lat_range)}"
+        )
         return self.bin_width_lon
 
     @property

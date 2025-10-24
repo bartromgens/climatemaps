@@ -124,6 +124,10 @@ def _check_cru_ts_data_exists(filepath: str, year_range: tuple[int, int], abbr: 
     return first_month_file.exists()
 
 
+def _check_chelsa_data_exists(filepath: str) -> bool:
+    return Path(filepath).exists()
+
+
 def _get_cru_ts_url(variable: ClimateVarKey, year_range: tuple[int, int]) -> str:
     base_url = "https://dap.ceda.ac.uk/badc/ipcc-ddc/data/obs/cru_ts2_1/clim_30"
 
@@ -134,6 +138,22 @@ def _get_cru_ts_url(variable: ClimateVarKey, year_range: tuple[int, int]) -> str
     filename = f"cru_{abbr}_clim_{year_range[0]}-{year_range[1]}.zip"
 
     return f"{base_url}/{abbr}/{filename}"
+
+
+def _get_chelsa_url(variable: ClimateVarKey, year_range: tuple[int, int]) -> str:
+    base_url = "https://os.zhdk.cloud.switch.ch/chelsav2/GLOBAL/climatologies/1981-2010"
+
+    variable_map = {
+        ClimateVarKey.CLOUD_COVER: "clt",
+    }
+
+    var_str = variable_map.get(variable)
+    if not var_str:
+        raise ValueError(f"Unsupported CHELSA variable: {variable}")
+
+    filename = f"CHELSA_{var_str}_01_1981-2010_V.2.1.tif"
+
+    return f"{base_url}/{var_str}/{filename}"
 
 
 def download_cru_ts_data(config: ClimateDataConfig) -> None:
@@ -160,6 +180,23 @@ def download_cru_ts_data(config: ClimateDataConfig) -> None:
 
     _download_file(url, temp_zip)
     _extract_zip(temp_zip, data_dir)
+
+
+def download_chelsa_data(config: ClimateDataConfig) -> None:
+    if _check_chelsa_data_exists(config.filepath):
+        logger.info(f"CHELSA data already exists at {config.filepath}")
+        return
+
+    logger.info(f"CHELSA data not found at {config.filepath}, downloading...")
+
+    try:
+        url = _get_chelsa_url(config.variable_type, config.year_range)
+    except ValueError as e:
+        logger.error(f"Cannot download data: {e}")
+        raise
+
+    destination = Path(config.filepath)
+    _download_file(url, destination)
 
 
 def download_historical_data(config: ClimateDataConfig) -> None:
@@ -237,5 +274,7 @@ def ensure_data_available(config: ClimateDataConfig) -> None:
             logger.warning(f"Future data format but not FutureClimateDataConfig: {config}")
     elif config.format == DataFormat.CRU_TS:
         download_cru_ts_data(config)
+    elif config.format == DataFormat.CHELSA:
+        download_chelsa_data(config)
     else:
         logger.warning(f"Unsupported format for auto-download: {config.format}")

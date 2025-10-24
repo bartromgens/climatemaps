@@ -19,6 +19,7 @@ class DataFormat(enum.Enum):
     GEOTIFF_WORLDCLIM_CMIP6 = "GEOTIFF_WORLDCLIM_CMIP6"
     GEOTIFF_WORLDCLIM_HISTORY = "GEOTIFF_WORLDCLIM_HISTORY"
     CRU_TS = "CRU_TS"  # Climatic Research Unit (CRU) Time-Series (TS)
+    CHELSA = "CHELSA"  # CHELSA climate data
 
 
 class SpatialResolution(enum.Enum):
@@ -26,6 +27,7 @@ class SpatialResolution(enum.Enum):
     MIN10 = "10m"
     MIN5 = "5m"
     MIN2_5 = "2.5m"
+    MIN0_5 = "0.5m"
 
 
 class ClimateVarKey(enum.Enum):
@@ -406,6 +408,15 @@ HISTORIC_DATA_GROUPS: List[ClimateDataConfigGroup] = [
         resolutions=[SpatialResolution.MIN30],
         year_ranges=[(1961, 1990)],
         conversion_factor=0.4,  # https://www.ipcc-data.org/obs/info/cru10/cru_cld_clim_1901-1910.html
+    ),
+    ClimateDataConfigGroup(
+        variable_types=[ClimateVarKey.CLOUD_COVER],
+        format=DataFormat.CHELSA,
+        source="https://chelsa-climate.org/",
+        resolutions=[SpatialResolution.MIN0_5],
+        year_ranges=[(1981, 2010)],
+        filepath_template="data/raw/chelsa/CHELSA_clt_01_1981-2010_V.2.1.tif",
+        conversion_factor=0.01,  # Convert from hundredths of percent to percentage
     ),
 ]
 

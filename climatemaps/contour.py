@@ -48,8 +48,14 @@ class ContourTileBuilder:
             self.geo_grid = self.geo_grid_orig.zoom(zoom_factor)
         else:
             self.geo_grid = self.geo_grid_orig
-        ax, contourf, figure = self._create_contourf()
-        self._save_contour_image(figure, filepath, figure_dpi)
+
+        # Adjust DPI for high-resolution data to maintain grid resolution
+        adjusted_dpi, fig_width, fig_height = self._calculate_appropriate_dpi(figure_dpi)
+        logger.info(f"Using DPI: {adjusted_dpi} (original: {figure_dpi})")
+        logger.info(f'Figure size: {fig_width:.1f}" x {fig_height:.1f}"')
+
+        ax, contourf, figure = self._create_contourf(fig_width, fig_height)
+        self._save_contour_image(figure, filepath, adjusted_dpi)
         self._create_raster_mbtiles(filepath)
         self._create_colorbar_image(ax, contourf, figure, filepath)
         self._create_contour_vector_mbtiles(filepath, zoom_factor=zoom_factor)
@@ -66,9 +72,66 @@ class ContourTileBuilder:
     def values(self):
         return self.geo_grid.clipped_values(self.config.level_lower, self.config.level_upper)
 
-    def _create_contourf(self):
-        logger.info(f"BEGIN: create matplotlib contourf")
-        figure = Figure(frameon=False)
+    def _create_contourf(self, fig_width: float = 10.0, fig_height: float = None):
+        # Check if this is high-resolution data that should use 2D histogram
+        if self._is_high_resolution():
+            return self._create_2d_histogram(fig_width, fig_height)
+        else:
+            return self._create_contour_plot(fig_width, fig_height)
+
+    def _is_high_resolution(self):
+        """Check if the data is high-resolution and should use 2D histogram instead of contours"""
+        # Consider high-resolution if we have more than 10 million pixels
+        total_pixels = len(self.geo_grid.lon_range) * len(self.geo_grid.lat_range)
+        return total_pixels > 10_000_000
+
+    def _calculate_appropriate_dpi(
+        self, base_dpi: int, standard_fig_width: float = 10.0
+    ) -> tuple[int, float, float]:
+        """Calculate appropriate DPI to maintain grid resolution in the output image"""
+        if not self._is_high_resolution():
+            return base_dpi, standard_fig_width, standard_fig_width
+
+        # For high-resolution data, calculate DPI needed to maintain grid resolution
+        grid_width = len(self.geo_grid.lon_range)
+        grid_height = len(self.geo_grid.lat_range)
+
+        # Calculate the aspect ratio of the geographic extent
+        lon_extent = self.geo_grid.urcrnrlon - self.geo_grid.llcrnrlon
+        lat_extent = self.geo_grid.urcrnrlat - self.geo_grid.llcrnrlat
+        aspect_ratio = lon_extent / lat_extent
+
+        # Calculate required DPI to maintain grid resolution
+        # We want at least 1 pixel per grid cell
+        standard_fig_height = standard_fig_width / aspect_ratio
+
+        # Calculate DPI needed to maintain grid resolution
+        required_dpi_width = grid_width / standard_fig_width
+        required_dpi_height = grid_height / standard_fig_height
+        required_dpi = max(required_dpi_width, required_dpi_height)
+
+        # Add a small buffer to ensure we maintain full resolution
+        required_dpi = required_dpi * 1.01  # 1% buffer
+
+        # Use the higher of the required DPI or base DPI
+        adjusted_dpi = max(int(required_dpi), base_dpi)
+
+        logger.info(f"Grid resolution: {grid_width} x {grid_height}")
+        logger.info(f'Figure size: {standard_fig_width:.1f}" x {standard_fig_height:.1f}"')
+        logger.info(f"Required DPI: {required_dpi:.1f}, using: {adjusted_dpi}")
+
+        return adjusted_dpi, standard_fig_width, standard_fig_height
+
+    def _calculate_fig_height(self, fig_width: float) -> float:
+        """Calculate figure height based on geographic extent aspect ratio"""
+        lon_extent = self.geo_grid.urcrnrlon - self.geo_grid.llcrnrlon
+        lat_extent = self.geo_grid.urcrnrlat - self.geo_grid.llcrnrlat
+        aspect_ratio = lon_extent / lat_extent
+        return fig_width / aspect_ratio
+
+    def _create_figure_and_axes(self, fig_width: float, fig_height: float):
+        """Create figure and axes with proper geographic extent"""
+        figure = Figure(frameon=False, figsize=(fig_width, fig_height))
         ax = figure.add_subplot(1, 1, 1, projection=ccrs.PlateCarree())
         ax.set_extent(
             [
@@ -85,6 +148,39 @@ class ContourTileBuilder:
         logger.info(
             f"llcrnrlat: {self.geo_grid.llcrnrlat}, llcrnrlon: {self.geo_grid.llcrnrlon}, urcrnrlat: {self.geo_grid.urcrnrlat}, urcrnrlon: {self.geo_grid.urcrnrlon}"
         )
+        return figure, ax
+
+    def _create_2d_histogram(self, fig_width: float = 10.0, fig_height: float = None):
+        """Create a 2D histogram plot for high-resolution data (much faster than contours)"""
+        logger.info(f"BEGIN: create 2D histogram for high-resolution data")
+        if fig_height is None:
+            fig_height = self._calculate_fig_height(fig_width)
+
+        figure, ax = self._create_figure_and_axes(fig_width, fig_height)
+        logger.info(f"Using 2D histogram for high-resolution data")
+
+        # Use pcolormesh for high-resolution data (much faster than contourf)
+        lon_grid, lat_grid = np.meshgrid(self.geo_grid.lon_range, self.geo_grid.lat_range)
+        im = ax.pcolormesh(
+            lon_grid,
+            lat_grid,
+            self.values,
+            transform=ccrs.PlateCarree(),
+            cmap=self.config.colormap,
+            norm=self.config.norm,
+            shading="auto",
+        )
+        ax.axis("off")
+        logger.info(f"DONE: create 2D histogram")
+        return ax, im, figure
+
+    def _create_contour_plot(self, fig_width: float = 10.0, fig_height: float = None):
+        """Create traditional contour plot for lower-resolution data"""
+        logger.info(f"BEGIN: create matplotlib contourf")
+        if fig_height is None:
+            fig_height = self._calculate_fig_height(fig_width)
+
+        figure, ax = self._create_figure_and_axes(fig_width, fig_height)
         logger.info(f"levels image: {self.config.levels_image}")
         lon_grid, lat_grid = np.meshgrid(self.geo_grid.lon_range, self.geo_grid.lat_range)
         contourf = ax.contourf(
@@ -162,13 +258,18 @@ class ContourTileBuilder:
     @classmethod
     def _save_contour_image(cls, figure, filepath, figure_dpi):
         logger.info(f"BEGIN: save contour to image")
-        figure.savefig(
-            filepath + ".png", dpi=figure_dpi, bbox_inches="tight", pad_inches=0, transparent=True
-        )
+        # For high-resolution data, don't use bbox_inches="tight" as it crops the image
+        # and can result in different dimensions than expected
+        figure.savefig(filepath + ".png", dpi=figure_dpi, pad_inches=0, transparent=True)
         logger.info(f"END: save contour to image")
 
     def _create_contour_vector_mbtiles(self, filepath, zoom_factor: float = None):
         logger.info("BEGIN: create contour mbtiles")
+
+        # For very high-resolution data, skip vector contours as they would be too dense
+        if self._is_high_resolution():
+            logger.info("Skipping vector contours for high-resolution data (would be too dense)")
+            return
 
         figure = Figure(frameon=False)
         ax = figure.add_subplot(1, 1, 1)
@@ -224,9 +325,9 @@ class ContourTileBuilder:
 
         logger.info("DONE: create contour mbtiles")
 
-    def _create_colorbar_image(self, ax, contour, figure, filepath):
+    def _create_colorbar_image(self, ax, contour_or_im, figure, filepath):
         logger.info(f"saving colorbar to image")
-        cbar = figure.colorbar(contour, format="%.1f")
+        cbar = figure.colorbar(contour_or_im, format="%.1f")
         cbar.set_label(self.config.title + " [" + self.config.unit + "]")
         cbar.set_ticks(self.config.colorbar_ticks)
         ax.set_visible(False)

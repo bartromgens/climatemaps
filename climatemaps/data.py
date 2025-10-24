@@ -2,7 +2,12 @@ import numpy
 
 from climatemaps.datasets import ClimateDataConfig, DataFormat, FutureClimateDataConfig
 from climatemaps.download import ensure_data_available
-from climatemaps.geotiff import read_geotiff_future, read_geotiff_history, read_geotiff_cru_ts
+from climatemaps.geotiff import (
+    read_geotiff_future,
+    read_geotiff_history,
+    read_geotiff_cru_ts,
+    read_geotiff_chelsa,
+)
 from climatemaps.geogrid import GeoGrid
 from climatemaps.logger import logger
 
@@ -17,6 +22,8 @@ def load_climate_data(data_config: ClimateDataConfig, month: int) -> GeoGrid:
             lon_range, lat_range, values = read_geotiff_future(data_config.filepath, month)
         elif data_config.format == DataFormat.GEOTIFF_WORLDCLIM_HISTORY:
             lon_range, lat_range, values = read_geotiff_history(data_config.filepath, month)
+        elif data_config.format == DataFormat.CHELSA:
+            lon_range, lat_range, values = read_geotiff_chelsa(data_config.filepath, month)
         else:
             raise ValueError(f"Unsupported data format: {data_config.format}")
 
