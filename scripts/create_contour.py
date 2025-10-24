@@ -4,8 +4,9 @@ import multiprocessing
 import os
 import sys
 import concurrent.futures
+from dataclasses import dataclass
 from datetime import datetime
-from typing import List
+from typing import List, Union
 
 import numpy as np
 
@@ -30,7 +31,6 @@ from climatemaps.datasets import HISTORIC_DATA_SETS
 from climatemaps.datasets import FUTURE_DATA_SETS
 from climatemaps.datasets import DIFFERENCE_DATA_SETS
 from climatemaps.datasets import SpatialResolution
-from climatemaps.settings import settings
 from climatemaps.logger import logger
 from climatemaps.tile import tile_files_exist, difference_tile_files_exist
 from climatemaps.download import ensure_data_available
@@ -40,9 +40,20 @@ maps_config: ClimateMapsConfig = get_config()
 
 np.set_printoptions(3, threshold=100, suppress=True)  # .3f
 
+
+@dataclass
+class DatasetGroup:
+    """Represents a group of datasets with their configuration and metadata."""
+
+    datasets: List[Union[ClimateDataConfig, ClimateDifferenceDataConfig]]
+    test_criteria: dict
+    is_difference: bool
+    name: str
+
+
 DEFAULT_TEST_SET_HISTORIC = {
-    "variable_type": ClimateVarKey.PRECIPITATION,
-    "resolution": SpatialResolution.MIN10,
+    "variable_type": ClimateVarKey.CLOUD_COVER,
+    "resolution": SpatialResolution.MIN0_5,
 }
 
 DEFAULT_TEST_SET_FUTURE = {
@@ -174,32 +185,46 @@ def main(
     climate_model: ClimateModel | None = None,
     if_older_than: datetime | None = None,
     processes: int = 1,
+    dataset_type: str | None = None,
 ) -> None:
     month_upper = 1 if limited_test_set else 12
     all_tasks = []
     all_datasets = []
 
     dataset_groups = [
-        (HISTORIC_DATA_SETS, DEFAULT_TEST_SET_HISTORIC, False, "historic"),
-        (FUTURE_DATA_SETS, DEFAULT_TEST_SET_FUTURE, False, "future"),
-        (DIFFERENCE_DATA_SETS, DEFAULT_TEST_SET_FUTURE, True, "difference"),
+        DatasetGroup(HISTORIC_DATA_SETS, DEFAULT_TEST_SET_HISTORIC, False, "historic"),
+        DatasetGroup(FUTURE_DATA_SETS, DEFAULT_TEST_SET_FUTURE, False, "future"),
+        DatasetGroup(DIFFERENCE_DATA_SETS, DEFAULT_TEST_SET_FUTURE, True, "difference"),
     ]
 
-    for datasets, criteria, is_diff, name in dataset_groups:
+    # Filter dataset groups based on dataset_type argument
+    if dataset_type is not None:
+        dataset_groups = [group for group in dataset_groups if group.name == dataset_type]
+        if not dataset_groups:
+            logger.warning(
+                f"No datasets found for type '{dataset_type}'. Available types: historic, future, difference"
+            )
+            return
+
+    for group in dataset_groups:
         if limited_test_set:
-            datasets = _filter_by_criteria(datasets, criteria, is_diff)
+            group.datasets = _filter_by_criteria(
+                group.datasets, group.test_criteria, group.is_difference
+            )
         elif climate_model is not None:
-            if name == "historic":
-                datasets = []
-            elif is_diff:
-                datasets = [
-                    ds for ds in datasets if ds.future_config.climate_model == climate_model
+            if group.name == "historic":
+                group.datasets = []
+            elif group.is_difference:
+                group.datasets = [
+                    ds for ds in group.datasets if ds.future_config.climate_model == climate_model
                 ]
             else:
-                datasets = [ds for ds in datasets if ds.climate_model == climate_model]
-        all_datasets.extend(datasets)
+                group.datasets = [ds for ds in group.datasets if ds.climate_model == climate_model]
+        all_datasets.extend(group.datasets)
         all_tasks.extend(
-            _create_tasks_for_datasets(datasets, month_upper, force_recreate, name, if_older_than)
+            _create_tasks_for_datasets(
+                group.datasets, month_upper, force_recreate, group.name, if_older_than
+            )
         )
 
     logger.info("Pre-ensuring all data files exist before multiprocessing")
@@ -351,6 +376,13 @@ if __name__ == "__main__":
         default=1,
         help="Number of parallel processes to use for tile creation. Defaults to 1.",
     )
+    parser.add_argument(
+        "--dataset-type",
+        type=str,
+        default=None,
+        choices=["historic", "future", "difference"],
+        help="Process only specific dataset type: historic, future, or difference. Defaults to all types.",
+    )
     args = parser.parse_args()
 
     climate_model = None
@@ -370,4 +402,5 @@ if __name__ == "__main__":
         climate_model=climate_model,
         if_older_than=if_older_than,
         processes=args.processes,
+        dataset_type=args.dataset_type,
     )
