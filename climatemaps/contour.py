@@ -220,12 +220,15 @@ class ContourTileBuilder:
         addo_cmd = [
             "gdaladdo",
             "-r",
-            "nearest",
+            "lanczos",
             mbtiles_temp_path,
             "2",
             "4",
             "8",
             "16",
+            "32",
+            "64",
+            "128",
         ]
 
         try:
