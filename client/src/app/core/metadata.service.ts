@@ -37,6 +37,7 @@ export class MetadataService {
   ];
 
   private readonly RESOLUTION_ORDER: SpatialResolution[] = [
+    SpatialResolution.MIN0_5,
     SpatialResolution.MIN2_5,
     SpatialResolution.MIN5,
     SpatialResolution.MIN10,
@@ -218,9 +219,19 @@ export class MetadataService {
   }
 
   private formatYearRangeLabel(start: number, end: number): string {
-    // Show "1970-2000" for all historic date ranges
-    if (start < 2000) {
+    // Show specific labels for known historical ranges
+    if (start === 1961 && end === 1990) {
+      return '1961-1990';
+    }
+    if (start === 1970 && end === 2000) {
       return '1970-2000';
+    }
+    if (start === 1981 && end === 2010) {
+      return '1981-2010';
+    }
+    // For other historical ranges, show the actual range
+    if (start < 2000) {
+      return `${start}-${end}`;
     }
     return `${start}-${end}`;
   }

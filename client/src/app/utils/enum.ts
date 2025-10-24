@@ -57,6 +57,7 @@ export enum SpatialResolution {
   MIN10 = '10m',
   MIN5 = '5m',
   MIN2_5 = '2.5m',
+  MIN0_5 = '0.5m',
 }
 
 // Climate Model enum matching the backend

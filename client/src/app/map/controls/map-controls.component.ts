@@ -200,6 +200,8 @@ export class MapControlsComponent implements OnInit {
         return 'High';
       case SpatialResolution.MIN2_5:
         return 'Very High';
+      case SpatialResolution.MIN0_5:
+        return 'Ultra High';
       default:
         return resolution;
     }

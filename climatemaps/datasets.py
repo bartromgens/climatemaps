@@ -401,14 +401,6 @@ HISTORIC_DATA_GROUPS: List[ClimateDataConfigGroup] = [
         year_ranges=[(1961, 1990)],
         conversion_factor=0.2,
     ),
-    CRUTSClimateDataConfigGroup(
-        variable_types=[ClimateVarKey.CLOUD_COVER],
-        format=DataFormat.CRU_TS,
-        source="https://ipcc-browser.ipcc-data.org/browser/dataset/653/0",
-        resolutions=[SpatialResolution.MIN30],
-        year_ranges=[(1961, 1990)],
-        conversion_factor=0.4,  # https://www.ipcc-data.org/obs/info/cru10/cru_cld_clim_1901-1910.html
-    ),
     ClimateDataConfigGroup(
         variable_types=[ClimateVarKey.CLOUD_COVER],
         format=DataFormat.CHELSA,
