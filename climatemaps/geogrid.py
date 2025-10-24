@@ -108,18 +108,6 @@ class GeoGrid(BaseModel):
         return self.lon_range[-1]
 
     @property
-    def bin_width(self):
-        # Use a small tolerance for high-resolution grids like CHELSA
-        tolerance = 1e-5
-        width_diff = abs(self.bin_width_lon - self.bin_width_lat)
-        assert width_diff < tolerance, (
-            f"Longitude and latitude bin widths must be approximately equal for regular grid. "
-            f"Got lon_width={self.bin_width_lon:.6f}, lat_width={self.bin_width_lat:.6f} "
-            f"(difference={width_diff:.8f}). Grid dimensions: {len(self.lon_range)} x {len(self.lat_range)}"
-        )
-        return self.bin_width_lon
-
-    @property
     def bin_width_lon(self):
         return 360.0 / len(self.lon_range)
 
@@ -130,22 +118,22 @@ class GeoGrid(BaseModel):
     @property
     def llcrnrlon(self):
         """lower left corner longitude"""
-        return self.lon_min - self.bin_width / 2
+        return self.lon_min - self.bin_width_lon / 2
 
     @property
     def llcrnrlat(self):
         """lower left corner latitude"""
-        return self.lat_min - self.bin_width / 2
+        return self.lat_min - self.bin_width_lat / 2
 
     @property
     def urcrnrlon(self):
         """upper right corner longitude"""
-        return self.lon_max + self.bin_width / 2
+        return self.lon_max + self.bin_width_lon / 2
 
     @property
     def urcrnrlat(self):
         """upper right corner latitude"""
-        return self.lat_max + self.bin_width / 2
+        return self.lat_max + self.bin_width_lat / 2
 
     def get_value_at_coordinate(self, lon: float, lat: float) -> float:
         if lon < self.lon_min or lon > self.lon_max:
