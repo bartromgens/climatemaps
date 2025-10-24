@@ -66,6 +66,31 @@ class GeoGrid(BaseModel):
         diff_vals = self.values - other.values
         return GeoGrid(lon_range=self.lon_range, lat_range=self.lat_range, values=diff_vals)
 
+    def downsample(self, factor: int = 2) -> "GeoGrid":
+        """
+        Reduce the resolution of the grid by the specified factor.
+        For example, factor=2 will halve the resolution in both dimensions.
+        """
+        if factor < 1:
+            raise ValueError("Downsampling factor must be >= 1")
+
+        if factor == 1:
+            return self
+
+        # Calculate new dimensions
+        new_lat_size = max(1, self.lat_range.size // factor)
+        new_lon_size = max(1, self.lon_range.size // factor)
+
+        # Create new coordinate arrays
+        new_lat_range = np.linspace(self.lat_max, self.lat_min, new_lat_size)
+        new_lon_range = np.linspace(self.lon_min, self.lon_max, new_lon_size)
+
+        # Downsample values using scipy's zoom function
+        zoom_factors = (new_lat_size / self.lat_range.size, new_lon_size / self.lon_range.size)
+        new_values = scipy.ndimage.zoom(self.values, zoom=zoom_factors, order=1)
+
+        return GeoGrid(lon_range=new_lon_range, lat_range=new_lat_range, values=new_values)
+
     @property
     def lat_min(self):
         return self.lat_range[-1]

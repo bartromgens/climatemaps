@@ -128,3 +128,80 @@ class TestGeoGridGetValueAtCoordinate:
         )
         with pytest.raises(ValueError, match="No data available at coordinates"):
             geo_grid_nan.get_value_at_coordinate(lon=45, lat=45)
+
+
+class TestGeoGridDownsample:
+
+    @pytest.fixture(autouse=True)
+    def setup(self):
+        # Create a larger grid for testing downsampling
+        self.lon_range = np.linspace(-180, 180, 20)
+        self.lat_range = np.linspace(90, -90, 10)
+        self.values = np.random.rand(10, 20)
+        self.geo_grid = GeoGrid(
+            lon_range=self.lon_range, lat_range=self.lat_range, values=self.values
+        )
+
+    def test_downsample_factor_2(self):
+        """Test downsampling by factor of 2"""
+        downsampled = self.geo_grid.downsample(factor=2)
+
+        # Check that dimensions are halved
+        assert downsampled.values.shape[0] == self.geo_grid.values.shape[0] // 2
+        assert downsampled.values.shape[1] == self.geo_grid.values.shape[1] // 2
+        assert len(downsampled.lat_range) == len(self.geo_grid.lat_range) // 2
+        assert len(downsampled.lon_range) == len(self.geo_grid.lon_range) // 2
+
+        # Check that geographic bounds are preserved
+        assert downsampled.lat_min == self.geo_grid.lat_min
+        assert downsampled.lat_max == self.geo_grid.lat_max
+        assert downsampled.lon_min == self.geo_grid.lon_min
+        assert downsampled.lon_max == self.geo_grid.lon_max
+
+    def test_downsample_factor_4(self):
+        """Test downsampling by factor of 4"""
+        downsampled = self.geo_grid.downsample(factor=4)
+
+        # Check that dimensions are quartered
+        assert downsampled.values.shape[0] == self.geo_grid.values.shape[0] // 4
+        assert downsampled.values.shape[1] == self.geo_grid.values.shape[1] // 4
+        assert len(downsampled.lat_range) == len(self.geo_grid.lat_range) // 4
+        assert len(downsampled.lon_range) == len(self.geo_grid.lon_range) // 4
+
+    def test_downsample_factor_1(self):
+        """Test that factor=1 returns original grid"""
+        downsampled = self.geo_grid.downsample(factor=1)
+
+        # Should be identical to original
+        npt.assert_array_equal(downsampled.values, self.geo_grid.values)
+        npt.assert_array_equal(downsampled.lat_range, self.geo_grid.lat_range)
+        npt.assert_array_equal(downsampled.lon_range, self.geo_grid.lon_range)
+
+    def test_downsample_invalid_factor(self):
+        """Test that invalid factors raise ValueError"""
+        with pytest.raises(ValueError, match="Downsampling factor must be >= 1"):
+            self.geo_grid.downsample(factor=0)
+
+        with pytest.raises(ValueError, match="Downsampling factor must be >= 1"):
+            self.geo_grid.downsample(factor=-1)
+
+    def test_downsample_large_factor(self):
+        """Test downsampling with a large factor that results in minimum size"""
+        # Use a factor that would result in 0 dimensions, should be clamped to 1
+        downsampled = self.geo_grid.downsample(factor=100)
+
+        # Should have minimum size of 1x1
+        assert downsampled.values.shape[0] == 1
+        assert downsampled.values.shape[1] == 1
+        assert len(downsampled.lat_range) == 1
+        assert len(downsampled.lon_range) == 1
+
+    def test_downsample_preserves_geographic_bounds(self):
+        """Test that downsampling preserves the geographic extent"""
+        downsampled = self.geo_grid.downsample(factor=3)
+
+        # Geographic bounds should be exactly the same
+        assert downsampled.lat_min == self.geo_grid.lat_min
+        assert downsampled.lat_max == self.geo_grid.lat_max
+        assert downsampled.lon_min == self.geo_grid.lon_min
+        assert downsampled.lon_max == self.geo_grid.lon_max

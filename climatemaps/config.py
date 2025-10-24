@@ -36,7 +36,7 @@ class ClimateMapsConfig:
 
     @property
     def figure_dpi(self) -> int:
-        return 3000
+        return 1000
 
 
 class ClimateMapsConfigDev(ClimateMapsConfig):
@@ -55,7 +55,7 @@ class ClimateMapsConfigDev(ClimateMapsConfig):
 
     @property
     def figure_dpi(self) -> int:
-        return 1000
+        return 700
 
 
 def get_config() -> ClimateMapsConfig:

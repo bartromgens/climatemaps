@@ -12,6 +12,7 @@ from climatemaps.contour_config import ContourPlotConfig
 from climatemaps.geogrid import GeoGrid
 from climatemaps.settings import settings
 from climatemaps.logger import logger
+from climatemaps.config import get_config
 
 
 class ContourTileBuilder:
@@ -44,7 +45,7 @@ class ContourTileBuilder:
         logger.info(f"BEGIN: contour for {name} and month {month} and zoomfactor {zoom_factor}")
         data_dir = self._create_output_dir(data_dir_out, name)
         filepath = os.path.join(str(data_dir), str(month))
-        if zoom_factor:
+        if zoom_factor and not self._is_high_resolution():
             self.geo_grid = self.geo_grid_orig.zoom(zoom_factor)
         else:
             self.geo_grid = self.geo_grid_orig
@@ -89,29 +90,25 @@ class ContourTileBuilder:
         self, base_dpi: int, standard_fig_width: float = 10.0
     ) -> tuple[int, float, float]:
         """Calculate appropriate DPI to maintain grid resolution in the output image"""
-        if not self._is_high_resolution():
-            return base_dpi, standard_fig_width, standard_fig_width
-
-        # For high-resolution data, calculate DPI needed to maintain grid resolution
-        grid_width = len(self.geo_grid.lon_range)
-        grid_height = len(self.geo_grid.lat_range)
-
         # Calculate the aspect ratio of the geographic extent
         lon_extent = self.geo_grid.urcrnrlon - self.geo_grid.llcrnrlon
         lat_extent = self.geo_grid.urcrnrlat - self.geo_grid.llcrnrlat
         aspect_ratio = lon_extent / lat_extent
 
-        # Calculate required DPI to maintain grid resolution
-        # We want at least 1 pixel per grid cell
+        # Calculate figure height based on aspect ratio
         standard_fig_height = standard_fig_width / aspect_ratio
+
+        if not self._is_high_resolution():
+            return base_dpi, standard_fig_width, standard_fig_height
+
+        # For high-resolution data, calculate DPI needed to maintain grid resolution
+        grid_width = len(self.geo_grid.lon_range)
+        grid_height = len(self.geo_grid.lat_range)
 
         # Calculate DPI needed to maintain grid resolution
         required_dpi_width = grid_width / standard_fig_width
         required_dpi_height = grid_height / standard_fig_height
         required_dpi = max(required_dpi_width, required_dpi_height)
-
-        # Add a small buffer to ensure we maintain full resolution
-        required_dpi = required_dpi * 1.01  # 1% buffer
 
         # Use the higher of the required DPI or base DPI
         adjusted_dpi = max(int(required_dpi), base_dpi)
@@ -132,6 +129,8 @@ class ContourTileBuilder:
     def _create_figure_and_axes(self, fig_width: float, fig_height: float):
         """Create figure and axes with proper geographic extent"""
         figure = Figure(frameon=False, figsize=(fig_width, fig_height))
+        # Remove padding to use full figure area
+        figure.subplots_adjust(left=0, right=1, top=1, bottom=0)
         ax = figure.add_subplot(1, 1, 1, projection=ccrs.PlateCarree())
         ax.set_extent(
             [
@@ -251,8 +250,12 @@ class ContourTileBuilder:
             raise
         finally:
             if os.path.exists(contour_image_path):
-                logger.info(f"Removing temporary PNG file: {contour_image_path}")
-                os.remove(contour_image_path)
+                config = get_config()
+                if not config.dev_mode:
+                    logger.info(f"Removing temporary PNG file: {contour_image_path}")
+                    os.remove(contour_image_path)
+                else:
+                    logger.info(f"Keeping temporary PNG file in dev mode: {contour_image_path}")
         logger.info(f"END: creating raster mbtiles:{mbtiles_path}")
 
     @classmethod
@@ -266,18 +269,32 @@ class ContourTileBuilder:
     def _create_contour_vector_mbtiles(self, filepath, zoom_factor: float = None):
         logger.info("BEGIN: create contour mbtiles")
 
-        # For very high-resolution data, skip vector contours as they would be too dense
+        # For very high-resolution data, downsample before creating contours
         if self._is_high_resolution():
-            logger.info("Skipping vector contours for high-resolution data (would be too dense)")
-            return
+            logger.info("Downsampling high-resolution data for vector contours")
+            # Calculate appropriate downsampling factor to get under 10M pixels
+            total_pixels = len(self.geo_grid.lon_range) * len(self.geo_grid.lat_range)
+            target_pixels = 10_000_000  # Target 10M pixels for good balance
+            downsample_factor = int(np.ceil(np.sqrt(total_pixels / target_pixels)))
+            logger.info(f"Downsampling by factor of {downsample_factor}")
+
+            # Create downsampled grid for contours
+            downsampled_grid = self.geo_grid.downsample(factor=downsample_factor)
+            contour_lon_range = downsampled_grid.lon_range
+            contour_lat_range = downsampled_grid.lat_range
+            contour_values = downsampled_grid.values
+        else:
+            contour_lon_range = self.geo_grid.lon_range
+            contour_lat_range = self.geo_grid.lat_range
+            contour_values = self.values
 
         figure = Figure(frameon=False)
         ax = figure.add_subplot(1, 1, 1)
         logger.info(f"creating matplotlib contour")
         contours = ax.contour(
-            self.geo_grid.lon_range,
-            self.geo_grid.lat_range,
-            self.values,
+            contour_lon_range,
+            contour_lat_range,
+            contour_values,
             levels=self.config.levels,
             cmap=self.config.colormap,
             norm=self.config.norm,
