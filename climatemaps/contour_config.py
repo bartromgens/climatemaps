@@ -6,7 +6,7 @@ from pydantic import computed_field
 from pydantic import model_validator
 from pydantic import ConfigDict
 from matplotlib import pyplot as plt
-from matplotlib.colors import SymLogNorm
+from matplotlib.colors import BoundaryNorm, SymLogNorm
 
 
 class ContourPlotConfig(BaseModel):
@@ -45,7 +45,10 @@ class ContourPlotConfig(BaseModel):
             return SymLogNorm(
                 linthresh=self.linthresh, vmin=self.level_lower, vmax=self.level_upper
             )
-        return None
+        n_colors = self.colormap.N
+        levels = np.linspace(self.level_lower, self.level_upper, num=n_colors)
+        norm = BoundaryNorm(levels, n_colors)
+        return norm
 
     @computed_field
     @property

@@ -160,7 +160,7 @@ CLIMATE_CONTOUR_CONFIGS: Dict[ClimateVarKey, ContourPlotConfig] = {
         level_lower=-30, level_upper=28, colormap=plt.cm.jet, title="Min. temperature", unit="C"
     ),
     ClimateVarKey.CLOUD_COVER: ContourPlotConfig(
-        level_lower=0, level_upper=100, colormap=plt.cm.RdYlBu, title="Cloud coverage", unit="%"
+        level_lower=10, level_upper=90, colormap=plt.cm.RdYlBu, title="Cloud coverage", unit="%"
     ),
     ClimateVarKey.WET_DAYS: ContourPlotConfig(
         level_lower=0, level_upper=30, colormap=plt.cm.RdYlBu, title="Wet days", unit="days"
@@ -185,7 +185,7 @@ CLIMATE_CONTOUR_CONFIGS: Dict[ClimateVarKey, ContourPlotConfig] = {
         level_lower=1, level_upper=34, colormap=plt.cm.jet, title="Vapour pressure", unit="hPa"
     ),
     ClimateVarKey.RELATIVE_HUMIDITY: ContourPlotConfig(
-        level_lower=0, level_upper=100, colormap=plt.cm.RdYlBu, title="Relative Humidity", unit="%"
+        level_lower=25, level_upper=100, colormap=plt.cm.RdYlBu, title="Relative Humidity", unit="%"
     ),
 }
 
