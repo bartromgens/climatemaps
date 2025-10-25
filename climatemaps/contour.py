@@ -195,8 +195,7 @@ class ContourTileBuilder:
         logger.info(f"DONE: create matplotlib contourf")
         return ax, contourf, figure
 
-    @classmethod
-    def _create_raster_mbtiles(cls, filepath):
+    def _create_raster_mbtiles(self, filepath):
         contour_image_path = f"{filepath}.png"
         mbtiles_path = f"{filepath}_raster.mbtiles"
         mbtiles_temp_path = f"{mbtiles_path}.tmp"
@@ -207,10 +206,10 @@ class ContourTileBuilder:
             "-of",
             "MBTILES",
             "-a_ullr",
-            "-180.0",
-            "90.0",
-            "180.0",
-            "-90.0",
+            str(self.geo_grid.llcrnrlon),
+            str(self.geo_grid.urcrnrlat),
+            str(self.geo_grid.urcrnrlon),
+            str(self.geo_grid.llcrnrlat),
             "-a_srs",
             "EPSG:4326",
             contour_image_path,
