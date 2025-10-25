@@ -37,16 +37,27 @@ def load_climate_data(data_config: ClimateDataConfig, month: int) -> GeoGrid:
         if data_config.conversion_function is not None:
             values = data_config.conversion_function(values, month)
 
+        # Create GeoGrid
+        geo_grid = GeoGrid(lon_range=lon_range, lat_range=lat_range, values=values)
+
         if data_config.resolution == SpatialResolution.MIN0_5:
-            factor = 4
+            factor = 3
             logger.info(
                 f"Downsampling {data_config.data_type_slug} from {data_config.resolution} with factor {factor}"
             )
-            return GeoGrid(lon_range=lon_range, lat_range=lat_range, values=values).downsample(
-                factor
-            )
+            geo_grid = geo_grid.downsample(factor)
 
-        return GeoGrid(lon_range=lon_range, lat_range=lat_range, values=values)
+            # Apply land mask after downsampling for CHELSA data (more efficient)
+            if data_config.format == DataFormat.CHELSA:
+                geo_grid = geo_grid.apply_land_mask()
+
+            return geo_grid
+
+        # Apply land mask for CHELSA data at full resolution
+        if data_config.format == DataFormat.CHELSA:
+            geo_grid = geo_grid.apply_land_mask()
+
+        return geo_grid
     except FileNotFoundError as e:
         logger.exception(
             f"Failed to load climate data for {data_config.data_type_slug}, month {month}, file: {data_config.filepath}: {e}"

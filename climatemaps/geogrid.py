@@ -1,12 +1,15 @@
 import logging
+import os
 
 import numpy as np
 import numpy.typing as npt
+import rasterio
 import scipy
 from pydantic import BaseModel
 from pydantic import ConfigDict
 from pydantic import field_validator
 from pydantic import model_validator
+from scipy.interpolate import RegularGridInterpolator
 
 logger = logging.getLogger(__name__)
 
@@ -48,6 +51,7 @@ class GeoGrid(BaseModel):
         Increase resolution of the data by using spline interpolation.
         Returns a new zoomed GeoGrid object.
         """
+        assert self.resolution_mega_pixel < 25, "Zooming is not supported for low-resolution data"
         values = scipy.ndimage.zoom(self.values, zoom=zoom_factor, order=1)
         lon_range = scipy.ndimage.zoom(self.lon_range, zoom=zoom_factor, order=1)
         lat_range = scipy.ndimage.zoom(self.lat_range, zoom=zoom_factor, order=1)
@@ -168,3 +172,71 @@ class GeoGrid(BaseModel):
             raise ValueError(f"No data available at coordinates (lat={lat}, lon={lon})")
 
         return value
+
+    def apply_land_mask(self, land_mask_path: str = "data/raw/land_mask.tif") -> "GeoGrid":
+        """
+        Apply land-sea mask to remove sea areas from the data array.
+
+        Args:
+            land_mask_path: Path to the land mask file
+
+        Returns:
+            A new GeoGrid with sea areas set to NaN
+        """
+        if not os.path.exists(land_mask_path):
+            logger.error(f"Land mask file not found at {land_mask_path}, skipping sea masking")
+            return self
+
+        logger.info(f"Applying land-sea mask from {land_mask_path}")
+
+        with rasterio.open(land_mask_path) as mask_src:
+            # Read the land mask
+            land_mask_data = mask_src.read(1)
+            logger.debug(f"Land mask shape: {land_mask_data.shape}, bounds: {mask_src.bounds}")
+
+            # Interpolate the land mask to match data coordinates using efficient method
+            logger.info("Interpolating land mask to match data coordinates")
+
+            # Create coordinate arrays for the land mask
+            mask_lon_array = np.linspace(
+                mask_src.bounds.left, mask_src.bounds.right, mask_src.width, endpoint=False
+            )
+
+            mask_lat_array = np.linspace(
+                mask_src.bounds.top, mask_src.bounds.bottom, mask_src.height, endpoint=False
+            )
+
+            # Create interpolator for the land mask
+            interpolator = RegularGridInterpolator(
+                (mask_lat_array, mask_lon_array),
+                land_mask_data,
+                method="nearest",
+                bounds_error=False,
+                fill_value=0,
+            )
+
+            # Create coordinate grids for data
+            lon_grid, lat_grid = np.meshgrid(self.lon_range, self.lat_range)
+
+            # Interpolate using the efficient RegularGridInterpolator
+            interpolated_mask = interpolator((lat_grid, lon_grid)).astype(np.uint8)
+
+            # Apply the land mask (1 = land, 0 = sea)
+            land_pixels = np.sum(interpolated_mask == 1)
+            sea_pixels = np.sum(interpolated_mask == 0)
+            logger.info(
+                f"Land-sea mask applied: {land_pixels} land pixels, {sea_pixels} sea pixels"
+            )
+
+            # Create new values array with masking applied
+            new_values = self.values.copy()
+            new_values[interpolated_mask == 0] = np.nan
+
+            # Log final statistics
+            final_land_pixels = np.count_nonzero(~np.isnan(new_values))
+            final_sea_pixels = np.count_nonzero(np.isnan(new_values))
+            logger.info(
+                f"After masking: {final_land_pixels} land pixels, {final_sea_pixels} sea pixels ({final_sea_pixels/new_values.size*100:.1f}% masked)"
+            )
+
+        return GeoGrid(lon_range=self.lon_range, lat_range=self.lat_range, values=new_values)
