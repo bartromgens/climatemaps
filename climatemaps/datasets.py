@@ -15,6 +15,19 @@ from pydantic import BaseModel
 from climatemaps.contour_config import ContourPlotConfig
 
 
+def chelsa_temperature_conversion(
+    values: npt.NDArray[np.floating], month: int
+) -> npt.NDArray[np.floating]:
+    """
+    Convert CHELSA temperature data from tenths of Kelvin to Celsius.
+
+    CHELSA temperature data is stored in tenths of Kelvin, so we need to:
+    1. Convert from tenths of Kelvin to Kelvin (already done by conversion_factor=0.1)
+    2. Convert from Kelvin to Celsius (subtract 273.15)
+    """
+    return values - 273.15
+
+
 class DataFormat(enum.Enum):
     GEOTIFF_WORLDCLIM_CMIP6 = "GEOTIFF_WORLDCLIM_CMIP6"
     GEOTIFF_WORLDCLIM_HISTORY = "GEOTIFF_WORLDCLIM_HISTORY"
@@ -106,6 +119,9 @@ CLIMATE_VARIABLES: Dict[ClimateVarKey, ClimateVariable] = {
     ClimateVarKey.FROST_DAYS: ClimateVariable(
         name="FrostDays", display_name="Frost Days", unit="days", filename="frostdays"
     ),
+    ClimateVarKey.WIND_SPEED: ClimateVariable(
+        name="WindSpeed", display_name="Wind Speed", unit="m/s", filename="wind"
+    ),
     ClimateVarKey.RADIATION: ClimateVariable(
         name="Radiation", display_name="Radiation", unit="W/m^2", filename="radiation"
     ),
@@ -144,6 +160,9 @@ CLIMATE_CONTOUR_CONFIGS: Dict[ClimateVarKey, ContourPlotConfig] = {
     ),
     ClimateVarKey.FROST_DAYS: ContourPlotConfig(
         level_lower=0, level_upper=30, colormap=plt.cm.RdYlBu, title="Frost days", unit="days"
+    ),
+    ClimateVarKey.WIND_SPEED: ContourPlotConfig(
+        level_lower=0, level_upper=15, colormap=plt.cm.viridis, title="Wind Speed", unit="m/s"
     ),
     ClimateVarKey.RADIATION: ContourPlotConfig(
         level_lower=0, level_upper=300, colormap=plt.cm.RdYlBu_r, title="Radiation", unit="W/m^2"
@@ -361,6 +380,62 @@ class CRUTSClimateDataConfigGroup(ClimateDataConfigGroup):
         return configs
 
 
+@dataclass
+class CHELSAClimateDataConfigGroup(ClimateDataConfigGroup):
+    def create_configs(self) -> List[ClimateDataConfig]:
+        configs: List[ClimateDataConfig] = []
+        for variable_type in self.variable_types:
+            for year_range in self.year_ranges:
+                for resolution in self.resolutions:
+                    # CHELSA variables use different naming conventions
+                    variable_map = {
+                        ClimateVarKey.CLOUD_COVER: "clt",
+                        ClimateVarKey.T_MAX: "tasmax",
+                        ClimateVarKey.T_MIN: "tasmin",
+                        ClimateVarKey.PRECIPITATION: "pr",
+                        ClimateVarKey.WIND_SPEED: "wind",
+                    }
+
+                    var_str = variable_map.get(variable_type)
+                    if not var_str:
+                        raise ValueError(f"Unsupported CHELSA variable: {variable_type}")
+
+                    # For CHELSA, we use a single file that contains all months in separate bands
+                    # The filepath template should point to the January file (month 01)
+                    filepath = f"data/raw/chelsa/CHELSA_{var_str}_01_{year_range[0]}-{year_range[1]}_V.2.1.tif"
+
+                    # Different conversion factors for different variables
+                    conversion_factors = {
+                        ClimateVarKey.CLOUD_COVER: 0.01,  # Convert from hundredths of percent to percentage
+                        ClimateVarKey.T_MAX: 0.1,  # Convert from tenths of degrees to degrees
+                        ClimateVarKey.T_MIN: 0.1,  # Convert from tenths of degrees to degrees
+                        ClimateVarKey.PRECIPITATION: 0.1,  # Convert from tenths of mm to mm
+                        ClimateVarKey.WIND_SPEED: 0.1,  # Convert from tenths of m/s to m/s
+                    }
+
+                    conversion_factor = conversion_factors.get(
+                        variable_type, self.conversion_factor
+                    )
+
+                    # Use temperature conversion function for temperature variables
+                    conversion_function = self.conversion_function
+                    if variable_type in [ClimateVarKey.T_MAX, ClimateVarKey.T_MIN]:
+                        conversion_function = chelsa_temperature_conversion
+
+                    config = ClimateDataConfig(
+                        variable_type=variable_type,
+                        format=self.format,
+                        resolution=resolution,
+                        year_range=year_range,
+                        filepath=filepath,
+                        conversion_function=conversion_function,
+                        conversion_factor=conversion_factor,
+                        source=self.source,
+                    )
+                    configs.append(config)
+        return configs
+
+
 HISTORIC_DATA_GROUPS: List[ClimateDataConfigGroup] = [
     ClimateDataConfigGroup(
         variable_types=[ClimateVarKey.T_MAX, ClimateVarKey.T_MIN, ClimateVarKey.PRECIPITATION],
@@ -401,14 +476,16 @@ HISTORIC_DATA_GROUPS: List[ClimateDataConfigGroup] = [
         year_ranges=[(1961, 1990)],
         conversion_factor=0.2,
     ),
-    ClimateDataConfigGroup(
-        variable_types=[ClimateVarKey.CLOUD_COVER],
+    CHELSAClimateDataConfigGroup(
+        variable_types=[
+            ClimateVarKey.CLOUD_COVER,
+            ClimateVarKey.T_MAX,
+            ClimateVarKey.T_MIN,
+        ],
         format=DataFormat.CHELSA,
-        source="https://chelsa-climate.org/",
+        source="https://envicloud.wsl.ch/#/?bucket=https%3A%2F%2Fos.zhdk.cloud.switch.ch%2Fchelsav2%2F&prefix=GLOBAL%2Fclimatologies%2F1981-2010%2F",
         resolutions=[SpatialResolution.MIN0_5],
         year_ranges=[(1981, 2010)],
-        filepath_template="data/raw/chelsa/CHELSA_clt_01_1981-2010_V.2.1.tif",
-        conversion_factor=0.01,  # Convert from hundredths of percent to percentage
     ),
 ]
 
