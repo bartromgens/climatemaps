@@ -1,6 +1,11 @@
 import numpy
 
-from climatemaps.datasets import ClimateDataConfig, DataFormat, FutureClimateDataConfig
+from climatemaps.datasets import (
+    ClimateDataConfig,
+    DataFormat,
+    FutureClimateDataConfig,
+    SpatialResolution,
+)
 from climatemaps.download import ensure_data_available
 from climatemaps.geotiff import (
     read_geotiff_future,
@@ -31,6 +36,15 @@ def load_climate_data(data_config: ClimateDataConfig, month: int) -> GeoGrid:
 
         if data_config.conversion_function is not None:
             values = data_config.conversion_function(values, month)
+
+        if data_config.resolution == SpatialResolution.MIN0_5:
+            factor = 4
+            logger.info(
+                f"Downsampling {data_config.data_type_slug} from {data_config.resolution} with factor {factor}"
+            )
+            return GeoGrid(lon_range=lon_range, lat_range=lat_range, values=values).downsample(
+                factor
+            )
 
         return GeoGrid(lon_range=lon_range, lat_range=lat_range, values=values)
     except FileNotFoundError as e:
