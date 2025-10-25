@@ -39,8 +39,8 @@ def load_climate_data(data_config: ClimateDataConfig, month: int) -> GeoGrid:
 
         geo_grid = GeoGrid(lon_range=lon_range, lat_range=lat_range, values=values)
 
-        if data_config.resolution == SpatialResolution.MIN0_5:
-            factor = 3
+        if values.size > 150_000_000:
+            factor = 2
             logger.info(
                 f"Downsampling {data_config.data_type_slug} from {data_config.resolution} with factor {factor}"
             )
