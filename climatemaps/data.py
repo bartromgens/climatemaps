@@ -37,7 +37,6 @@ def load_climate_data(data_config: ClimateDataConfig, month: int) -> GeoGrid:
         if data_config.conversion_function is not None:
             values = data_config.conversion_function(values, month)
 
-        # Create GeoGrid
         geo_grid = GeoGrid(lon_range=lon_range, lat_range=lat_range, values=values)
 
         if data_config.resolution == SpatialResolution.MIN0_5:
@@ -47,13 +46,6 @@ def load_climate_data(data_config: ClimateDataConfig, month: int) -> GeoGrid:
             )
             geo_grid = geo_grid.downsample(factor)
 
-            # Apply land mask after downsampling for CHELSA data (more efficient)
-            if data_config.format == DataFormat.CHELSA:
-                geo_grid = geo_grid.apply_land_mask()
-
-            return geo_grid
-
-        # Apply land mask for CHELSA data at full resolution
         if data_config.format == DataFormat.CHELSA:
             geo_grid = geo_grid.apply_land_mask()
 
