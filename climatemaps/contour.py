@@ -323,8 +323,8 @@ class ContourTileBuilder:
                 mbtiles_file=mbtiles_temp_filepath,
                 minzoom=self.zoom_min,
                 maxzoom=self.zoom_max,
-                full_detail=10,
-                lower_detail=9,
+                full_detail=12,
+                lower_detail=8,
                 min_detail=7,
                 extra_args=["--layer", "contours"],
             )
