@@ -27,7 +27,6 @@ class ContourPlotConfig(BaseModel):
         if self.level_upper <= self.level_lower:
             raise ValueError("level_upper must exceed level_lower")
         if self.log_scale:
-            lt = self.linthresh
             if self.level_lower <= 0:
                 raise ValueError("level_lower must be > 0 for log scale")
             if self.linthresh <= 0:

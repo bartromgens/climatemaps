@@ -63,22 +63,19 @@ def read_geotiff_cru_ts(filepath: str, month: int) -> Tuple[np.ndarray, np.ndarr
 
 def read_geotiff_chelsa(filepath: str, month: int) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     """
-    Read CHELSA data. CHELSA files contain monthly data in separate bands.
+    Read CHELSA data. CHELSA files are named with different months (01, 02, 03, etc.).
     """
     assert month > 0 and month <= 12, f"Month must be between 1 and 12, got {month}"
 
-    logger.info(f"Loading CHELSA data from {filepath}, month {month}")
+    # Format the filepath template with the month parameter
+    data_type = filepath.split("/")[-1]
+    formatted_filepath = os.path.join(filepath, f"{data_type}_{month:02d}.tif")
 
-    with rasterio.open(filepath) as src:
-        # CHELSA files have monthly data in separate bands
-        array = src.read(month).astype(float)
+    logger.info(f"Loading CHELSA data from {formatted_filepath}, month {month}")
 
-        # Handle NoData values (typically -9999 or similar)
-        array[array <= -9999] = np.nan
-        array[array == -32768] = np.nan  # Common NoData value
-
+    with rasterio.open(formatted_filepath) as src:
+        array = src.read(1).astype(float)
         logger.debug(f"CHELSA data loaded: shape {array.shape}, bounds {src.bounds}")
-
         lon_array, lat_array = _process_coordinate_arrays(src.transform, src.width, src.height)
 
     return lon_array, lat_array, array

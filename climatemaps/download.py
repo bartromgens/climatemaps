@@ -140,7 +140,7 @@ def _get_cru_ts_url(variable: ClimateVarKey, year_range: tuple[int, int]) -> str
     return f"{base_url}/{abbr}/{filename}"
 
 
-def _get_chelsa_url(variable: ClimateVarKey, year_range: tuple[int, int]) -> str:
+def _get_chelsa_url(variable: ClimateVarKey, year_range: tuple[int, int], month: int = 1) -> str:
     base_url = "https://os.zhdk.cloud.switch.ch/chelsav2/GLOBAL/climatologies/1981-2010"
 
     # Use the variable mapping from datasets.py
@@ -150,7 +150,11 @@ def _get_chelsa_url(variable: ClimateVarKey, year_range: tuple[int, int]) -> str
     if not var_str:
         raise ValueError(f"Unsupported CHELSA variable: {variable}")
 
-    filename = f"CHELSA_{var_str}_01_1981-2010_V.2.1.tif"
+    # RADIATION variable has a different filename format: month comes after year range
+    if variable == ClimateVarKey.RADIATION:
+        filename = f"CHELSA_{var_str}_{year_range[0]}-{year_range[1]}_{month:02d}_V.2.1.tif"
+    else:
+        filename = f"CHELSA_{var_str}_{month:02d}_{year_range[0]}-{year_range[1]}_V.2.1.tif"
 
     return f"{base_url}/{var_str}/{filename}"
 
@@ -182,20 +186,36 @@ def download_cru_ts_data(config: ClimateDataConfig) -> None:
 
 
 def download_chelsa_data(config: ClimateDataConfig) -> None:
-    if _check_chelsa_data_exists(config.filepath):
-        logger.info(f"CHELSA data already exists at {config.filepath}")
-        return
+    # Create the base directory for CHELSA data
+    base_dir = Path(config.filepath)
+    base_dir.mkdir(parents=True, exist_ok=True)
 
-    logger.info(f"CHELSA data not found at {config.filepath}, downloading...")
+    # Download data for all 12 months
+    for month in range(1, 13):
+        # Construct the filename for this month
+        from climatemaps.datasets import CHELSA_FILE_ABBREVIATIONS
 
-    try:
-        url = _get_chelsa_url(config.variable_type, config.year_range)
-    except ValueError as e:
-        logger.error(f"Cannot download data: {e}")
-        raise
+        var_str = CHELSA_FILE_ABBREVIATIONS.get(config.variable_type)
+        if not var_str:
+            raise ValueError(f"Unsupported CHELSA variable: {config.variable_type}")
 
-    destination = Path(config.filepath)
-    _download_file(url, destination)
+        filename = f"CHELSA_{var_str}_{config.year_range[0]}-{config.year_range[1]}_{month:02d}.tif"
+
+        destination = base_dir / filename
+
+        # Check if this month's data already exists
+        if destination.exists():
+            logger.info(f"CHELSA data for month {month:02d} already exists at {destination}")
+            continue
+
+        logger.info(f"Downloading CHELSA data for month {month:02d}...")
+
+        try:
+            url = _get_chelsa_url(config.variable_type, config.year_range, month)
+            _download_file(url, destination)
+        except ValueError as e:
+            logger.error(f"Cannot download data for month {month:02d}: {e}")
+            raise
 
 
 def download_historical_data(config: ClimateDataConfig) -> None:

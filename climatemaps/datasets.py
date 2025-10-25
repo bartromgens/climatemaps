@@ -160,7 +160,12 @@ CLIMATE_CONTOUR_CONFIGS: Dict[ClimateVarKey, ContourPlotConfig] = {
         level_lower=-30, level_upper=28, colormap=plt.cm.jet, title="Min. temperature", unit="C"
     ),
     ClimateVarKey.CLOUD_COVER: ContourPlotConfig(
-        level_lower=10, level_upper=90, colormap=plt.cm.RdYlBu, title="Cloud coverage", unit="%"
+        level_lower=10,
+        level_upper=90,
+        colormap=plt.cm.RdYlBu,
+        title="Cloud coverage",
+        unit="%",
+        n_contours=11,
     ),
     ClimateVarKey.WET_DAYS: ContourPlotConfig(
         level_lower=0, level_upper=30, colormap=plt.cm.RdYlBu, title="Wet days", unit="days"
@@ -172,7 +177,7 @@ CLIMATE_CONTOUR_CONFIGS: Dict[ClimateVarKey, ContourPlotConfig] = {
         level_lower=0, level_upper=8, colormap=plt.cm.viridis, title="Wind Speed", unit="m/s"
     ),
     ClimateVarKey.RADIATION: ContourPlotConfig(
-        level_lower=0, level_upper=300, colormap=plt.cm.RdYlBu_r, title="Radiation", unit="W/m^2"
+        level_lower=0, level_upper=320, colormap=plt.cm.RdYlBu_r, title="Radiation", unit="W/m^2"
     ),
     ClimateVarKey.DIURNAL_TEMP_RANGE: ContourPlotConfig(
         level_lower=5,
@@ -374,6 +379,7 @@ CHELSA_FILE_ABBREVIATIONS: Dict[ClimateVarKey, str] = {
     ClimateVarKey.PRECIPITATION: "pr",
     ClimateVarKey.WIND_SPEED: "sfcWind",
     ClimateVarKey.RELATIVE_HUMIDITY: "hurs",
+    ClimateVarKey.RADIATION: "rsds",
 }
 
 
@@ -411,9 +417,7 @@ class CHELSAClimateDataConfigGroup(ClimateDataConfigGroup):
                     if not var_str:
                         raise ValueError(f"Unsupported CHELSA variable: {variable_type}")
 
-                    # For CHELSA, we use a single file that contains all months in separate bands
-                    # The filepath template should point to the January file (month 01)
-                    filepath = f"data/raw/chelsa/CHELSA_{var_str}_01_{year_range[0]}-{year_range[1]}_V.2.1.tif"
+                    filepath = f"data/raw/chelsa/CHELSA_{var_str}_{year_range[0]}-{year_range[1]}"
 
                     # Different conversion factors for different variables
                     conversion_factors = {
@@ -423,6 +427,7 @@ class CHELSAClimateDataConfigGroup(ClimateDataConfigGroup):
                         ClimateVarKey.PRECIPITATION: 0.1,
                         ClimateVarKey.WIND_SPEED: 0.001,
                         ClimateVarKey.RELATIVE_HUMIDITY: 0.01,
+                        ClimateVarKey.RADIATION: 0.01,
                     }
 
                     conversion_factor = conversion_factors.get(
@@ -496,6 +501,7 @@ HISTORIC_DATA_GROUPS: List[ClimateDataConfigGroup] = [
             ClimateVarKey.PRECIPITATION,
             ClimateVarKey.WIND_SPEED,
             ClimateVarKey.RELATIVE_HUMIDITY,
+            ClimateVarKey.RADIATION,
         ],
         format=DataFormat.CHELSA,
         source="https://www.chelsa-climate.org/datasets/chelsa_climatologies",
