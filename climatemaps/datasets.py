@@ -372,7 +372,7 @@ CHELSA_FILE_ABBREVIATIONS: Dict[ClimateVarKey, str] = {
     ClimateVarKey.T_MAX: "tasmax",
     ClimateVarKey.T_MIN: "tasmin",
     ClimateVarKey.PRECIPITATION: "pr",
-    ClimateVarKey.WIND_SPEED: "wind",
+    ClimateVarKey.WIND_SPEED: "sfcWind",
     ClimateVarKey.RELATIVE_HUMIDITY: "hurs",
 }
 
@@ -498,7 +498,7 @@ HISTORIC_DATA_GROUPS: List[ClimateDataConfigGroup] = [
             ClimateVarKey.RELATIVE_HUMIDITY,
         ],
         format=DataFormat.CHELSA,
-        source="https://envicloud.wsl.ch/#/?bucket=https%3A%2F%2Fos.zhdk.cloud.switch.ch%2Fchelsav2%2F&prefix=GLOBAL%2Fclimatologies%2F1981-2010%2F",
+        source="https://www.chelsa-climate.org/datasets/chelsa_climatologies",
         resolutions=[SpatialResolution.MIN0_5],
         year_ranges=[(1981, 2010)],
     ),
