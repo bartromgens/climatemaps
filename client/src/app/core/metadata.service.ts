@@ -32,6 +32,7 @@ export class MetadataService {
     ClimateVarKey.FROST_DAYS,
     ClimateVarKey.DIURNAL_TEMP_RANGE,
     ClimateVarKey.VAPOUR_PRESSURE,
+    ClimateVarKey.VAPOUR_PRESSURE_DEFICIT,
     ClimateVarKey.RADIATION,
     ClimateVarKey.WIND_SPEED,
     ClimateVarKey.RELATIVE_HUMIDITY,
@@ -216,6 +217,7 @@ export class MetadataService {
       Radiation: ClimateVarKey.RADIATION,
       DiurnalTempRange: ClimateVarKey.DIURNAL_TEMP_RANGE,
       VapourPressure: ClimateVarKey.VAPOUR_PRESSURE,
+      VapourPressureDeficit: ClimateVarKey.VAPOUR_PRESSURE_DEFICIT,
       RelativeHumidity: ClimateVarKey.RELATIVE_HUMIDITY,
       MoistureIndex: ClimateVarKey.MOISTURE_INDEX,
     };

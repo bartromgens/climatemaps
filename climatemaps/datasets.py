@@ -56,6 +56,7 @@ class ClimateVarKey(enum.Enum):
     VAPOUR_PRESSURE = "VAPOUR_PRESSURE"
     RELATIVE_HUMIDITY = "RELATIVE_HUMIDITY"
     MOISTURE_INDEX = "MOISTURE_INDEX"
+    VAPOUR_PRESSURE_DEFICIT = "VAPOUR_PRESSURE_DEFICIT"
 
 
 class ClimateScenario(enum.Enum):
@@ -148,6 +149,12 @@ CLIMATE_VARIABLES: Dict[ClimateVarKey, ClimateVariable] = {
         unit="mm/month",
         filename="moistureindex",
     ),
+    ClimateVarKey.VAPOUR_PRESSURE_DEFICIT: ClimateVariable(
+        name="VapourPressureDeficit",
+        display_name="Vapour Pressure Deficit",
+        unit="Pa",
+        filename="vapourpressuredeficit",
+    ),
 }
 
 
@@ -205,6 +212,15 @@ CLIMATE_CONTOUR_CONFIGS: Dict[ClimateVarKey, ContourPlotConfig] = {
         colormap=plt.cm.viridis,
         title="Moisture Index",
         unit="mm/month",
+        n_contours=16,
+    ),
+    ClimateVarKey.VAPOUR_PRESSURE_DEFICIT: ContourPlotConfig(
+        level_lower=0,
+        level_upper=2500,
+        colormap=plt.cm.viridis,
+        title="Vapour Pressure Deficit",
+        unit="Pa",
+        n_contours=16,
     ),
 }
 
@@ -381,6 +397,7 @@ CRU_TS_FILE_ABBREVIATIONS: Dict[ClimateVarKey, str] = {
     ClimateVarKey.WET_DAYS: "wet",
     ClimateVarKey.FROST_DAYS: "frs",
     ClimateVarKey.VAPOUR_PRESSURE: "vap",
+    ClimateVarKey.VAPOUR_PRESSURE_DEFICIT: "vpd",
     ClimateVarKey.T_MAX: "tmx",
     ClimateVarKey.T_MIN: "tmn",
     ClimateVarKey.PRECIPITATION: "pre",
@@ -395,6 +412,7 @@ CHELSA_FILE_ABBREVIATIONS: Dict[ClimateVarKey, str] = {
     ClimateVarKey.RELATIVE_HUMIDITY: "hurs",
     ClimateVarKey.RADIATION: "rsds",
     ClimateVarKey.MOISTURE_INDEX: "cmi",
+    ClimateVarKey.VAPOUR_PRESSURE_DEFICIT: "vpd",
 }
 
 
@@ -444,6 +462,7 @@ class CHELSAClimateDataConfigGroup(ClimateDataConfigGroup):
                         ClimateVarKey.RELATIVE_HUMIDITY: 0.01,
                         ClimateVarKey.RADIATION: 0.01,
                         ClimateVarKey.MOISTURE_INDEX: 0.1,
+                        ClimateVarKey.VAPOUR_PRESSURE_DEFICIT: 0.1,
                     }
 
                     conversion_factor = conversion_factors.get(
@@ -502,6 +521,7 @@ HISTORIC_DATA_GROUPS: List[ClimateDataConfigGroup] = [
     CRUTSClimateDataConfigGroup(
         variable_types=[
             ClimateVarKey.VAPOUR_PRESSURE,
+            ClimateVarKey.VAPOUR_PRESSURE_DEFICIT,
         ],
         format=DataFormat.CRU_TS,
         source="https://ipcc-browser.ipcc-data.org/browser/dataset/653/0",
@@ -519,6 +539,7 @@ HISTORIC_DATA_GROUPS: List[ClimateDataConfigGroup] = [
             ClimateVarKey.RELATIVE_HUMIDITY,
             ClimateVarKey.RADIATION,
             ClimateVarKey.MOISTURE_INDEX,
+            ClimateVarKey.VAPOUR_PRESSURE_DEFICIT,
         ],
         format=DataFormat.CHELSA,
         source="https://www.chelsa-climate.org/datasets/chelsa_climatologies",

@@ -12,6 +12,7 @@ export enum ClimateVarKey {
   VAPOUR_PRESSURE = 'VAPOUR_PRESSURE',
   RELATIVE_HUMIDITY = 'RELATIVE_HUMIDITY',
   MOISTURE_INDEX = 'MOISTURE_INDEX',
+  VAPOUR_PRESSURE_DEFICIT = 'VAPOUR_PRESSURE_DEFICIT',
 }
 
 export const CLIMATE_VAR_KEY_TO_NAME: Record<ClimateVarKey, string> = {
@@ -27,6 +28,7 @@ export const CLIMATE_VAR_KEY_TO_NAME: Record<ClimateVarKey, string> = {
   [ClimateVarKey.VAPOUR_PRESSURE]: 'vapour_pressure',
   [ClimateVarKey.RELATIVE_HUMIDITY]: 'relative_humidity',
   [ClimateVarKey.MOISTURE_INDEX]: 'moisture_index',
+  [ClimateVarKey.VAPOUR_PRESSURE_DEFICIT]: 'vapour_pressure_deficit',
 };
 
 export const CLIMATE_VAR_DISPLAY_NAMES: Record<ClimateVarKey, string> = {
@@ -42,6 +44,7 @@ export const CLIMATE_VAR_DISPLAY_NAMES: Record<ClimateVarKey, string> = {
   [ClimateVarKey.VAPOUR_PRESSURE]: 'Vapour Pressure',
   [ClimateVarKey.RELATIVE_HUMIDITY]: 'Relative Humidity',
   [ClimateVarKey.MOISTURE_INDEX]: 'Moisture Index',
+  [ClimateVarKey.VAPOUR_PRESSURE_DEFICIT]: 'Vapour Pressure Deficit',
 };
 
 export const CLIMATE_VAR_UNITS: Record<ClimateVarKey, string> = {
@@ -57,6 +60,7 @@ export const CLIMATE_VAR_UNITS: Record<ClimateVarKey, string> = {
   [ClimateVarKey.VAPOUR_PRESSURE]: 'hPa',
   [ClimateVarKey.RELATIVE_HUMIDITY]: '%',
   [ClimateVarKey.MOISTURE_INDEX]: 'mm/month',
+  [ClimateVarKey.VAPOUR_PRESSURE_DEFICIT]: 'Pa',
 };
 
 // Spatial Resolution enum matching the backend

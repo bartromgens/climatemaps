@@ -58,6 +58,10 @@ const CLIMATE_VARIABLE_ROUTES: Record<
     path: 'moisture-index',
     title: 'Moisture Index Map',
   },
+  [ClimateVarKey.VAPOUR_PRESSURE_DEFICIT]: {
+    path: 'vapour-pressure-deficit',
+    title: 'Vapour Pressure Deficit Map',
+  },
 };
 
 /**
