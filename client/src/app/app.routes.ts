@@ -50,6 +50,10 @@ const CLIMATE_VARIABLE_ROUTES: Record<
     title: 'Vapour Pressure Map',
   },
   [ClimateVarKey.WIND_SPEED]: { path: 'wind-speed', title: 'Wind Speed Map' },
+  [ClimateVarKey.RELATIVE_HUMIDITY]: {
+    path: 'relative-humidity',
+    title: 'Relative Humidity Map',
+  },
 };
 
 /**

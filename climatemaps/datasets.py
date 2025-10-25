@@ -169,7 +169,7 @@ CLIMATE_CONTOUR_CONFIGS: Dict[ClimateVarKey, ContourPlotConfig] = {
         level_lower=0, level_upper=30, colormap=plt.cm.RdYlBu, title="Frost days", unit="days"
     ),
     ClimateVarKey.WIND_SPEED: ContourPlotConfig(
-        level_lower=0, level_upper=15, colormap=plt.cm.viridis, title="Wind Speed", unit="m/s"
+        level_lower=0, level_upper=50, colormap=plt.cm.viridis, title="Wind Speed", unit="m/s"
     ),
     ClimateVarKey.RADIATION: ContourPlotConfig(
         level_lower=0, level_upper=300, colormap=plt.cm.RdYlBu_r, title="Radiation", unit="W/m^2"
@@ -417,12 +417,12 @@ class CHELSAClimateDataConfigGroup(ClimateDataConfigGroup):
 
                     # Different conversion factors for different variables
                     conversion_factors = {
-                        ClimateVarKey.CLOUD_COVER: 0.01,  # Convert from hundredths of percent to percentage
-                        ClimateVarKey.T_MAX: 0.1,  # Convert from tenths of degrees to degrees
-                        ClimateVarKey.T_MIN: 0.1,  # Convert from tenths of degrees to degrees
-                        ClimateVarKey.PRECIPITATION: 0.1,  # Convert from tenths of mm to mm
-                        ClimateVarKey.WIND_SPEED: 0.1,  # Convert from tenths of m/s to m/s
-                        ClimateVarKey.RELATIVE_HUMIDITY: 0.01,  # Convert from hundredths of percent to percentage
+                        ClimateVarKey.CLOUD_COVER: 0.01,
+                        ClimateVarKey.T_MAX: 0.1,
+                        ClimateVarKey.T_MIN: 0.1,
+                        ClimateVarKey.PRECIPITATION: 0.1,
+                        ClimateVarKey.WIND_SPEED: 0.1,
+                        ClimateVarKey.RELATIVE_HUMIDITY: 0.01,
                     }
 
                     conversion_factor = conversion_factors.get(

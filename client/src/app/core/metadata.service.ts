@@ -34,6 +34,7 @@ export class MetadataService {
     ClimateVarKey.VAPOUR_PRESSURE,
     ClimateVarKey.RADIATION,
     ClimateVarKey.WIND_SPEED,
+    ClimateVarKey.RELATIVE_HUMIDITY,
   ];
 
   private readonly RESOLUTION_ORDER: SpatialResolution[] = [
@@ -210,12 +211,20 @@ export class MetadataService {
       CloudCover: ClimateVarKey.CLOUD_COVER,
       WetDays: ClimateVarKey.WET_DAYS,
       FrostDays: ClimateVarKey.FROST_DAYS,
+      WindSpeed: ClimateVarKey.WIND_SPEED,
       Radiation: ClimateVarKey.RADIATION,
       DiurnalTempRange: ClimateVarKey.DIURNAL_TEMP_RANGE,
       VapourPressure: ClimateVarKey.VAPOUR_PRESSURE,
+      RelativeHumidity: ClimateVarKey.RELATIVE_HUMIDITY,
     };
 
-    return nameToKey[name] || null;
+    const result = nameToKey[name];
+    if (!result) {
+      console.error(
+        `Unknown variable name: ${name}. Available names: ${Object.keys(nameToKey).join(', ')}`,
+      );
+    }
+    return result || null;
   }
 
   private formatYearRangeLabel(start: number, end: number): string {
