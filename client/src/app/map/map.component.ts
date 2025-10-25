@@ -50,6 +50,11 @@ import { ToastService } from '../core/toast.service';
 import { ClimateVariableHelperService } from '../core/climate-variable-helper.service';
 import { CoordinateUtils } from '../utils/coordinate-utils';
 import { MatomoTracker } from 'ngx-matomo-client';
+import {
+  ColorExtractionService,
+  ColorInfo,
+} from './services/color-extraction.service';
+import { ColorExtractionTestComponent } from './components/color-extraction-test.component';
 
 @Component({
   selector: 'app-map',
@@ -71,6 +76,7 @@ import { MatomoTracker } from 'ngx-matomo-client';
     MobileHamburgerMenuComponent,
     ShowChangeToggleOverlayComponent,
     ContourToggleOverlayComponent,
+    ColorExtractionTestComponent,
   ],
   templateUrl: './map.component.html',
   styleUrl: './map.component.scss',
@@ -145,11 +151,12 @@ export class MapComponent extends BaseMapComponent implements OnInit {
   options: any;
   debug = !environment.production;
 
-  private map: Map | null = null;
+  map: Map | null = null;
   private rasterLayer: Layer | null = null;
   private vectorLayer: Layer | null = null;
   plotData: { lat: number; lon: number; dataType: string } | null = null;
   timerangePlotData: { lat: number; lon: number; month: number } | null = null;
+  showColorExtractionTest = false; // Set to true to enable color extraction testing
 
   constructor(
     route: ActivatedRoute,
@@ -167,6 +174,7 @@ export class MapComponent extends BaseMapComponent implements OnInit {
     private temperatureUnitService: TemperatureUnitService,
     private seoService: SeoService,
     private climateVariableHelper: ClimateVariableHelperService,
+    private colorExtractionService: ColorExtractionService,
   ) {
     super(
       route,
@@ -376,13 +384,11 @@ export class MapComponent extends BaseMapComponent implements OnInit {
       this.rasterLayer = tileLayer(
         `${this.selectedOption.rasterUrl}_${this.monthSelected}/{z}/{x}/{y}.png`,
         {
-          // attribution: '&copy; My Raster Tiles',
           minZoom: 0,
           maxNativeZoom: this.selectedOption.rasterMaxZoom,
           maxZoom: 12,
           tileSize: 256,
           opacity: 0.8,
-          // tms: true, // uncomment if your MBTiles uses TMS y‐axis
         },
       );
 
@@ -541,6 +547,101 @@ export class MapComponent extends BaseMapComponent implements OnInit {
         `Level ${zoomLevel}`,
         zoomLevel,
       );
+    }
+  }
+
+  onMouseMove(event: LeafletMouseEvent): void {
+    if (!this.map) {
+      return;
+    }
+
+    // Try to extract color from the raster layer first
+    let colorInfo: ColorInfo | null = null;
+
+    if (this.rasterLayer) {
+      console.log('Extracting color from raster layer');
+      colorInfo = this.colorExtractionService.getColorFromTileLayer(
+        this.map,
+        event.latlng,
+        this.rasterLayer as any,
+      );
+    }
+
+    // // Fallback to general color extraction if raster layer extraction fails
+    // if (!colorInfo) {
+    //   console.log('Falling back to general color extraction');
+    //   colorInfo = this.colorExtractionService.getColorAtPosition(
+    //     this.map,
+    //     event.latlng,
+    //   );
+    // }
+
+    if (colorInfo) {
+      console.log('Color at mouse position:', {
+        position: { lat: event.latlng.lat, lng: event.latlng.lng },
+        color: colorInfo,
+        source: this.rasterLayer ? 'raster layer' : 'general extraction',
+      });
+
+      // You can use the color information here
+      // For example, update a color display component or tooltip
+      this.displayColorInfo(colorInfo, event.latlng);
+    }
+  }
+
+  private displayColorInfo(colorInfo: ColorInfo, latlng: L.LatLng): void {
+    // Create a tooltip showing the color information
+    const colorText = `Color: ${colorInfo.hex} (${colorInfo.rgba})`;
+    this.tooltipManager.createHoverTooltip(colorText, latlng, this.map!);
+  }
+
+  /**
+   * Get color from the raster layer at the specified position
+   * @param latlng LatLng position to sample
+   * @returns ColorInfo object with color data or null if extraction fails
+   */
+  getColorFromRasterLayer(latlng: L.LatLng): ColorInfo | null {
+    if (!this.map || !this.rasterLayer) {
+      console.warn('Map or raster layer not available');
+      return null;
+    }
+
+    try {
+      return this.colorExtractionService.getColorFromTileLayer(
+        this.map,
+        latlng,
+        this.rasterLayer as any,
+      );
+    } catch (error) {
+      console.error('Error extracting color from raster layer:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Get color from the raster layer at the current mouse position
+   * @param event Mouse event from the map
+   * @returns ColorInfo object with color data or null if extraction fails
+   */
+  getColorFromRasterLayerAtMouse(event: LeafletMouseEvent): ColorInfo | null {
+    return this.getColorFromRasterLayer(event.latlng);
+  }
+
+  /**
+   * Get the maximum zoom level for the raster layer
+   * @returns Maximum zoom level or null if not available
+   */
+  getRasterLayerMaxZoom(): number | null {
+    if (!this.rasterLayer) {
+      return null;
+    }
+
+    try {
+      const options = (this.rasterLayer as any).options;
+      return options?.maxNativeZoom || options?.maxZoom || null;
+    } catch (error) {
+      console.error('Error getting raster layer max zoom:', error);
+      return null;
     }
   }
 
