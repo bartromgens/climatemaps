@@ -11,6 +11,7 @@ export enum ClimateVarKey {
   DIURNAL_TEMP_RANGE = 'DIURNAL_TEMP_RANGE',
   VAPOUR_PRESSURE = 'VAPOUR_PRESSURE',
   RELATIVE_HUMIDITY = 'RELATIVE_HUMIDITY',
+  MOISTURE_INDEX = 'MOISTURE_INDEX',
 }
 
 export const CLIMATE_VAR_KEY_TO_NAME: Record<ClimateVarKey, string> = {
@@ -25,6 +26,7 @@ export const CLIMATE_VAR_KEY_TO_NAME: Record<ClimateVarKey, string> = {
   [ClimateVarKey.DIURNAL_TEMP_RANGE]: 'diurnal_temp_range',
   [ClimateVarKey.VAPOUR_PRESSURE]: 'vapour_pressure',
   [ClimateVarKey.RELATIVE_HUMIDITY]: 'relative_humidity',
+  [ClimateVarKey.MOISTURE_INDEX]: 'moisture_index',
 };
 
 export const CLIMATE_VAR_DISPLAY_NAMES: Record<ClimateVarKey, string> = {
@@ -39,6 +41,7 @@ export const CLIMATE_VAR_DISPLAY_NAMES: Record<ClimateVarKey, string> = {
   [ClimateVarKey.DIURNAL_TEMP_RANGE]: 'Diurnal Temperature Range',
   [ClimateVarKey.VAPOUR_PRESSURE]: 'Vapour Pressure',
   [ClimateVarKey.RELATIVE_HUMIDITY]: 'Relative Humidity',
+  [ClimateVarKey.MOISTURE_INDEX]: 'Moisture Index',
 };
 
 export const CLIMATE_VAR_UNITS: Record<ClimateVarKey, string> = {
@@ -53,6 +56,7 @@ export const CLIMATE_VAR_UNITS: Record<ClimateVarKey, string> = {
   [ClimateVarKey.DIURNAL_TEMP_RANGE]: '°C',
   [ClimateVarKey.VAPOUR_PRESSURE]: 'hPa',
   [ClimateVarKey.RELATIVE_HUMIDITY]: '%',
+  [ClimateVarKey.MOISTURE_INDEX]: 'mm/month',
 };
 
 // Spatial Resolution enum matching the backend

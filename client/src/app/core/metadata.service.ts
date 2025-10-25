@@ -35,6 +35,7 @@ export class MetadataService {
     ClimateVarKey.RADIATION,
     ClimateVarKey.WIND_SPEED,
     ClimateVarKey.RELATIVE_HUMIDITY,
+    ClimateVarKey.MOISTURE_INDEX,
   ];
 
   private readonly RESOLUTION_ORDER: SpatialResolution[] = [
@@ -216,6 +217,7 @@ export class MetadataService {
       DiurnalTempRange: ClimateVarKey.DIURNAL_TEMP_RANGE,
       VapourPressure: ClimateVarKey.VAPOUR_PRESSURE,
       RelativeHumidity: ClimateVarKey.RELATIVE_HUMIDITY,
+      MoistureIndex: ClimateVarKey.MOISTURE_INDEX,
     };
 
     const result = nameToKey[name];

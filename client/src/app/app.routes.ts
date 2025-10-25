@@ -54,6 +54,10 @@ const CLIMATE_VARIABLE_ROUTES: Record<
     path: 'relative-humidity',
     title: 'Relative Humidity Map',
   },
+  [ClimateVarKey.MOISTURE_INDEX]: {
+    path: 'moisture-index',
+    title: 'Moisture Index Map',
+  },
 };
 
 /**

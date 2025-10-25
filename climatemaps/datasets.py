@@ -55,6 +55,7 @@ class ClimateVarKey(enum.Enum):
     DIURNAL_TEMP_RANGE = "DIURNAL_TEMP_RANGE"
     VAPOUR_PRESSURE = "VAPOUR_PRESSURE"
     RELATIVE_HUMIDITY = "RELATIVE_HUMIDITY"
+    MOISTURE_INDEX = "MOISTURE_INDEX"
 
 
 class ClimateScenario(enum.Enum):
@@ -141,6 +142,12 @@ CLIMATE_VARIABLES: Dict[ClimateVarKey, ClimateVariable] = {
         unit="%",
         filename="relativehumidity",
     ),
+    ClimateVarKey.MOISTURE_INDEX: ClimateVariable(
+        name="MoistureIndex",
+        display_name="Moisture Index",
+        unit="mm/month",
+        filename="moistureindex",
+    ),
 }
 
 
@@ -191,6 +198,13 @@ CLIMATE_CONTOUR_CONFIGS: Dict[ClimateVarKey, ContourPlotConfig] = {
     ),
     ClimateVarKey.RELATIVE_HUMIDITY: ContourPlotConfig(
         level_lower=25, level_upper=100, colormap=plt.cm.RdYlBu, title="Relative Humidity", unit="%"
+    ),
+    ClimateVarKey.MOISTURE_INDEX: ContourPlotConfig(
+        level_lower=-250,
+        level_upper=250,
+        colormap=plt.cm.viridis,
+        title="Moisture Index",
+        unit="mm/month",
     ),
 }
 
@@ -380,6 +394,7 @@ CHELSA_FILE_ABBREVIATIONS: Dict[ClimateVarKey, str] = {
     ClimateVarKey.WIND_SPEED: "sfcWind",
     ClimateVarKey.RELATIVE_HUMIDITY: "hurs",
     ClimateVarKey.RADIATION: "rsds",
+    ClimateVarKey.MOISTURE_INDEX: "cmi",
 }
 
 
@@ -428,6 +443,7 @@ class CHELSAClimateDataConfigGroup(ClimateDataConfigGroup):
                         ClimateVarKey.WIND_SPEED: 0.001,
                         ClimateVarKey.RELATIVE_HUMIDITY: 0.01,
                         ClimateVarKey.RADIATION: 0.01,
+                        ClimateVarKey.MOISTURE_INDEX: 0.1,
                     }
 
                     conversion_factor = conversion_factors.get(
@@ -502,6 +518,7 @@ HISTORIC_DATA_GROUPS: List[ClimateDataConfigGroup] = [
             ClimateVarKey.WIND_SPEED,
             ClimateVarKey.RELATIVE_HUMIDITY,
             ClimateVarKey.RADIATION,
+            ClimateVarKey.MOISTURE_INDEX,
         ],
         format=DataFormat.CHELSA,
         source="https://www.chelsa-climate.org/datasets/chelsa_climatologies",
