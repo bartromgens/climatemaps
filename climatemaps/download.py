@@ -145,6 +145,10 @@ def _get_chelsa_url(variable: ClimateVarKey, year_range: tuple[int, int]) -> str
 
     variable_map = {
         ClimateVarKey.CLOUD_COVER: "clt",
+        ClimateVarKey.T_MAX: "tasmax",
+        ClimateVarKey.T_MIN: "tasmin",
+        ClimateVarKey.PRECIPITATION: "pr",
+        ClimateVarKey.WIND_SPEED: "wind",
     }
 
     var_str = variable_map.get(variable)
