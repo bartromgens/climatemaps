@@ -219,7 +219,7 @@ class ContourTileBuilder:
         addo_cmd = [
             "gdaladdo",
             "-r",
-            "lanczos",
+            "gauss",
             mbtiles_temp_path,
             "2",
             "4",
@@ -276,7 +276,7 @@ class ContourTileBuilder:
             logger.info("Downsampling high-resolution data for vector contours")
             # Calculate appropriate downsampling factor to get under 10M pixels
             total_pixels = len(self.geo_grid.lon_range) * len(self.geo_grid.lat_range)
-            target_pixels = 10_000_000  # Target 10M pixels for good balance
+            target_pixels = 25_000_000
             downsample_factor = int(np.ceil(np.sqrt(total_pixels / target_pixels)))
             logger.info(f"Downsampling by factor of {downsample_factor}")
 
