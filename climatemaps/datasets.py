@@ -54,6 +54,7 @@ class ClimateVarKey(enum.Enum):
     RADIATION = "RADIATION"
     DIURNAL_TEMP_RANGE = "DIURNAL_TEMP_RANGE"
     VAPOUR_PRESSURE = "VAPOUR_PRESSURE"
+    RELATIVE_HUMIDITY = "RELATIVE_HUMIDITY"
 
 
 class ClimateScenario(enum.Enum):
@@ -134,6 +135,12 @@ CLIMATE_VARIABLES: Dict[ClimateVarKey, ClimateVariable] = {
     ClimateVarKey.VAPOUR_PRESSURE: ClimateVariable(
         name="VapourPressure", display_name="Vapour Pressure", unit="hPa", filename="vapourpressure"
     ),
+    ClimateVarKey.RELATIVE_HUMIDITY: ClimateVariable(
+        name="RelativeHumidity",
+        display_name="Relative Humidity",
+        unit="%",
+        filename="relativehumidity",
+    ),
 }
 
 
@@ -176,6 +183,9 @@ CLIMATE_CONTOUR_CONFIGS: Dict[ClimateVarKey, ContourPlotConfig] = {
     ),
     ClimateVarKey.VAPOUR_PRESSURE: ContourPlotConfig(
         level_lower=1, level_upper=34, colormap=plt.cm.jet, title="Vapour pressure", unit="hPa"
+    ),
+    ClimateVarKey.RELATIVE_HUMIDITY: ContourPlotConfig(
+        level_lower=0, level_upper=100, colormap=plt.cm.RdYlBu, title="Relative Humidity", unit="%"
     ),
 }
 
@@ -357,6 +367,15 @@ CRU_TS_FILE_ABBREVIATIONS: Dict[ClimateVarKey, str] = {
     ClimateVarKey.PRECIPITATION: "pre",
 }
 
+CHELSA_FILE_ABBREVIATIONS: Dict[ClimateVarKey, str] = {
+    ClimateVarKey.CLOUD_COVER: "clt",
+    ClimateVarKey.T_MAX: "tasmax",
+    ClimateVarKey.T_MIN: "tasmin",
+    ClimateVarKey.PRECIPITATION: "pr",
+    ClimateVarKey.WIND_SPEED: "wind",
+    ClimateVarKey.RELATIVE_HUMIDITY: "hurs",
+}
+
 
 @dataclass
 class CRUTSClimateDataConfigGroup(ClimateDataConfigGroup):
@@ -388,15 +407,7 @@ class CHELSAClimateDataConfigGroup(ClimateDataConfigGroup):
             for year_range in self.year_ranges:
                 for resolution in self.resolutions:
                     # CHELSA variables use different naming conventions
-                    variable_map = {
-                        ClimateVarKey.CLOUD_COVER: "clt",
-                        ClimateVarKey.T_MAX: "tasmax",
-                        ClimateVarKey.T_MIN: "tasmin",
-                        ClimateVarKey.PRECIPITATION: "pr",
-                        ClimateVarKey.WIND_SPEED: "wind",
-                    }
-
-                    var_str = variable_map.get(variable_type)
+                    var_str = CHELSA_FILE_ABBREVIATIONS.get(variable_type)
                     if not var_str:
                         raise ValueError(f"Unsupported CHELSA variable: {variable_type}")
 
@@ -411,6 +422,7 @@ class CHELSAClimateDataConfigGroup(ClimateDataConfigGroup):
                         ClimateVarKey.T_MIN: 0.1,  # Convert from tenths of degrees to degrees
                         ClimateVarKey.PRECIPITATION: 0.1,  # Convert from tenths of mm to mm
                         ClimateVarKey.WIND_SPEED: 0.1,  # Convert from tenths of m/s to m/s
+                        ClimateVarKey.RELATIVE_HUMIDITY: 0.01,  # Convert from hundredths of percent to percentage
                     }
 
                     conversion_factor = conversion_factors.get(
@@ -481,6 +493,9 @@ HISTORIC_DATA_GROUPS: List[ClimateDataConfigGroup] = [
             ClimateVarKey.CLOUD_COVER,
             ClimateVarKey.T_MAX,
             ClimateVarKey.T_MIN,
+            ClimateVarKey.PRECIPITATION,
+            ClimateVarKey.WIND_SPEED,
+            ClimateVarKey.RELATIVE_HUMIDITY,
         ],
         format=DataFormat.CHELSA,
         source="https://envicloud.wsl.ch/#/?bucket=https%3A%2F%2Fos.zhdk.cloud.switch.ch%2Fchelsav2%2F&prefix=GLOBAL%2Fclimatologies%2F1981-2010%2F",

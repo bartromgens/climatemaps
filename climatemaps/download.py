@@ -143,15 +143,10 @@ def _get_cru_ts_url(variable: ClimateVarKey, year_range: tuple[int, int]) -> str
 def _get_chelsa_url(variable: ClimateVarKey, year_range: tuple[int, int]) -> str:
     base_url = "https://os.zhdk.cloud.switch.ch/chelsav2/GLOBAL/climatologies/1981-2010"
 
-    variable_map = {
-        ClimateVarKey.CLOUD_COVER: "clt",
-        ClimateVarKey.T_MAX: "tasmax",
-        ClimateVarKey.T_MIN: "tasmin",
-        ClimateVarKey.PRECIPITATION: "pr",
-        ClimateVarKey.WIND_SPEED: "wind",
-    }
+    # Use the variable mapping from datasets.py
+    from climatemaps.datasets import CHELSA_FILE_ABBREVIATIONS
 
-    var_str = variable_map.get(variable)
+    var_str = CHELSA_FILE_ABBREVIATIONS.get(variable)
     if not var_str:
         raise ValueError(f"Unsupported CHELSA variable: {variable}")
 
