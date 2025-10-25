@@ -77,6 +77,8 @@ class GeoGrid(BaseModel):
         if factor == 1:
             return self
 
+        logger.info(f"Downsampling geogrid from {self.resolution_mega_pixel:.1f} megapixels")
+
         # Calculate new dimensions
         new_lat_size = max(1, self.lat_range.size // factor)
         new_lon_size = max(1, self.lon_range.size // factor)
@@ -89,7 +91,10 @@ class GeoGrid(BaseModel):
         zoom_factors = (new_lat_size / self.lat_range.size, new_lon_size / self.lon_range.size)
         new_values = scipy.ndimage.zoom(self.values, zoom=zoom_factors, order=1)
 
-        return GeoGrid(lon_range=new_lon_range, lat_range=new_lat_range, values=new_values)
+        new_geogrid = GeoGrid(lon_range=new_lon_range, lat_range=new_lat_range, values=new_values)
+        logger.info(f"Downsampled geogrid to {new_geogrid.resolution_mega_pixel:.1f} megapixels")
+
+        return new_geogrid
 
     @property
     def lat_min(self):
@@ -134,6 +139,12 @@ class GeoGrid(BaseModel):
     def urcrnrlat(self):
         """upper right corner latitude"""
         return self.lat_max + self.bin_width_lat / 2
+
+    @property
+    def resolution_mega_pixel(self) -> float:
+        """Total number of pixels in the grid, expressed in megapixels (millions of pixels)"""
+        total_pixels = self.values.size
+        return total_pixels / 1_000_000
 
     def get_value_at_coordinate(self, lon: float, lat: float) -> float:
         if lon < self.lon_min or lon > self.lon_max:
