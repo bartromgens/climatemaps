@@ -14,7 +14,10 @@ from geopy.exc import GeocoderTimedOut, GeocoderServiceError
 from climatemaps.config import ClimateMap
 from climatemaps.settings import settings
 from climatemaps.datasets import ClimateDifferenceDataConfig
-from climatemaps.data import load_climate_data, load_climate_data_for_difference
+from climatemaps.data import (
+    load_climate_data_for_single_value,
+    load_climate_data_for_difference_single_value,
+)
 
 app = FastAPI()
 
@@ -71,11 +74,11 @@ def get_climate_value(data_type: str, month: int, lat: float, lon: float):
 
     try:
         if isinstance(data_config, ClimateDifferenceDataConfig):
-            geo_grid = load_climate_data_for_difference(
+            geo_grid = load_climate_data_for_difference_single_value(
                 data_config.historical_config, data_config.future_config, month
             )
         else:
-            geo_grid = load_climate_data(data_config, month)
+            geo_grid = load_climate_data_for_single_value(data_config, month)
 
         value = geo_grid.get_value_at_coordinate(lon, lat)
 
