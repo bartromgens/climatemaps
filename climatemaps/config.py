@@ -47,7 +47,7 @@ class ClimateMapsConfigDev(ClimateMapsConfig):
 
     @property
     def zoom_max(self) -> int:
-        return 7
+        return 8
 
     @property
     def zoom_factor(self) -> Optional[float]:
