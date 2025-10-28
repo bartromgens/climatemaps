@@ -17,6 +17,7 @@ import { MatomoTracker } from 'ngx-matomo-client';
 import { GeocodingService, LocationSuggestion } from './core/geocoding.service';
 import { MapNavigationService } from './core/map-navigation.service';
 import { TemperatureUnitSelectorComponent } from './core/temperature-unit-selector.component';
+import { PrecipitationUnitSelectorComponent } from './core/precipitation-unit-selector.component';
 
 @Component({
   selector: 'app-root',
@@ -34,6 +35,7 @@ import { TemperatureUnitSelectorComponent } from './core/temperature-unit-select
     MatMenuModule,
     ReactiveFormsModule,
     TemperatureUnitSelectorComponent,
+    PrecipitationUnitSelectorComponent,
   ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',

@@ -18,6 +18,7 @@ import {
 } from '../../core/geocoding.service';
 import { MapNavigationService } from '../../core/map-navigation.service';
 import { TemperatureUnitSelectorComponent } from '../../core/temperature-unit-selector.component';
+import { PrecipitationUnitSelectorComponent } from '../../core/precipitation-unit-selector.component';
 
 @Component({
   selector: 'app-mobile-hamburger-menu',
@@ -33,6 +34,7 @@ import { TemperatureUnitSelectorComponent } from '../../core/temperature-unit-se
     MatInputModule,
     MatFormFieldModule,
     TemperatureUnitSelectorComponent,
+    PrecipitationUnitSelectorComponent,
   ],
   templateUrl: './mobile-hamburger-menu.component.html',
   styleUrl: './mobile-hamburger-menu.component.scss',

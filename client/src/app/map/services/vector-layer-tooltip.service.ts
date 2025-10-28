@@ -3,6 +3,8 @@ import { Map } from 'leaflet';
 import { TooltipManagerService } from './tooltip-manager.service';
 import { TemperatureUnitService } from '../../core/temperature-unit.service';
 import { TemperatureUtils } from '../../utils/temperature-utils';
+import { PrecipitationUnitService } from '../../core/precipitation-unit.service';
+import { PrecipitationUtils } from '../../utils/precipitation-utils';
 import { ClimateVarKey } from '../../utils/enum';
 
 @Injectable({
@@ -12,6 +14,7 @@ export class VectorLayerTooltipService {
   constructor(
     private tooltipManager: TooltipManagerService,
     private temperatureUnitService: TemperatureUnitService,
+    private precipitationUnitService: PrecipitationUnitService,
   ) {}
 
   handleVectorLayerHover(
@@ -37,6 +40,18 @@ export class VectorLayerTooltipService {
       if (currentUnit === '°F') {
         value = TemperatureUtils.celsiusToFahrenheit(value);
         displayUnit = '°F';
+      }
+    }
+
+    const isPrecipitation = PrecipitationUtils.isPrecipitationVariable(
+      variableType as ClimateVarKey,
+    );
+
+    if (isPrecipitation && displayUnit === 'mm/month') {
+      const currentUnit = this.precipitationUnitService.getUnit();
+      if (currentUnit === 'in') {
+        value = PrecipitationUtils.mmToInches(value);
+        displayUnit = 'in/month';
       }
     }
 

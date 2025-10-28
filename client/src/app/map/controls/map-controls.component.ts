@@ -23,6 +23,8 @@ import { YearSliderComponent } from './year-slider.component';
 import { MonthSliderComponent } from './month-slider.component';
 import { TemperatureUnitService } from '../../core/temperature-unit.service';
 import { TemperatureUtils } from '../../utils/temperature-utils';
+import { PrecipitationUnitService } from '../../core/precipitation-unit.service';
+import { PrecipitationUtils } from '../../utils/precipitation-utils';
 import { ClimateVariableHelperService } from '../../core/climate-variable-helper.service';
 import { MatomoTracker } from 'ngx-matomo-client';
 
@@ -78,6 +80,7 @@ export class MapControlsComponent implements OnInit {
 
   constructor(
     private temperatureUnitService: TemperatureUnitService,
+    private precipitationUnitService: PrecipitationUnitService,
     private climateVariableHelper: ClimateVariableHelperService,
   ) {}
 
@@ -97,6 +100,13 @@ export class MapControlsComponent implements OnInit {
     const isTemperature = TemperatureUtils.isTemperatureVariable(variableType);
     if (isTemperature && climateVariable.unit === '°C') {
       return this.temperatureUnit;
+    }
+
+    const isPrecipitation =
+      PrecipitationUtils.isPrecipitationVariable(variableType);
+    if (isPrecipitation && climateVariable.unit === 'mm/month') {
+      const precipitationUnit = this.precipitationUnitService.getUnit();
+      return precipitationUnit === 'in' ? 'in/month' : 'mm/month';
     }
 
     return climateVariable.unit;

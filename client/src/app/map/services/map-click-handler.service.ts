@@ -7,6 +7,8 @@ import {
 import { TooltipManagerService } from './tooltip-manager.service';
 import { TemperatureUnitService } from '../../core/temperature-unit.service';
 import { TemperatureUtils } from '../../utils/temperature-utils';
+import { PrecipitationUnitService } from '../../core/precipitation-unit.service';
+import { PrecipitationUtils } from '../../utils/precipitation-utils';
 import { ClimateVarKey } from '../../utils/enum';
 import { CoordinateUtils } from '../../utils/coordinate-utils';
 
@@ -18,6 +20,7 @@ export class MapClickHandlerService {
     private climateMapService: ClimateMapService,
     private tooltipManager: TooltipManagerService,
     private temperatureUnitService: TemperatureUnitService,
+    private precipitationUnitService: PrecipitationUnitService,
   ) {}
 
   handleMapClick(
@@ -70,6 +73,18 @@ export class MapClickHandlerService {
       if (currentUnit === '°F') {
         value = TemperatureUtils.celsiusToFahrenheit(value);
         unit = '°F';
+      }
+    }
+
+    const isPrecipitation = PrecipitationUtils.isPrecipitationVariable(
+      variableType as ClimateVarKey,
+    );
+
+    if (isPrecipitation && unit === 'mm/month') {
+      const currentUnit = this.precipitationUnitService.getUnit();
+      if (currentUnit === 'in') {
+        value = PrecipitationUtils.mmToInches(value);
+        unit = 'in/month';
       }
     }
 

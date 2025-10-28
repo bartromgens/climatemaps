@@ -33,6 +33,8 @@ import {
   TemperatureUnit,
 } from '../../core/temperature-unit.service';
 import { TemperatureUtils } from '../../utils/temperature-utils';
+import { PrecipitationUnitService } from '../../core/precipitation-unit.service';
+import { PrecipitationUtils } from '../../utils/precipitation-utils';
 import { YearRange } from '../../core/metadata.service';
 
 Chart.register(...registerables);
@@ -79,9 +81,16 @@ export class ClimateMonthlyPlotComponent
     private climateMapService: ClimateMapService,
     private cdr: ChangeDetectorRef,
     private temperatureUnitService: TemperatureUnitService,
+    private precipitationUnitService: PrecipitationUnitService,
   ) {
     this.temperatureUnitService.unit$.subscribe((unit) => {
       this.currentUnit = unit;
+      if (this.chart && this.monthlyData.tmax.length > 0) {
+        this.renderChart();
+      }
+    });
+
+    this.precipitationUnitService.unit$.subscribe(() => {
       if (this.chart && this.monthlyData.tmax.length > 0) {
         this.renderChart();
       }
@@ -233,9 +242,13 @@ export class ClimateMonthlyPlotComponent
     );
 
     const tempUnit = this.currentUnit;
+    const precipUnit =
+      this.precipitationUnitService.getUnit() === 'in'
+        ? 'in/month'
+        : 'mm/month';
     const tmaxLabel = `${CLIMATE_VAR_DISPLAY_NAMES[ClimateVarKey.T_MAX]} (${tempUnit})`;
     const tminLabel = `${CLIMATE_VAR_DISPLAY_NAMES[ClimateVarKey.T_MIN]} (${tempUnit})`;
-    const precipLabel = `${CLIMATE_VAR_DISPLAY_NAMES[ClimateVarKey.PRECIPITATION]} (${CLIMATE_VAR_UNITS[ClimateVarKey.PRECIPITATION]})`;
+    const precipLabel = `${CLIMATE_VAR_DISPLAY_NAMES[ClimateVarKey.PRECIPITATION]} (${precipUnit})`;
 
     const config: ChartConfiguration = {
       type: 'line',
@@ -262,7 +275,12 @@ export class ClimateMonthlyPlotComponent
           },
           {
             label: precipLabel,
-            data: this.monthlyData.precipitation,
+            data: this.monthlyData.precipitation.map((value) => {
+              const currentUnit = this.precipitationUnitService.getUnit();
+              return currentUnit === 'in'
+                ? PrecipitationUtils.mmToInches(value)
+                : value;
+            }),
             borderColor: 'rgb(54, 162, 235)',
             backgroundColor: 'rgba(54, 162, 235, 0.2)',
             tension: 0.4,

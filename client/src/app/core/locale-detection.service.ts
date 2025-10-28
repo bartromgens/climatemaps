@@ -10,7 +10,7 @@ export interface LocaleInfo {
   providedIn: 'root',
 })
 export class LocaleDetectionService {
-  private readonly FAHRENHEIT_COUNTRIES = new Set([
+  private readonly IMPERIAL_COUNTRIES = new Set([
     'US', // United States
     'BS', // Bahamas
     'BZ', // Belize
@@ -35,6 +35,15 @@ export class LocaleDetectionService {
     };
   }
 
+  private isImperialCountry(localeInfo: LocaleInfo): boolean {
+    return (
+      (localeInfo.country !== null &&
+        this.IMPERIAL_COUNTRIES.has(localeInfo.country.toUpperCase())) ||
+      (localeInfo.region !== null &&
+        this.IMPERIAL_COUNTRIES.has(localeInfo.region.toUpperCase()))
+    );
+  }
+
   shouldUseFahrenheit(localeInfo?: LocaleInfo): boolean {
     if (!localeInfo) {
       localeInfo = this.detectLocale();
@@ -47,32 +56,41 @@ export class LocaleDetectionService {
       navigatorLanguage: navigator.language,
     });
 
-    // Check if the detected country uses Fahrenheit
-    if (
-      localeInfo.country &&
-      this.FAHRENHEIT_COUNTRIES.has(localeInfo.country.toUpperCase())
-    ) {
+    if (this.isImperialCountry(localeInfo)) {
       console.log(
-        '[LocaleDetection] Using Fahrenheit for country:',
-        localeInfo.country,
-      );
-      return true;
-    }
-
-    // Check if the region suggests Fahrenheit usage
-    if (
-      localeInfo.region &&
-      this.FAHRENHEIT_COUNTRIES.has(localeInfo.region.toUpperCase())
-    ) {
-      console.log(
-        '[LocaleDetection] Using Fahrenheit for region:',
-        localeInfo.region,
+        '[LocaleDetection] Using Fahrenheit for country/region:',
+        localeInfo.country || localeInfo.region,
       );
       return true;
     }
 
     // Default to Celsius for unknown or uncertain locations
     console.log('[LocaleDetection] Using Celsius (default)');
+    return false;
+  }
+
+  shouldUseInches(localeInfo?: LocaleInfo): boolean {
+    if (!localeInfo) {
+      localeInfo = this.detectLocale();
+    }
+
+    console.log('[LocaleDetection] Detected locale for precipitation:', {
+      language: localeInfo.language,
+      country: localeInfo.country,
+      region: localeInfo.region,
+      navigatorLanguage: navigator.language,
+    });
+
+    if (this.isImperialCountry(localeInfo)) {
+      console.log(
+        '[LocaleDetection] Using inches for country/region:',
+        localeInfo.country || localeInfo.region,
+      );
+      return true;
+    }
+
+    // Default to mm for unknown or uncertain locations
+    console.log('[LocaleDetection] Using mm (default)');
     return false;
   }
 
