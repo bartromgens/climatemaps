@@ -11,9 +11,10 @@ import { MapControlsComponent } from '../controls/map-controls.component';
 import { MobileHamburgerMenuComponent } from '../controls/mobile-hamburger-menu.component';
 import { MobileDateControlOverlayComponent } from '../controls/mobile-date-control-overlay.component';
 import { VariableSelectorOverlayComponent } from '../controls/variable-selector-overlay.component';
+import { ClimateScenarioOverlayComponent } from '../controls/climate-scenario-overlay.component';
 import { ClimateMapService } from '../../core/climatemap.service';
 import { MetadataService, YearRange } from '../../core/metadata.service';
-import { SpatialResolution, ClimateVarKey } from '../../utils/enum';
+import { SpatialResolution, ClimateVarKey, ClimateScenario } from '../../utils/enum';
 import {
   LayerBuilderService,
   LayerOption,
@@ -44,6 +45,7 @@ interface MonthOption {
     MobileHamburgerMenuComponent,
     MobileDateControlOverlayComponent,
     VariableSelectorOverlayComponent,
+    ClimateScenarioOverlayComponent,
   ],
   templateUrl: './monthly-grid.component.html',
   styleUrl: './monthly-grid.component.scss',
@@ -170,10 +172,6 @@ export class MonthlyGridComponent extends BaseMapComponent {
     this.onControlsChange(this.controlsData);
   }
 
-  onVariableChange(variableType: ClimateVarKey): void {
-    this.controlsData.selectedVariableType = variableType;
-    this.onControlsChange(this.controlsData);
-  }
 
   protected updateUrlWithControls(): void {
     const isHistorical =

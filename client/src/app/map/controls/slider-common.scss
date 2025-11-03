@@ -1,13 +1,15 @@
+@import "../../../styles/variables";
+
 // Shared styles for slider components
 :host {
   display: block;
-  height: 96px;
+  height: $bottom-controls-height;
 }
 
 .slider-labels {
   display: flex;
   justify-content: space-between;
-  margin-bottom: 10px;
+  margin-bottom: 5px;
   font-size: 1rem;
   font-weight: bold;
   color: rgba(0, 0, 0, 0.6);

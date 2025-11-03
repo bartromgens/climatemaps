@@ -8,7 +8,6 @@
     <div class="sidebar-content">
       <!-- Close button inside sidebar -->
       <button
-        *ngIf="isMobile"
         mat-icon-button
         class="sidebar-close-button"
         (click)="toggleSidebar()"
@@ -20,16 +19,17 @@
       <app-map-controls
         [controlsData]="controlsData"
         [controlsOptions]="controlsOptions"
+        [showDropDownControls]="true"
         (controlsChange)="onControlsChange($event)"
       ></app-map-controls>
     </div>
   </mat-sidenav>
   <mat-sidenav-content>
-    <!-- Mobile toggle button -->
+    <!-- Sidebar toggle button -->
     <button
-      *ngIf="isMobile && !sidebarOpened"
+      *ngIf="!sidebarOpened"
       mat-icon-button
-      class="mobile-toggle-button"
+      class="sidebar-toggle-button"
       (click)="toggleSidebar()"
       [attr.aria-label]="'Open sidebar'"
     >
@@ -54,6 +54,26 @@
       [disabled]="!shouldShowDifferenceCheckbox()"
       (toggleChange)="onShowChangeToggle($event)"
     ></app-show-change-toggle-overlay>
+
+    <!-- Climate scenario overlay -->
+    <app-climate-scenario-overlay
+      [show]="shouldShowFutureControls()"
+      [selectedClimateScenario]="controlsData.selectedClimateScenario"
+      [climateScenarios]="controlsOptions?.climateScenarios || []"
+      [availableClimateScenarios]="
+        controlsOptions?.availableClimateScenarios || []
+      "
+      (climateScenarioChange)="onClimateScenarioChangeOverlay($event)"
+    ></app-climate-scenario-overlay>
+
+    <!-- Climate model overlay -->
+    <app-climate-model-overlay
+      [show]="shouldShowFutureControls()"
+      [selectedClimateModel]="controlsData.selectedClimateModel"
+      [climateModels]="controlsOptions?.climateModels || []"
+      [availableClimateModels]="controlsOptions?.availableClimateModels || []"
+      (climateModelChange)="onClimateModelChangeOverlay($event)"
+    ></app-climate-model-overlay>
 
     <div
       class="page-content-wrapper"
@@ -109,6 +129,7 @@
       <app-map-controls
         [controlsData]="controlsData"
         [controlsOptions]="controlsOptions"
+        [showDropDownControls]="false"
         (controlsChange)="onControlsChange($event)"
       ></app-map-controls>
     </div>
