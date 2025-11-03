@@ -7,7 +7,6 @@
   >
     <div class="sidebar-content">
       <button
-        *ngIf="isMobile"
         mat-icon-button
         class="sidebar-close-button"
         (click)="toggleSidebar()"
@@ -26,9 +25,9 @@
   </mat-sidenav>
   <mat-sidenav-content>
     <button
-      *ngIf="isMobile && !sidebarOpened"
+      *ngIf="!sidebarOpened"
       mat-icon-button
-      class="mobile-toggle-button"
+      class="sidebar-toggle-button"
       (click)="toggleSidebar()"
       [attr.aria-label]="'Open sidebar'"
     >
@@ -51,6 +50,16 @@
       [hideYearSelector]="true"
       (monthChange)="onMonthChange($event)"
     ></app-mobile-date-control-overlay>
+
+    <app-climate-scenario-overlay
+      [show]="true"
+      [selectedClimateScenario]="controlsData.selectedClimateScenario"
+      [climateScenarios]="controlsOptions?.climateScenarios || []"
+      [availableClimateScenarios]="
+        controlsOptions?.availableClimateScenarios || []
+      "
+      (climateScenarioChange)="onClimateScenarioChangeOverlay($event)"
+    ></app-climate-scenario-overlay>
 
     <div class="maps-grid-wrapper">
       <div class="maps-grid">

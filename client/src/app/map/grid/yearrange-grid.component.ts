@@ -11,6 +11,7 @@ import { MapControlsComponent } from '../controls/map-controls.component';
 import { MobileHamburgerMenuComponent } from '../controls/mobile-hamburger-menu.component';
 import { MobileDateControlOverlayComponent } from '../controls/mobile-date-control-overlay.component';
 import { VariableSelectorOverlayComponent } from '../controls/variable-selector-overlay.component';
+import { ClimateScenarioOverlayComponent } from '../controls/climate-scenario-overlay.component';
 import { ClimateMapService } from '../../core/climatemap.service';
 import { MetadataService, YearRange } from '../../core/metadata.service';
 import {
@@ -50,6 +51,7 @@ interface YearRangeOption {
     MobileHamburgerMenuComponent,
     MobileDateControlOverlayComponent,
     VariableSelectorOverlayComponent,
+    ClimateScenarioOverlayComponent,
   ],
   templateUrl: './yearrange-grid.component.html',
   styleUrl: './yearrange-grid.component.scss',
@@ -193,5 +195,21 @@ export class YearRangeGridComponent extends BaseMapComponent {
   onVariableChange(variableType: ClimateVarKey): void {
     this.controlsData.selectedVariableType = variableType;
     this.onControlsChange(this.controlsData);
+  }
+
+  onClimateScenarioChangeOverlay(scenario: ClimateScenario | null): void {
+    this.controlsData.selectedClimateScenario = scenario;
+    this.onControlsChange(this.controlsData);
+  }
+
+  shouldShowFutureControls(): boolean {
+    return !!(
+      this.controlsData?.selectedYearRange &&
+      this.controlsOptions?.isHistoricalYearRange &&
+      this.controlsData.selectedYearRange.value &&
+      !this.controlsOptions.isHistoricalYearRange(
+        this.controlsData.selectedYearRange.value,
+      )
+    );
   }
 }
