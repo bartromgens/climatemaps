@@ -29,9 +29,15 @@ import { MobileHamburgerMenuComponent } from './controls/mobile-hamburger-menu.c
 import { ShowChangeToggleOverlayComponent } from './controls/show-change-toggle-overlay.component';
 import { ContourToggleOverlayComponent } from './controls/contour-toggle-overlay.component';
 import { ClimateModelOverlayComponent } from './controls/climate-model-overlay.component';
+import { ClimateScenarioOverlayComponent } from './controls/climate-scenario-overlay.component';
 import { ClimateMapService } from '../core/climatemap.service';
 import { MetadataService, YearRange } from '../core/metadata.service';
-import { SpatialResolution, ClimateVarKey, ClimateModel } from '../utils/enum';
+import {
+  SpatialResolution,
+  ClimateVarKey,
+  ClimateModel,
+  ClimateScenario,
+} from '../utils/enum';
 import { TooltipManagerService } from './services/tooltip-manager.service';
 import { VectorLayerTooltipService } from './services/vector-layer-tooltip.service';
 import { MapClickHandlerService } from './services/map-click-handler.service';
@@ -73,6 +79,7 @@ import { MatomoTracker } from 'ngx-matomo-client';
     ShowChangeToggleOverlayComponent,
     ContourToggleOverlayComponent,
     ClimateModelOverlayComponent,
+    ClimateScenarioOverlayComponent,
   ],
   templateUrl: './map.component.html',
   styleUrl: './map.component.scss',
@@ -696,6 +703,11 @@ export class MapComponent extends BaseMapComponent implements OnInit {
 
   onClimateModelChangeOverlay(model: ClimateModel | null): void {
     this.controlsData.selectedClimateModel = model;
+    this.onControlsChange(this.controlsData);
+  }
+
+  onClimateScenarioChangeOverlay(scenario: ClimateScenario | null): void {
+    this.controlsData.selectedClimateScenario = scenario;
     this.onControlsChange(this.controlsData);
   }
 

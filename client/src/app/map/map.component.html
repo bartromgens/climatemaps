@@ -55,6 +55,15 @@
       (toggleChange)="onShowChangeToggle($event)"
     ></app-show-change-toggle-overlay>
 
+    <!-- Climate scenario overlay -->
+    <app-climate-scenario-overlay
+      [show]="shouldShowFutureControls()"
+      [selectedClimateScenario]="controlsData.selectedClimateScenario"
+      [climateScenarios]="controlsOptions?.climateScenarios || []"
+      [availableClimateScenarios]="controlsOptions?.availableClimateScenarios || []"
+      (climateScenarioChange)="onClimateScenarioChangeOverlay($event)"
+    ></app-climate-scenario-overlay>
+
     <!-- Climate model overlay -->
     <app-climate-model-overlay
       [show]="shouldShowFutureControls()"

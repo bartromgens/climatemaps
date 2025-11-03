@@ -1,0 +1,19 @@
+<div class="climate-scenario-overlay" *ngIf="show">
+  <mat-form-field subscriptSizing="dynamic" class="overlay-select-field">
+    <mat-label>Climate Scenario</mat-label>
+    <mat-select
+      [value]="selectedClimateScenario"
+      (selectionChange)="onClimateScenarioChange($event)"
+    >
+      <mat-option
+        *ngFor="let scenario of climateScenarios"
+        [value]="scenario"
+        [disabled]="!availableClimateScenarios.includes(scenario)"
+        [class.disabled-option]="!availableClimateScenarios.includes(scenario)"
+      >
+        {{ getClimateScenarioDisplayName(scenario) }}
+      </mat-option>
+    </mat-select>
+  </mat-form-field>
+</div>
+
