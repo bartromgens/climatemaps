@@ -1,4 +1,5 @@
 @import "../../../styles/variables";
+@import "grid-sidebar";
 
 .custom-sidebar {
   width: 320px;
@@ -47,7 +48,7 @@
   height: 40px;
   border-bottom: 2px solid #ddd;
   background-color: #f8f9fa;
-  
+
   @media (max-width: 768px) {
     grid-template-columns: 80px repeat(2, 1fr);
     height: 30px;
@@ -67,7 +68,7 @@
   padding: 8px;
   text-align: center;
   border-right: 1px solid #e0e0e0;
-  
+
   &:last-child {
     border-right: none;
   }
@@ -85,11 +86,11 @@
   grid-template-columns: 180px 1fr;
   flex: 1;
   border-bottom: 1px solid #e0e0e0;
-  
+
   &:last-child {
     border-bottom: none;
   }
-  
+
   @media (max-width: 768px) {
     grid-template-columns: 80px 1fr;
   }
@@ -105,7 +106,7 @@
   background-color: #f8f9fa;
   border-right: 2px solid #ddd;
   writing-mode: horizontal-tb;
-  
+
   @media (max-width: 768px) {
     font-size: 0.7rem;
     padding: 4px;
@@ -116,7 +117,7 @@
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 0;
-  
+
   @media (max-width: 768px) {
     grid-template-columns: repeat(2, 1fr);
     grid-template-rows: repeat(2, 1fr);
@@ -135,11 +136,11 @@
   .maps-grid-wrapper {
     height: 100vh;
   }
-  
+
   .column-headers {
     display: none;
   }
-  
+
   .grid-row:nth-child(3),
   .grid-row:nth-child(4) {
     display: none;
