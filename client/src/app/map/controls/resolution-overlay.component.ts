@@ -1,40 +1,34 @@
-import { Component, inject, Input, Output, EventEmitter } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatSelectModule } from '@angular/material/select';
+import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { SpatialResolution } from '../../utils/enum';
-import { MatomoTracker } from 'ngx-matomo-client';
+import { BaseOverlaySelectComponent } from './base-overlay-select.component';
 
 @Component({
   selector: 'app-resolution-overlay',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatFormFieldModule, MatSelectModule],
-  templateUrl: './resolution-overlay.component.html',
-  styleUrl: './resolution-overlay.component.scss',
+  imports: [BaseOverlaySelectComponent],
+  template: `
+    <app-base-overlay-select
+      [label]="'Resolution'"
+      [selectedValue]="selectedResolution"
+      [options]="resolutions"
+      [availableOptions]="availableResolutions"
+      [show]="show"
+      [trackingCategory]="'Control Selection'"
+      [trackingAction]="'Resolution Change (Overlay)'"
+      [getDisplayName]="getResolutionDisplayName"
+      [bottomPosition]="140"
+      (valueChange)="onValueChange($event)"
+    ></app-base-overlay-select>
+  `,
 })
 export class ResolutionOverlayComponent {
-  private readonly tracker = inject(MatomoTracker);
-
   @Input() selectedResolution: SpatialResolution | undefined;
   @Input() resolutions: SpatialResolution[] = [];
   @Input() availableResolutions: SpatialResolution[] = [];
   @Input() show = true;
   @Output() resolutionChange = new EventEmitter<SpatialResolution>();
 
-  onResolutionChange(event: any): void {
-    const resolution = event.value as SpatialResolution;
-    this.resolutionChange.emit(resolution);
-
-    const resolutionName = this.getResolutionDisplayName(resolution);
-    this.tracker.trackEvent(
-      'Control Selection',
-      'Resolution Change (Overlay)',
-      resolutionName,
-    );
-  }
-
-  getResolutionDisplayName(resolution: SpatialResolution): string {
+  getResolutionDisplayName = (resolution: SpatialResolution): string => {
     switch (resolution) {
       case SpatialResolution.MIN30:
         return 'Low';
@@ -46,6 +40,12 @@ export class ResolutionOverlayComponent {
         return 'Very High';
       default:
         return resolution;
+    }
+  };
+
+  onValueChange(value: SpatialResolution | null): void {
+    if (value !== null) {
+      this.resolutionChange.emit(value);
     }
   }
 }

@@ -1,0 +1,16 @@
+<div class="overlay-container" *ngIf="show">
+  <mat-form-field subscriptSizing="dynamic" class="overlay-select-field">
+    <mat-label>{{ label }}</mat-label>
+    <mat-select [value]="selectedValue" (selectionChange)="onSelectionChange($event)">
+      <mat-option
+        *ngFor="let option of options"
+        [value]="option"
+        [disabled]="!isAvailable(option)"
+        [class.disabled-option]="!isAvailable(option)"
+      >
+        {{ getDisplayName(option) }}
+      </mat-option>
+    </mat-select>
+  </mat-form-field>
+</div>
+
