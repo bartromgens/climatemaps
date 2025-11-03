@@ -677,7 +677,7 @@ export class MapComponent extends BaseMapComponent implements OnInit {
     return `${yearRange[0]}-${yearRange[1]}`;
   }
 
-  onVariableChange(variableType: ClimateVarKey): void {
+  override onVariableChange(variableType: ClimateVarKey): void {
     this.controlsData.selectedVariableType = variableType;
     this.checkAndShowFuturePredictionWarning();
     this.onControlsChange(this.controlsData);
@@ -706,7 +706,9 @@ export class MapComponent extends BaseMapComponent implements OnInit {
     this.onControlsChange(this.controlsData);
   }
 
-  onClimateScenarioChangeOverlay(scenario: ClimateScenario | null): void {
+  override onClimateScenarioChangeOverlay(
+    scenario: ClimateScenario | null,
+  ): void {
     this.controlsData.selectedClimateScenario = scenario;
     this.onControlsChange(this.controlsData);
   }
@@ -803,7 +805,7 @@ export class MapComponent extends BaseMapComponent implements OnInit {
     );
   }
 
-  shouldShowFutureControls(): boolean {
+  override shouldShowFutureControls(): boolean {
     return !!(
       this.controlsData?.selectedYearRange &&
       this.controlsOptions?.isHistoricalYearRange &&
