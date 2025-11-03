@@ -31,9 +31,7 @@ export class ClimateScenarioOverlayComponent {
   @Input() show = false;
   @Output() climateScenarioChange = new EventEmitter<ClimateScenario | null>();
 
-  getClimateScenarioDisplayName = (
-    scenario: ClimateScenario,
-  ): string => {
+  getClimateScenarioDisplayName = (scenario: ClimateScenario): string => {
     return CLIMATE_SCENARIO_DISPLAY_NAMES[scenario] || scenario;
   };
 

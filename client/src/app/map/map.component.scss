@@ -69,11 +69,15 @@
 // Sidebar toggle button
 .sidebar-toggle-button {
   position: fixed;
-  top: 120px;
+  top: 16px;
   left: 10px;
   z-index: 2000;
   background-color: white;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+
+  @media (min-width: 769px) {
+    top: 120px;
+  }
 }
 
 // Map info display (month and year range)

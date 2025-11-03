@@ -25,8 +25,8 @@ import { CommonModule } from '@angular/common';
     `
       .colorbar-container {
         position: fixed;
-        bottom: 120px;
-        left: 14px;
+        bottom: 130px;
+        left: 6px;
         background: rgba(255, 255, 255, 0.4);
         border-radius: 8px;
         padding: 10px;
