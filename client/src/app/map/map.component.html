@@ -55,6 +55,15 @@
       (toggleChange)="onShowChangeToggle($event)"
     ></app-show-change-toggle-overlay>
 
+    <!-- Resolution overlay -->
+    <app-resolution-overlay
+      [show]="true"
+      [selectedResolution]="controlsData.selectedResolution"
+      [resolutions]="controlsOptions?.resolutions || []"
+      [availableResolutions]="controlsOptions?.availableResolutions || []"
+      (resolutionChange)="onResolutionChangeOverlay($event)"
+    ></app-resolution-overlay>
+
     <!-- Climate scenario overlay -->
     <app-climate-scenario-overlay
       [show]="shouldShowFutureControls()"

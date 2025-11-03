@@ -30,6 +30,7 @@ import { ShowChangeToggleOverlayComponent } from './controls/show-change-toggle-
 import { ContourToggleOverlayComponent } from './controls/contour-toggle-overlay.component';
 import { ClimateModelOverlayComponent } from './controls/climate-model-overlay.component';
 import { ClimateScenarioOverlayComponent } from './controls/climate-scenario-overlay.component';
+import { ResolutionOverlayComponent } from './controls/resolution-overlay.component';
 import { ClimateMapService } from '../core/climatemap.service';
 import { MetadataService, YearRange } from '../core/metadata.service';
 import {
@@ -80,6 +81,7 @@ import { MatomoTracker } from 'ngx-matomo-client';
     ContourToggleOverlayComponent,
     ClimateModelOverlayComponent,
     ClimateScenarioOverlayComponent,
+    ResolutionOverlayComponent,
   ],
   templateUrl: './map.component.html',
   styleUrl: './map.component.scss',
@@ -708,6 +710,11 @@ export class MapComponent extends BaseMapComponent implements OnInit {
 
   onClimateScenarioChangeOverlay(scenario: ClimateScenario | null): void {
     this.controlsData.selectedClimateScenario = scenario;
+    this.onControlsChange(this.controlsData);
+  }
+
+  onResolutionChangeOverlay(resolution: SpatialResolution): void {
+    this.controlsData.selectedResolution = resolution;
     this.onControlsChange(this.controlsData);
   }
 
