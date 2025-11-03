@@ -28,9 +28,10 @@ import { ColorbarComponent } from './colorbar.component';
 import { MobileHamburgerMenuComponent } from './controls/mobile-hamburger-menu.component';
 import { ShowChangeToggleOverlayComponent } from './controls/show-change-toggle-overlay.component';
 import { ContourToggleOverlayComponent } from './controls/contour-toggle-overlay.component';
+import { ClimateModelOverlayComponent } from './controls/climate-model-overlay.component';
 import { ClimateMapService } from '../core/climatemap.service';
 import { MetadataService, YearRange } from '../core/metadata.service';
-import { SpatialResolution, ClimateVarKey } from '../utils/enum';
+import { SpatialResolution, ClimateVarKey, ClimateModel } from '../utils/enum';
 import { TooltipManagerService } from './services/tooltip-manager.service';
 import { VectorLayerTooltipService } from './services/vector-layer-tooltip.service';
 import { MapClickHandlerService } from './services/map-click-handler.service';
@@ -71,6 +72,7 @@ import { MatomoTracker } from 'ngx-matomo-client';
     MobileHamburgerMenuComponent,
     ShowChangeToggleOverlayComponent,
     ContourToggleOverlayComponent,
+    ClimateModelOverlayComponent,
   ],
   templateUrl: './map.component.html',
   styleUrl: './map.component.scss',
@@ -692,6 +694,11 @@ export class MapComponent extends BaseMapComponent implements OnInit {
     this.onControlsChange(this.controlsData);
   }
 
+  onClimateModelChangeOverlay(model: ClimateModel | null): void {
+    this.controlsData.selectedClimateModel = model;
+    this.onControlsChange(this.controlsData);
+  }
+
   onPlotDataRequested(event: { plotData: any; timerangePlotData: any }): void {
     this.plotData = event.plotData;
     this.timerangePlotData = event.timerangePlotData;
@@ -781,6 +788,17 @@ export class MapComponent extends BaseMapComponent implements OnInit {
     }
     return !this.isHistoricalYearRange(
       this.controlsData.selectedYearRange.value,
+    );
+  }
+
+  shouldShowFutureControls(): boolean {
+    return !!(
+      this.controlsData?.selectedYearRange &&
+      this.controlsOptions?.isHistoricalYearRange &&
+      this.controlsData.selectedYearRange.value &&
+      !this.controlsOptions.isHistoricalYearRange(
+        this.controlsData.selectedYearRange.value,
+      )
     );
   }
 

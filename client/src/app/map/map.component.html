@@ -55,6 +55,15 @@
       (toggleChange)="onShowChangeToggle($event)"
     ></app-show-change-toggle-overlay>
 
+    <!-- Climate model overlay -->
+    <app-climate-model-overlay
+      [show]="shouldShowFutureControls()"
+      [selectedClimateModel]="controlsData.selectedClimateModel"
+      [climateModels]="controlsOptions?.climateModels || []"
+      [availableClimateModels]="controlsOptions?.availableClimateModels || []"
+      (climateModelChange)="onClimateModelChangeOverlay($event)"
+    ></app-climate-model-overlay>
+
     <div
       class="page-content-wrapper"
       leaflet
