@@ -75,7 +75,7 @@ export class MapControlsComponent implements OnInit {
   @Input() controlsData: MapControlsData | undefined;
   @Input() controlsOptions: MapControlsOptions | undefined;
   @Input() hideVariableSelector = false;
-  @Input() isMobile = false;
+  @Input() showDropDownControls = true;
   @Output() controlsChange = new EventEmitter<MapControlsData>();
   temperatureUnit = '°C';
 

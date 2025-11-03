@@ -8,7 +8,6 @@
     <div class="sidebar-content">
       <!-- Close button inside sidebar -->
       <button
-        *ngIf="isMobile"
         mat-icon-button
         class="sidebar-close-button"
         (click)="toggleSidebar()"
@@ -20,17 +19,17 @@
       <app-map-controls
         [controlsData]="controlsData"
         [controlsOptions]="controlsOptions"
-        [isMobile]="isMobile"
+        [showDropDownControls]="true"
         (controlsChange)="onControlsChange($event)"
       ></app-map-controls>
     </div>
   </mat-sidenav>
   <mat-sidenav-content>
-    <!-- Mobile toggle button -->
+    <!-- Sidebar toggle button -->
     <button
-      *ngIf="isMobile && !sidebarOpened"
+      *ngIf="!sidebarOpened"
       mat-icon-button
-      class="mobile-toggle-button"
+      class="sidebar-toggle-button"
       (click)="toggleSidebar()"
       [attr.aria-label]="'Open sidebar'"
     >
@@ -139,6 +138,7 @@
       <app-map-controls
         [controlsData]="controlsData"
         [controlsOptions]="controlsOptions"
+        [showDropDownControls]="false"
         (controlsChange)="onControlsChange($event)"
       ></app-map-controls>
     </div>
