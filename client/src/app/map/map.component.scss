@@ -87,7 +87,8 @@
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
   backdrop-filter: blur(8px);
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
 
   .info-label {
     font-size: 11px;
@@ -153,7 +154,6 @@
   max-width: 100vw !important;
 }
 
-
 // Mobile-specific styling
 @media (max-width: 768px) {
   .mobile-toggle-button {
@@ -182,13 +182,11 @@
   }
 }
 
-
 // Desktop-specific styling
 @media (min-width: 769px) {
   .mobile-toggle-button {
     display: none;
   }
-
 
   ::ng-deep .custom-sidebar {
     display: none;

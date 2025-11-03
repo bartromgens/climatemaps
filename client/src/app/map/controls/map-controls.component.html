@@ -13,7 +13,7 @@
   </div>
 </div>
 
-<div class="row controls-row">
+<div class="row controls-row" *ngIf="isMobile">
   <mat-form-field
     *ngIf="!hideVariableSelector"
     subscriptSizing="dynamic"

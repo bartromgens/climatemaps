@@ -20,6 +20,7 @@
       <app-map-controls
         [controlsData]="controlsData"
         [controlsOptions]="controlsOptions"
+        [isMobile]="isMobile"
         (controlsChange)="onControlsChange($event)"
       ></app-map-controls>
     </div>
@@ -69,7 +70,9 @@
       [show]="shouldShowFutureControls()"
       [selectedClimateScenario]="controlsData.selectedClimateScenario"
       [climateScenarios]="controlsOptions?.climateScenarios || []"
-      [availableClimateScenarios]="controlsOptions?.availableClimateScenarios || []"
+      [availableClimateScenarios]="
+        controlsOptions?.availableClimateScenarios || []
+      "
       (climateScenarioChange)="onClimateScenarioChangeOverlay($event)"
     ></app-climate-scenario-overlay>
 
