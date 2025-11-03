@@ -19,6 +19,7 @@
       <app-map-controls
         [controlsData]="controlsData"
         [controlsOptions]="controlsOptions"
+        [showDropDownControls]="true"
         (controlsChange)="onControlsChange($event)"
       ></app-map-controls>
     </div>
@@ -67,6 +68,7 @@
       <app-map-controls
         [controlsData]="controlsData"
         [controlsOptions]="controlsOptions"
+        [showDropDownControls]="false"
         (controlsChange)="onControlsChange($event)"
       ></app-map-controls>
     </div>
