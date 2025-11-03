@@ -13,6 +13,7 @@ import {
   SpatialResolution,
   ClimateScenario,
   ClimateModel,
+  CLIMATE_SCENARIO_DISPLAY_NAMES,
 } from '../utils/enum';
 import {
   LayerBuilderService,
@@ -444,5 +445,36 @@ export abstract class BaseMapComponent implements OnInit {
 
   toggleSidebar(): void {
     this.sidebarOpened = !this.sidebarOpened;
+  }
+
+  onVariableChange(variableType: ClimateVarKey): void {
+    this.controlsData.selectedVariableType = variableType;
+    this.onControlsChange(this.controlsData);
+  }
+
+  shouldShowFutureControls(): boolean {
+    return !!(
+      this.controlsData?.selectedYearRange &&
+      this.controlsOptions?.isHistoricalYearRange &&
+      this.controlsData.selectedYearRange.value &&
+      !this.controlsOptions.isHistoricalYearRange(
+        this.controlsData.selectedYearRange.value,
+      )
+    );
+  }
+
+  onClimateScenarioChangeOverlay(scenario: ClimateScenario | null): void {
+    this.controlsData.selectedClimateScenario = scenario;
+    this.onControlsChange(this.controlsData);
+  }
+
+  protected getYearRangeLabel(yearRange: YearRange): string {
+    const start = yearRange.value[0];
+    const end = yearRange.value[1];
+    return `${start}-${end}`;
+  }
+
+  protected getScenarioLabel(scenario: ClimateScenario): string {
+    return CLIMATE_SCENARIO_DISPLAY_NAMES[scenario] || scenario;
   }
 }

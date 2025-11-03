@@ -34,10 +34,6 @@
 }
 
 .maps-grid-wrapper {
-  height: $page-height;
-  width: 100%;
-  padding: 0;
-  position: relative;
   display: flex;
   flex-direction: column;
 }
@@ -125,18 +121,6 @@
 }
 
 @media (max-width: 768px) {
-  .mobile-toggle-button {
-    display: block;
-  }
-
-  .desktop-controls {
-    display: none;
-  }
-
-  .maps-grid-wrapper {
-    height: 100vh;
-  }
-
   .column-headers {
     display: none;
   }
@@ -159,23 +143,8 @@
 
 :host ::ng-deep {
   mat-sidenav-container {
-    height: calc(100vh - $navbar-height);
-
     @media (max-width: 768px) {
       height: calc(100vh);
     }
-  }
-
-  mat-sidenav-content {
-    display: flex;
-    flex-direction: column;
-  }
-
-  .leaflet-container {
-    background: #e0e0e0;
-  }
-
-  .leaflet-control-attribution {
-    display: none;
   }
 }

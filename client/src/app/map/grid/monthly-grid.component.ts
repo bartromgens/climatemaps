@@ -172,26 +172,6 @@ export class MonthlyGridComponent extends BaseMapComponent {
     this.onControlsChange(this.controlsData);
   }
 
-  onVariableChange(variableType: ClimateVarKey): void {
-    this.controlsData.selectedVariableType = variableType;
-    this.onControlsChange(this.controlsData);
-  }
-
-  onClimateScenarioChangeOverlay(scenario: ClimateScenario | null): void {
-    this.controlsData.selectedClimateScenario = scenario;
-    this.onControlsChange(this.controlsData);
-  }
-
-  shouldShowFutureControls(): boolean {
-    return !!(
-      this.controlsData?.selectedYearRange &&
-      this.controlsOptions?.isHistoricalYearRange &&
-      this.controlsData.selectedYearRange.value &&
-      !this.controlsOptions.isHistoricalYearRange(
-        this.controlsData.selectedYearRange.value,
-      )
-    );
-  }
 
   protected updateUrlWithControls(): void {
     const isHistorical =

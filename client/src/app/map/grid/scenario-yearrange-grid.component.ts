@@ -16,7 +16,6 @@ import {
   ClimateScenario,
   ClimateModel,
   SpatialResolution,
-  CLIMATE_SCENARIO_DISPLAY_NAMES,
   ClimateVarKey,
 } from '../../utils/enum';
 import {
@@ -174,15 +173,6 @@ export class ScenarioYearRangeGridComponent extends BaseMapComponent {
     URLUtils.updateURLParams(urlData);
   }
 
-  getScenarioLabel(scenario: ClimateScenario): string {
-    return CLIMATE_SCENARIO_DISPLAY_NAMES[scenario] || scenario;
-  }
-
-  getYearRangeLabel(yearRange: YearRange): string {
-    const start = yearRange.value[0];
-    const end = yearRange.value[1];
-    return `${start}-${end}`;
-  }
 
   getCellsForScenario(scenario: ClimateScenario): GridCell[] {
     return this.gridCells.filter((cell) => cell.scenario === scenario);
@@ -196,8 +186,4 @@ export class ScenarioYearRangeGridComponent extends BaseMapComponent {
     return this.gridCells[0]?.option?.climateMap?.getDisplayName() || null;
   }
 
-  onVariableChange(variableType: ClimateVarKey): void {
-    this.controlsData.selectedVariableType = variableType;
-    this.onControlsChange(this.controlsData);
-  }
 }

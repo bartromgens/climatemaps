@@ -93,3 +93,50 @@
     }
   }
 }
+
+// Common maps grid wrapper styling
+.maps-grid-wrapper {
+  height: $page-height;
+  width: 100%;
+  padding: 0;
+  position: relative;
+
+  @media (max-width: 768px) {
+    height: 100vh;
+  }
+}
+
+// Common mat-sidenav-container and leaflet styling
+:host ::ng-deep {
+  mat-sidenav-container {
+    height: calc(100vh - $navbar-height);
+
+    @media (max-width: 768px) {
+      height: calc(100vh - $mobile-slider-height);
+    }
+  }
+
+  mat-sidenav-content {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .leaflet-container {
+    background: #e0e0e0;
+  }
+
+  .leaflet-control-attribution {
+    display: none;
+  }
+}
+
+// Common mobile-specific styling
+@media (max-width: 768px) {
+  .mobile-toggle-button {
+    display: block;
+  }
+
+  .desktop-controls {
+    display: none;
+  }
+}

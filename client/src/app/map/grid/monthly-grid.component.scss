@@ -1,13 +1,6 @@
 @import "../../../styles/variables";
 @import "grid-sidebar";
 
-.maps-grid-wrapper {
-  height: $page-height;
-  width: 100%;
-  padding: 0;
-  position: relative;
-}
-
 .maps-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -31,43 +24,5 @@
     grid-template-columns: repeat(2, 1fr);
     grid-template-rows: repeat(6, 1fr);
     grid-auto-flow: column;
-  }
-}
-
-// Mobile-specific styling
-@media (max-width: 768px) {
-  .mobile-toggle-button {
-    display: block;
-  }
-
-  .desktop-controls {
-    display: none;
-  }
-
-  .maps-grid-wrapper {
-    height: 100vh;
-  }
-}
-
-:host ::ng-deep {
-  mat-sidenav-container {
-    height: calc(100vh - $navbar-height);
-
-    @media (max-width: 768px) {
-      height: calc(100vh - $mobile-slider-height);
-    }
-  }
-
-  mat-sidenav-content {
-    display: flex;
-    flex-direction: column;
-  }
-
-  .leaflet-container {
-    background: #e0e0e0;
-  }
-
-  .leaflet-control-attribution {
-    display: none;
   }
 }

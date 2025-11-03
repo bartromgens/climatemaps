@@ -145,11 +145,6 @@ export class YearRangeGridComponent extends BaseMapComponent {
     this.updateControlsOptions();
   }
 
-  private getYearRangeLabel(yearRange: YearRange): string {
-    const start = yearRange.value[0];
-    const end = yearRange.value[1];
-    return `${start}-${end}`;
-  }
 
   private findMatchingLayers(): void {
     const availableYearRanges = this.getAvailableYearRanges();
@@ -190,26 +185,5 @@ export class YearRangeGridComponent extends BaseMapComponent {
   onMonthChange(month: number): void {
     this.controlsData.selectedMonth = month;
     this.onControlsChange(this.controlsData);
-  }
-
-  onVariableChange(variableType: ClimateVarKey): void {
-    this.controlsData.selectedVariableType = variableType;
-    this.onControlsChange(this.controlsData);
-  }
-
-  onClimateScenarioChangeOverlay(scenario: ClimateScenario | null): void {
-    this.controlsData.selectedClimateScenario = scenario;
-    this.onControlsChange(this.controlsData);
-  }
-
-  shouldShowFutureControls(): boolean {
-    return !!(
-      this.controlsData?.selectedYearRange &&
-      this.controlsOptions?.isHistoricalYearRange &&
-      this.controlsData.selectedYearRange.value &&
-      !this.controlsOptions.isHistoricalYearRange(
-        this.controlsData.selectedYearRange.value,
-      )
-    );
   }
 }
