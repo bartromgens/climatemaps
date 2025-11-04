@@ -1,0 +1,34 @@
+<div class="search-container">
+  <div class="custom-search-input">
+    <mat-icon class="search-icon">search</mat-icon>
+    <input
+      type="text"
+      class="search-input"
+      placeholder="Search city or country..."
+      [formControl]="searchControl"
+      [matAutocomplete]="auto"
+    />
+    <button
+      *ngIf="searchControl.value"
+      mat-icon-button
+      class="clear-button"
+      (click)="clearSearch()"
+      aria-label="Clear"
+    >
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+  <mat-autocomplete
+    #auto="matAutocomplete"
+    [displayWith]="displayLocationName"
+    (optionSelected)="onLocationSelected($event.option.value)"
+  >
+    <mat-option
+      *ngFor="let location of filteredLocations$ | async"
+      [value]="location"
+    >
+      {{ location.displayName }}
+    </mat-option>
+  </mat-autocomplete>
+</div>
+
