@@ -28,13 +28,13 @@ export class VariableSelectorOverlayComponent {
     {
       key: ClimateVarKey.T_MAX,
       icon: 'assets/thermometer-hot.svg',
-      shortName: 'Temp. Max',
+      shortName: 'Temp. (Day)',
       isSvg: true,
     },
     {
       key: ClimateVarKey.T_MIN,
       icon: 'assets/thermometer-cold.svg',
-      shortName: 'Temp. Min',
+      shortName: 'Temp. (Night)',
       isSvg: true,
     },
     {

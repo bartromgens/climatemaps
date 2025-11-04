@@ -26,8 +26,8 @@ export const CLIMATE_VAR_KEY_TO_NAME: Record<ClimateVarKey, string> = {
 };
 
 export const CLIMATE_VAR_DISPLAY_NAMES: Record<ClimateVarKey, string> = {
-  [ClimateVarKey.T_MAX]: 'Temperature Max',
-  [ClimateVarKey.T_MIN]: 'Temperature Min',
+  [ClimateVarKey.T_MAX]: 'Temperature (Day)',
+  [ClimateVarKey.T_MIN]: 'Temperature (Night)',
   [ClimateVarKey.PRECIPITATION]: 'Precipitation',
   [ClimateVarKey.CLOUD_COVER]: 'Cloud Cover',
   [ClimateVarKey.WET_DAYS]: 'Wet Days',
