@@ -1,6 +1,12 @@
+@import "../styles/variables";
+
 mat-toolbar {
   background-color: white !important;
   color: #1565c0;
+  min-height: $navbar-height !important;
+  height: $navbar-height !important;
+  display: flex;
+  align-items: center;
 }
 
 .spacer {
