@@ -4,9 +4,15 @@ import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatInputModule } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { ReactiveFormsModule, FormControl } from '@angular/forms';
-import { Observable } from 'rxjs';
-import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
+import { Observable, BehaviorSubject } from 'rxjs';
+import {
+  debounceTime,
+  distinctUntilChanged,
+  switchMap,
+  finalize,
+} from 'rxjs/operators';
 import { MatomoTracker } from 'ngx-matomo-client';
 
 import { GeocodingService, LocationSuggestion } from './geocoding.service';
@@ -21,6 +27,7 @@ import { MapNavigationService } from './map-navigation.service';
     MatInputModule,
     MatIconModule,
     MatButtonModule,
+    MatProgressSpinnerModule,
     ReactiveFormsModule,
   ],
   templateUrl: './location-search.component.html',
@@ -29,6 +36,7 @@ import { MapNavigationService } from './map-navigation.service';
 export class LocationSearchComponent {
   searchControl = new FormControl('');
   filteredLocations$: Observable<LocationSuggestion[]>;
+  isLoading$ = new BehaviorSubject<boolean>(false);
   private readonly tracker = inject(MatomoTracker);
 
   constructor(
@@ -40,7 +48,14 @@ export class LocationSearchComponent {
       distinctUntilChanged(),
       switchMap((value) => {
         const query = typeof value === 'string' ? value : '';
-        return this.geocodingService.searchLocations(query);
+        if (query && query.trim().length >= 2) {
+          this.isLoading$.next(true);
+        } else {
+          this.isLoading$.next(false);
+        }
+        return this.geocodingService
+          .searchLocations(query)
+          .pipe(finalize(() => this.isLoading$.next(false)));
       }),
     );
   }

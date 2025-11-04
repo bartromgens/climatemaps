@@ -8,8 +8,13 @@
       [formControl]="searchControl"
       [matAutocomplete]="auto"
     />
+    <mat-spinner
+      *ngIf="isLoading$ | async"
+      class="loading-spinner"
+      diameter="20"
+    ></mat-spinner>
     <button
-      *ngIf="searchControl.value"
+      *ngIf="searchControl.value && !(isLoading$ | async)"
       mat-icon-button
       class="clear-button"
       (click)="clearSearch()"
