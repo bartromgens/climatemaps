@@ -1,5 +1,6 @@
 from typing import List, Optional
 import os
+import time
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException
@@ -25,7 +26,7 @@ climate_maps = [ClimateMap.create(maps_config) for maps_config in settings.DATA_
 
 data_config_map = {config.data_type_slug: config for config in settings.DATA_SETS_API}
 
-geocoder = Photon(user_agent="openclimatemap")
+geocoder = Photon(user_agent="openclimatemap", timeout=10)
 
 
 @api.get("/climatemap", response_model=List[ClimateMap])
@@ -143,48 +144,58 @@ def search_locations(query: str, limit: int = 50) -> List[GeocodingLocation]:
     if limit < 1 or limit > 50:
         raise HTTPException(status_code=400, detail="Limit must be between 1 and 50")
 
-    try:
-        results = geocoder.geocode(query, exactly_one=False, limit=50, language="en")
+    max_retries = 3
+    retry_delay = 0.5
 
-        if not results:
-            return []
+    for attempt in range(max_retries):
+        try:
+            results = geocoder.geocode(query, exactly_one=False, limit=50, language="en")
 
-        locations: List[GeocodingLocation] = []
+            if not results:
+                return []
 
-        for index, result in enumerate(results):
-            if not hasattr(result, "raw"):
-                continue
+            locations: List[GeocodingLocation] = []
 
-            raw = result.raw
-            properties = raw.get("properties", {})
+            for result in results:
+                if not hasattr(result, "raw"):
+                    continue
 
-            if not _is_city_country_or_town_photon(properties):
-                continue
+                raw = result.raw
+                properties = raw.get("properties", {})
 
-            location_type = properties.get("type", "").lower()
-            bounding_box = None
-            if "extent" in properties and len(properties["extent"]) == 4:
-                extent = properties["extent"]
-                bounding_box = [extent[1], extent[3], extent[0], extent[2]]
+                if not _is_city_country_or_town_photon(properties):
+                    continue
 
-            locations.append(
-                GeocodingLocation(
-                    display_name=result.address,
-                    latitude=result.latitude,
-                    longitude=result.longitude,
-                    type=location_type,
-                    bounding_box=bounding_box,
+                location_type = properties.get("type", "").lower()
+                bounding_box = None
+                if "extent" in properties and len(properties["extent"]) == 4:
+                    extent = properties["extent"]
+                    bounding_box = [extent[1], extent[3], extent[0], extent[2]]
+
+                locations.append(
+                    GeocodingLocation(
+                        display_name=result.address,
+                        latitude=result.latitude,
+                        longitude=result.longitude,
+                        type=location_type,
+                        bounding_box=bounding_box,
+                    )
                 )
-            )
 
-        return locations[:limit]
+            return locations[:limit]
 
-    except GeocoderTimedOut:
-        raise HTTPException(status_code=504, detail="Geocoding service timed out")
-    except GeocoderServiceError as e:
-        raise HTTPException(status_code=503, detail=f"Geocoding service error: {str(e)}")
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error searching locations: {str(e)}")
+        except GeocoderTimedOut:
+            if attempt < max_retries - 1:
+                time.sleep(retry_delay * (2**attempt))
+                continue
+            raise HTTPException(status_code=504, detail="Geocoding service timed out after retries")
+        except GeocoderServiceError as e:
+            if attempt < max_retries - 1:
+                time.sleep(retry_delay * (2**attempt))
+                continue
+            raise HTTPException(status_code=503, detail=f"Geocoding service error: {str(e)}")
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Error searching locations: {str(e)}")
 
 
 def _is_city_country_or_town_photon(properties: dict) -> bool:
