@@ -22,6 +22,7 @@
     #auto="matAutocomplete"
     [displayWith]="displayLocationName"
     (optionSelected)="onLocationSelected($event.option.value)"
+    panelClass="location-search-autocomplete"
   >
     <mat-option
       *ngFor="let location of filteredLocations$ | async"
@@ -31,4 +32,3 @@
     </mat-option>
   </mat-autocomplete>
 </div>
-

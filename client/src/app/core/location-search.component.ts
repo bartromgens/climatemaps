@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatInputModule } from '@angular/material/input';
@@ -26,7 +26,7 @@ import { MapNavigationService } from './map-navigation.service';
   templateUrl: './location-search.component.html',
   styleUrl: './location-search.component.scss',
 })
-export class LocationSearchComponent implements OnInit {
+export class LocationSearchComponent {
   searchControl = new FormControl('');
   filteredLocations$: Observable<LocationSuggestion[]>;
   private readonly tracker = inject(MatomoTracker);
@@ -44,8 +44,6 @@ export class LocationSearchComponent implements OnInit {
       }),
     );
   }
-
-  ngOnInit(): void {}
 
   displayLocationName(location: LocationSuggestion | null): string {
     return location ? location.displayName : '';
@@ -71,4 +69,3 @@ export class LocationSearchComponent implements OnInit {
     this.searchControl.setValue('');
   }
 }
-

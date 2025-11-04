@@ -1,6 +1,18 @@
+@import "../../styles/variables";
+
 .search-container {
   display: flex;
   align-items: center;
+  position: fixed;
+  top: calc($navbar-height + 10px);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  pointer-events: none;
+
+  .custom-search-input {
+    pointer-events: auto;
+  }
 }
 
 .custom-search-input {
@@ -84,4 +96,3 @@
     }
   }
 }
-
