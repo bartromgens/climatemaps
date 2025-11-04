@@ -1,5 +1,5 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
-import { ClimateModel } from '../../utils/enum';
+import { ClimateModel } from '../../../utils/enum';
 import { BaseOverlaySelectComponent } from './base-overlay-select.component';
 
 @Component({
@@ -39,4 +39,3 @@ export class ClimateModelOverlayComponent {
     this.climateModelChange.emit(value);
   }
 }
-

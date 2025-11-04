@@ -19,8 +19,8 @@ import {
   CLIMATE_SCENARIO_DISPLAY_NAMES,
 } from '../../utils/enum';
 import { YearRange } from '../../core/metadata.service';
-import { YearSliderComponent } from './year-slider.component';
-import { MonthSliderComponent } from './month-slider.component';
+import { YearSliderComponent } from './sliders/year-slider.component';
+import { MonthSliderComponent } from './sliders/month-slider.component';
 import { TemperatureUnitService } from '../../core/temperature-unit.service';
 import { TemperatureUtils } from '../../utils/temperature-utils';
 import { PrecipitationUnitService } from '../../core/precipitation-unit.service';

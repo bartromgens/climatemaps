@@ -9,9 +9,9 @@ import { SmallMapComponent } from '../controls/small-map.component';
 import { ColorbarComponent } from '../colorbar.component';
 import { MapControlsComponent } from '../controls/map-controls.component';
 import { MobileHamburgerMenuComponent } from '../controls/mobile-hamburger-menu.component';
-import { MobileDateControlOverlayComponent } from '../controls/mobile-date-control-overlay.component';
-import { VariableSelectorOverlayComponent } from '../controls/variable-selector-overlay.component';
-import { ClimateScenarioOverlayComponent } from '../controls/climate-scenario-overlay.component';
+import { MobileDateControlOverlayComponent } from '../controls/overlays/mobile-date-control-overlay.component';
+import { VariableSelectorOverlayComponent } from '../controls/overlays/variable-selector-overlay.component';
+import { ClimateScenarioOverlayComponent } from '../controls/overlays/climate-scenario-overlay.component';
 import { ClimateMapService } from '../../core/climatemap.service';
 import { MetadataService, YearRange } from '../../core/metadata.service';
 import {
@@ -144,7 +144,6 @@ export class YearRangeGridComponent extends BaseMapComponent {
 
     this.updateControlsOptions();
   }
-
 
   private findMatchingLayers(): void {
     const availableYearRanges = this.getAvailableYearRanges();

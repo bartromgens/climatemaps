@@ -2,7 +2,7 @@ import { Component, Input, Output, EventEmitter } from '@angular/core';
 import {
   ClimateScenario,
   CLIMATE_SCENARIO_DISPLAY_NAMES,
-} from '../../utils/enum';
+} from '../../../utils/enum';
 import { BaseOverlaySelectComponent } from './base-overlay-select.component';
 
 @Component({

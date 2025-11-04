@@ -9,7 +9,7 @@ import { SmallMapComponent } from '../controls/small-map.component';
 import { ColorbarComponent } from '../colorbar.component';
 import { MapControlsComponent } from '../controls/map-controls.component';
 import { MobileHamburgerMenuComponent } from '../controls/mobile-hamburger-menu.component';
-import { VariableSelectorOverlayComponent } from '../controls/variable-selector-overlay.component';
+import { VariableSelectorOverlayComponent } from '../controls/overlays/variable-selector-overlay.component';
 import { ClimateMapService } from '../../core/climatemap.service';
 import { MetadataService, YearRange } from '../../core/metadata.service';
 import {
@@ -173,7 +173,6 @@ export class ScenarioYearRangeGridComponent extends BaseMapComponent {
     URLUtils.updateURLParams(urlData);
   }
 
-
   getCellsForScenario(scenario: ClimateScenario): GridCell[] {
     return this.gridCells.filter((cell) => cell.scenario === scenario);
   }
@@ -185,5 +184,4 @@ export class ScenarioYearRangeGridComponent extends BaseMapComponent {
   get displayName(): string | null {
     return this.gridCells[0]?.option?.climateMap?.getDisplayName() || null;
   }
-
 }

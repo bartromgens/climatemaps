@@ -1,7 +1,7 @@
 import { Component, inject, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
-import { ClimateVarKey } from '../../utils/enum';
+import { ClimateVarKey } from '../../../utils/enum';
 import { MatomoTracker } from 'ngx-matomo-client';
 
 @Component({
