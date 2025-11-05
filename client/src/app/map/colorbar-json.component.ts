@@ -153,7 +153,7 @@ import {
 
       @media (max-width: 768px) {
         .colorbar-canvas {
-          width: 50px;
+          width: 16px;
         }
       }
     `,
