@@ -9,9 +9,18 @@
   gap: 10px;
   z-index: 1000;
   pointer-events: none;
+  max-height: calc($page-height - 40px);
 
   > * {
     pointer-events: auto;
+    flex: 1 1 auto;
+    min-height: 0;
+  }
+
+  ::ng-deep .chart-container {
+    height: calc(($page-height - 200px) / 2);
+    min-height: 200px;
+    max-height: 350px;
   }
 
   @media (max-width: 768px) {
@@ -19,6 +28,12 @@
     right: 10px;
     left: 10px;
     gap: 10px;
+
+    ::ng-deep .chart-container {
+      height: 30vh;
+      min-height: unset;
+      max-height: unset;
+    }
   }
 }
 
