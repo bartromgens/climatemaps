@@ -88,7 +88,7 @@
     </div>
 
     <app-colorbar-json
-      [dataType]="gridCells[0]?.option?.climateMap?.dataType || null"
+      [dataType]="gridCells.length > 0 ? gridCells[0].option?.climateMap?.dataType || null : null"
       [width]="12"
       [height]="180"
       [showLabel]="!isMobile"

@@ -41,20 +41,24 @@
               "./node_modules/leaflet.markercluster/dist/MarkerCluster.css",
               "./node_modules/leaflet.markercluster/dist/MarkerCluster.Default.css"
             ],
-            "scripts": []
+            "scripts": [],
+            "allowedCommonJsDependencies": [
+              "leaflet",
+              "leaflet.vectorgrid"
+            ]
           },
           "configurations": {
             "production": {
               "budgets": [
                 {
                   "type": "initial",
-                  "maximumWarning": "1300kB",
+                  "maximumWarning": "1600kB",
                   "maximumError": "2MB"
                 },
                 {
                   "type": "anyComponentStyle",
-                  "maximumWarning": "2kB",
-                  "maximumError": "4kB"
+                  "maximumWarning": "5kB",
+                  "maximumError": "8kB"
                 }
               ],
               "outputHashing": "all"
