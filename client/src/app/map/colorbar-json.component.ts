@@ -26,8 +26,10 @@ import {
           class="colorbar-canvas"
           [width]="canvasWidth"
           [height]="canvasHeight"
+          [style.width.px]="width"
+          [style.height.px]="height"
         ></canvas>
-        <div class="colorbar-ticks">
+        <div class="colorbar-ticks" [style.height.px]="height">
           <div
             *ngFor="let tick of ticks"
             class="colorbar-tick"
@@ -41,7 +43,7 @@ import {
             </div>
           </div>
         </div>
-        <div class="colorbar-label">
+        <div class="colorbar-label" [style.height.px]="height">
           {{ colorbarConfig.title }} [{{ colorbarConfig.unit }}]
         </div>
       </div>
@@ -60,7 +62,6 @@ import {
         z-index: 1000;
         display: inline-flex;
         align-items: flex-start;
-        width: 68px;
         max-width: none;
         overflow: visible;
       }
@@ -90,8 +91,6 @@ import {
       }
 
       .colorbar-canvas {
-        width: 16px;
-        height: 300px;
         display: block;
         border: 1px solid rgba(0, 0, 0, 0.1);
         box-sizing: border-box;
@@ -99,7 +98,6 @@ import {
 
       .colorbar-ticks {
         position: relative;
-        height: 300px;
         margin-left: 0;
       }
 
@@ -138,7 +136,6 @@ import {
         position: absolute;
         left: 60px;
         top: 60px;
-        height: 300px;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -150,24 +147,24 @@ import {
         transform: rotate(-90deg);
         transform-origin: left center;
       }
-
-      @media (max-width: 768px) {
-        .colorbar-canvas {
-          width: 16px;
-        }
-      }
     `,
   ],
 })
 export class ColorbarJsonComponent implements OnInit, OnChanges, AfterViewInit {
   @Input() dataType: string | null = null;
   @Input() numTicks = 11;
+  @Input() height = 180;
+  @Input() width = 16;
 
   @ViewChild('colorbarCanvas') canvasRef?: ElementRef<HTMLCanvasElement>;
 
   colorbarConfig: ColorbarConfigResponse | null = null;
-  canvasWidth = 20;
-  canvasHeight = 300;
+  get canvasWidth(): number {
+    return this.width;
+  }
+  get canvasHeight(): number {
+    return this.height;
+  }
   ticks: { value: number; position: number }[] = [];
 
   constructor(private climateMapService: ClimateMapService) {}
@@ -193,6 +190,13 @@ export class ColorbarJsonComponent implements OnInit, OnChanges, AfterViewInit {
     }
     if (changes['numTicks'] && this.colorbarConfig) {
       this.calculateTicks();
+    }
+    if (changes['height']) {
+      this.calculateTicks();
+      this.drawColorbarOnNextTick();
+    }
+    if (changes['width']) {
+      this.drawColorbarOnNextTick();
     }
   }
 
