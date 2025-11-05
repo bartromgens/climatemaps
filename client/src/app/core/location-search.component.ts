@@ -43,16 +43,23 @@ export class LocationSearchComponent {
     private geocodingService: GeocodingService,
     private mapNavigationService: MapNavigationService,
   ) {
-    this.filteredLocations$ = this.searchControl.valueChanges.pipe(
-      debounceTime(300),
-      distinctUntilChanged(),
-      switchMap((value) => {
+    // Show loading spinner when user starts typing to get quick feedback
+    this.searchControl.valueChanges
+      .pipe(debounceTime(10), distinctUntilChanged())
+      .subscribe((value) => {
         const query = typeof value === 'string' ? value : '';
         if (query && query.trim().length >= 2) {
           this.isLoading$.next(true);
         } else {
           this.isLoading$.next(false);
         }
+      });
+
+    this.filteredLocations$ = this.searchControl.valueChanges.pipe(
+      debounceTime(300),
+      distinctUntilChanged(),
+      switchMap((value) => {
+        const query = typeof value === 'string' ? value : '';
         return this.geocodingService
           .searchLocations(query)
           .pipe(finalize(() => this.isLoading$.next(false)));
