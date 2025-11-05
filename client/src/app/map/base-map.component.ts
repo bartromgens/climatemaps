@@ -41,7 +41,7 @@ export abstract class BaseMapComponent implements OnInit {
     selectedClimateModel: null,
     showDifferenceMap: true,
     showContourLines: true,
-    selectedMonth: 1,
+    selectedMonth: new Date().getMonth() + 1,
   };
 
   controlsOptions: MapControlsOptions | undefined;
