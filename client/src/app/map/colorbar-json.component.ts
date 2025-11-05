@@ -38,8 +38,8 @@ import { getClimateVarKeyFromDataType } from '../utils/enum';
         <canvas
           #colorbarCanvas
           class="colorbar-canvas"
-          [width]="canvasWidth"
-          [height]="canvasHeight"
+          [width]="width"
+          [height]="height"
           [style.width.px]="width"
           [style.height.px]="height"
         ></canvas>
@@ -181,12 +181,6 @@ export class ColorbarJsonComponent
   @ViewChild('colorbarCanvas') canvasRef?: ElementRef<HTMLCanvasElement>;
 
   colorbarConfig: ColorbarConfigResponse | null = null;
-  get canvasWidth(): number {
-    return this.width;
-  }
-  get canvasHeight(): number {
-    return this.height;
-  }
   ticks: { value: number; position: number }[] = [];
 
   private unitSubscription?: Subscription;
@@ -238,15 +232,12 @@ export class ColorbarJsonComponent
     }
 
     const variableKey = getClimateVarKeyFromDataType(this.dataType);
-    if (variableKey) {
-      this.isTemperatureVariable =
-        TemperatureUtils.isTemperatureVariable(variableKey);
-      this.isPrecipitationVariable =
-        PrecipitationUtils.isPrecipitationVariable(variableKey);
-    } else {
-      this.isTemperatureVariable = false;
-      this.isPrecipitationVariable = false;
-    }
+    this.isTemperatureVariable = variableKey
+      ? TemperatureUtils.isTemperatureVariable(variableKey)
+      : false;
+    this.isPrecipitationVariable = variableKey
+      ? PrecipitationUtils.isPrecipitationVariable(variableKey)
+      : false;
   }
 
   ngAfterViewInit(): void {
@@ -315,12 +306,10 @@ export class ColorbarJsonComponent
 
     const { levels, colors } = this.colorbarConfig;
     const numLevels = levels.length;
-    const barWidth = this.canvasWidth;
-    const barHeight = this.canvasHeight;
 
-    ctx.clearRect(0, 0, barWidth, barHeight);
+    ctx.clearRect(0, 0, this.width, this.height);
 
-    const gradient = ctx.createLinearGradient(0, barHeight, 0, 0);
+    const gradient = ctx.createLinearGradient(0, this.height, 0, 0);
 
     for (let i = 0; i < numLevels; i++) {
       const position = i / (numLevels - 1);
@@ -333,11 +322,11 @@ export class ColorbarJsonComponent
     }
 
     ctx.fillStyle = gradient;
-    ctx.fillRect(0, 0, barWidth, barHeight);
+    ctx.fillRect(0, 0, this.width, this.height);
 
     ctx.strokeStyle = 'rgba(0, 0, 0, 0.3)';
     ctx.lineWidth = 1;
-    ctx.strokeRect(0, 0, barWidth, barHeight);
+    ctx.strokeRect(0, 0, this.width, this.height);
   }
 
   private calculateTicks(): void {
@@ -366,7 +355,7 @@ export class ColorbarJsonComponent
       // - Subtracts 4px: 1px top border + 1px bottom border + 2px for tick centering at edges
       // - Adds 2px: offset for top border (1px) + half-tick-height offset (1px)
       // This ensures ticks align with the gradient fill area, not the border
-      const pixelPosition = (1 - position) * (this.canvasHeight - 4) + 2;
+      const pixelPosition = (1 - position) * (this.height - 4) + 2;
       this.ticks.push({ value, position: pixelPosition });
     }
   }
