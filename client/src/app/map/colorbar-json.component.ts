@@ -7,12 +7,26 @@ import {
   ViewChild,
   ElementRef,
   AfterViewInit,
+  OnDestroy,
+  ChangeDetectorRef,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Subscription, combineLatest } from 'rxjs';
 import {
   ClimateMapService,
   ColorbarConfigResponse,
 } from '../core/climatemap.service';
+import {
+  TemperatureUnitService,
+  TemperatureUnit,
+} from '../core/temperature-unit.service';
+import {
+  PrecipitationUnitService,
+  PrecipitationUnit,
+} from '../core/precipitation-unit.service';
+import { TemperatureUtils } from '../utils/temperature-utils';
+import { PrecipitationUtils } from '../utils/precipitation-utils';
+import { getClimateVarKeyFromDataType } from '../utils/enum';
 
 @Component({
   selector: 'app-colorbar-json',
@@ -39,7 +53,7 @@ import {
               <div class="colorbar-tick-line"></div>
             </div>
             <div class="colorbar-tick-label">
-              {{ tick.value | number: '1.1-1' }}
+              {{ getDisplayValue(tick.value) | number: '1.1-1' }}
             </div>
           </div>
         </div>
@@ -48,7 +62,7 @@ import {
           class="colorbar-label"
           [style.height.px]="height"
         >
-          {{ colorbarConfig.title }} [{{ colorbarConfig.unit }}]
+          {{ colorbarConfig.title }} [{{ getDisplayUnit() }}]
         </div>
       </div>
     </div>
@@ -155,7 +169,9 @@ import {
     `,
   ],
 })
-export class ColorbarJsonComponent implements OnInit, OnChanges, AfterViewInit {
+export class ColorbarJsonComponent
+  implements OnInit, OnChanges, AfterViewInit, OnDestroy
+{
   @Input() dataType: string | null = null;
   @Input() numTicks = 11;
   @Input() height = 200;
@@ -173,11 +189,63 @@ export class ColorbarJsonComponent implements OnInit, OnChanges, AfterViewInit {
   }
   ticks: { value: number; position: number }[] = [];
 
-  constructor(private climateMapService: ClimateMapService) {}
+  private unitSubscription?: Subscription;
+  private isTemperatureVariable = false;
+  private isPrecipitationVariable = false;
+  private currentTemperatureUnit: TemperatureUnit = TemperatureUnit.CELSIUS;
+  private currentPrecipitationUnit: PrecipitationUnit = PrecipitationUnit.MM;
+
+  constructor(
+    private climateMapService: ClimateMapService,
+    private temperatureUnitService: TemperatureUnitService,
+    private precipitationUnitService: PrecipitationUnitService,
+    private cdr: ChangeDetectorRef,
+  ) {}
 
   ngOnInit(): void {
+    this.subscribeToUnitChanges();
     if (this.dataType) {
+      this.updateVariableType();
       this.fetchColorbarConfig();
+    }
+  }
+
+  ngOnDestroy(): void {
+    if (this.unitSubscription) {
+      this.unitSubscription.unsubscribe();
+    }
+  }
+
+  private subscribeToUnitChanges(): void {
+    this.unitSubscription = combineLatest([
+      this.temperatureUnitService.unit$,
+      this.precipitationUnitService.unit$,
+    ]).subscribe(([tempUnit, precipUnit]) => {
+      this.currentTemperatureUnit = tempUnit;
+      this.currentPrecipitationUnit = precipUnit;
+      if (this.colorbarConfig) {
+        this.calculateTicks();
+        this.cdr.markForCheck();
+      }
+    });
+  }
+
+  private updateVariableType(): void {
+    if (!this.dataType) {
+      this.isTemperatureVariable = false;
+      this.isPrecipitationVariable = false;
+      return;
+    }
+
+    const variableKey = getClimateVarKeyFromDataType(this.dataType);
+    if (variableKey) {
+      this.isTemperatureVariable =
+        TemperatureUtils.isTemperatureVariable(variableKey);
+      this.isPrecipitationVariable =
+        PrecipitationUtils.isPrecipitationVariable(variableKey);
+    } else {
+      this.isTemperatureVariable = false;
+      this.isPrecipitationVariable = false;
     }
   }
 
@@ -188,6 +256,7 @@ export class ColorbarJsonComponent implements OnInit, OnChanges, AfterViewInit {
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['dataType']) {
       if (this.dataType) {
+        this.updateVariableType();
         this.fetchColorbarConfig();
       } else {
         this.colorbarConfig = null;
@@ -300,5 +369,29 @@ export class ColorbarJsonComponent implements OnInit, OnChanges, AfterViewInit {
       const pixelPosition = (1 - position) * (this.canvasHeight - 4) + 2;
       this.ticks.push({ value, position: pixelPosition });
     }
+  }
+
+  getDisplayValue(rawValue: number): number {
+    if (this.isTemperatureVariable) {
+      return this.temperatureUnitService.convertTemperature(rawValue);
+    }
+    if (this.isPrecipitationVariable) {
+      return this.precipitationUnitService.convertPrecipitation(rawValue);
+    }
+    return rawValue;
+  }
+
+  getDisplayUnit(): string {
+    if (!this.colorbarConfig) {
+      return '';
+    }
+
+    if (this.isTemperatureVariable) {
+      return this.currentTemperatureUnit;
+    }
+    if (this.isPrecipitationVariable) {
+      return this.currentPrecipitationUnit;
+    }
+    return this.colorbarConfig.unit;
   }
 }
