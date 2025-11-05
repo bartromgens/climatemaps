@@ -6,7 +6,6 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 
 import { SmallMapComponent } from '../controls/small-map.component';
-import { ColorbarComponent } from '../colorbar.component';
 import { ColorbarJsonComponent } from '../colorbar-json.component';
 import { MapControlsComponent } from '../controls/map-controls.component';
 import { MobileHamburgerMenuComponent } from '../controls/mobile-hamburger-menu.component';
@@ -47,7 +46,6 @@ interface YearRangeOption {
     MatSidenavModule,
     MatButtonModule,
     SmallMapComponent,
-    ColorbarComponent,
     ColorbarJsonComponent,
     MapControlsComponent,
     MobileHamburgerMenuComponent,

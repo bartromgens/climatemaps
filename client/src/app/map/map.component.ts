@@ -24,7 +24,6 @@ import { environment } from '../../environments/environment';
 import { MapControlsComponent } from './controls/map-controls.component';
 import { VariableSelectorOverlayComponent } from './controls/overlays/variable-selector-overlay.component';
 import { MobileDateControlOverlayComponent } from './controls/overlays/mobile-date-control-overlay.component';
-import { ColorbarComponent } from './colorbar.component';
 import { ColorbarJsonComponent } from './colorbar-json.component';
 import { MobileHamburgerMenuComponent } from './controls/mobile-hamburger-menu.component';
 import { ShowChangeToggleOverlayComponent } from './controls/overlays/show-change-toggle-overlay.component';
@@ -75,7 +74,6 @@ import { MatomoTracker } from 'ngx-matomo-client';
     MapControlsComponent,
     VariableSelectorOverlayComponent,
     MobileDateControlOverlayComponent,
-    ColorbarComponent,
     ColorbarJsonComponent,
     ClimatePlotsComponent,
     MobileHamburgerMenuComponent,

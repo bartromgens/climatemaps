@@ -83,24 +83,6 @@
     padding: 6px !important;
   }
 
-  app-colorbar {
-    .colorbar-container {
-      position: relative !important;
-      left: auto !important;
-      right: auto !important;
-      bottom: auto !important;
-      max-width: 40px !important;
-      padding: 0 !important;
-
-      @media (max-width: 768px) {
-        left: auto !important;
-        right: 5px !important;
-        bottom: 60px !important;
-        max-width: 35px !important;
-        padding: 5px !important;
-      }
-    }
-  }
 }
 
 // Common maps grid wrapper styling

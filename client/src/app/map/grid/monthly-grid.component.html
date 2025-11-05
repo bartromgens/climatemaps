@@ -85,11 +85,6 @@
     </div>
 
     <div class="colorbar-wrapper">
-      <app-colorbar
-        [colormapUrl]="selectedOption?.climateMap?.colormapUrl || null"
-        [displayName]="selectedOption?.climateMap?.getDisplayName() || null"
-        [selectedMonth]="1"
-      ></app-colorbar>
       <app-colorbar-json
         [dataType]="selectedOption?.climateMap?.dataType || null"
       ></app-colorbar-json>
