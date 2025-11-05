@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { LocaleDetectionService } from './locale-detection.service';
 import { PrecipitationUtils } from '../utils/precipitation-utils';
+import { LocalStorageService } from './local-storage.service';
 
 export enum PrecipitationUnit {
   MM = 'mm',
@@ -17,15 +18,28 @@ export class PrecipitationUnitService {
   );
   public unit$: Observable<PrecipitationUnit> = this.unitSubject.asObservable();
 
-  constructor(private localeDetectionService: LocaleDetectionService) {
+  constructor(
+    private localeDetectionService: LocaleDetectionService,
+    private localStorageService: LocalStorageService,
+  ) {
     this.initializeFromLocale();
   }
 
   private initializeFromLocale(): void {
-    const shouldUseInches = this.localeDetectionService.shouldUseInches();
-    const initialUnit = shouldUseInches
-      ? PrecipitationUnit.INCHES
-      : PrecipitationUnit.MM;
+    const storedUnit = this.localStorageService.getItem(
+      'precipitationUnit',
+    ) as PrecipitationUnit | null;
+    let initialUnit: PrecipitationUnit;
+
+    if (storedUnit && Object.values(PrecipitationUnit).includes(storedUnit)) {
+      initialUnit = storedUnit;
+    } else {
+      const shouldUseInches = this.localeDetectionService.shouldUseInches();
+      initialUnit = shouldUseInches
+        ? PrecipitationUnit.INCHES
+        : PrecipitationUnit.MM;
+    }
+
     console.log('[PrecipitationUnit] Initialized with unit:', initialUnit);
     this.unitSubject.next(initialUnit);
   }
@@ -35,6 +49,7 @@ export class PrecipitationUnitService {
   }
 
   setUnit(unit: PrecipitationUnit): void {
+    this.localStorageService.setItem('precipitationUnit', unit);
     this.unitSubject.next(unit);
   }
 
