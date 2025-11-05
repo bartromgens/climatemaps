@@ -53,7 +53,7 @@ import { getClimateVarKeyFromDataType } from '../utils/enum';
               <div class="colorbar-tick-line"></div>
             </div>
             <div class="colorbar-tick-label">
-              {{ getDisplayValue(tick.value) | number: '1.1-1' }}
+              {{ getDisplayValue(tick.value) | number: '1.0-1' }}
             </div>
           </div>
         </div>
