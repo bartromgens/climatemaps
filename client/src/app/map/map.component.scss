@@ -190,3 +190,26 @@
     display: none !important;
   }
 }
+
+.colorbar-wrapper {
+  position: fixed;
+  bottom: 130px;
+  left: 6px;
+  background: rgba(255, 255, 255, 0.4);
+  border-radius: 8px;
+  padding: 10px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  max-width: 140px;
+
+  @media (max-width: 768px) {
+    bottom: 105px;
+    left: 5px;
+    max-width: 120px;
+    background: rgba(255, 255, 255, 0);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0);
+  }
+}

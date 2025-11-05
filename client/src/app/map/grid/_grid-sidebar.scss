@@ -75,13 +75,22 @@
 
 // Colorbar positioning for grid components
 :host ::ng-deep {
+  .colorbar-wrapper {
+    left: auto !important;
+    right: 6px !important;
+    bottom: 140px !important;
+    max-width: 100px !important;
+    padding: 6px !important;
+  }
+
   app-colorbar {
     .colorbar-container {
+      position: relative !important;
       left: auto !important;
-      right: 6px !important;
-      bottom: 140px !important;
+      right: auto !important;
+      bottom: auto !important;
       max-width: 40px !important;
-      padding: 6px !important;
+      padding: 0 !important;
 
       @media (max-width: 768px) {
         left: auto !important;
