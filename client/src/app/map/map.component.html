@@ -137,11 +137,9 @@
       ></app-map-controls>
     </div>
 
-    <div class="colorbar-wrapper">
-      <app-colorbar-json
-        [dataType]="selectedOption?.climateMap?.dataType || null"
-      ></app-colorbar-json>
-    </div>
+    <app-colorbar-json
+      [dataType]="selectedOption?.climateMap?.dataType || null"
+    ></app-colorbar-json>
 
     <!-- Climate plots component -->
     <app-climate-plots

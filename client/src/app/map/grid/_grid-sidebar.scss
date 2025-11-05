@@ -75,14 +75,11 @@
 
 // Colorbar positioning for grid components
 :host ::ng-deep {
-  .colorbar-wrapper {
+  app-colorbar-json {
     left: auto !important;
     right: 6px !important;
     bottom: 140px !important;
-    max-width: 100px !important;
-    padding: 6px !important;
   }
-
 }
 
 // Common maps grid wrapper styling

@@ -84,10 +84,8 @@
       ></app-map-controls>
     </div>
 
-    <div class="colorbar-wrapper">
-      <app-colorbar-json
-        [dataType]="selectedOption?.climateMap?.dataType || null"
-      ></app-colorbar-json>
-    </div>
+    <app-colorbar-json
+      [dataType]="selectedOption?.climateMap?.dataType || null"
+    ></app-colorbar-json>
   </mat-sidenav-content>
 </mat-sidenav-container>

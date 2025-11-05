@@ -41,11 +41,38 @@ import {
             </div>
           </div>
         </div>
+        <div class="colorbar-label">
+          {{ colorbarConfig.title }} [{{ colorbarConfig.unit }}]
+        </div>
       </div>
     </div>
   `,
   styles: [
     `
+      :host {
+        position: fixed;
+        bottom: 130px;
+        left: 6px;
+        background: rgba(255, 255, 255, 0.4);
+        border-radius: 8px;
+        padding: 10px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        z-index: 1000;
+        display: inline-flex;
+        align-items: flex-start;
+        width: 70px;
+        max-width: none;
+      }
+
+      @media (max-width: 768px) {
+        :host {
+          bottom: 105px;
+          left: 5px;
+          background: rgba(255, 255, 255, 0);
+          box-shadow: 0 2px 10px rgba(0, 0, 0, 0);
+        }
+      }
+
       .colorbar-container {
         display: flex;
         flex-direction: column;
@@ -102,6 +129,21 @@ import {
         white-space: nowrap;
         font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
           'Helvetica Neue', Arial, sans-serif;
+      }
+
+      .colorbar-label {
+        margin-left: -10px;
+        height: 300px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 11px;
+        color: #333;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+          'Helvetica Neue', Arial, sans-serif;
+        white-space: nowrap;
+        transform: rotate(-90deg);
+        transform-origin: center;
       }
 
       @media (max-width: 768px) {
