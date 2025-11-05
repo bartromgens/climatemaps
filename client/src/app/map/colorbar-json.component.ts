@@ -188,6 +188,8 @@ export class ColorbarJsonComponent
   private isPrecipitationVariable = false;
   private currentTemperatureUnit: TemperatureUnit = TemperatureUnit.CELSIUS;
   private currentPrecipitationUnit: PrecipitationUnit = PrecipitationUnit.MM;
+  private drawRetryCount = 0;
+  private readonly MAX_DRAW_RETRIES = 10;
 
   constructor(
     private climateMapService: ClimateMapService,
@@ -246,6 +248,7 @@ export class ColorbarJsonComponent
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['dataType']) {
+      this.drawRetryCount = 0;
       if (this.dataType) {
         this.updateVariableType();
         this.fetchColorbarConfig();
@@ -256,6 +259,7 @@ export class ColorbarJsonComponent
     }
     if (changes['numTicks'] && this.colorbarConfig) {
       this.calculateTicks();
+      this.drawColorbarOnNextTick();
     }
     if (changes['height']) {
       this.calculateTicks();
@@ -274,6 +278,7 @@ export class ColorbarJsonComponent
     this.climateMapService.getColorbarConfig(this.dataType).subscribe({
       next: (config: ColorbarConfigResponse) => {
         this.colorbarConfig = config;
+        this.cdr.detectChanges();
         this.calculateTicks();
         this.drawColorbarOnNextTick();
       },
@@ -286,11 +291,25 @@ export class ColorbarJsonComponent
   }
 
   private drawColorbarOnNextTick(): void {
-    setTimeout(() => {
-      if (this.canvasRef && this.colorbarConfig) {
-        this.drawColorbar();
-      }
-    }, 0);
+    this.drawRetryCount = 0;
+    this.attemptDrawColorbar();
+  }
+
+  private attemptDrawColorbar(): void {
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        if (this.canvasRef?.nativeElement && this.colorbarConfig) {
+          const canvas = this.canvasRef.nativeElement;
+          if (canvas.width > 0 && canvas.height > 0) {
+            this.drawColorbar();
+            this.drawRetryCount = 0;
+          } else if (this.drawRetryCount < this.MAX_DRAW_RETRIES) {
+            this.drawRetryCount++;
+            setTimeout(() => this.attemptDrawColorbar(), 10);
+          }
+        }
+      });
+    });
   }
 
   private drawColorbar(): void {
