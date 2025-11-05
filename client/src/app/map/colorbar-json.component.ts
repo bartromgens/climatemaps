@@ -60,8 +60,9 @@ import {
         z-index: 1000;
         display: inline-flex;
         align-items: flex-start;
-        width: 70px;
+        width: 68px;
         max-width: none;
+        overflow: visible;
       }
 
       @media (max-width: 768px) {
@@ -77,6 +78,7 @@ import {
         display: flex;
         flex-direction: column;
         align-items: flex-start;
+        overflow: visible;
       }
 
       .colorbar-wrapper {
@@ -84,10 +86,11 @@ import {
         flex-direction: row;
         align-items: flex-start;
         position: relative;
+        overflow: visible;
       }
 
       .colorbar-canvas {
-        width: 20px;
+        width: 16px;
         height: 300px;
         display: block;
         border: 1px solid rgba(0, 0, 0, 0.1);
@@ -132,7 +135,9 @@ import {
       }
 
       .colorbar-label {
-        margin-left: -10px;
+        position: absolute;
+        left: 60px;
+        top: 60px;
         height: 300px;
         display: flex;
         align-items: center;
@@ -143,7 +148,7 @@ import {
           'Helvetica Neue', Arial, sans-serif;
         white-space: nowrap;
         transform: rotate(-90deg);
-        transform-origin: center;
+        transform-origin: left center;
       }
 
       @media (max-width: 768px) {

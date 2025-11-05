@@ -83,6 +83,11 @@
     max-width: none !important;
     padding: 6px !important;
     display: inline-flex !important;
+    overflow: visible !important;
+
+    .colorbar-container {
+      overflow: visible !important;
+    }
   }
 }
 
