@@ -75,21 +75,23 @@
 
 // Colorbar positioning for grid components
 :host ::ng-deep {
-  app-colorbar {
-    .colorbar-container {
-      left: auto !important;
-      right: 6px !important;
-      bottom: 140px !important;
-      max-width: 40px !important;
-      padding: 6px !important;
+  app-colorbar-json {
+    left: auto !important;
+    right: 12px !important;
+    bottom: 140px !important;
+    width: 56px !important;
+    max-width: none !important;
+    padding: 6px !important;
+    display: inline-flex !important;
+    overflow: visible !important;
 
-      @media (max-width: 768px) {
-        left: auto !important;
-        right: 5px !important;
-        bottom: 60px !important;
-        max-width: 35px !important;
-        padding: 5px !important;
-      }
+    .colorbar-container {
+      overflow: visible !important;
+    }
+
+    @media (max-width: 768px) {
+      bottom: 60px !important;
+      right: 0px !important;
     }
   }
 }

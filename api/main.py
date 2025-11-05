@@ -48,6 +48,29 @@ def get_colorbar(data_type: str, month: int):
         raise HTTPException(status_code=404, detail="Colorbar not found")
 
 
+class ColorbarConfigResponse(BaseModel):
+    title: str
+    unit: str
+    levels: list[float]
+    colors: list[list[float]]
+    level_lower: float
+    level_upper: float
+    log_scale: bool
+
+
+@api.get("/colorbar-config/{data_type}", response_model=ColorbarConfigResponse)
+def get_colorbar_config(data_type: str):
+    """Get colorbar configuration (colors and levels) as JSON for a specific data type."""
+    if data_type not in data_config_map:
+        raise HTTPException(status_code=404, detail=f"Data type '{data_type}' not found")
+
+    data_config = data_config_map[data_type]
+    contour_config = data_config.contour_config
+    colorbar_data = contour_config.get_colorbar_data()
+    
+    return ColorbarConfigResponse(**colorbar_data)
+
+
 class ClimateValueResponse(BaseModel):
     value: float
     data_type: str

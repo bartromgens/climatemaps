@@ -87,10 +87,11 @@
       ></app-map-controls>
     </div>
 
-    <app-colorbar
-      [colormapUrl]="colormapUrl"
-      [displayName]="displayName"
-      [selectedMonth]="controlsData.selectedMonth"
-    ></app-colorbar>
+    <app-colorbar-json
+      [dataType]="gridCells[0]?.option?.climateMap?.dataType || null"
+      [width]="12"
+      [height]="180"
+      [showLabel]="!isMobile"
+    ></app-colorbar-json>
   </mat-sidenav-content>
 </mat-sidenav-container>
