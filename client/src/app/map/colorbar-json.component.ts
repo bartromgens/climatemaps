@@ -43,7 +43,11 @@ import {
             </div>
           </div>
         </div>
-        <div class="colorbar-label" [style.height.px]="height">
+        <div
+          *ngIf="showLabel"
+          class="colorbar-label"
+          [style.height.px]="height"
+        >
           {{ colorbarConfig.title }} [{{ colorbarConfig.unit }}]
         </div>
       </div>
@@ -62,6 +66,7 @@ import {
         z-index: 1000;
         display: inline-flex;
         align-items: flex-start;
+        width: 56px;
         max-width: none;
         overflow: visible;
       }
@@ -134,7 +139,7 @@ import {
 
       .colorbar-label {
         position: absolute;
-        left: 60px;
+        left: 52px;
         top: 60px;
         display: flex;
         align-items: center;
@@ -153,8 +158,9 @@ import {
 export class ColorbarJsonComponent implements OnInit, OnChanges, AfterViewInit {
   @Input() dataType: string | null = null;
   @Input() numTicks = 11;
-  @Input() height = 180;
-  @Input() width = 16;
+  @Input() height = 200;
+  @Input() width = 14;
+  @Input() showLabel = true;
 
   @ViewChild('colorbarCanvas') canvasRef?: ElementRef<HTMLCanvasElement>;
 
