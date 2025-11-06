@@ -179,12 +179,13 @@ export class RasterTooltipService {
     );
 
     let tooltipContent: string;
+    const unitSpan = `<span class="tooltip-unit">${unit}</span>`;
     if (value >= colorbarConfig.level_upper) {
-      tooltipContent = `>${convertedValue.toFixed(1)} ${unit}`;
+      tooltipContent = `>${convertedValue.toFixed(1)} ${unitSpan}`;
     } else if (value <= colorbarConfig.level_lower) {
-      tooltipContent = `<${convertedValue.toFixed(1)} ${unit}`;
+      tooltipContent = `<${convertedValue.toFixed(1)} ${unitSpan}`;
     } else {
-      tooltipContent = `${convertedValue.toFixed(1)} ${unit}`;
+      tooltipContent = `${convertedValue.toFixed(1)} ${unitSpan}`;
     }
 
     if (isPersistent) {
