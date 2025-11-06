@@ -87,8 +87,8 @@ import { getClimateVarKeyFromDataType } from '../utils/enum';
 
       @media (max-width: 768px) {
         :host {
-          bottom: 105px;
-          left: 5px;
+          bottom: 95px;
+          left: -4px;
           background: rgba(255, 255, 255, 0);
           box-shadow: 0 2px 10px rgba(0, 0, 0, 0);
         }
