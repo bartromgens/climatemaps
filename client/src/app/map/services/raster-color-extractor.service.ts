@@ -14,13 +14,11 @@ export interface RasterColor {
   providedIn: 'root',
 })
 export class RasterColorExtractorService {
-  private readonly tileRegex = /\/(\d+)\/(\d+)\/(\d+)\.png/;
-  private canvasCache: HTMLCanvasElement | null = null;
-  private contextCache: CanvasRenderingContext2D | null = null;
-  private cachedTileImages: HTMLImageElement[] | null = null;
-  private cachedMapContainer: HTMLElement | null = null;
-  private lastQueryTime = 0;
-  private readonly TILE_QUERY_CACHE_MS = 100;
+  private canvasCache = new WeakMap<HTMLImageElement, HTMLCanvasElement>();
+  private contextCache = new WeakMap<
+    HTMLImageElement,
+    CanvasRenderingContext2D
+  >();
 
   extractColorFromRasterLayer(
     event: LeafletMouseEvent | { latlng: { lat: number; lng: number } },
@@ -29,19 +27,21 @@ export class RasterColorExtractorService {
     selectedOption: LayerOption | undefined,
     monthSelected: number,
   ): RasterColor | null {
-    if (!map || !rasterLayer || !selectedOption?.rasterUrl) {
+    if (!map || !rasterLayer) {
       return null;
     }
 
-    const zoom = map.getZoom();
-    const lat = event.latlng.lat;
-    const lng = event.latlng.lng;
+    const mapZoom = map.getZoom();
+    const effectiveZoom = Math.min(
+      mapZoom,
+      selectedOption?.rasterMaxZoom ?? mapZoom,
+    );
 
-    // Convert lat/lng to tile coordinates
+    // Convert lat/lng to tile coordinates using effective zoom (actual tile zoom level)
     const tileSize = 256;
-    const scale = Math.pow(2, zoom);
-    const worldX = (lng + 180) / 360;
-    const latRad = (lat * Math.PI) / 180;
+    const scale = Math.pow(2, effectiveZoom);
+    const latRad = (event.latlng.lat * Math.PI) / 180;
+    const worldX = (event.latlng.lng + 180) / 360;
     const worldY =
       (1 - Math.log(Math.tan(latRad) + 1 / Math.cos(latRad)) / Math.PI) / 2;
 
@@ -49,49 +49,50 @@ export class RasterColorExtractorService {
     const tileY = Math.floor(worldY * scale);
 
     // Calculate pixel position within the tile
+    // Note: tile images are always 256x256 pixels regardless of display zoom
     const pixelX = Math.floor((worldX * scale - tileX) * tileSize);
     const pixelY = Math.floor((worldY * scale - tileY) * tileSize);
 
-    // Cache tile images query to avoid frequent DOM queries
-    const now = Date.now();
+    // Find the tile image element in the DOM - query once
     const mapContainer = map.getContainer();
-    if (
-      !this.cachedTileImages ||
-      this.cachedMapContainer !== mapContainer ||
-      now - this.lastQueryTime > this.TILE_QUERY_CACHE_MS
-    ) {
-      const tileNodeList = mapContainer.querySelectorAll(
-        'img.leaflet-tile-loaded',
-      ) as NodeListOf<HTMLImageElement>;
-      this.cachedTileImages = Array.from(tileNodeList);
-      this.cachedMapContainer = mapContainer;
-      this.lastQueryTime = now;
+    const tileImages = Array.from(
+      mapContainer.querySelectorAll('img.leaflet-tile-loaded'),
+    ) as HTMLImageElement[];
+
+    if (tileImages.length === 0) {
+      return null;
     }
 
-    const tileImages = this.cachedTileImages;
-    const rasterUrl = selectedOption.rasterUrl;
-    const monthPath = `_${monthSelected}/`;
+    // Pre-compute filter strings to avoid repeated string operations
+    const rasterUrl = selectedOption?.rasterUrl || '';
+    const monthPattern = `_${monthSelected}/`;
+    const urlPattern = /\/(\d+)\/(\d+)\/(\d+)\.png/;
 
-    // Iterate over cached tile images array
+    // Pre-filter and convert to array once
+    const filteredImages: HTMLImageElement[] = [];
     for (const img of tileImages) {
       const imgSrc = img.src;
-
-      // Early exit: check URL contains before regex matching
-      if (!imgSrc.includes(rasterUrl) || !imgSrc.includes(monthPath)) {
-        continue;
+      if (imgSrc.includes(rasterUrl) && imgSrc.includes(monthPattern)) {
+        filteredImages.push(img);
       }
+    }
 
-      const tileMatch = imgSrc.match(this.tileRegex);
-      if (!tileMatch) {
-        continue;
-      }
+    if (filteredImages.length === 0) {
+      return null;
+    }
 
-      const imgZ = parseInt(tileMatch[1], 10);
-      const imgX = parseInt(tileMatch[2], 10);
-      const imgY = parseInt(tileMatch[3], 10);
-
-      if (imgZ === zoom && imgX === tileX && imgY === tileY) {
-        return this.getPixelColorFromImage(img, pixelX, pixelY);
+    // Find tile by matching tile coordinates from URL
+    for (const img of filteredImages) {
+      const tileMatch = img.src.match(urlPattern);
+      if (tileMatch) {
+        const imgZ = parseInt(tileMatch[1], 10);
+        if (imgZ === effectiveZoom) {
+          const imgX = parseInt(tileMatch[2], 10);
+          const imgY = parseInt(tileMatch[3], 10);
+          if (imgX === tileX && imgY === tileY) {
+            return this.getPixelColorFromImage(img, pixelX, pixelY);
+          }
+        }
       }
     }
 
@@ -104,33 +105,40 @@ export class RasterColorExtractorService {
     y: number,
   ): RasterColor | null {
     try {
-      const imgWidth = img.width || img.naturalWidth;
-      const imgHeight = img.height || img.naturalHeight;
+      const width = img.width || img.naturalWidth;
+      const height = img.height || img.naturalHeight;
 
-      if (!this.canvasCache || !this.contextCache) {
-        this.canvasCache = document.createElement('canvas');
-        this.contextCache = this.canvasCache.getContext('2d', {
-          willReadFrequently: true,
-        });
-        if (!this.contextCache) {
-          return null;
-        }
+      if (width === 0 || height === 0) {
+        return null;
       }
 
-      const canvas = this.canvasCache;
-      const ctx = this.contextCache;
+      let canvas = this.canvasCache.get(img);
+      let ctx = this.contextCache.get(img);
 
-      // Only resize canvas if image dimensions changed
-      if (canvas.width !== imgWidth || canvas.height !== imgHeight) {
-        canvas.width = imgWidth;
-        canvas.height = imgHeight;
+      if (!canvas || !ctx) {
+        canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const newCtx = canvas.getContext('2d', { willReadFrequently: true });
+
+        if (!newCtx) {
+          return null;
+        }
+
+        ctx = newCtx;
+        this.canvasCache.set(img, canvas);
+        this.contextCache.set(img, ctx);
+      }
+
+      if (canvas.width !== width || canvas.height !== height) {
+        canvas.width = width;
+        canvas.height = height;
       }
 
       ctx.drawImage(img, 0, 0);
 
-      // Ensure coordinates are within bounds
-      const clampedX = Math.max(0, Math.min(x, imgWidth - 1));
-      const clampedY = Math.max(0, Math.min(y, imgHeight - 1));
+      const clampedX = x < 0 ? 0 : x >= width ? width - 1 : x;
+      const clampedY = y < 0 ? 0 : y >= height ? height - 1 : y;
 
       const imageData = ctx.getImageData(clampedX, clampedY, 1, 1);
       const pixel = imageData.data;
@@ -165,78 +173,71 @@ export class RasterColorExtractorService {
       return null;
     }
 
-    // Normalize the input color to 0-1 range (colors in config are already normalized)
     const normalizedColor = {
       r: color.r / 255,
       g: color.g / 255,
       b: color.b / 255,
     };
 
-    // Find the closest matching color in the colorbar
-    let minDistance = Infinity;
+    let minSquaredDistance = Infinity;
     let closestIndex = 0;
 
     for (let i = 0; i < numColors; i++) {
       const configColor = colors[i];
-      const distance = this.calculateColorDistance(
+      const squaredDistance = this.calculateSquaredColorDistance(
         normalizedColor,
         configColor,
       );
 
-      if (distance < minDistance) {
-        minDistance = distance;
+      if (squaredDistance < minSquaredDistance) {
+        minSquaredDistance = squaredDistance;
         closestIndex = i;
       }
     }
 
-    // If exact match (or very close), return the corresponding level
+    const minDistance = Math.sqrt(minSquaredDistance);
+
     if (minDistance < 0.001) {
       return levels[closestIndex];
     }
 
-    // Determine which adjacent color to interpolate with
     let neighborIndex: number;
     let neighborDistance: number;
 
     if (closestIndex === 0) {
-      // At the start, use the next color
       neighborIndex = 1;
       neighborDistance = this.calculateColorDistance(
         normalizedColor,
         colors[1],
       );
     } else if (closestIndex === numColors - 1) {
-      // At the end, use the previous color
       neighborIndex = numColors - 2;
       neighborDistance = this.calculateColorDistance(
         normalizedColor,
         colors[numColors - 2],
       );
     } else {
-      // Check both neighbors and use the closer one
-      const prevDistance = this.calculateColorDistance(
+      const prevSquaredDistance = this.calculateSquaredColorDistance(
         normalizedColor,
         colors[closestIndex - 1],
       );
-      const nextDistance = this.calculateColorDistance(
+      const nextSquaredDistance = this.calculateSquaredColorDistance(
         normalizedColor,
         colors[closestIndex + 1],
       );
 
-      if (prevDistance < nextDistance) {
+      if (prevSquaredDistance < nextSquaredDistance) {
         neighborIndex = closestIndex - 1;
-        neighborDistance = prevDistance;
+        neighborDistance = Math.sqrt(prevSquaredDistance);
       } else {
         neighborIndex = closestIndex + 1;
-        neighborDistance = nextDistance;
+        neighborDistance = Math.sqrt(nextSquaredDistance);
       }
     }
 
-    // Interpolate between the closest color and its neighbor
     const closestLevel = levels[closestIndex];
     const neighborLevel = levels[neighborIndex];
 
-    // Calculate weights based on inverse distance
     const totalDistance = minDistance + neighborDistance;
     if (totalDistance === 0) {
       return closestLevel;
@@ -245,31 +246,34 @@ export class RasterColorExtractorService {
     const weight1 = neighborDistance / totalDistance;
     const weight2 = minDistance / totalDistance;
 
-    // Interpolate the level value
     let interpolatedValue: number;
     if (log_scale) {
-      // For log scale, interpolate in log space
       const log1 = Math.log10(Math.max(closestLevel, 1e-10));
       const log2 = Math.log10(Math.max(neighborLevel, 1e-10));
       const interpolatedLog = weight1 * log1 + weight2 * log2;
       interpolatedValue = Math.pow(10, interpolatedLog);
     } else {
-      // Linear interpolation
       interpolatedValue = weight1 * closestLevel + weight2 * neighborLevel;
     }
 
     return interpolatedValue;
   }
 
-  private calculateColorDistance(
+  private calculateSquaredColorDistance(
     color1: { r: number; g: number; b: number },
     color2: number[],
   ): number {
-    // Calculate Euclidean distance in RGB space (alpha ignored)
     const dr = color1.r - color2[0];
     const dg = color1.g - color2[1];
     const db = color1.b - color2[2];
 
-    return Math.sqrt(dr * dr + dg * dg + db * db);
+    return dr * dr + dg * dg + db * db;
+  }
+
+  private calculateColorDistance(
+    color1: { r: number; g: number; b: number },
+    color2: number[],
+  ): number {
+    return Math.sqrt(this.calculateSquaredColorDistance(color1, color2));
   }
 }
