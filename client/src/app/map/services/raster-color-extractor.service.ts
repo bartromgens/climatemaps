@@ -210,12 +210,18 @@ export class RasterColorExtractorService {
         normalizedColor,
         colors[1],
       );
+      if (minDistance < neighborDistance) {
+        return levels[0];
+      }
     } else if (closestIndex === numColors - 1) {
       neighborIndex = numColors - 2;
       neighborDistance = this.calculateColorDistance(
         normalizedColor,
         colors[numColors - 2],
       );
+      if (minDistance < neighborDistance) {
+        return levels[numColors - 1];
+      }
     } else {
       const prevSquaredDistance = this.calculateSquaredColorDistance(
         normalizedColor,
