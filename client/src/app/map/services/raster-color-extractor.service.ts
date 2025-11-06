@@ -14,6 +14,14 @@ export interface RasterColor {
   providedIn: 'root',
 })
 export class RasterColorExtractorService {
+  private readonly tileRegex = /\/(\d+)\/(\d+)\/(\d+)\.png/;
+  private canvasCache: HTMLCanvasElement | null = null;
+  private contextCache: CanvasRenderingContext2D | null = null;
+  private cachedTileImages: HTMLImageElement[] | null = null;
+  private cachedMapContainer: HTMLElement | null = null;
+  private lastQueryTime = 0;
+  private readonly TILE_QUERY_CACHE_MS = 100;
+
   extractColorFromRasterLayer(
     event: LeafletMouseEvent | { latlng: { lat: number; lng: number } },
     map: Map,
@@ -21,25 +29,21 @@ export class RasterColorExtractorService {
     selectedOption: LayerOption | undefined,
     monthSelected: number,
   ): RasterColor | null {
-    if (!map || !rasterLayer) {
+    if (!map || !rasterLayer || !selectedOption?.rasterUrl) {
       return null;
     }
 
     const zoom = map.getZoom();
-    const containerPoint = map.latLngToContainerPoint(event.latlng);
+    const lat = event.latlng.lat;
+    const lng = event.latlng.lng;
 
     // Convert lat/lng to tile coordinates
     const tileSize = 256;
     const scale = Math.pow(2, zoom);
-    const worldX = (event.latlng.lng + 180) / 360;
+    const worldX = (lng + 180) / 360;
+    const latRad = (lat * Math.PI) / 180;
     const worldY =
-      (1 -
-        Math.log(
-          Math.tan((event.latlng.lat * Math.PI) / 180) +
-            1 / Math.cos((event.latlng.lat * Math.PI) / 180),
-        ) /
-          Math.PI) /
-      2;
+      (1 - Math.log(Math.tan(latRad) + 1 / Math.cos(latRad)) / Math.PI) / 2;
 
     const tileX = Math.floor(worldX * scale);
     const tileY = Math.floor(worldY * scale);
@@ -48,58 +52,46 @@ export class RasterColorExtractorService {
     const pixelX = Math.floor((worldX * scale - tileX) * tileSize);
     const pixelY = Math.floor((worldY * scale - tileY) * tileSize);
 
-    // Find the tile image element in the DOM
+    // Cache tile images query to avoid frequent DOM queries
+    const now = Date.now();
     const mapContainer = map.getContainer();
-    const tileImages = mapContainer.querySelectorAll(
-      'img.leaflet-tile-loaded',
-    ) as NodeListOf<HTMLImageElement>;
-
-    // First try to find by matching tile coordinates from URL
-    for (const img of Array.from(tileImages)) {
-      const imgSrc = img.src;
-      if (
-        imgSrc.includes(selectedOption?.rasterUrl || '') &&
-        imgSrc.includes(`_${monthSelected}/`)
-      ) {
-        const tileMatch = imgSrc.match(/\/(\d+)\/(\d+)\/(\d+)\.png/);
-        if (tileMatch) {
-          const imgZ = parseInt(tileMatch[1], 10);
-          const imgX = parseInt(tileMatch[2], 10);
-          const imgY = parseInt(tileMatch[3], 10);
-
-          if (imgZ === zoom && imgX === tileX && imgY === tileY) {
-            return this.getPixelColorFromImage(img, pixelX, pixelY);
-          }
-        }
-      }
+    if (
+      !this.cachedTileImages ||
+      this.cachedMapContainer !== mapContainer ||
+      now - this.lastQueryTime > this.TILE_QUERY_CACHE_MS
+    ) {
+      const tileNodeList = mapContainer.querySelectorAll(
+        'img.leaflet-tile-loaded',
+      ) as NodeListOf<HTMLImageElement>;
+      this.cachedTileImages = Array.from(tileNodeList);
+      this.cachedMapContainer = mapContainer;
+      this.lastQueryTime = now;
     }
 
-    // Fallback: find tile by checking if container point is within tile bounds
-    for (const img of Array.from(tileImages)) {
-      const imgSrc = img.src;
-      if (
-        imgSrc.includes(selectedOption?.rasterUrl || '') &&
-        imgSrc.includes(`_${monthSelected}/`)
-      ) {
-        const rect = img.getBoundingClientRect();
-        const mapRect = mapContainer.getBoundingClientRect();
-        const imgLeft = rect.left - mapRect.left;
-        const imgTop = rect.top - mapRect.top;
+    const tileImages = this.cachedTileImages;
+    const rasterUrl = selectedOption.rasterUrl;
+    const monthPath = `_${monthSelected}/`;
 
-        if (
-          containerPoint.x >= imgLeft &&
-          containerPoint.x < imgLeft + rect.width &&
-          containerPoint.y >= imgTop &&
-          containerPoint.y < imgTop + rect.height
-        ) {
-          const localX = Math.floor(
-            ((containerPoint.x - imgLeft) / rect.width) * tileSize,
-          );
-          const localY = Math.floor(
-            ((containerPoint.y - imgTop) / rect.height) * tileSize,
-          );
-          return this.getPixelColorFromImage(img, localX, localY);
-        }
+    // Iterate over cached tile images array
+    for (const img of tileImages) {
+      const imgSrc = img.src;
+
+      // Early exit: check URL contains before regex matching
+      if (!imgSrc.includes(rasterUrl) || !imgSrc.includes(monthPath)) {
+        continue;
+      }
+
+      const tileMatch = imgSrc.match(this.tileRegex);
+      if (!tileMatch) {
+        continue;
+      }
+
+      const imgZ = parseInt(tileMatch[1], 10);
+      const imgX = parseInt(tileMatch[2], 10);
+      const imgY = parseInt(tileMatch[3], 10);
+
+      if (imgZ === zoom && imgX === tileX && imgY === tileY) {
+        return this.getPixelColorFromImage(img, pixelX, pixelY);
       }
     }
 
@@ -112,20 +104,33 @@ export class RasterColorExtractorService {
     y: number,
   ): RasterColor | null {
     try {
-      const canvas = document.createElement('canvas');
-      canvas.width = img.width || img.naturalWidth;
-      canvas.height = img.height || img.naturalHeight;
-      const ctx = canvas.getContext('2d');
+      const imgWidth = img.width || img.naturalWidth;
+      const imgHeight = img.height || img.naturalHeight;
 
-      if (!ctx) {
-        return null;
+      if (!this.canvasCache || !this.contextCache) {
+        this.canvasCache = document.createElement('canvas');
+        this.contextCache = this.canvasCache.getContext('2d', {
+          willReadFrequently: true,
+        });
+        if (!this.contextCache) {
+          return null;
+        }
+      }
+
+      const canvas = this.canvasCache;
+      const ctx = this.contextCache;
+
+      // Only resize canvas if image dimensions changed
+      if (canvas.width !== imgWidth || canvas.height !== imgHeight) {
+        canvas.width = imgWidth;
+        canvas.height = imgHeight;
       }
 
       ctx.drawImage(img, 0, 0);
 
       // Ensure coordinates are within bounds
-      const clampedX = Math.max(0, Math.min(x, canvas.width - 1));
-      const clampedY = Math.max(0, Math.min(y, canvas.height - 1));
+      const clampedX = Math.max(0, Math.min(x, imgWidth - 1));
+      const clampedY = Math.max(0, Math.min(y, imgHeight - 1));
 
       const imageData = ctx.getImageData(clampedX, clampedY, 1, 1);
       const pixel = imageData.data;

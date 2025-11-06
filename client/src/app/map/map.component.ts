@@ -561,7 +561,7 @@ export class MapComponent extends BaseMapComponent implements OnInit {
     const now = Date.now();
     const timeSinceLastCall = now - this.lastMouseMoveCall;
 
-    if (timeSinceLastCall >= 20) {
+    if (timeSinceLastCall >= 16) {
       this.handleMouseMove(event);
       this.lastMouseMoveCall = now;
     }
