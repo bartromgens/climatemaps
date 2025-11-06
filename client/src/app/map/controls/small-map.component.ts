@@ -22,7 +22,7 @@ import {
 import { LayerOption } from '../services/layer-builder.service';
 import { TooltipManagerService } from '../services/tooltip-manager.service';
 import { VectorLayerTooltipService } from '../services/vector-layer-tooltip.service';
-import { MapClickHandlerService } from '../services/map-click-handler.service';
+import { RasterTooltipService } from '../services/raster-tooltip.service';
 
 @Component({
   selector: 'app-small-map',
@@ -104,7 +104,7 @@ export class SmallMapComponent implements OnInit, OnDestroy, OnChanges {
     private mapSyncService: MapSyncService,
     private tooltipManager: TooltipManagerService,
     private vectorLayerTooltip: VectorLayerTooltipService,
-    private mapClickHandler: MapClickHandlerService,
+    private rasterTooltip: RasterTooltipService,
   ) {
     const initialState = this.mapSyncService.getInitialViewState();
     this.options = {
@@ -205,6 +205,7 @@ export class SmallMapComponent implements OnInit, OnDestroy, OnChanges {
           maxZoom: 12,
           tileSize: 256,
           opacity: 0.8,
+          crossOrigin: 'anonymous',
         },
       );
 
@@ -216,6 +217,7 @@ export class SmallMapComponent implements OnInit, OnDestroy, OnChanges {
               color: properties.stroke,
               weight: 1.5,
               opacity: 0.8,
+              crossOrigin: 'anonymous',
             }),
           },
           interactive: true,
@@ -302,12 +304,13 @@ export class SmallMapComponent implements OnInit, OnDestroy, OnChanges {
     this.lastClickTimestamp = Date.now();
     this.mapSyncService.broadcastClick(event.latlng.lat, event.latlng.lng);
 
-    this.mapClickHandler.handleMapClick(
+    this.rasterTooltip.handleMapClick(
       event,
       this.map,
-      this.selectedOption.metadata.dataType,
+      this.rasterLayer,
+      this.selectedOption,
       this.month,
-      variableType,
+      variableType as any,
     );
   }
 
@@ -330,12 +333,13 @@ export class SmallMapComponent implements OnInit, OnDestroy, OnChanges {
       },
     };
 
-    this.mapClickHandler.handleMapClick(
+    this.rasterTooltip.handleMapClick(
       syntheticEvent,
       this.map,
-      this.selectedOption.metadata.dataType,
+      this.rasterLayer,
+      this.selectedOption,
       this.month,
-      variableType,
+      variableType as any,
     );
   }
 }

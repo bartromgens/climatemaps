@@ -24,7 +24,6 @@ import {
   ClimateVarKey,
   CLIMATE_VAR_KEY_TO_NAME,
   CLIMATE_VAR_DISPLAY_NAMES,
-  CLIMATE_VAR_UNITS,
   ClimateScenario,
   ClimateModel,
 } from '../../utils/enum';

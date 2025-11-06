@@ -4,20 +4,19 @@
 }
 
 .contour-hover-tooltip {
-  background-color: rgba(0, 0, 0, 0.8) !important;
-  color: white !important;
-  border: 1px solid #333 !important;
-  border-radius: 4px !important;
-  padding: 8px 12px !important;
-  font-size: 16px !important;
-  font-weight: 500 !important;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3) !important;
+  background-color: transparent !important;
+  color: black !important;
+  border: none !important;
+  padding: 0 !important;
+  font-size: 14px !important;
+  font-weight: 700 !important;
+  box-shadow: none !important;
   pointer-events: none !important;
   z-index: 1000 !important;
 }
 
 .contour-hover-tooltip::before {
-  border-top-color: rgba(0, 0, 0, 0.8) !important;
+  display: none !important;
 }
 
 .desktop-controls-overlay {

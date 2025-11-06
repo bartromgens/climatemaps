@@ -21,11 +21,10 @@ import {
 import { YearRange } from '../../core/metadata.service';
 import { YearSliderComponent } from './sliders/year-slider.component';
 import { MonthSliderComponent } from './sliders/month-slider.component';
-import { TemperatureUnitService } from '../../core/temperature-unit.service';
-import { TemperatureUtils } from '../../utils/temperature-utils';
+import { TemperatureUnit, TemperatureUnitService } from '../../core/temperature-unit.service';
 import { PrecipitationUnitService } from '../../core/precipitation-unit.service';
-import { PrecipitationUtils } from '../../utils/precipitation-utils';
 import { ClimateVariableHelperService } from '../../core/climate-variable-helper.service';
+import { UnitUtils } from '../../utils/unit-utils';
 import { MatomoTracker } from 'ngx-matomo-client';
 
 export interface MapControlsData {
@@ -77,7 +76,7 @@ export class MapControlsComponent implements OnInit {
   @Input() hideVariableSelector = false;
   @Input() showDropDownControls = true;
   @Output() controlsChange = new EventEmitter<MapControlsData>();
-  temperatureUnit = '°C';
+  temperatureUnit = TemperatureUnit.CELSIUS;
 
   constructor(
     private temperatureUnitService: TemperatureUnitService,
@@ -98,19 +97,12 @@ export class MapControlsComponent implements OnInit {
       return '';
     }
 
-    const isTemperature = TemperatureUtils.isTemperatureVariable(variableType);
-    if (isTemperature && climateVariable.unit === '°C') {
-      return this.temperatureUnit;
-    }
-
-    const isPrecipitation =
-      PrecipitationUtils.isPrecipitationVariable(variableType);
-    if (isPrecipitation && climateVariable.unit === 'mm/month') {
-      const precipitationUnit = this.precipitationUnitService.getUnit();
-      return precipitationUnit === 'in' ? 'in/month' : 'mm/month';
-    }
-
-    return climateVariable.unit;
+    return UnitUtils.getDisplayUnit(
+      climateVariable.unit,
+      variableType,
+      this.temperatureUnitService.getUnit(),
+      this.precipitationUnitService.getUnit(),
+    );
   }
 
   onVariableTypeChange(event: any): void {

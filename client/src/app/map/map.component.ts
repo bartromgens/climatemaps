@@ -41,18 +41,17 @@ import {
 } from '../utils/enum';
 import { TooltipManagerService } from './services/tooltip-manager.service';
 import { VectorLayerTooltipService } from './services/vector-layer-tooltip.service';
-import { MapClickHandlerService } from './services/map-click-handler.service';
 import {
   LayerBuilderService,
   LayerOption,
 } from './services/layer-builder.service';
 import { LayerFilterService } from './services/layer-filter.service';
+import { RasterTooltipService } from './services/raster-tooltip.service';
 import { URLUtils } from '../utils/url-utils';
 import { ClimatePlotsComponent } from './plot/climate-plots.component';
 import { MapNavigationService } from '../core/map-navigation.service';
 import { MapSyncService } from './services/map-sync.service';
 import { BaseMapComponent } from './base-map.component';
-import { TemperatureUnitService } from '../core/temperature-unit.service';
 import { SeoService } from '../core/seo.service';
 import { ToastService } from '../core/toast.service';
 import { ClimateVariableHelperService } from '../core/climate-variable-helper.service';
@@ -161,6 +160,7 @@ export class MapComponent extends BaseMapComponent implements OnInit {
   private vectorLayer: Layer | null = null;
   plotData: { lat: number; lon: number; dataType: string } | null = null;
   timerangePlotData: { lat: number; lon: number; month: number } | null = null;
+  private hoverTooltipTimeout: any = null;
 
   constructor(
     route: ActivatedRoute,
@@ -173,11 +173,10 @@ export class MapComponent extends BaseMapComponent implements OnInit {
     mapSyncService: MapSyncService,
     private tooltipManager: TooltipManagerService,
     private vectorLayerTooltip: VectorLayerTooltipService,
-    private mapClickHandler: MapClickHandlerService,
     private mapNavigationService: MapNavigationService,
-    private temperatureUnitService: TemperatureUnitService,
     private seoService: SeoService,
     private climateVariableHelper: ClimateVariableHelperService,
+    private rasterTooltip: RasterTooltipService,
   ) {
     super(
       route,
@@ -393,7 +392,7 @@ export class MapComponent extends BaseMapComponent implements OnInit {
           maxZoom: 12,
           tileSize: 256,
           opacity: 0.8,
-          // tms: true, // uncomment if your MBTiles uses TMS y‐axis
+          crossOrigin: 'anonymous',
         },
       );
 
@@ -405,6 +404,7 @@ export class MapComponent extends BaseMapComponent implements OnInit {
               color: properties.stroke,
               weight: 2,
               opacity: 1,
+              crossOrigin: 'anonymous',
             }),
           },
           interactive: true,
@@ -490,11 +490,12 @@ export class MapComponent extends BaseMapComponent implements OnInit {
       `${lat.toFixed(4)},${lon.toFixed(4)}`,
     );
 
-    // Always handle tooltip display (works on both mobile and desktop)
-    this.mapClickHandler.handleMapClick(
+    // Handle tooltip display using raster color extraction
+    this.rasterTooltip.handleMapClick(
       event,
       this.map,
-      this.selectedOption.metadata.dataType,
+      this.rasterLayer,
+      this.selectedOption,
       this.monthSelected,
       this.controlsData.selectedVariableType,
     );
@@ -536,12 +537,50 @@ export class MapComponent extends BaseMapComponent implements OnInit {
     this.update();
     this.updateUrlFromMapState();
     this.clearTooltips();
+    if (this.hoverTooltipTimeout) {
+      clearTimeout(this.hoverTooltipTimeout);
+      this.hoverTooltipTimeout = null;
+    }
+  }
+
+  onMouseMove(event: LeafletMouseEvent): void {
+    if (!this.selectedOption?.metadata?.dataType || !this.map) {
+      return;
+    }
+
+    // Throttle mouse move events
+    if (this.hoverTooltipTimeout) {
+      clearTimeout(this.hoverTooltipTimeout);
+    }
+
+    this.hoverTooltipTimeout = setTimeout(() => {
+      this.handleMouseMove(event);
+    }, 10);
+  }
+
+  private handleMouseMove(event: LeafletMouseEvent): void {
+    if (!this.selectedOption?.metadata?.dataType || !this.map) {
+      return;
+    }
+
+    this.rasterTooltip.handleMouseMove(
+      event,
+      this.map,
+      this.rasterLayer,
+      this.selectedOption,
+      this.monthSelected,
+      this.controlsData.selectedVariableType,
+    );
   }
 
   onZoom(event: LeafletEvent): void {
     console.log('onZoom: level', this.map?.getZoom(), event);
     this.updateUrlFromMapState();
     this.clearTooltips();
+    if (this.hoverTooltipTimeout) {
+      clearTimeout(this.hoverTooltipTimeout);
+      this.hoverTooltipTimeout = null;
+    }
     this.handleZoomBasedResolutionChange();
 
     const zoomLevel = this.map?.getZoom();
@@ -590,7 +629,10 @@ export class MapComponent extends BaseMapComponent implements OnInit {
       return;
     }
 
-    const unit = this.getCurrentUnit();
+    const climateVariable =
+      this.climateVariables[this.controlsData.selectedVariableType];
+    const unit = climateVariable?.unit || '';
+
     this.vectorLayerTooltip.handleVectorLayerHover(
       e,
       this.map,
@@ -605,20 +647,6 @@ export class MapComponent extends BaseMapComponent implements OnInit {
     }
   }
 
-  private getCurrentUnit(): string {
-    if (!this.selectedOption?.metadata) {
-      return '';
-    }
-
-    const climateVariable =
-      this.climateVariables[this.controlsData.selectedVariableType];
-
-    if (climateVariable?.unit) {
-      return climateVariable.unit;
-    }
-    return 'unknown';
-  }
-
   private setupNavigationListener(): void {
     this.mapNavigationService.navigation$.subscribe((request) => {
       if (this.map) {
@@ -628,18 +656,42 @@ export class MapComponent extends BaseMapComponent implements OnInit {
         });
         this.updateUrlFromMapState();
 
-        if (request.generateCharts && this.selectedOption?.metadata?.dataType) {
-          // Wait for map animation to complete before generating plots
-          setTimeout(() => {
+        // Wait for map animation to complete before showing tooltip and generating plots
+        setTimeout(() => {
+          const normalizedLon = CoordinateUtils.normalizeLongitude(request.lon);
+
+          // Show tooltip at the selected location (similar to map click)
+          if (this.selectedOption?.metadata?.dataType) {
+            const syntheticEvent = {
+              latlng: {
+                lat: request.lat,
+                lng: normalizedLon,
+              },
+            };
+
+            this.rasterTooltip.handleMapClick(
+              syntheticEvent,
+              this.map!,
+              this.rasterLayer,
+              this.selectedOption,
+              this.monthSelected,
+              this.controlsData.selectedVariableType,
+            );
+          }
+
+          if (
+            request.generateCharts &&
+            this.selectedOption?.metadata?.dataType
+          ) {
             const plotData = {
               lat: request.lat,
-              lon: CoordinateUtils.normalizeLongitude(request.lon),
+              lon: normalizedLon,
               dataType: this.selectedOption!.metadata!.dataType,
             };
 
             const timerangePlotData = {
               lat: request.lat,
-              lon: CoordinateUtils.normalizeLongitude(request.lon),
+              lon: normalizedLon,
               month: this.monthSelected,
             };
 
@@ -651,8 +703,8 @@ export class MapComponent extends BaseMapComponent implements OnInit {
               this.plotData = plotData;
               this.timerangePlotData = timerangePlotData;
             }
-          }, 1200); // Wait for map animation to complete (1.0s duration + buffer)
-        }
+          }
+        }, 1200); // Wait for map animation to complete (1.0s duration + buffer)
       }
     });
   }

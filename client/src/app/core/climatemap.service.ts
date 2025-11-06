@@ -77,7 +77,9 @@ export class ClimateMapService {
     });
   }
 
-  public getColorbarConfig(dataType: string): Observable<ColorbarConfigResponse> {
+  public getColorbarConfig(
+    dataType: string,
+  ): Observable<ColorbarConfigResponse> {
     const url = `${environment.apiBaseUrl}/colorbar-config/${dataType}`;
     return this.httpClient.get<ColorbarConfigResponse>(url);
   }
