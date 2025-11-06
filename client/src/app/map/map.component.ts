@@ -160,7 +160,8 @@ export class MapComponent extends BaseMapComponent implements OnInit {
   private vectorLayer: Layer | null = null;
   plotData: { lat: number; lon: number; dataType: string } | null = null;
   timerangePlotData: { lat: number; lon: number; month: number } | null = null;
-  private hoverTooltipTimeout: any = null;
+  private lastMouseMoveCall = 0;
+  private isDragging = false;
 
   constructor(
     route: ActivatedRoute,
@@ -525,6 +526,15 @@ export class MapComponent extends BaseMapComponent implements OnInit {
   onMapReady(map: Map): void {
     this.map = map;
     this.initializeMap();
+
+    map.on('dragstart', () => {
+      this.isDragging = true;
+    });
+
+    map.on('dragend', () => {
+      this.isDragging = false;
+    });
+
     setTimeout(() => {
       this.map?.invalidateSize();
       // Set initial resolution based on zoom level
@@ -537,10 +547,6 @@ export class MapComponent extends BaseMapComponent implements OnInit {
     this.update();
     this.updateUrlFromMapState();
     this.clearTooltips();
-    if (this.hoverTooltipTimeout) {
-      clearTimeout(this.hoverTooltipTimeout);
-      this.hoverTooltipTimeout = null;
-    }
   }
 
   onMouseMove(event: LeafletMouseEvent): void {
@@ -548,14 +554,17 @@ export class MapComponent extends BaseMapComponent implements OnInit {
       return;
     }
 
-    // Throttle mouse move events
-    if (this.hoverTooltipTimeout) {
-      clearTimeout(this.hoverTooltipTimeout);
+    if (this.isDragging) {
+      return;
     }
 
-    this.hoverTooltipTimeout = setTimeout(() => {
+    const now = Date.now();
+    const timeSinceLastCall = now - this.lastMouseMoveCall;
+
+    if (timeSinceLastCall >= 20) {
       this.handleMouseMove(event);
-    }, 10);
+      this.lastMouseMoveCall = now;
+    }
   }
 
   private handleMouseMove(event: LeafletMouseEvent): void {
@@ -577,10 +586,6 @@ export class MapComponent extends BaseMapComponent implements OnInit {
     console.log('onZoom: level', this.map?.getZoom(), event);
     this.updateUrlFromMapState();
     this.clearTooltips();
-    if (this.hoverTooltipTimeout) {
-      clearTimeout(this.hoverTooltipTimeout);
-      this.hoverTooltipTimeout = null;
-    }
     this.handleZoomBasedResolutionChange();
 
     const zoomLevel = this.map?.getZoom();
