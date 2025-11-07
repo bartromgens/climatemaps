@@ -1,9 +1,8 @@
 from typing import List, Optional
-import os
 import time
 from pathlib import Path
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
@@ -17,6 +16,9 @@ from climatemaps.settings import settings
 from climatemaps.datasets import ClimateDifferenceDataConfig
 from climatemaps.data import load_climate_data, load_climate_data_for_difference
 
+from api.middleware import RateLimitMiddleware
+from api.cache import GeoGridCache
+
 app = FastAPI()
 
 api = FastAPI()
@@ -27,6 +29,10 @@ climate_maps = [ClimateMap.create(maps_config) for maps_config in settings.DATA_
 data_config_map = {config.data_type_slug: config for config in settings.DATA_SETS_API}
 
 geocoder = Photon(user_agent="openclimatemap", timeout=10)
+
+geo_grid_cache = GeoGridCache()
+
+api.add_middleware(RateLimitMiddleware, calls_per_minute=1000)
 
 
 @api.get("/climatemap", response_model=List[ClimateMap])
@@ -67,7 +73,7 @@ def get_colorbar_config(data_type: str):
     data_config = data_config_map[data_type]
     contour_config = data_config.contour_config
     colorbar_data = contour_config.get_colorbar_data()
-    
+
     return ColorbarConfigResponse(**colorbar_data)
 
 
@@ -94,12 +100,16 @@ def get_climate_value(data_type: str, month: int, lat: float, lon: float):
     data_config = data_config_map[data_type]
 
     try:
-        if isinstance(data_config, ClimateDifferenceDataConfig):
-            geo_grid = load_climate_data_for_difference(
-                data_config.historical_config, data_config.future_config, month
-            )
-        else:
-            geo_grid = load_climate_data(data_config, month)
+        geo_grid = geo_grid_cache.get(data_type, month)
+
+        if geo_grid is None:
+            if isinstance(data_config, ClimateDifferenceDataConfig):
+                geo_grid = load_climate_data_for_difference(
+                    data_config.historical_config, data_config.future_config, month
+                )
+            else:
+                geo_grid = load_climate_data(data_config, month)
+            geo_grid_cache.set(data_type, month, geo_grid)
 
         value = geo_grid.get_value_at_coordinate(lon, lat)
 
