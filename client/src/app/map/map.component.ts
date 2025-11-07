@@ -47,6 +47,7 @@ import {
 } from './services/layer-builder.service';
 import { LayerFilterService } from './services/layer-filter.service';
 import { RasterTooltipService } from './services/raster-tooltip.service';
+import { GeolocationService } from './services/geolocation.service';
 import { URLUtils } from '../utils/url-utils';
 import { ClimatePlotsComponent } from './plot/climate-plots.component';
 import { MapNavigationService } from '../core/map-navigation.service';
@@ -178,6 +179,7 @@ export class MapComponent extends BaseMapComponent implements OnInit {
     private seoService: SeoService,
     private climateVariableHelper: ClimateVariableHelperService,
     private rasterTooltip: RasterTooltipService,
+    private geolocationService: GeolocationService,
   ) {
     super(
       route,
@@ -471,6 +473,26 @@ export class MapComponent extends BaseMapComponent implements OnInit {
     this.options.center = latLng(lat, lon);
     this.options.zoom = zoom;
     this.map?.setView([lat, lon], zoom);
+  }
+
+  onLocationButtonClick(): void {
+    this.geolocationService.getCurrentPosition().subscribe({
+      next: (position) => {
+        const normalizedLon = CoordinateUtils.normalizeLongitude(position.lon);
+        const zoom = 5;
+
+        if (this.map) {
+          this.map.setView([position.lat, normalizedLon], zoom, {
+            animate: true,
+            duration: 1.0,
+          });
+          this.updateUrlFromMapState();
+        }
+      },
+      error: () => {
+        // Error handling is done in the service
+      },
+    });
   }
 
   onMapClick(event: LeafletMouseEvent): void {

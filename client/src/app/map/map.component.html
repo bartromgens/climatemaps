@@ -43,6 +43,17 @@
     <!-- Location search overlay -->
     <app-location-search></app-location-search>
 
+    <!-- Location button -->
+    <button
+      mat-icon-button
+      class="location-button"
+      (click)="onLocationButtonClick()"
+      [attr.aria-label]="'Use device location'"
+      title="Use device location"
+    >
+      <mat-icon>my_location</mat-icon>
+    </button>
+
     <!-- Contour lines toggle -->
     <app-contour-toggle-overlay
       *ngIf="!environment.production"

@@ -80,6 +80,23 @@
   }
 }
 
+// Location button
+.location-button {
+  position: fixed;
+  top: 80px;
+  left: 10px;
+  z-index: 500;
+  background-color: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+
+  @media (min-width: 769px) {
+    bottom: 120px;
+    right: 20px;
+    left: auto;
+    top: auto;
+  }
+}
+
 // Map info display (month and year range)
 .map-info-display {
   position: absolute;
