@@ -297,7 +297,7 @@ export class SmallMapComponent implements OnInit, OnDestroy, OnChanges {
     // Track map click with Matomo
     this.tracker.trackEvent(
       'Map Interaction',
-      'Small Map Click',
+      'Map Click (Small Map)',
       `${event.latlng.lat.toFixed(4)},${event.latlng.lng.toFixed(4)}`,
     );
 

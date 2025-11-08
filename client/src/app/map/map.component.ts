@@ -476,6 +476,12 @@ export class MapComponent extends BaseMapComponent implements OnInit {
   }
 
   onLocationButtonClick(): void {
+    this.tracker.trackEvent(
+      'Map Interaction',
+      'Location Button',
+      'Button Clicked',
+    );
+
     this.geolocationService.getCurrentPosition().subscribe({
       next: (position) => {
         const normalizedLon = CoordinateUtils.normalizeLongitude(position.lon);
@@ -612,12 +618,7 @@ export class MapComponent extends BaseMapComponent implements OnInit {
 
     const zoomLevel = this.map?.getZoom();
     if (zoomLevel !== undefined) {
-      this.tracker.trackEvent(
-        'Map Interaction',
-        'Zoom',
-        `Level ${zoomLevel}`,
-        zoomLevel,
-      );
+      this.tracker.trackEvent('Map Interaction', 'Zoom', `Level ${zoomLevel}`);
     }
   }
 
@@ -923,7 +924,6 @@ export class MapComponent extends BaseMapComponent implements OnInit {
       'Control Selection',
       'Contour Lines Toggle',
       showContour ? 'Enabled' : 'Disabled',
-      showContour ? 1 : 0,
     );
   }
 
@@ -964,7 +964,6 @@ export class MapComponent extends BaseMapComponent implements OnInit {
       'Control Selection',
       'Difference Map Toggle (Mobile)',
       showChange ? 'Enabled' : 'Disabled',
-      showChange ? 1 : 0,
     );
   }
 

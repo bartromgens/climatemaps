@@ -21,7 +21,10 @@ import {
 import { YearRange } from '../../core/metadata.service';
 import { YearSliderComponent } from './sliders/year-slider.component';
 import { MonthSliderComponent } from './sliders/month-slider.component';
-import { TemperatureUnit, TemperatureUnitService } from '../../core/temperature-unit.service';
+import {
+  TemperatureUnit,
+  TemperatureUnitService,
+} from '../../core/temperature-unit.service';
 import { PrecipitationUnitService } from '../../core/precipitation-unit.service';
 import { ClimateVariableHelperService } from '../../core/climate-variable-helper.service';
 import { UnitUtils } from '../../utils/unit-utils';
@@ -115,7 +118,7 @@ export class MapControlsComponent implements OnInit {
           ?.displayName || event.value;
       this.tracker.trackEvent(
         'Variable Selection',
-        'Variable Change',
+        'Variable Change (Sidebar C',
         variableName,
       );
     }

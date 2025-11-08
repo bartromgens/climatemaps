@@ -60,14 +60,6 @@ export class VariableSelectorOverlayComponent {
   onVariableClick(variableType: ClimateVarKey): void {
     if (this.isAvailable(variableType)) {
       this.variableChange.emit(variableType);
-
-      const variable = this.variables.find((v) => v.key === variableType);
-      const variableName = variable?.shortName || variableType;
-      this.tracker.trackEvent(
-        'Variable Selection',
-        'Variable Change (Overlay)',
-        variableName,
-      );
     }
   }
 
