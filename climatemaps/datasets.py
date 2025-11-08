@@ -185,6 +185,33 @@ CLIMATE_DIFFERENCE_CONTOUR_CONFIGS: Dict[ClimateVarKey, ContourPlotConfig] = {
     ),
 }
 
+# Contour configurations for ensemble std dev difference maps
+# Uses smaller ranges for temperature variables (-2 to 2)
+CLIMATE_DIFFERENCE_CONTOUR_CONFIGS_STD_DEV: Dict[ClimateVarKey, ContourPlotConfig] = {
+    ClimateVarKey.PRECIPITATION: ContourPlotConfig(
+        level_lower=1,
+        level_upper=75,
+        colormap=plt.cm.RdYlGn_r,
+        title="Precipitation Change",
+        unit="mm/month",
+        log_scale=True,
+    ),
+    ClimateVarKey.T_MAX: ContourPlotConfig(
+        level_lower=0,
+        level_upper=2,
+        colormap=plt.cm.RdYlGn_r,
+        title="Temperature (Day) Change",
+        unit="°C",
+    ),
+    ClimateVarKey.T_MIN: ContourPlotConfig(
+        level_lower=0,
+        level_upper=2,
+        colormap=plt.cm.RdYlGn_r,
+        title="Temperature (Night) Change",
+        unit="°C",
+    ),
+}
+
 
 def convert_per_month_to_per_day(
     v: npt.NDArray[np.floating], month: int
@@ -249,6 +276,8 @@ class ClimateDifferenceDataConfig(ClimateDataConfig):
 
     @property
     def contour_config(self) -> ContourPlotConfig:
+        if self.future_config and self.future_config.climate_model == ClimateModel.ENSEMBLE_STD_DEV:
+            return CLIMATE_DIFFERENCE_CONTOUR_CONFIGS_STD_DEV[self.variable_type]
         return CLIMATE_DIFFERENCE_CONTOUR_CONFIGS[self.variable_type]
 
 
@@ -429,7 +458,6 @@ FUTURE_DATA_GROUPS: List[FutureClimateDataConfigGroup] = [
         ],
         climate_models=[
             ClimateModel.ENSEMBLE_MEAN,
-            ClimateModel.ENSEMBLE_STD_DEV,
         ],
         filepath_template=FUTURE_FILE_TEMPLATE,
     ),
@@ -446,6 +474,7 @@ FUTURE_DATA_GROUPS: List[FutureClimateDataConfigGroup] = [
             ClimateScenario.SSP585,
         ],
         climate_models=[
+            ClimateModel.ENSEMBLE_STD_DEV,
             ClimateModel.EC_EARTH3_VEG,
             ClimateModel.ACCESS_CM2,
             ClimateModel.MPI_ESM1_2_HR,
