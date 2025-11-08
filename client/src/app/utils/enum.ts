@@ -69,6 +69,7 @@ export enum SpatialResolution {
 // Climate Model enum matching the backend
 export enum ClimateModel {
   ENSEMBLE_MEAN = 'ENSEMBLE_MEAN',
+  ENSEMBLE_STD_DEV = 'ENSEMBLE_STD_DEV',
   ACCESS_CM2 = 'ACCESS_CM2',
   BCC_CSM2_MR = 'BCC_CSM2_MR',
   CMCC_ESM2 = 'CMCC_ESM2',
@@ -99,6 +100,16 @@ export const CLIMATE_SCENARIO_DISPLAY_NAMES: Record<ClimateScenario, string> = {
   [ClimateScenario.SSP370]: 'Limited climate action (SSP3-7.0)',
   [ClimateScenario.SSP585]: 'Minimal climate action (SSP5-8.5)',
 };
+
+export function getClimateModelDisplayName(model: ClimateModel): string {
+  if (model === ClimateModel.ENSEMBLE_MEAN) {
+    return 'Ensemble Mean';
+  }
+  if (model === ClimateModel.ENSEMBLE_STD_DEV) {
+    return 'Ensemble Std. Deviation';
+  }
+  return model.replace(/_/g, '-');
+}
 
 // Data format enum matching the backend
 export enum DataFormat {

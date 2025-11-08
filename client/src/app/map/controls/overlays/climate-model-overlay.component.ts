@@ -1,5 +1,5 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
-import { ClimateModel } from '../../../utils/enum';
+import { ClimateModel, getClimateModelDisplayName } from '../../../utils/enum';
 import { BaseOverlaySelectComponent } from './base-overlay-select.component';
 
 @Component({
@@ -28,12 +28,7 @@ export class ClimateModelOverlayComponent {
   @Input() show = false;
   @Output() climateModelChange = new EventEmitter<ClimateModel | null>();
 
-  getClimateModelDisplayName = (model: ClimateModel): string => {
-    if (model === ClimateModel.ENSEMBLE_MEAN) {
-      return 'Ensemble Mean';
-    }
-    return model.replace(/_/g, '-');
-  };
+  getClimateModelDisplayName = getClimateModelDisplayName;
 
   onValueChange(value: ClimateModel | null): void {
     this.climateModelChange.emit(value);

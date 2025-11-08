@@ -164,3 +164,72 @@ def compute_ensemble_mean(
 
     logger.info(f"Ensemble mean written to: {output_filepath}")
     return output_filepath
+
+
+def compute_ensemble_std_dev(
+    base_dir: Path,
+    resolution: SpatialResolution,
+    variable: ClimateVarKey,
+    scenario: ClimateScenario,
+    year_range: tuple[int, int],
+    output_dir: Path,
+) -> Path:
+    logger.info(
+        f"Computing ensemble standard deviation for {variable.name} {scenario.name} {year_range}"
+    )
+
+    available_files = get_available_models(
+        base_dir,
+        resolution,
+        variable,
+        scenario,
+        year_range,
+    )
+
+    if not available_files:
+        logger.error(f"No model files found for {variable.name} {scenario.name} {year_range}")
+        raise FileNotFoundError(
+            f"No model files found for {variable.name} {scenario.name} {year_range}"
+        )
+
+    logger.info(f"Found {len(available_files)} model files to compute standard deviation")
+
+    with rasterio.open(available_files[0]) as src:
+        metadata = src.meta.copy()
+        num_bands = src.count
+        width = src.width
+        height = src.height
+
+    ensemble_data = np.zeros((num_bands, height, width), dtype=np.float32)
+
+    for band_idx in range(num_bands):
+        band_data_list = []
+
+        for filepath in available_files:
+            with rasterio.open(filepath) as src:
+                band_data = src.read(band_idx + 1).astype(np.float32)
+                band_data_list.append(band_data)
+
+        band_stack = np.stack(band_data_list, axis=0)
+        ensemble_data[band_idx] = np.nanstd(band_stack, axis=0)
+
+        logger.info(f"Processed band {band_idx + 1}/{num_bands}")
+
+    output_filepath = get_model_filepath(
+        output_dir,
+        resolution,
+        variable,
+        ClimateModel.ENSEMBLE_STD_DEV.filename,
+        scenario,
+        year_range,
+    )
+    output_filepath.parent.mkdir(parents=True, exist_ok=True)
+
+    metadata.update({"dtype": "float32", "compress": "lzw"})
+
+    with rasterio.open(output_filepath, "w", **metadata) as dst:
+        for band_idx in range(num_bands):
+            dst.write(ensemble_data[band_idx], band_idx + 1)
+
+    logger.info(f"Ensemble standard deviation written to: {output_filepath}")
+    return output_filepath

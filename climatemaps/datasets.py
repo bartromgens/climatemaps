@@ -58,6 +58,7 @@ class ClimateModel(enum.Enum):
     """
 
     ENSEMBLE_MEAN = "ENSEMBLE_MEAN"
+    ENSEMBLE_STD_DEV = "ENSEMBLE_STD_DEV"
     ACCESS_CM2 = "ACCESS_CM2"
     BCC_CSM2_MR = "BCC_CSM2_MR"
     CMCC_ESM2 = "CMCC_ESM2"
@@ -428,6 +429,7 @@ FUTURE_DATA_GROUPS: List[FutureClimateDataConfigGroup] = [
         ],
         climate_models=[
             ClimateModel.ENSEMBLE_MEAN,
+            ClimateModel.ENSEMBLE_STD_DEV,
         ],
         filepath_template=FUTURE_FILE_TEMPLATE,
     ),

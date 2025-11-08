@@ -46,7 +46,7 @@ DEFAULT_TEST_SET_HISTORIC = {
 }
 
 DEFAULT_TEST_SET_FUTURE = {
-    "variable_type": ClimateVarKey.PRECIPITATION,
+    "variable_type": ClimateVarKey.T_MAX,
     "resolution": SpatialResolution.MIN10,
     "climate_scenario": ClimateScenario.SSP370,
     "climate_model": ClimateModel.ENSEMBLE_MEAN,
