@@ -7,8 +7,7 @@ from pydantic import computed_field
 from pydantic import model_validator
 from pydantic import ConfigDict
 from matplotlib import pyplot as plt
-from matplotlib.colors import Normalize
-from matplotlib.colors import SymLogNorm
+from matplotlib.colors import Normalize, SymLogNorm
 from matplotlib.colors import BoundaryNorm
 
 
@@ -42,14 +41,16 @@ class ContourPlotConfig(BaseModel):
 
     @computed_field
     @property
-    def norm(self) -> SymLogNorm | None:
+    def norm(self) -> SymLogNorm | BoundaryNorm:
         if self.log_scale:
             return SymLogNorm(
                 linthresh=self.linthresh, vmin=self.level_lower, vmax=self.level_upper
             )
-        n_colors = self.colormap.N
-        levels = np.linspace(self.level_lower, self.level_upper, num=n_colors)
-        norm = BoundaryNorm(levels, n_colors)
+        # TODO: Use BoundaryNorm for 2d histogram plot? Check if Normalize works correctly for 2d histogram plot.
+        # n_colors = self.colormap.N
+        # levels = np.linspace(self.level_lower, self.level_upper, num=n_colors)
+        # norm = BoundaryNorm(levels, n_colors)
+        norm = Normalize(vmin=self.level_lower, vmax=self.level_upper)
         return norm
 
     @computed_field
@@ -79,10 +80,7 @@ class ContourPlotConfig(BaseModel):
             levels_array = np.linspace(self.level_lower, self.level_upper, num=num_levels)
         levels_list = levels_array.tolist()
 
-        if self.norm:
-            norm = self.norm
-        else:
-            norm = Normalize(vmin=self.level_lower, vmax=self.level_upper)
+        norm = self.norm
 
         colors = []
         for level in levels_list:
