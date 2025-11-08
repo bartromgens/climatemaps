@@ -1,6 +1,11 @@
 import numpy
 
-from climatemaps.datasets import ClimateDataConfig, DataFormat, FutureClimateDataConfig
+from climatemaps.datasets import (
+    ClimateDataConfig,
+    ClimateModel,
+    DataFormat,
+    FutureClimateDataConfig,
+)
 from climatemaps.download import ensure_data_available
 from climatemaps.geotiff import read_geotiff_future, read_geotiff_history, read_geotiff_cru_ts
 from climatemaps.geogrid import GeoGrid
@@ -41,10 +46,13 @@ def load_climate_data(data_config: ClimateDataConfig, month: int) -> GeoGrid:
 def load_climate_data_for_difference(
     historical_config: ClimateDataConfig, future_config: FutureClimateDataConfig, month: int
 ) -> GeoGrid:
-    historical_grid = load_climate_data(historical_config, month)
     future_grid = load_climate_data(future_config, month)
 
-    # Ensure coordinate arrays match
+    if future_config.climate_model == ClimateModel.ENSEMBLE_STD_DEV:
+        return future_grid
+
+    historical_grid = load_climate_data(historical_config, month)
+
     if not numpy.allclose(historical_grid.lon_range, future_grid.lon_range) or not numpy.allclose(
         historical_grid.lat_range, future_grid.lat_range
     ):
