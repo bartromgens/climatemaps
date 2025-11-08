@@ -75,6 +75,8 @@ class ContourPlotConfig(BaseModel):
             levels_array = np.linspace(self.level_lower, self.level_upper, num=num_levels)
         levels_list = levels_array.tolist()
 
+        norm = self.norm
+
         colors = []
         for level in levels_list:
             normalized_value = norm(level)
