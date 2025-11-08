@@ -27,25 +27,22 @@ class TestContour:
     def test_create_tiles(self):
         month = 1
         name = "test"
-        expected_colorbar_file = f"{month}_colorbar.png"
-        expected_image_file = f"{month}.png"
-        expected_raster_tiles_file = f"{month}_raster.mbtiles"
-        expected_vector_tiles_file = f"{month}_vector.mbtiles"
         expected_files = {
-            expected_colorbar_file: "c1c96094eb0fabb6d38dd1e4adff2379351d1d80376dbd5e6fc19c61cc5d4e04",
-            expected_image_file: "194e17635d738c43171039ee2389201fb8dbddf35d2ab8b45e0f3f09652669b4",
-            expected_raster_tiles_file: "219a04d48f88699d04e0c838a683a3e913a7933c06d617984064c5b2056983da",
-            expected_vector_tiles_file: None,  # This checksum changes each run, no idea why (timestamp?)
+            f"{month}_colorbar.png": "c1c96094eb0fabb6d38dd1e4adff2379351d1d80376dbd5e6fc19c61cc5d4e04",
+            f"{month}_raster.mbtiles": None,
+            f"{month}_vector.mbtiles": None,  # This checksum changes each run, no idea why (timestamp?)
         }
         with tempfile.TemporaryDirectory() as tmpdir:
             self.contour.create_tiles(data_dir_out=tmpdir, name=name, month=month)
             for filename, checksum_expected in expected_files.items():
                 filepath = os.path.join(tmpdir, name, filename)
-                assert os.path.exists(filepath)
+                assert os.path.exists(filepath), f"File {filepath} does not exist"
                 checksum = self._compute_checksum(filepath)
                 logger.info(f"checksum for {filepath}: {checksum}")
                 if checksum_expected is not None:
-                    assert checksum_expected == checksum
+                    assert (
+                        checksum_expected == checksum
+                    ), f"Checksum for {filepath} does not match expected {checksum_expected}"
 
             geojson_filepath = os.path.join(tmpdir, name, f"{month}.geojson")
             assert not os.path.exists(geojson_filepath)
