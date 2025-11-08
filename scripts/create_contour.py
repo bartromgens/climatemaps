@@ -41,7 +41,7 @@ maps_config: ClimateMapsConfig = get_config()
 np.set_printoptions(3, threshold=100, suppress=True)  # .3f
 
 DEFAULT_TEST_SET_HISTORIC = {
-    "variable_type": ClimateVarKey.PRECIPITATION,
+    "variable_type": ClimateVarKey.T_MAX,
     "resolution": SpatialResolution.MIN10,
 }
 

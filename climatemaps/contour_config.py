@@ -46,7 +46,7 @@ class ContourPlotConfig(BaseModel):
             return SymLogNorm(
                 linthresh=self.linthresh, vmin=self.level_lower, vmax=self.level_upper
             )
-        return None
+        return Normalize(vmin=self.level_lower, vmax=self.level_upper)
 
     @computed_field
     @property
@@ -74,11 +74,6 @@ class ContourPlotConfig(BaseModel):
         else:
             levels_array = np.linspace(self.level_lower, self.level_upper, num=num_levels)
         levels_list = levels_array.tolist()
-
-        if self.norm:
-            norm = self.norm
-        else:
-            norm = Normalize(vmin=self.level_lower, vmax=self.level_upper)
 
         colors = []
         for level in levels_list:
