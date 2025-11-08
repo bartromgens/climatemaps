@@ -24,6 +24,16 @@ export interface NearestCityResponse {
   longitude: number;
 }
 
+export interface ColorbarConfigResponse {
+  title: string;
+  unit: string;
+  levels: number[];
+  colors: number[][];
+  level_lower: number;
+  level_upper: number;
+  log_scale: boolean;
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -65,5 +75,12 @@ export class ClimateMapService {
     return this.httpClient.get<NearestCityResponse>(url, {
       params: { lat: lat.toString(), lon: lon.toString() },
     });
+  }
+
+  public getColorbarConfig(
+    dataType: string,
+  ): Observable<ColorbarConfigResponse> {
+    const url = `${environment.apiBaseUrl}/colorbar-config/${dataType}`;
+    return this.httpClient.get<ColorbarConfigResponse>(url);
   }
 }

@@ -7,7 +7,6 @@
   >
     <div class="sidebar-content">
       <button
-        *ngIf="isMobile"
         mat-icon-button
         class="sidebar-close-button"
         (click)="toggleSidebar()"
@@ -19,15 +18,16 @@
       <app-map-controls
         [controlsData]="controlsData"
         [controlsOptions]="controlsOptions"
+        [showDropDownControls]="true"
         (controlsChange)="onControlsChange($event)"
       ></app-map-controls>
     </div>
   </mat-sidenav>
   <mat-sidenav-content>
     <button
-      *ngIf="isMobile && !sidebarOpened"
+      *ngIf="!sidebarOpened"
       mat-icon-button
-      class="mobile-toggle-button"
+      class="sidebar-toggle-button"
       (click)="toggleSidebar()"
       [attr.aria-label]="'Open sidebar'"
     >
@@ -53,6 +53,16 @@
       (yearRangeChange)="onYearRangeChange($event)"
     ></app-mobile-date-control-overlay>
 
+    <app-climate-scenario-overlay
+      [show]="shouldShowFutureControls()"
+      [selectedClimateScenario]="controlsData.selectedClimateScenario"
+      [climateScenarios]="controlsOptions?.climateScenarios || []"
+      [availableClimateScenarios]="
+        controlsOptions?.availableClimateScenarios || []
+      "
+      (climateScenarioChange)="onClimateScenarioChangeOverlay($event)"
+    ></app-climate-scenario-overlay>
+
     <div class="maps-grid-wrapper">
       <div class="maps-grid">
         <app-small-map
@@ -69,14 +79,16 @@
       <app-map-controls
         [controlsData]="controlsData"
         [controlsOptions]="controlsOptions"
+        [showDropDownControls]="false"
         (controlsChange)="onControlsChange($event)"
       ></app-map-controls>
     </div>
 
-    <app-colorbar
-      [colormapUrl]="selectedOption?.climateMap?.colormapUrl || null"
-      [displayName]="selectedOption?.climateMap?.getDisplayName() || null"
-      [selectedMonth]="1"
-    ></app-colorbar>
+    <app-colorbar-json
+      [dataType]="selectedOption?.climateMap?.dataType || null"
+      [width]="12"
+      [height]="180"
+      [showLabel]="!isMobile"
+    ></app-colorbar-json>
   </mat-sidenav-content>
 </mat-sidenav-container>

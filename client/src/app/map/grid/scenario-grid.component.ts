@@ -6,18 +6,17 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 
 import { SmallMapComponent } from '../controls/small-map.component';
-import { ColorbarComponent } from '../colorbar.component';
+import { ColorbarJsonComponent } from '../colorbar-json.component';
 import { MapControlsComponent } from '../controls/map-controls.component';
 import { MobileHamburgerMenuComponent } from '../controls/mobile-hamburger-menu.component';
-import { MobileDateControlOverlayComponent } from '../controls/mobile-date-control-overlay.component';
-import { VariableSelectorOverlayComponent } from '../controls/variable-selector-overlay.component';
+import { MobileDateControlOverlayComponent } from '../controls/overlays/mobile-date-control-overlay.component';
+import { VariableSelectorOverlayComponent } from '../controls/overlays/variable-selector-overlay.component';
 import { ClimateMapService } from '../../core/climatemap.service';
 import { MetadataService, YearRange } from '../../core/metadata.service';
 import {
   ClimateScenario,
   ClimateModel,
   SpatialResolution,
-  CLIMATE_SCENARIO_DISPLAY_NAMES,
   ClimateVarKey,
 } from '../../utils/enum';
 import {
@@ -46,7 +45,7 @@ interface ScenarioOption {
     MatSidenavModule,
     MatButtonModule,
     SmallMapComponent,
-    ColorbarComponent,
+    ColorbarJsonComponent,
     MapControlsComponent,
     MobileHamburgerMenuComponent,
     MobileDateControlOverlayComponent,
@@ -183,10 +182,6 @@ export class ScenarioGridComponent extends BaseMapComponent {
     this.updateControlsOptions();
   }
 
-  private getScenarioLabel(scenario: ClimateScenario): string {
-    return CLIMATE_SCENARIO_DISPLAY_NAMES[scenario] || scenario;
-  }
-
   private findMatchingLayers(): void {
     if (
       !this.controlsData.selectedYearRange ||
@@ -244,11 +239,6 @@ export class ScenarioGridComponent extends BaseMapComponent {
 
   onYearRangeChange(yearRange: YearRange): void {
     this.controlsData.selectedYearRange = yearRange;
-    this.onControlsChange(this.controlsData);
-  }
-
-  onVariableChange(variableType: ClimateVarKey): void {
-    this.controlsData.selectedVariableType = variableType;
     this.onControlsChange(this.controlsData);
   }
 }

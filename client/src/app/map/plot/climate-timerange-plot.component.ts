@@ -25,7 +25,6 @@ import {
   ClimateVarKey,
   CLIMATE_VAR_KEY_TO_NAME,
   CLIMATE_VAR_DISPLAY_NAMES,
-  CLIMATE_VAR_UNITS,
   ClimateScenario,
   ClimateModel,
 } from '../../utils/enum';
@@ -34,6 +33,8 @@ import {
   TemperatureUnit,
 } from '../../core/temperature-unit.service';
 import { TemperatureUtils } from '../../utils/temperature-utils';
+import { PrecipitationUnitService } from '../../core/precipitation-unit.service';
+import { PrecipitationUtils } from '../../utils/precipitation-utils';
 
 Chart.register(...registerables);
 
@@ -90,9 +91,16 @@ export class ClimateTimerangePlotComponent
     private climateMapService: ClimateMapService,
     private cdr: ChangeDetectorRef,
     private temperatureUnitService: TemperatureUnitService,
+    private precipitationUnitService: PrecipitationUnitService,
   ) {
     this.temperatureUnitService.unit$.subscribe((unit) => {
       this.currentUnit = unit;
+      if (this.chart && this.timeRangeData.length > 0) {
+        this.renderChart();
+      }
+    });
+
+    this.precipitationUnitService.unit$.subscribe(() => {
       if (this.chart && this.timeRangeData.length > 0) {
         this.renderChart();
       }
@@ -266,9 +274,13 @@ export class ClimateTimerangePlotComponent
     );
 
     const tempUnit = this.currentUnit;
+    const precipUnit =
+      this.precipitationUnitService.getUnit() === 'in'
+        ? 'in/month'
+        : 'mm/month';
     const tmaxLabel = `${CLIMATE_VAR_DISPLAY_NAMES[ClimateVarKey.T_MAX]} Change (${tempUnit})`;
     const tminLabel = `${CLIMATE_VAR_DISPLAY_NAMES[ClimateVarKey.T_MIN]} Change (${tempUnit})`;
-    const precipLabel = `${CLIMATE_VAR_DISPLAY_NAMES[ClimateVarKey.PRECIPITATION]} Change (${CLIMATE_VAR_UNITS[ClimateVarKey.PRECIPITATION]})`;
+    const precipLabel = `${CLIMATE_VAR_DISPLAY_NAMES[ClimateVarKey.PRECIPITATION]} Change (${precipUnit})`;
 
     const config: ChartConfiguration = {
       type: 'line',
@@ -295,7 +307,12 @@ export class ClimateTimerangePlotComponent
           },
           {
             label: precipLabel,
-            data: this.timeRangeData.map((d) => d.precipitation),
+            data: this.timeRangeData.map((d) => {
+              const currentUnit = this.precipitationUnitService.getUnit();
+              return currentUnit === 'in'
+                ? PrecipitationUtils.mmToInches(d.precipitation)
+                : d.precipitation;
+            }),
             borderColor: 'rgb(54, 162, 235)',
             backgroundColor: 'rgba(54, 162, 235, 0.2)',
             tension: 0.4,
@@ -337,7 +354,7 @@ export class ClimateTimerangePlotComponent
             position: 'right',
             title: {
               display: true,
-              text: `Precipitation Change (${CLIMATE_VAR_UNITS[ClimateVarKey.PRECIPITATION]})`,
+              text: `Precipitation Change (${precipUnit})`,
             },
             grid: {
               drawOnChartArea: false,

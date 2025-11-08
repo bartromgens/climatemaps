@@ -8,7 +8,6 @@
     <div class="sidebar-content">
       <!-- Close button inside sidebar -->
       <button
-        *ngIf="isMobile"
         mat-icon-button
         class="sidebar-close-button"
         (click)="toggleSidebar()"
@@ -20,16 +19,17 @@
       <app-map-controls
         [controlsData]="controlsData"
         [controlsOptions]="controlsOptions"
+        [showDropDownControls]="true"
         (controlsChange)="onControlsChange($event)"
       ></app-map-controls>
     </div>
   </mat-sidenav>
   <mat-sidenav-content>
-    <!-- Mobile toggle button -->
+    <!-- Sidebar toggle button -->
     <button
-      *ngIf="isMobile && !sidebarOpened"
+      *ngIf="!sidebarOpened"
       mat-icon-button
-      class="mobile-toggle-button"
+      class="sidebar-toggle-button"
       (click)="toggleSidebar()"
       [attr.aria-label]="'Open sidebar'"
     >
@@ -39,6 +39,20 @@
     <app-mobile-hamburger-menu
       [isMobile]="isMobile"
     ></app-mobile-hamburger-menu>
+
+    <!-- Location search overlay -->
+    <app-location-search></app-location-search>
+
+    <!-- Location button -->
+    <button
+      mat-icon-button
+      class="location-button"
+      (click)="onLocationButtonClick()"
+      [attr.aria-label]="'Use device location'"
+      title="Use device location"
+    >
+      <mat-icon>my_location</mat-icon>
+    </button>
 
     <!-- Contour lines toggle -->
     <app-contour-toggle-overlay
@@ -55,6 +69,26 @@
       (toggleChange)="onShowChangeToggle($event)"
     ></app-show-change-toggle-overlay>
 
+    <!-- Climate scenario overlay -->
+    <app-climate-scenario-overlay
+      [show]="shouldShowFutureControls()"
+      [selectedClimateScenario]="controlsData.selectedClimateScenario"
+      [climateScenarios]="controlsOptions?.climateScenarios || []"
+      [availableClimateScenarios]="
+        controlsOptions?.availableClimateScenarios || []
+      "
+      (climateScenarioChange)="onClimateScenarioChangeOverlay($event)"
+    ></app-climate-scenario-overlay>
+
+    <!-- Climate model overlay -->
+    <app-climate-model-overlay
+      [show]="shouldShowFutureControls()"
+      [selectedClimateModel]="controlsData.selectedClimateModel"
+      [climateModels]="controlsOptions?.climateModels || []"
+      [availableClimateModels]="controlsOptions?.availableClimateModels || []"
+      (climateModelChange)="onClimateModelChangeOverlay($event)"
+    ></app-climate-model-overlay>
+
     <div
       class="page-content-wrapper"
       leaflet
@@ -63,6 +97,7 @@
       (leafletMapReady)="onMapReady($event)"
       (leafletMapMoveEnd)="onMove($event)"
       (leafletMapZoomEnd)="onZoom($event)"
+      (leafletMouseMove)="onMouseMove($event)"
     ></div>
 
     <!-- Month and Year Range Display -->
@@ -109,15 +144,15 @@
       <app-map-controls
         [controlsData]="controlsData"
         [controlsOptions]="controlsOptions"
+        [showDropDownControls]="false"
         (controlsChange)="onControlsChange($event)"
       ></app-map-controls>
     </div>
 
-    <app-colorbar
-      [colormapUrl]="selectedOption?.climateMap?.colormapUrl || null"
-      [displayName]="selectedOption?.climateMap?.getDisplayName() || null"
-      [selectedMonth]="monthSelected"
-    ></app-colorbar>
+    <app-colorbar-json
+      [dataType]="selectedOption?.climateMap?.dataType || null"
+      [width]="isMobile ? 12 : 14"
+    ></app-colorbar-json>
 
     <!-- Climate plots component -->
     <app-climate-plots

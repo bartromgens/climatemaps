@@ -7,7 +7,6 @@
   >
     <div class="sidebar-content">
       <button
-        *ngIf="isMobile"
         mat-icon-button
         class="sidebar-close-button"
         (click)="toggleSidebar()"
@@ -19,15 +18,16 @@
       <app-map-controls
         [controlsData]="controlsData"
         [controlsOptions]="controlsOptions"
+        [showDropDownControls]="true"
         (controlsChange)="onControlsChange($event)"
       ></app-map-controls>
     </div>
   </mat-sidenav>
   <mat-sidenav-content>
     <button
-      *ngIf="isMobile && !sidebarOpened"
+      *ngIf="!sidebarOpened"
       mat-icon-button
-      class="mobile-toggle-button"
+      class="sidebar-toggle-button"
       (click)="toggleSidebar()"
       [attr.aria-label]="'Open sidebar'"
     >
@@ -69,14 +69,16 @@
       <app-map-controls
         [controlsData]="controlsData"
         [controlsOptions]="controlsOptions"
+        [showDropDownControls]="false"
         (controlsChange)="onControlsChange($event)"
       ></app-map-controls>
     </div>
 
-    <app-colorbar
-      [colormapUrl]="colormapUrl"
-      [displayName]="displayName"
-      [selectedMonth]="controlsData.selectedMonth"
-    ></app-colorbar>
+    <app-colorbar-json
+      [dataType]="scenarios.length > 0 ? scenarios[0].option?.climateMap?.dataType || null : null"
+      [width]="12"
+      [height]="180"
+      [showLabel]="!isMobile"
+    ></app-colorbar-json>
   </mat-sidenav-content>
 </mat-sidenav-container>

@@ -1,4 +1,5 @@
 from typing import Any
+from typing import Dict
 import numpy as np
 from pydantic import BaseModel
 from pydantic import Field
@@ -6,7 +7,9 @@ from pydantic import computed_field
 from pydantic import model_validator
 from pydantic import ConfigDict
 from matplotlib import pyplot as plt
-from matplotlib.colors import BoundaryNorm, SymLogNorm
+from matplotlib.colors import Normalize
+from matplotlib.colors import SymLogNorm
+from matplotlib.colors import BoundaryNorm
 
 
 class ContourPlotConfig(BaseModel):
@@ -67,3 +70,33 @@ class ContourPlotConfig(BaseModel):
     @property
     def colorbar_ticks(self) -> list[float]:
         return self.levels[::2].tolist()
+
+    def get_colorbar_data(self) -> Dict[str, Any]:
+        num_levels = 100
+        if self.log_scale:
+            levels_array = np.geomspace(self.level_lower, self.level_upper, num=num_levels)
+        else:
+            levels_array = np.linspace(self.level_lower, self.level_upper, num=num_levels)
+        levels_list = levels_array.tolist()
+
+        if self.norm:
+            norm = self.norm
+        else:
+            norm = Normalize(vmin=self.level_lower, vmax=self.level_upper)
+
+        colors = []
+        for level in levels_list:
+            normalized_value = norm(level)
+            normalized_value = max(0.0, min(1.0, normalized_value))
+            rgba = self.colormap(normalized_value)
+            colors.append([float(rgba[0]), float(rgba[1]), float(rgba[2]), float(rgba[3])])
+
+        return {
+            "title": self.title,
+            "unit": self.unit,
+            "levels": levels_list,
+            "colors": colors,
+            "level_lower": float(self.level_lower),
+            "level_upper": float(self.level_upper),
+            "log_scale": self.log_scale,
+        }

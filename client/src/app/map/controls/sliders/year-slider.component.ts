@@ -1,7 +1,7 @@
 import { Component, EventEmitter, inject, Input, Output } from '@angular/core';
 import { MatSliderModule } from '@angular/material/slider';
 import { CommonModule } from '@angular/common';
-import { YearRange, MetadataService } from '../../core/metadata.service';
+import { YearRange, MetadataService } from '../../../core/metadata.service';
 import { MatomoTracker } from 'ngx-matomo-client';
 
 @Component({
@@ -29,7 +29,7 @@ export class YearSliderComponent {
         year.value[0] === this.value!.value[0] &&
         year.value[1] === this.value!.value[1];
       const matchesAdditional = year.additionalValues?.some(
-        (additionalValue) =>
+        (additionalValue: [number, number]) =>
           additionalValue[0] === this.value!.value[0] &&
           additionalValue[1] === this.value!.value[1],
       );

@@ -22,29 +22,37 @@ import 'leaflet.vectorgrid';
 
 import { environment } from '../../environments/environment';
 import { MapControlsComponent } from './controls/map-controls.component';
-import { VariableSelectorOverlayComponent } from './controls/variable-selector-overlay.component';
-import { MobileDateControlOverlayComponent } from './controls/mobile-date-control-overlay.component';
-import { ColorbarComponent } from './colorbar.component';
+import { VariableSelectorOverlayComponent } from './controls/overlays/variable-selector-overlay.component';
+import { MobileDateControlOverlayComponent } from './controls/overlays/mobile-date-control-overlay.component';
+import { ColorbarJsonComponent } from './colorbar-json.component';
 import { MobileHamburgerMenuComponent } from './controls/mobile-hamburger-menu.component';
-import { ShowChangeToggleOverlayComponent } from './controls/show-change-toggle-overlay.component';
-import { ContourToggleOverlayComponent } from './controls/contour-toggle-overlay.component';
+import { ShowChangeToggleOverlayComponent } from './controls/overlays/show-change-toggle-overlay.component';
+import { ContourToggleOverlayComponent } from './controls/overlays/contour-toggle-overlay.component';
+import { ClimateModelOverlayComponent } from './controls/overlays/climate-model-overlay.component';
+import { ClimateScenarioOverlayComponent } from './controls/overlays/climate-scenario-overlay.component';
+import { LocationSearchComponent } from '../core/location-search.component';
 import { ClimateMapService } from '../core/climatemap.service';
 import { MetadataService, YearRange } from '../core/metadata.service';
-import { SpatialResolution, ClimateVarKey } from '../utils/enum';
+import {
+  SpatialResolution,
+  ClimateVarKey,
+  ClimateModel,
+  ClimateScenario,
+} from '../utils/enum';
 import { TooltipManagerService } from './services/tooltip-manager.service';
 import { VectorLayerTooltipService } from './services/vector-layer-tooltip.service';
-import { MapClickHandlerService } from './services/map-click-handler.service';
 import {
   LayerBuilderService,
   LayerOption,
 } from './services/layer-builder.service';
 import { LayerFilterService } from './services/layer-filter.service';
+import { RasterTooltipService } from './services/raster-tooltip.service';
+import { GeolocationService } from './services/geolocation.service';
 import { URLUtils } from '../utils/url-utils';
 import { ClimatePlotsComponent } from './plot/climate-plots.component';
 import { MapNavigationService } from '../core/map-navigation.service';
 import { MapSyncService } from './services/map-sync.service';
 import { BaseMapComponent } from './base-map.component';
-import { TemperatureUnitService } from '../core/temperature-unit.service';
 import { SeoService } from '../core/seo.service';
 import { ToastService } from '../core/toast.service';
 import { ClimateVariableHelperService } from '../core/climate-variable-helper.service';
@@ -66,11 +74,14 @@ import { MatomoTracker } from 'ngx-matomo-client';
     MapControlsComponent,
     VariableSelectorOverlayComponent,
     MobileDateControlOverlayComponent,
-    ColorbarComponent,
+    ColorbarJsonComponent,
     ClimatePlotsComponent,
     MobileHamburgerMenuComponent,
     ShowChangeToggleOverlayComponent,
     ContourToggleOverlayComponent,
+    ClimateModelOverlayComponent,
+    ClimateScenarioOverlayComponent,
+    LocationSearchComponent,
   ],
   templateUrl: './map.component.html',
   styleUrl: './map.component.scss',
@@ -150,6 +161,8 @@ export class MapComponent extends BaseMapComponent implements OnInit {
   private vectorLayer: Layer | null = null;
   plotData: { lat: number; lon: number; dataType: string } | null = null;
   timerangePlotData: { lat: number; lon: number; month: number } | null = null;
+  private lastMouseMoveCall = 0;
+  private isDragging = false;
 
   constructor(
     route: ActivatedRoute,
@@ -162,11 +175,11 @@ export class MapComponent extends BaseMapComponent implements OnInit {
     mapSyncService: MapSyncService,
     private tooltipManager: TooltipManagerService,
     private vectorLayerTooltip: VectorLayerTooltipService,
-    private mapClickHandler: MapClickHandlerService,
     private mapNavigationService: MapNavigationService,
-    private temperatureUnitService: TemperatureUnitService,
     private seoService: SeoService,
     private climateVariableHelper: ClimateVariableHelperService,
+    private rasterTooltip: RasterTooltipService,
+    private geolocationService: GeolocationService,
   ) {
     super(
       route,
@@ -382,7 +395,7 @@ export class MapComponent extends BaseMapComponent implements OnInit {
           maxZoom: 12,
           tileSize: 256,
           opacity: 0.8,
-          // tms: true, // uncomment if your MBTiles uses TMS y‐axis
+          crossOrigin: 'anonymous',
         },
       );
 
@@ -394,6 +407,7 @@ export class MapComponent extends BaseMapComponent implements OnInit {
               color: properties.stroke,
               weight: 2,
               opacity: 1,
+              crossOrigin: 'anonymous',
             }),
           },
           interactive: true,
@@ -461,6 +475,32 @@ export class MapComponent extends BaseMapComponent implements OnInit {
     this.map?.setView([lat, lon], zoom);
   }
 
+  onLocationButtonClick(): void {
+    this.tracker.trackEvent(
+      'Map Interaction',
+      'Location Button',
+      'Button Clicked',
+    );
+
+    this.geolocationService.getCurrentPosition().subscribe({
+      next: (position) => {
+        const normalizedLon = CoordinateUtils.normalizeLongitude(position.lon);
+        const zoom = 5;
+
+        if (this.map) {
+          this.map.setView([position.lat, normalizedLon], zoom, {
+            animate: true,
+            duration: 1.0,
+          });
+          this.updateUrlFromMapState();
+        }
+      },
+      error: () => {
+        // Error handling is done in the service
+      },
+    });
+  }
+
   onMapClick(event: LeafletMouseEvent): void {
     console.log('mapClick', event);
 
@@ -479,11 +519,12 @@ export class MapComponent extends BaseMapComponent implements OnInit {
       `${lat.toFixed(4)},${lon.toFixed(4)}`,
     );
 
-    // Always handle tooltip display (works on both mobile and desktop)
-    this.mapClickHandler.handleMapClick(
+    // Handle tooltip display using raster color extraction
+    this.rasterTooltip.handleMapClick(
       event,
       this.map,
-      this.selectedOption.metadata.dataType,
+      this.rasterLayer,
+      this.selectedOption,
       this.monthSelected,
       this.controlsData.selectedVariableType,
     );
@@ -513,6 +554,15 @@ export class MapComponent extends BaseMapComponent implements OnInit {
   onMapReady(map: Map): void {
     this.map = map;
     this.initializeMap();
+
+    map.on('dragstart', () => {
+      this.isDragging = true;
+    });
+
+    map.on('dragend', () => {
+      this.isDragging = false;
+    });
+
     setTimeout(() => {
       this.map?.invalidateSize();
       // Set initial resolution based on zoom level
@@ -527,6 +577,39 @@ export class MapComponent extends BaseMapComponent implements OnInit {
     this.clearTooltips();
   }
 
+  onMouseMove(event: LeafletMouseEvent): void {
+    if (!this.selectedOption?.metadata?.dataType || !this.map) {
+      return;
+    }
+
+    if (this.isDragging) {
+      return;
+    }
+
+    const now = Date.now();
+    const timeSinceLastCall = now - this.lastMouseMoveCall;
+
+    if (timeSinceLastCall >= 16) {
+      this.handleMouseMove(event);
+      this.lastMouseMoveCall = now;
+    }
+  }
+
+  private handleMouseMove(event: LeafletMouseEvent): void {
+    if (!this.selectedOption?.metadata?.dataType || !this.map) {
+      return;
+    }
+
+    this.rasterTooltip.handleMouseMove(
+      event,
+      this.map,
+      this.rasterLayer,
+      this.selectedOption,
+      this.monthSelected,
+      this.controlsData.selectedVariableType,
+    );
+  }
+
   onZoom(event: LeafletEvent): void {
     console.log('onZoom: level', this.map?.getZoom(), event);
     this.updateUrlFromMapState();
@@ -535,12 +618,7 @@ export class MapComponent extends BaseMapComponent implements OnInit {
 
     const zoomLevel = this.map?.getZoom();
     if (zoomLevel !== undefined) {
-      this.tracker.trackEvent(
-        'Map Interaction',
-        'Zoom',
-        `Level ${zoomLevel}`,
-        zoomLevel,
-      );
+      this.tracker.trackEvent('Map Interaction', 'Zoom', `Level ${zoomLevel}`);
     }
   }
 
@@ -579,7 +657,10 @@ export class MapComponent extends BaseMapComponent implements OnInit {
       return;
     }
 
-    const unit = this.getCurrentUnit();
+    const climateVariable =
+      this.climateVariables[this.controlsData.selectedVariableType];
+    const unit = climateVariable?.unit || '';
+
     this.vectorLayerTooltip.handleVectorLayerHover(
       e,
       this.map,
@@ -594,20 +675,6 @@ export class MapComponent extends BaseMapComponent implements OnInit {
     }
   }
 
-  private getCurrentUnit(): string {
-    if (!this.selectedOption?.metadata) {
-      return '';
-    }
-
-    const climateVariable =
-      this.climateVariables[this.controlsData.selectedVariableType];
-
-    if (climateVariable?.unit) {
-      return climateVariable.unit;
-    }
-    return 'unknown';
-  }
-
   private setupNavigationListener(): void {
     this.mapNavigationService.navigation$.subscribe((request) => {
       if (this.map) {
@@ -617,18 +684,42 @@ export class MapComponent extends BaseMapComponent implements OnInit {
         });
         this.updateUrlFromMapState();
 
-        if (request.generateCharts && this.selectedOption?.metadata?.dataType) {
-          // Wait for map animation to complete before generating plots
-          setTimeout(() => {
+        // Wait for map animation to complete before showing tooltip and generating plots
+        setTimeout(() => {
+          const normalizedLon = CoordinateUtils.normalizeLongitude(request.lon);
+
+          // Show tooltip at the selected location (similar to map click)
+          if (this.selectedOption?.metadata?.dataType) {
+            const syntheticEvent = {
+              latlng: {
+                lat: request.lat,
+                lng: normalizedLon,
+              },
+            };
+
+            this.rasterTooltip.handleMapClick(
+              syntheticEvent,
+              this.map!,
+              this.rasterLayer,
+              this.selectedOption,
+              this.monthSelected,
+              this.controlsData.selectedVariableType,
+            );
+          }
+
+          if (
+            request.generateCharts &&
+            this.selectedOption?.metadata?.dataType
+          ) {
             const plotData = {
               lat: request.lat,
-              lon: CoordinateUtils.normalizeLongitude(request.lon),
+              lon: normalizedLon,
               dataType: this.selectedOption!.metadata!.dataType,
             };
 
             const timerangePlotData = {
               lat: request.lat,
-              lon: CoordinateUtils.normalizeLongitude(request.lon),
+              lon: normalizedLon,
               month: this.monthSelected,
             };
 
@@ -640,8 +731,8 @@ export class MapComponent extends BaseMapComponent implements OnInit {
               this.plotData = plotData;
               this.timerangePlotData = timerangePlotData;
             }
-          }, 1200); // Wait for map animation to complete (1.0s duration + buffer)
-        }
+          }
+        }, 1200); // Wait for map animation to complete (1.0s duration + buffer)
       }
     });
   }
@@ -668,7 +759,7 @@ export class MapComponent extends BaseMapComponent implements OnInit {
     return `${yearRange[0]}-${yearRange[1]}`;
   }
 
-  onVariableChange(variableType: ClimateVarKey): void {
+  override onVariableChange(variableType: ClimateVarKey): void {
     this.controlsData.selectedVariableType = variableType;
     this.checkAndShowFuturePredictionWarning();
     this.onControlsChange(this.controlsData);
@@ -689,6 +780,18 @@ export class MapComponent extends BaseMapComponent implements OnInit {
 
   onYearRangeChange(yearRange: YearRange): void {
     this.controlsData.selectedYearRange = yearRange;
+    this.onControlsChange(this.controlsData);
+  }
+
+  onClimateModelChangeOverlay(model: ClimateModel | null): void {
+    this.controlsData.selectedClimateModel = model;
+    this.onControlsChange(this.controlsData);
+  }
+
+  override onClimateScenarioChangeOverlay(
+    scenario: ClimateScenario | null,
+  ): void {
+    this.controlsData.selectedClimateScenario = scenario;
     this.onControlsChange(this.controlsData);
   }
 
@@ -784,6 +887,17 @@ export class MapComponent extends BaseMapComponent implements OnInit {
     );
   }
 
+  override shouldShowFutureControls(): boolean {
+    return !!(
+      this.controlsData?.selectedYearRange &&
+      this.controlsOptions?.isHistoricalYearRange &&
+      this.controlsData.selectedYearRange.value &&
+      !this.controlsOptions.isHistoricalYearRange(
+        this.controlsData.selectedYearRange.value,
+      )
+    );
+  }
+
   shouldShowDifferenceCheckbox(): boolean {
     return !!(
       this.controlsData?.selectedYearRange &&
@@ -810,7 +924,6 @@ export class MapComponent extends BaseMapComponent implements OnInit {
       'Control Selection',
       'Contour Lines Toggle',
       showContour ? 'Enabled' : 'Disabled',
-      showContour ? 1 : 0,
     );
   }
 
@@ -851,7 +964,6 @@ export class MapComponent extends BaseMapComponent implements OnInit {
       'Control Selection',
       'Difference Map Toggle (Mobile)',
       showChange ? 'Enabled' : 'Disabled',
-      showChange ? 1 : 0,
     );
   }
 

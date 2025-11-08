@@ -31,9 +31,16 @@ export const CLIMATE_VAR_KEY_TO_NAME: Record<ClimateVarKey, string> = {
   [ClimateVarKey.VAPOUR_PRESSURE_DEFICIT]: 'vapour_pressure_deficit',
 };
 
+export const CLIMATE_VAR_NAME_TO_KEY: Record<string, ClimateVarKey> =
+  Object.fromEntries(
+    (Object.entries(CLIMATE_VAR_KEY_TO_NAME) as [ClimateVarKey, string][]).map(
+      ([key, name]) => [name, key],
+    ),
+  ) as Record<string, ClimateVarKey>;
+
 export const CLIMATE_VAR_DISPLAY_NAMES: Record<ClimateVarKey, string> = {
-  [ClimateVarKey.T_MAX]: 'Temperature Max',
-  [ClimateVarKey.T_MIN]: 'Temperature Min',
+  [ClimateVarKey.T_MAX]: 'Temperature (Day)',
+  [ClimateVarKey.T_MIN]: 'Temperature (Night)',
   [ClimateVarKey.PRECIPITATION]: 'Precipitation',
   [ClimateVarKey.CLOUD_COVER]: 'Cloud Cover',
   [ClimateVarKey.WET_DAYS]: 'Wet Days',
@@ -115,6 +122,13 @@ export enum DataFormat {
 
 // Note: Climate variable configurations and year ranges are now dynamically
 // loaded from the API via the MetadataService instead of being hardcoded here.
+
+export function getClimateVarKeyFromDataType(
+  dataType: string,
+): ClimateVarKey | null {
+  const firstPart = dataType.split('_')[0];
+  return CLIMATE_VAR_NAME_TO_KEY[firstPart] || null;
+}
 
 // eslint-disable-next-line @typescript-eslint/no-namespace
 export namespace EnumUtils {

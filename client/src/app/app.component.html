@@ -1,25 +1,3 @@
-<ng-template #searchField let-autocomplete="autocomplete">
-  <mat-form-field appearance="fill">
-    <mat-icon matPrefix>search</mat-icon>
-    <input
-      type="text"
-      matInput
-      placeholder="Search city or country..."
-      [formControl]="searchControl"
-      [matAutocomplete]="autocomplete"
-    />
-    <button
-      *ngIf="searchControl.value"
-      mat-icon-button
-      matSuffix
-      (click)="clearSearch()"
-      aria-label="Clear"
-    >
-      <mat-icon>close</mat-icon>
-    </button>
-  </mat-form-field>
-</ng-template>
-
 <mat-toolbar *ngIf="!isMobile">
   <a routerLink="/" class="app-title-link">
     <span>{{ title }}</span>
@@ -32,24 +10,6 @@
   <a mat-button routerLink="/climate-matrix">Climate Matrix</a>
 
   <span class="spacer"></span>
-
-  <div class="search-container">
-    <ng-container
-      *ngTemplateOutlet="searchField; context: { autocomplete: auto }"
-    ></ng-container>
-    <mat-autocomplete
-      #auto="matAutocomplete"
-      [displayWith]="displayLocationName"
-      (optionSelected)="onLocationSelected($event.option.value)"
-    >
-      <mat-option
-        *ngFor="let location of filteredLocations$ | async"
-        [value]="location"
-      >
-        {{ location.displayName }}
-      </mat-option>
-    </mat-autocomplete>
-  </div>
 
   <a mat-button routerLink="/about">About</a>
   <a
@@ -79,6 +39,10 @@
       <div class="settings-section">
         <span class="settings-label">Temperature Unit</span>
         <app-temperature-unit-selector></app-temperature-unit-selector>
+      </div>
+      <div class="settings-section">
+        <span class="settings-label">Precipitation Unit</span>
+        <app-precipitation-unit-selector></app-precipitation-unit-selector>
       </div>
     </div>
   </mat-menu>

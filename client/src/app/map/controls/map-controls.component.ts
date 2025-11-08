@@ -19,11 +19,15 @@ import {
   CLIMATE_SCENARIO_DISPLAY_NAMES,
 } from '../../utils/enum';
 import { YearRange } from '../../core/metadata.service';
-import { YearSliderComponent } from './year-slider.component';
-import { MonthSliderComponent } from './month-slider.component';
-import { TemperatureUnitService } from '../../core/temperature-unit.service';
-import { TemperatureUtils } from '../../utils/temperature-utils';
+import { YearSliderComponent } from './sliders/year-slider.component';
+import { MonthSliderComponent } from './sliders/month-slider.component';
+import {
+  TemperatureUnit,
+  TemperatureUnitService,
+} from '../../core/temperature-unit.service';
+import { PrecipitationUnitService } from '../../core/precipitation-unit.service';
 import { ClimateVariableHelperService } from '../../core/climate-variable-helper.service';
+import { UnitUtils } from '../../utils/unit-utils';
 import { MatomoTracker } from 'ngx-matomo-client';
 
 export interface MapControlsData {
@@ -73,11 +77,13 @@ export class MapControlsComponent implements OnInit {
   @Input() controlsData: MapControlsData | undefined;
   @Input() controlsOptions: MapControlsOptions | undefined;
   @Input() hideVariableSelector = false;
+  @Input() showDropDownControls = true;
   @Output() controlsChange = new EventEmitter<MapControlsData>();
-  temperatureUnit = '°C';
+  temperatureUnit = TemperatureUnit.CELSIUS;
 
   constructor(
     private temperatureUnitService: TemperatureUnitService,
+    private precipitationUnitService: PrecipitationUnitService,
     private climateVariableHelper: ClimateVariableHelperService,
   ) {}
 
@@ -94,12 +100,12 @@ export class MapControlsComponent implements OnInit {
       return '';
     }
 
-    const isTemperature = TemperatureUtils.isTemperatureVariable(variableType);
-    if (isTemperature && climateVariable.unit === '°C') {
-      return this.temperatureUnit;
-    }
-
-    return climateVariable.unit;
+    return UnitUtils.getDisplayUnit(
+      climateVariable.unit,
+      variableType,
+      this.temperatureUnitService.getUnit(),
+      this.precipitationUnitService.getUnit(),
+    );
   }
 
   onVariableTypeChange(event: any): void {
@@ -112,7 +118,7 @@ export class MapControlsComponent implements OnInit {
           ?.displayName || event.value;
       this.tracker.trackEvent(
         'Variable Selection',
-        'Variable Change',
+        'Variable Change (Sidebar C',
         variableName,
       );
     }

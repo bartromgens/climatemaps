@@ -19,6 +19,7 @@
       <app-map-controls
         [controlsData]="controlsData"
         [controlsOptions]="controlsOptions"
+        [showDropDownControls]="true"
         (controlsChange)="onControlsChange($event)"
       ></app-map-controls>
     </div>
@@ -81,14 +82,16 @@
       <app-map-controls
         [controlsData]="controlsData"
         [controlsOptions]="controlsOptions"
+        [showDropDownControls]="false"
         (controlsChange)="onControlsChange($event)"
       ></app-map-controls>
     </div>
 
-    <app-colorbar
-      [colormapUrl]="colormapUrl"
-      [displayName]="displayName"
-      [selectedMonth]="controlsData.selectedMonth"
-    ></app-colorbar>
+    <app-colorbar-json
+      [dataType]="gridCells.length > 0 ? gridCells[0].option?.climateMap?.dataType || null : null"
+      [width]="12"
+      [height]="180"
+      [showLabel]="!isMobile"
+    ></app-colorbar-json>
   </mat-sidenav-content>
 </mat-sidenav-container>

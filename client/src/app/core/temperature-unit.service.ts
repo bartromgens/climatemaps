@@ -1,5 +1,7 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
+import { LocaleDetectionService } from './locale-detection.service';
+import { LocalStorageService } from './local-storage.service';
 
 export enum TemperatureUnit {
   CELSIUS = '°C',
@@ -15,11 +17,39 @@ export class TemperatureUnitService {
   );
   public unit$: Observable<TemperatureUnit> = this.unitSubject.asObservable();
 
+  constructor(
+    private localeDetectionService: LocaleDetectionService,
+    private localStorageService: LocalStorageService,
+  ) {
+    this.initializeFromLocale();
+  }
+
+  private initializeFromLocale(): void {
+    const storedUnit = this.localStorageService.getItem(
+      'temperatureUnit',
+    ) as TemperatureUnit | null;
+    let initialUnit: TemperatureUnit;
+
+    if (storedUnit && Object.values(TemperatureUnit).includes(storedUnit)) {
+      initialUnit = storedUnit;
+    } else {
+      const shouldUseFahrenheit =
+        this.localeDetectionService.shouldUseFahrenheit();
+      initialUnit = shouldUseFahrenheit
+        ? TemperatureUnit.FAHRENHEIT
+        : TemperatureUnit.CELSIUS;
+    }
+
+    console.log('[TemperatureUnit] Initialized with unit:', initialUnit);
+    this.unitSubject.next(initialUnit);
+  }
+
   getUnit(): TemperatureUnit {
     return this.unitSubject.value;
   }
 
   setUnit(unit: TemperatureUnit): void {
+    this.localStorageService.setItem('temperatureUnit', unit);
     this.unitSubject.next(unit);
   }
 

@@ -1,0 +1,144 @@
+@import "../../../styles/variables";
+
+// Sidebar content styling
+.sidebar-content {
+  padding: 10px 5px;
+  height: $page-height-mobile;
+  overflow-y: auto;
+  position: relative;
+
+  @media (min-width: 769px) {
+    height: calc($page-height - $bottom-controls-height);
+  }
+}
+
+// Sidebar close button
+.sidebar-close-button {
+  position: relative;
+  float: right;
+  margin-left: 8px;
+}
+
+// Custom sidebar styling
+::ng-deep .custom-sidebar {
+  width: 100vw !important;
+  max-width: 100vw !important;
+
+  @media (min-width: 769px) {
+    width: 280px !important;
+    max-width: 280px !important;
+  }
+}
+
+.mobile-toggle-button {
+  position: fixed;
+  top: 16px;
+  left: 10px;
+  z-index: 2000;
+  background-color: white;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+
+  &:hover {
+    background-color: #f5f5f5;
+  }
+}
+
+.sidebar-toggle-button {
+  position: fixed;
+  top: 16px;
+  left: 10px;
+  z-index: 2000;
+  background-color: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+
+  @media (min-width: 769px) {
+    top: 120px;
+  }
+}
+
+// Desktop-specific styling
+@media (min-width: 769px) {
+  .mobile-toggle-button {
+    display: none;
+  }
+}
+
+// Adjust desktop controls overlay when sidebar is open on desktop
+@media (min-width: 769px) {
+  :host ::ng-deep {
+    mat-sidenav-container.mat-drawer-opened .desktop-controls-overlay,
+    mat-sidenav-container.mat-sidenav-opened .desktop-controls-overlay {
+      left: 280px;
+    }
+  }
+}
+
+// Colorbar positioning for grid components
+:host ::ng-deep {
+  app-colorbar-json {
+    left: auto !important;
+    right: 12px !important;
+    bottom: 140px !important;
+    width: 56px !important;
+    max-width: none !important;
+    padding: 6px !important;
+    display: inline-flex !important;
+    overflow: visible !important;
+
+    .colorbar-container {
+      overflow: visible !important;
+    }
+
+    @media (max-width: 768px) {
+      bottom: 60px !important;
+      right: -10px !important;
+    }
+  }
+}
+
+// Common maps grid wrapper styling
+.maps-grid-wrapper {
+  height: $page-height;
+  width: 100%;
+  padding: 0;
+  position: relative;
+
+  @media (max-width: 768px) {
+    height: 100vh;
+  }
+}
+
+// Common mat-sidenav-container and leaflet styling
+:host ::ng-deep {
+  mat-sidenav-container {
+    height: calc(100vh - $navbar-height);
+
+    @media (max-width: 768px) {
+      height: calc(100vh - $mobile-slider-height);
+    }
+  }
+
+  mat-sidenav-content {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .leaflet-container {
+    background: #e0e0e0;
+  }
+
+  .leaflet-control-attribution {
+    display: none;
+  }
+}
+
+// Common mobile-specific styling
+@media (max-width: 768px) {
+  .mobile-toggle-button {
+    display: block;
+  }
+
+  .desktop-controls {
+    display: none;
+  }
+}

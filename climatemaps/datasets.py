@@ -108,10 +108,10 @@ CLIMATE_VARIABLES: Dict[ClimateVarKey, ClimateVariable] = {
         name="Precipitation", display_name="Precipitation", unit="mm/month", filename="prec"
     ),
     ClimateVarKey.T_MAX: ClimateVariable(
-        name="Tmax", display_name="Temperature Max", unit="°C", filename="tmax"
+        name="Tmax", display_name="Temperature (Day)", unit="°C", filename="tmax"
     ),
     ClimateVarKey.T_MIN: ClimateVariable(
-        name="Tmin", display_name="Temperature Min", unit="°C", filename="tmin"
+        name="Tmin", display_name="Temperature (Night)", unit="°C", filename="tmin"
     ),
     ClimateVarKey.CLOUD_COVER: ClimateVariable(
         name="CloudCover", display_name="Cloud Cover", unit="%", filename="cloud"
@@ -168,10 +168,10 @@ CLIMATE_CONTOUR_CONFIGS: Dict[ClimateVarKey, ContourPlotConfig] = {
         log_scale=True,
     ),
     ClimateVarKey.T_MAX: ContourPlotConfig(
-        level_lower=-20, level_upper=45, colormap=plt.cm.jet, title="Max. temperature", unit="C"
+        level_lower=-20, level_upper=45, colormap=plt.cm.jet, title="Temperature (Day)", unit="C"
     ),
     ClimateVarKey.T_MIN: ContourPlotConfig(
-        level_lower=-30, level_upper=28, colormap=plt.cm.jet, title="Min. temperature", unit="C"
+        level_lower=-30, level_upper=28, colormap=plt.cm.jet, title="Temperature (Night)", unit="C"
     ),
     ClimateVarKey.CLOUD_COVER: ContourPlotConfig(
         level_lower=10,
@@ -238,14 +238,14 @@ CLIMATE_DIFFERENCE_CONTOUR_CONFIGS: Dict[ClimateVarKey, ContourPlotConfig] = {
         level_lower=-6,
         level_upper=6,
         colormap=plt.cm.RdYlBu_r,
-        title="Max. Temperature Change",
+        title="Temperature (Day) Change",
         unit="°C",
     ),
     ClimateVarKey.T_MIN: ContourPlotConfig(
         level_lower=-5,
         level_upper=5,
         colormap=plt.cm.RdYlBu_r,
-        title="Min. Temperature Change",
+        title="Temperature (Night) Change",
         unit="°C",
     ),
 }

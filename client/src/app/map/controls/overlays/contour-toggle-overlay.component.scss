@@ -1,11 +1,12 @@
-@import "../../../styles/overlay-button.scss";
+@import "../../../../styles/overlay-button.scss";
 
 :host {
-  bottom: 250px;
+  bottom: 240px;
   right: 20px;
 
   @media (max-width: 768px) {
     bottom: 180px;
+    right: 10px;
   }
 }
 

@@ -1,7 +1,7 @@
 import { Component, inject, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatSliderModule } from '@angular/material/slider';
-import { YearRange, MetadataService } from '../../core/metadata.service';
+import { YearRange, MetadataService } from '../../../core/metadata.service';
 import { MatomoTracker } from 'ngx-matomo-client';
 
 @Component({
@@ -52,7 +52,7 @@ export class MobileDateControlOverlayComponent {
         year.value[0] === this.selectedYearRange!.value[0] &&
         year.value[1] === this.selectedYearRange!.value[1];
       const matchesAdditional = year.additionalValues?.some(
-        (additionalValue) =>
+        (additionalValue: [number, number]) =>
           additionalValue[0] === this.selectedYearRange!.value[0] &&
           additionalValue[1] === this.selectedYearRange!.value[1],
       );

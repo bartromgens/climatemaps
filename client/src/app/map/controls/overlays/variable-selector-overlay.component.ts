@@ -1,7 +1,7 @@
 import { Component, inject, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
-import { ClimateVarKey } from '../../utils/enum';
+import { ClimateVarKey } from '../../../utils/enum';
 import { MatomoTracker } from 'ngx-matomo-client';
 
 @Component({
@@ -28,13 +28,13 @@ export class VariableSelectorOverlayComponent {
     {
       key: ClimateVarKey.T_MAX,
       icon: 'assets/thermometer-hot.svg',
-      shortName: 'Temp. Max',
+      shortName: 'Temp. (Day)',
       isSvg: true,
     },
     {
       key: ClimateVarKey.T_MIN,
       icon: 'assets/thermometer-cold.svg',
-      shortName: 'Temp. Min',
+      shortName: 'Temp. (Night)',
       isSvg: true,
     },
     {
@@ -60,14 +60,6 @@ export class VariableSelectorOverlayComponent {
   onVariableClick(variableType: ClimateVarKey): void {
     if (this.isAvailable(variableType)) {
       this.variableChange.emit(variableType);
-
-      const variable = this.variables.find((v) => v.key === variableType);
-      const variableName = variable?.shortName || variableType;
-      this.tracker.trackEvent(
-        'Variable Selection',
-        'Variable Change (Overlay)',
-        variableName,
-      );
     }
   }
 
