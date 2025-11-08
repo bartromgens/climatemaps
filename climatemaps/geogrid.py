@@ -177,6 +177,8 @@ class GeoGrid(BaseModel):
         """
         Apply land-sea mask to remove sea areas from the data array.
 
+        TODO: commit land_mask.tif to the repository.
+
         Args:
             land_mask_path: Path to the land mask file
 
