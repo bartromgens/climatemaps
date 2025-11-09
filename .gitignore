@@ -204,6 +204,7 @@ __marimo__/
 settings_local.py
 data/raw/*
 !data/raw/.gitkeep
+!data/raw/land_mask.tif
 !data/raw/world_bounding_box.geojson
 data/tiles/*
 !data/tiles/.gitkeep
