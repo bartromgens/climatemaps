@@ -2,6 +2,7 @@ import numpy
 
 from climatemaps.datasets import (
     ClimateDataConfig,
+    ClimateModel,
     DataFormat,
     FutureClimateDataConfig,
 )
@@ -77,11 +78,13 @@ def _calculate_difference(
     month: int,
     load_function,
 ) -> GeoGrid:
-    """Base function to calculate difference between historical and future climate data."""
-    historical_grid = load_function(historical_config, month)
-    future_grid = load_function(future_config, month)
+    future_grid = load_climate_data(future_config, month)
 
-    # Ensure coordinate arrays match
+    if future_config.climate_model == ClimateModel.ENSEMBLE_STD_DEV:
+        return future_grid
+
+    historical_grid = load_climate_data(historical_config, month)
+
     if not numpy.allclose(historical_grid.lon_range, future_grid.lon_range) or not numpy.allclose(
         historical_grid.lat_range, future_grid.lat_range
     ):

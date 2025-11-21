@@ -17,6 +17,7 @@ import {
   ClimateScenario,
   ClimateModel,
   CLIMATE_SCENARIO_DISPLAY_NAMES,
+  getClimateModelDisplayName,
 } from '../../utils/enum';
 import { YearRange } from '../../core/metadata.service';
 import { YearSliderComponent } from './sliders/year-slider.component';
@@ -118,7 +119,7 @@ export class MapControlsComponent implements OnInit {
           ?.displayName || event.value;
       this.tracker.trackEvent(
         'Variable Selection',
-        'Variable Change (Sidebar C',
+        'Variable Change (Sidebar Controls)',
         variableName,
       );
     }
@@ -217,12 +218,7 @@ export class MapControlsComponent implements OnInit {
     return CLIMATE_SCENARIO_DISPLAY_NAMES[scenario] || scenario;
   }
 
-  getClimateModelDisplayName(model: ClimateModel): string {
-    if (model === ClimateModel.ENSEMBLE_MEAN) {
-      return 'Ensemble Mean';
-    }
-    return model.replace(/_/g, '-');
-  }
+  getClimateModelDisplayName = getClimateModelDisplayName;
 
   shouldShowFutureControls(): boolean {
     return !!(

@@ -1,8 +1,10 @@
+import gc
 import os
 import subprocess
 
 import numpy as np
 from matplotlib.figure import Figure
+import matplotlib.pyplot as plt
 import cartopy.crs as ccrs
 
 import geojsoncontour
@@ -57,8 +59,11 @@ class ContourTileBuilder:
 
         ax, contourf, figure = self._create_contourf(fig_width, fig_height)
         self._save_contour_image(figure, filepath, adjusted_dpi)
-        self._create_raster_mbtiles(filepath)
         self._create_colorbar_image(ax, contourf, figure, filepath)
+        plt.close(figure)
+        del figure, ax, contourf
+        gc.collect()
+        self._create_raster_mbtiles(filepath)
         self._create_contour_vector_mbtiles(filepath, zoom_factor=zoom_factor)
         logger.info(f"DONE: contour for {name} and month {month} and zoomfactor {zoom_factor}")
 
@@ -309,6 +314,9 @@ class ContourTileBuilder:
             geojson_filepath=geojson_filepath,
             unit=self.config.unit,
         )
+        plt.close(figure)
+        del figure, ax, contours
+        gc.collect()
 
         assert os.path.exists(self.world_bounding_box_filepath)
 

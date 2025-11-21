@@ -52,12 +52,12 @@ class DatasetGroup:
 
 
 DEFAULT_TEST_SET_HISTORIC = {
-    "variable_type": ClimateVarKey.CLOUD_COVER,
-    "resolution": SpatialResolution.MIN0_5,
+    "variable_type": ClimateVarKey.T_MAX,
+    "resolution": SpatialResolution.MIN10,
 }
 
 DEFAULT_TEST_SET_FUTURE = {
-    "variable_type": ClimateVarKey.PRECIPITATION,
+    "variable_type": ClimateVarKey.T_MAX,
     "resolution": SpatialResolution.MIN10,
     "climate_scenario": ClimateScenario.SSP370,
     "climate_model": ClimateModel.ENSEMBLE_MEAN,

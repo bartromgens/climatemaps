@@ -49,6 +49,7 @@ export class MetadataService {
 
   private readonly MODEL_ORDER: ClimateModel[] = [
     ClimateModel.ENSEMBLE_MEAN,
+    ClimateModel.ENSEMBLE_STD_DEV,
     ClimateModel.ACCESS_CM2,
     ClimateModel.BCC_CSM2_MR,
     ClimateModel.CMCC_ESM2,

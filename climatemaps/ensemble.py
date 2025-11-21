@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import List
+from typing import Callable, List
 
 import numpy as np
 import rasterio
@@ -99,15 +99,20 @@ def get_available_models(
     return available_files
 
 
-def compute_ensemble_mean(
+def _compute_ensemble_statistic(
     base_dir: Path,
     resolution: SpatialResolution,
     variable: ClimateVarKey,
     scenario: ClimateScenario,
     year_range: tuple[int, int],
     output_dir: Path,
+    aggregation_func: Callable[[np.ndarray, int], np.ndarray],
+    output_model: ClimateModel,
+    operation_name: str,
 ) -> Path:
-    logger.info(f"Computing ensemble mean for {variable.name} {scenario.name} {year_range}")
+    logger.info(
+        f"Computing ensemble {operation_name} for {variable.name} {scenario.name} {year_range}"
+    )
 
     available_files = get_available_models(
         base_dir,
@@ -123,7 +128,7 @@ def compute_ensemble_mean(
             f"No model files found for {variable.name} {scenario.name} {year_range}"
         )
 
-    logger.info(f"Found {len(available_files)} model files to average")
+    logger.info(f"Found {len(available_files)} model files to compute {operation_name}")
 
     with rasterio.open(available_files[0]) as src:
         metadata = src.meta.copy()
@@ -142,7 +147,7 @@ def compute_ensemble_mean(
                 band_data_list.append(band_data)
 
         band_stack = np.stack(band_data_list, axis=0)
-        ensemble_data[band_idx] = np.nanmean(band_stack, axis=0)
+        ensemble_data[band_idx] = aggregation_func(band_stack, axis=0)
 
         logger.info(f"Processed band {band_idx + 1}/{num_bands}")
 
@@ -150,7 +155,7 @@ def compute_ensemble_mean(
         output_dir,
         resolution,
         variable,
-        ClimateModel.ENSEMBLE_MEAN.filename,
+        output_model.filename,
         scenario,
         year_range,
     )
@@ -162,5 +167,47 @@ def compute_ensemble_mean(
         for band_idx in range(num_bands):
             dst.write(ensemble_data[band_idx], band_idx + 1)
 
-    logger.info(f"Ensemble mean written to: {output_filepath}")
+    logger.info(f"Ensemble {operation_name} written to: {output_filepath}")
     return output_filepath
+
+
+def compute_ensemble_mean(
+    base_dir: Path,
+    resolution: SpatialResolution,
+    variable: ClimateVarKey,
+    scenario: ClimateScenario,
+    year_range: tuple[int, int],
+    output_dir: Path,
+) -> Path:
+    return _compute_ensemble_statistic(
+        base_dir=base_dir,
+        resolution=resolution,
+        variable=variable,
+        scenario=scenario,
+        year_range=year_range,
+        output_dir=output_dir,
+        aggregation_func=np.nanmean,
+        output_model=ClimateModel.ENSEMBLE_MEAN,
+        operation_name="mean",
+    )
+
+
+def compute_ensemble_std_dev(
+    base_dir: Path,
+    resolution: SpatialResolution,
+    variable: ClimateVarKey,
+    scenario: ClimateScenario,
+    year_range: tuple[int, int],
+    output_dir: Path,
+) -> Path:
+    return _compute_ensemble_statistic(
+        base_dir=base_dir,
+        resolution=resolution,
+        variable=variable,
+        scenario=scenario,
+        year_range=year_range,
+        output_dir=output_dir,
+        aggregation_func=np.nanstd,
+        output_model=ClimateModel.ENSEMBLE_STD_DEV,
+        operation_name="standard deviation",
+    )

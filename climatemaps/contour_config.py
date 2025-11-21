@@ -8,7 +8,6 @@ from pydantic import model_validator
 from pydantic import ConfigDict
 from matplotlib import pyplot as plt
 from matplotlib.colors import Normalize, SymLogNorm
-from matplotlib.colors import BoundaryNorm
 
 
 class ContourPlotConfig(BaseModel):
@@ -41,17 +40,12 @@ class ContourPlotConfig(BaseModel):
 
     @computed_field
     @property
-    def norm(self) -> SymLogNorm | BoundaryNorm:
+    def norm(self) -> SymLogNorm | Normalize:
         if self.log_scale:
             return SymLogNorm(
                 linthresh=self.linthresh, vmin=self.level_lower, vmax=self.level_upper
             )
-        # TODO: Use BoundaryNorm for 2d histogram plot? Check if Normalize works correctly for 2d histogram plot.
-        # n_colors = self.colormap.N
-        # levels = np.linspace(self.level_lower, self.level_upper, num=n_colors)
-        # norm = BoundaryNorm(levels, n_colors)
-        norm = Normalize(vmin=self.level_lower, vmax=self.level_upper)
-        return norm
+        return Normalize(vmin=self.level_lower, vmax=self.level_upper)
 
     @computed_field
     @property
