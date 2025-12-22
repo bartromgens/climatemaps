@@ -311,6 +311,11 @@ class ClimateDataConfig:
     def contour_config(self) -> ContourPlotConfig:
         return CLIMATE_CONTOUR_CONFIGS[self.variable_type]
 
+    @property
+    def target_pixels(self) -> int | None:
+        """Target maximum number of pixels to reduce memory usage for contour maps"""
+        return 50_000_000
+
 
 @dataclass
 class FutureClimateDataConfig(ClimateDataConfig):

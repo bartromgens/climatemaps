@@ -70,7 +70,7 @@ class GeoGrid(BaseModel):
         diff_vals = self.values - other.values
         return GeoGrid(lon_range=self.lon_range, lat_range=self.lat_range, values=diff_vals)
 
-    def downsample(self, factor: int = 2) -> "GeoGrid":
+    def downsample(self, factor: float = 2) -> "GeoGrid":
         """
         Reduce the resolution of the grid by the specified factor.
         For example, factor=2 will halve the resolution in both dimensions.
@@ -84,8 +84,8 @@ class GeoGrid(BaseModel):
         logger.info(f"Downsampling geogrid from {self.resolution_mega_pixel:.1f} megapixels")
 
         # Calculate new dimensions
-        new_lat_size = max(1, self.lat_range.size // factor)
-        new_lon_size = max(1, self.lon_range.size // factor)
+        new_lat_size = max(1, int(self.lat_range.size / factor))
+        new_lon_size = max(1, int(self.lon_range.size / factor))
 
         # Create new coordinate arrays
         new_lat_range = np.linspace(self.lat_max, self.lat_min, new_lat_size)
@@ -176,7 +176,7 @@ class GeoGrid(BaseModel):
     def apply_land_mask(self, land_mask_path: str = "data/raw/land_mask.tif") -> "GeoGrid":
         """
         Apply land-sea mask to remove sea areas from the data array.
-        
+
         The default land mask is taken from https://zenodo.org/records/10076199 (Strandgren, J. (2023). Global Land Water Mask [Data set]. Zenodo.)
 
         TODO: find high resolution land mask.

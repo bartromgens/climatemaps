@@ -282,7 +282,7 @@ class ContourTileBuilder:
             # Calculate appropriate downsampling factor to get under 10M pixels
             total_pixels = len(self.geo_grid.lon_range) * len(self.geo_grid.lat_range)
             target_pixels = 25_000_000
-            downsample_factor = int(np.ceil(np.sqrt(total_pixels / target_pixels)))
+            downsample_factor = float(np.sqrt(total_pixels / target_pixels))
             logger.info(f"Downsampling by factor of {downsample_factor}")
 
             # Create downsampled grid for contours

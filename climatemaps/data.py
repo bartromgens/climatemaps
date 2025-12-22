@@ -54,12 +54,13 @@ def _load_climate_data_base(data_config: ClimateDataConfig, month: int) -> GeoGr
 def load_climate_data(data_config: ClimateDataConfig, month: int) -> GeoGrid:
     geo_grid = _load_climate_data_base(data_config, month)
 
-    if geo_grid.values.size > 150_000_000:
-        factor = 3
+    logger.info(f"Grid data size size: {geo_grid.values.size/1_000_000:.1f} mega pixels")
+    if data_config.target_pixels is not None and geo_grid.values.size > data_config.target_pixels:
+        downsample_factor = float(numpy.sqrt(geo_grid.values.size / data_config.target_pixels))
         logger.info(
-            f"Downsampling {data_config.data_type_slug} from {data_config.resolution} with factor {factor}"
+            f"Downsampling {data_config.data_type_slug} from {data_config.resolution} with factor {downsample_factor}"
         )
-        geo_grid = geo_grid.downsample(factor)
+        geo_grid = geo_grid.downsample(downsample_factor)
 
     if data_config.format == DataFormat.CHELSA:
         geo_grid = geo_grid.apply_land_mask()
@@ -73,10 +74,7 @@ def load_climate_data_for_single_value(data_config: ClimateDataConfig, month: in
 
 
 def _calculate_difference(
-    historical_config: ClimateDataConfig,
-    future_config: FutureClimateDataConfig,
-    month: int,
-    load_function,
+    historical_config: ClimateDataConfig, future_config: FutureClimateDataConfig, month: int
 ) -> GeoGrid:
     future_grid = load_climate_data(future_config, month)
 
