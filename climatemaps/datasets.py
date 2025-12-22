@@ -312,9 +312,14 @@ class ClimateDataConfig:
         return CLIMATE_CONTOUR_CONFIGS[self.variable_type]
 
     @property
-    def target_pixels(self) -> int | None:
+    def target_resolution_raster(self) -> int | None:
         """Target maximum number of pixels to reduce memory usage for contour maps"""
         return 50_000_000
+
+    @property
+    def target_resolution_vector(self) -> int:
+        """Target maximum number of pixels for vector contour downsampling"""
+        return 25_000_000
 
     def get_climate_model(self) -> Optional[ClimateModel]:
         return None

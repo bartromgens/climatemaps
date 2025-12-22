@@ -19,7 +19,7 @@ from climatemaps.logger import logger
 
 def _load_climate_data_base(data_config: ClimateDataConfig, month: int) -> GeoGrid:
     """Base function to load climate data without post-processing."""
-    ensure_data_available(data_config)
+    ensure_data_available(data_config, month_upper=month)
 
     if data_config.format == DataFormat.CRU_TS:
         lon_range, lat_range, values = read_geotiff_cru_ts(data_config.filepath, month)
@@ -44,8 +44,13 @@ def load_climate_data(data_config: ClimateDataConfig, month: int) -> GeoGrid:
     geo_grid = _load_climate_data_base(data_config, month)
 
     logger.info(f"Grid data size size: {geo_grid.values.size/1_000_000:.1f} mega pixels")
-    if data_config.target_pixels is not None and geo_grid.values.size > data_config.target_pixels:
-        downsample_factor = float(numpy.sqrt(geo_grid.values.size / data_config.target_pixels))
+    if (
+        data_config.target_resolution_raster is not None
+        and geo_grid.values.size > data_config.target_resolution_raster
+    ):
+        downsample_factor = float(
+            numpy.sqrt(geo_grid.values.size / data_config.target_resolution_raster)
+        )
         logger.info(
             f"Downsampling {data_config.data_type_slug} from {data_config.resolution} with factor {downsample_factor}"
         )

@@ -117,7 +117,9 @@ def _create_tasks_for_datasets(
     return tasks
 
 
-def _pre_ensure_all_data_available(data_sets: List[ClimateDataConfig]) -> None:
+def _pre_ensure_all_data_available(
+    data_sets: List[ClimateDataConfig], month_upper: int = 12
+) -> None:
     unique_configs = set()
 
     for config in data_sets:
@@ -138,7 +140,7 @@ def _pre_ensure_all_data_available(data_sets: List[ClimateDataConfig]) -> None:
 
         logger.info(f"Ensuring data available for {description}: {cfg.data_type_slug}")
         try:
-            ensure_data_available(cfg)
+            ensure_data_available(cfg, month_upper=month_upper)
             processed_configs.add(id(cfg))
         except Exception as e:
             failed_downloads.append((cfg.data_type_slug, str(e)))
@@ -237,7 +239,7 @@ def main(
         )
 
     logger.info("Pre-ensuring all data files exist before multiprocessing")
-    _pre_ensure_all_data_available(all_datasets)
+    _pre_ensure_all_data_available(all_datasets, month_upper)
 
     logger.info(f"Processing all data sets with {len(all_tasks)} total tasks")
     run_tasks_with_process_pool(all_tasks, process, processes)
@@ -339,6 +341,7 @@ def _create_contour(data_set_config, month: int) -> None:
         geo_grid=geo_grid,
         zoom_min=maps_config.zoom_min,
         zoom_max=maps_config.zoom_max_vector,
+        target_resolution_vector=data_set_config.target_resolution_vector,
     )
     contour_map.create_tiles(
         maps_config.data_dir_out,

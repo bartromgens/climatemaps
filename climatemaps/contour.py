@@ -27,11 +27,13 @@ class ContourTileBuilder:
         geo_grid: GeoGrid,
         zoom_min: int = 0,
         zoom_max: int = 5,
+        target_resolution_vector: int | None = None,
     ):
         logger.info(f"Contour zoom {zoom_min}-{zoom_max}")
         self.zoom_min = zoom_min
         self.zoom_max = zoom_max
         self.config = config
+        self.target_resolution_vector = target_resolution_vector
         self.geo_grid_orig = geo_grid
         self.geo_grid = geo_grid
         logger.info(f"lon min, max: {self.geo_grid.lon_min}, {self.geo_grid.lon_max}")
@@ -277,11 +279,10 @@ class ContourTileBuilder:
         logger.info("BEGIN: create contour mbtiles")
 
         # For very high-resolution data, downsample before creating contours
-        if self._is_high_resolution():
+        if self._is_high_resolution() and self.target_resolution_vector is not None:
             logger.info("Downsampling high-resolution data for vector contours")
-            # Calculate appropriate downsampling factor to get under 10M pixels
             total_pixels = len(self.geo_grid.lon_range) * len(self.geo_grid.lat_range)
-            target_pixels = 25_000_000
+            target_pixels = self.target_resolution_vector
             downsample_factor = float(np.sqrt(total_pixels / target_pixels))
             logger.info(f"Downsampling by factor of {downsample_factor}")
 

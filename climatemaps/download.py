@@ -181,13 +181,13 @@ def download_cru_ts_data(config: ClimateDataConfig, force_redownload: bool = Fal
             raise ValueError(f"Extracted CRU-TS file for month {month:02d} failed verification")
 
 
-def download_chelsa_data(config: ClimateDataConfig, force_redownload: bool = False) -> None:
+def download_chelsa_data(config: ClimateDataConfig, force_redownload: bool = False, month_upper: int = 12) -> None:
     # Create the base directory for CHELSA data
     base_dir = Path(config.filepath)
     base_dir.mkdir(parents=True, exist_ok=True)
 
-    # Download data for all 12 months
-    for month in range(1, 13):
+    # Download data for months 1 to month_upper
+    for month in range(1, month_upper + 1):
         # Construct the filename for this month
         from climatemaps.datasets import CHELSA_FILE_ABBREVIATIONS
 
@@ -331,7 +331,7 @@ def download_future_data(config: FutureClimateDataConfig, force_redownload: bool
     _download_file(url, destination)
 
 
-def ensure_data_available(config: ClimateDataConfig, force_redownload: bool = False) -> None:
+def ensure_data_available(config: ClimateDataConfig, force_redownload: bool = False, month_upper: int = 12) -> None:
     if config.format == DataFormat.GEOTIFF_WORLDCLIM_HISTORY:
         download_historical_data(config, force_redownload)
     elif config.format == DataFormat.GEOTIFF_WORLDCLIM_CMIP6:
@@ -342,6 +342,6 @@ def ensure_data_available(config: ClimateDataConfig, force_redownload: bool = Fa
     elif config.format == DataFormat.CRU_TS:
         download_cru_ts_data(config, force_redownload)
     elif config.format == DataFormat.CHELSA:
-        download_chelsa_data(config, force_redownload)
+        download_chelsa_data(config, force_redownload, month_upper)
     else:
         logger.warning(f"Unsupported format for auto-download: {config.format}")
