@@ -6,7 +6,7 @@ import sys
 import concurrent.futures
 from dataclasses import dataclass
 from datetime import datetime
-from typing import List, Union
+from typing import List, Optional, Union
 
 import numpy as np
 
@@ -42,55 +42,57 @@ np.set_printoptions(3, threshold=100, suppress=True)  # .3f
 
 
 @dataclass
+class TestCriteria:
+    variable_type: Optional[ClimateVarKey] = None
+    resolution: Optional[SpatialResolution] = None
+    climate_scenario: Optional[ClimateScenario] = None
+    climate_model: Optional[ClimateModel] = None
+    year_range: Optional[tuple[int, int]] = None
+
+
+@dataclass
 class DatasetGroup:
     """Represents a group of datasets with their configuration and metadata."""
 
     datasets: List[Union[ClimateDataConfig, ClimateDifferenceDataConfig]]
-    test_criteria: dict
+    test_criteria: TestCriteria
     is_difference: bool
     name: str
 
 
-DEFAULT_TEST_SET_HISTORIC = {
-    "variable_type": ClimateVarKey.T_MAX,
-    "resolution": SpatialResolution.MIN10,
-}
+DEFAULT_TEST_SET_HISTORIC = TestCriteria(
+    variable_type=ClimateVarKey.CLOUD_COVER,
+    resolution=SpatialResolution.MIN0_5,
+)
 
-DEFAULT_TEST_SET_FUTURE = {
-    "variable_type": ClimateVarKey.T_MAX,
-    "resolution": SpatialResolution.MIN10,
-    "climate_scenario": ClimateScenario.SSP370,
-    "climate_model": ClimateModel.ENSEMBLE_MEAN,
-    "year_range": (2021, 2040),
-}
+DEFAULT_TEST_SET_FUTURE = TestCriteria(
+    variable_type=ClimateVarKey.T_MAX,
+    resolution=SpatialResolution.MIN10,
+    climate_scenario=ClimateScenario.SSP370,
+    climate_model=ClimateModel.ENSEMBLE_MEAN,
+    year_range=(2021, 2040),
+)
 
 
 def _filter_by_criteria(
-    data_sets: List[ClimateDataConfig], criteria: dict, is_difference: bool = False
+    data_sets: List[ClimateDataConfig], criteria: TestCriteria
 ) -> List[ClimateDataConfig]:
     def matches(config: ClimateDataConfig) -> bool:
-        if config.variable_type != criteria["variable_type"]:
+        if (
+            criteria.variable_type is not None
+            and config.get_variable_type() != criteria.variable_type
+        ):
             return False
-        if config.resolution != criteria["resolution"]:
+        if criteria.resolution is not None and config.resolution != criteria.resolution:
             return False
 
-        if is_difference:
-            return (
-                config.future_config.climate_scenario == criteria.get("climate_scenario")
-                and config.future_config.climate_model == criteria.get("climate_model")
-                and config.future_config.year_range == criteria.get("year_range")
-            )
-
-        year_match = (
-            criteria.get("year_range") is None or config.year_range == criteria["year_range"]
-        )
+        year_match = criteria.year_range is None or config.get_year_range() == criteria.year_range
         scenario_match = (
-            criteria.get("climate_scenario") is None
-            or getattr(config, "climate_scenario", None) == criteria["climate_scenario"]
+            criteria.climate_scenario is None
+            or config.get_climate_scenario() == criteria.climate_scenario
         )
         model_match = (
-            criteria.get("climate_model") is None
-            or getattr(config, "climate_model", None) == criteria["climate_model"]
+            criteria.climate_model is None or config.get_climate_model() == criteria.climate_model
         )
 
         return year_match and scenario_match and model_match
@@ -183,6 +185,7 @@ def main(
     force_recreate: bool = False,
     limited_test_set: bool = False,
     climate_model: ClimateModel | None = None,
+    variable_type: ClimateVarKey | None = None,
     if_older_than: datetime | None = None,
     processes: int = 1,
     dataset_type: str | None = None,
@@ -208,18 +211,19 @@ def main(
 
     for group in dataset_groups:
         if limited_test_set:
-            group.datasets = _filter_by_criteria(
-                group.datasets, group.test_criteria, group.is_difference
-            )
-        elif climate_model is not None:
-            if group.name == "historic":
-                group.datasets = []
-            elif group.is_difference:
+            group.datasets = _filter_by_criteria(group.datasets, group.test_criteria)
+        else:
+            if climate_model is not None:
+                if group.name == "historic":
+                    group.datasets = []
+                else:
+                    group.datasets = [
+                        ds for ds in group.datasets if ds.get_climate_model() == climate_model
+                    ]
+            if variable_type is not None:
                 group.datasets = [
-                    ds for ds in group.datasets if ds.future_config.climate_model == climate_model
+                    ds for ds in group.datasets if ds.get_variable_type() == variable_type
                 ]
-            else:
-                group.datasets = [ds for ds in group.datasets if ds.climate_model == climate_model]
         all_datasets.extend(group.datasets)
         all_tasks.extend(
             _create_tasks_for_datasets(
@@ -364,6 +368,13 @@ if __name__ == "__main__":
         help="Process only datasets for a specific climate model (e.g., ENSEMBLE_MEAN, EC_Earth3_Veg).",
     )
     parser.add_argument(
+        "--variable-type",
+        type=str,
+        default=None,
+        choices=[var.value for var in ClimateVarKey],
+        help="Process only datasets for a specific variable type (e.g., PRECIPITATION, T_MAX, CLOUD_COVER).",
+    )
+    parser.add_argument(
         "--if-older-than",
         type=str,
         default=None,
@@ -389,6 +400,10 @@ if __name__ == "__main__":
     if args.climate_model:
         climate_model = ClimateModel(args.climate_model)
 
+    variable_type = None
+    if args.variable_type:
+        variable_type = ClimateVarKey(args.variable_type)
+
     if_older_than = None
     if args.if_older_than:
         try:
@@ -400,6 +415,7 @@ if __name__ == "__main__":
         force_recreate=args.force_recreate,
         limited_test_set=args.test_set,
         climate_model=climate_model,
+        variable_type=variable_type,
         if_older_than=if_older_than,
         processes=args.processes,
         dataset_type=args.dataset_type,

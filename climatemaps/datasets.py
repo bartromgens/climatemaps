@@ -316,6 +316,18 @@ class ClimateDataConfig:
         """Target maximum number of pixels to reduce memory usage for contour maps"""
         return 50_000_000
 
+    def get_climate_model(self) -> Optional[ClimateModel]:
+        return None
+
+    def get_variable_type(self) -> ClimateVarKey:
+        return self.variable_type
+
+    def get_climate_scenario(self) -> Optional[ClimateScenario]:
+        return None
+
+    def get_year_range(self) -> Tuple[int, int]:
+        return self.year_range
+
 
 @dataclass
 class FutureClimateDataConfig(ClimateDataConfig):
@@ -326,6 +338,12 @@ class FutureClimateDataConfig(ClimateDataConfig):
     def data_type_slug(self) -> str:
         base_slug = super().data_type_slug
         return f"{base_slug}_{self.climate_scenario.name}_{self.climate_model.name}".lower()
+
+    def get_climate_model(self) -> Optional[ClimateModel]:
+        return self.climate_model
+
+    def get_climate_scenario(self) -> Optional[ClimateScenario]:
+        return self.climate_scenario
 
 
 @dataclass
@@ -350,6 +368,26 @@ class ClimateDifferenceDataConfig(ClimateDataConfig):
         if self.future_config and self.future_config.climate_model == ClimateModel.ENSEMBLE_STD_DEV:
             return CLIMATE_DIFFERENCE_CONTOUR_CONFIGS_STD_DEV[self.variable_type]
         return CLIMATE_DIFFERENCE_CONTOUR_CONFIGS[self.variable_type]
+
+    def get_climate_model(self) -> Optional[ClimateModel]:
+        if self.future_config:
+            return self.future_config.climate_model
+        return None
+
+    def get_variable_type(self) -> ClimateVarKey:
+        if self.future_config:
+            return self.future_config.variable_type
+        return self.variable_type
+
+    def get_climate_scenario(self) -> Optional[ClimateScenario]:
+        if self.future_config:
+            return self.future_config.climate_scenario
+        return None
+
+    def get_year_range(self) -> Tuple[int, int]:
+        if self.future_config:
+            return self.future_config.year_range
+        return self.year_range
 
 
 @dataclass
