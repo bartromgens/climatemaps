@@ -19,6 +19,7 @@ from climatemaps.config import get_config
 
 class ContourTileBuilder:
     world_bounding_box_filepath = "data/raw/world_bounding_box.geojson"
+    HIGH_RESOLUTION_PIXEL_THRESHOLD = 10_000_000
 
     def __init__(
         self,
@@ -79,7 +80,7 @@ class ContourTileBuilder:
         return self.geo_grid.clipped_values(self.config.level_lower, self.config.level_upper)
 
     def _create_contourf(self, fig_width: float = 10.0, fig_height: float = None):
-        # Check if this is high-resolution data that should use 2D histogram
+        # Check if this is high-resolution data that should use 2D histogram (faster than contours)
         if self._is_high_resolution():
             return self._create_2d_histogram(fig_width, fig_height)
         else:
@@ -87,9 +88,8 @@ class ContourTileBuilder:
 
     def _is_high_resolution(self):
         """Check if the data is high-resolution and should use 2D histogram instead of contours"""
-        # Consider high-resolution if we have more than 10 million pixels
         total_pixels = len(self.geo_grid.lon_range) * len(self.geo_grid.lat_range)
-        return total_pixels > 10_000_000
+        return total_pixels > self.HIGH_RESOLUTION_PIXEL_THRESHOLD
 
     def _calculate_appropriate_dpi(
         self, base_dpi: int, standard_fig_width: float = 10.0
