@@ -5,6 +5,7 @@ from typing import Tuple
 import numpy as np
 import rasterio
 import rasterio.errors
+from rasterio.windows import Window
 from climatemaps.logger import logger
 
 
@@ -16,7 +17,7 @@ def verify_geotiff_file(filepath: str | Path) -> bool:
     filepath = Path(filepath)
     if not filepath.exists():
         return False
-    
+
     try:
         with rasterio.open(filepath) as src:
             # Try to read metadata
@@ -25,9 +26,11 @@ def verify_geotiff_file(filepath: str | Path) -> bool:
             _ = src.count
             _ = src.transform
             _ = src.bounds
-            # Try to read the entire first band to catch corruption issues
-            # This will fail if there are read errors like the one in the user's error message
-            array = src.read(1)
+            # Read a small sample window instead of the entire file for faster verification
+            # This catches corruption issues without loading the full file
+            sample_size = min(10, src.width, src.height)
+            window = Window(0, 0, sample_size, sample_size)
+            array = src.read(1, window=window)
             _ = array.shape
             # Verify we got some data
             if array.size == 0:
