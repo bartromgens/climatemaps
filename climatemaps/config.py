@@ -27,7 +27,7 @@ class ClimateMapsConfig:
         return False
 
     @property
-    def zoom_max(self) -> int:
+    def zoom_max_vector(self) -> int:
         return 8
 
     @property
@@ -46,7 +46,7 @@ class ClimateMapsConfigDev(ClimateMapsConfig):
         return True
 
     @property
-    def zoom_max(self) -> int:
+    def zoom_max_vector(self) -> int:
         return 8
 
     @property
@@ -103,7 +103,7 @@ class ClimateMap(BaseModel):
             tiles_url=f"{settings.TILE_SERVER_URL}/{config.data_type_slug}",
             colormap_url=f"{settings.API_BASE_URL}/colorbar/{config.data_type_slug}",
             max_zoom_raster=settings.ZOOM_MAX_RASTER,
-            max_zoom_vector=get_config().zoom_max,
+            max_zoom_vector=get_config().zoom_max_vector,
             source=config.source,
             climate_model=climate_model,
             climate_scenario=climate_scenario,

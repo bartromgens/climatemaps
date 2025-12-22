@@ -329,7 +329,7 @@ def _create_contour(data_set_config, month: int) -> None:
         data_set_config.contour_config,
         geo_grid=geo_grid,
         zoom_min=maps_config.zoom_min,
-        zoom_max=maps_config.zoom_max,
+        zoom_max=maps_config.zoom_max_vector,
     )
     contour_map.create_tiles(
         maps_config.data_dir_out,
