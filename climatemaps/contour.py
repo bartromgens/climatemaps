@@ -42,12 +42,12 @@ class ContourTileBuilder:
         name: str,
         month: int,
         figure_dpi: int = 700,
-        zoom_factor: float = 2.0,
+        zoom_factor: float = None,
     ):
         logger.info(f"BEGIN: contour for {name} and month {month} and zoomfactor {zoom_factor}")
         data_dir = self._create_output_dir(data_dir_out, name)
         filepath = os.path.join(str(data_dir), str(month))
-        if zoom_factor and not self._is_high_resolution():
+        if zoom_factor is not None and not self._is_high_resolution():
             self.geo_grid = self.geo_grid_orig.zoom(zoom_factor)
         else:
             self.geo_grid = self.geo_grid_orig
@@ -64,7 +64,7 @@ class ContourTileBuilder:
         del figure, ax, contourf
         gc.collect()
         self._create_raster_mbtiles(filepath)
-        self._create_contour_vector_mbtiles(filepath, zoom_factor=zoom_factor)
+        self._create_contour_vector_mbtiles(filepath)
         logger.info(f"DONE: contour for {name} and month {month} and zoomfactor {zoom_factor}")
 
     @classmethod
@@ -273,7 +273,7 @@ class ContourTileBuilder:
         figure.savefig(filepath + ".png", dpi=figure_dpi, pad_inches=0, transparent=True)
         logger.info(f"END: save contour to image")
 
-    def _create_contour_vector_mbtiles(self, filepath, zoom_factor: float = None):
+    def _create_contour_vector_mbtiles(self, filepath):
         logger.info("BEGIN: create contour mbtiles")
 
         # For very high-resolution data, downsample before creating contours
