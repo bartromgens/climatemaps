@@ -19,36 +19,25 @@ from climatemaps.logger import logger
 
 def _load_climate_data_base(data_config: ClimateDataConfig, month: int) -> GeoGrid:
     """Base function to load climate data without post-processing."""
-    try:
-        ensure_data_available(data_config)
+    ensure_data_available(data_config)
 
-        if data_config.format == DataFormat.CRU_TS:
-            lon_range, lat_range, values = read_geotiff_cru_ts(data_config.filepath, month)
-        elif data_config.format == DataFormat.GEOTIFF_WORLDCLIM_CMIP6:
-            lon_range, lat_range, values = read_geotiff_future(data_config.filepath, month)
-        elif data_config.format == DataFormat.GEOTIFF_WORLDCLIM_HISTORY:
-            lon_range, lat_range, values = read_geotiff_history(data_config.filepath, month)
-        elif data_config.format == DataFormat.CHELSA:
-            lon_range, lat_range, values = read_geotiff_chelsa(data_config.filepath, month)
-        else:
-            raise ValueError(f"Unsupported data format: {data_config.format}")
+    if data_config.format == DataFormat.CRU_TS:
+        lon_range, lat_range, values = read_geotiff_cru_ts(data_config.filepath, month)
+    elif data_config.format == DataFormat.GEOTIFF_WORLDCLIM_CMIP6:
+        lon_range, lat_range, values = read_geotiff_future(data_config.filepath, month)
+    elif data_config.format == DataFormat.GEOTIFF_WORLDCLIM_HISTORY:
+        lon_range, lat_range, values = read_geotiff_history(data_config.filepath, month)
+    elif data_config.format == DataFormat.CHELSA:
+        lon_range, lat_range, values = read_geotiff_chelsa(data_config.filepath, month)
+    else:
+        raise ValueError(f"Unsupported data format: {data_config.format}")
 
-        values = values * data_config.conversion_factor
+    values = values * data_config.conversion_factor
 
-        if data_config.conversion_function is not None:
-            values = data_config.conversion_function(values, month)
+    if data_config.conversion_function is not None:
+        values = data_config.conversion_function(values, month)
 
-        return GeoGrid(lon_range=lon_range, lat_range=lat_range, values=values)
-    except FileNotFoundError as e:
-        logger.exception(
-            f"Failed to load climate data for {data_config.data_type_slug}, month {month}, file: {data_config.filepath}: {e}"
-        )
-        raise
-    except Exception as e:
-        logger.exception(
-            f"Unexpected error loading climate data for {data_config.data_type_slug}, month {month}, file: {data_config.filepath}: {e}"
-        )
-        raise
+    return GeoGrid(lon_range=lon_range, lat_range=lat_range, values=values)
 
 
 def load_climate_data(data_config: ClimateDataConfig, month: int) -> GeoGrid:

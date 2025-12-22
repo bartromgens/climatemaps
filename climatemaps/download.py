@@ -13,6 +13,7 @@ from climatemaps.datasets import (
     SpatialResolution,
 )
 from climatemaps.ensemble import compute_ensemble_mean, compute_ensemble_std_dev
+from climatemaps.geotiff import verify_geotiff_file
 from climatemaps.logger import logger
 
 
@@ -73,7 +74,7 @@ def _get_worldclim_future_url(
     return f"{base_url}/{res_str}/{model_str}/{scenario_str}/wc2.1_{res_str}_{var_str}_{model_str}_{scenario_str}_{year_str}.tif"
 
 
-def _download_file(url: str, destination: Path) -> None:
+def _download_file(url: str, destination: Path, verify: bool = True) -> None:
     destination.parent.mkdir(parents=True, exist_ok=True)
 
     logger.info(f"Downloading from {url}")
@@ -82,7 +83,17 @@ def _download_file(url: str, destination: Path) -> None:
     try:
         urlretrieve(url, destination)
         logger.info(f"Successfully downloaded {destination}")
+
+        if verify and destination.suffix.lower() in [".tif", ".tiff"]:
+            if not verify_geotiff_file(destination):
+                logger.warning(
+                    f"Downloaded file {destination} failed verification, deleting and will retry"
+                )
+                destination.unlink()
+                raise ValueError(f"Downloaded file {destination} failed verification")
     except Exception as e:
+        if isinstance(e, ValueError) and "failed verification" in str(e):
+            raise
         logger.error(f"Failed to download {url}: {e}")
         raise
 
@@ -98,34 +109,6 @@ def _extract_zip(zip_path: Path, extract_to: Path) -> None:
     # Remove the zip file after extraction
     zip_path.unlink()
     logger.info(f"Removed temporary file {zip_path}")
-
-
-def _check_historical_data_exists(filepath: str) -> bool:
-    data_dir = Path(filepath)
-    if not data_dir.exists():
-        return False
-
-    # Check if at least the first month file exists
-    data_type = filepath.split("/")[-1]
-    first_month_file = data_dir / f"{data_type}_01.tif"
-    return first_month_file.exists()
-
-
-def _check_future_data_exists(filepath: str) -> bool:
-    return Path(filepath).exists()
-
-
-def _check_cru_ts_data_exists(filepath: str, year_range: tuple[int, int], abbr: str) -> bool:
-    data_dir = Path(filepath)
-    if not data_dir.exists():
-        return False
-
-    first_month_file = data_dir / f"cru_{abbr}_clim_{year_range[0]}-{year_range[1]}_01.tif"
-    return first_month_file.exists()
-
-
-def _check_chelsa_data_exists(filepath: str) -> bool:
-    return Path(filepath).exists()
 
 
 def _get_cru_ts_url(variable: ClimateVarKey, year_range: tuple[int, int]) -> str:
@@ -159,16 +142,25 @@ def _get_chelsa_url(variable: ClimateVarKey, year_range: tuple[int, int], month:
     return f"{base_url}/{var_str}/{filename}"
 
 
-def download_cru_ts_data(config: ClimateDataConfig) -> None:
+def download_cru_ts_data(config: ClimateDataConfig, force_redownload: bool = False) -> None:
     abbr = CRU_TS_FILE_ABBREVIATIONS.get(config.variable_type)
     if not abbr:
         raise ValueError(f"Unsupported CRU-TS variable: {config.variable_type}")
 
-    if _check_cru_ts_data_exists(config.filepath, config.year_range, abbr):
-        logger.info(f"CRU-TS data already exists at {config.filepath}")
-        return
+    data_dir = Path(config.filepath)
+    year_str = f"{config.year_range[0]}-{config.year_range[1]}"
+    file_pattern = f"cru_{abbr}_clim_{year_str}_{{:02d}}.tif"
+    first_month_file = data_dir / file_pattern.format(1)
 
-    logger.info(f"CRU-TS data not found at {config.filepath}, downloading...")
+    if first_month_file.exists() and not force_redownload:
+        if verify_geotiff_file(first_month_file):
+            logger.info(f"CRU-TS data already exists and is valid at {config.filepath}")
+            return
+        logger.warning("CRU-TS data exists but is corrupted, will re-download")
+        for month in range(1, 13):
+            (data_dir / file_pattern.format(month)).unlink(missing_ok=True)
+
+    logger.info(f"CRU-TS data not found or invalid at {config.filepath}, downloading...")
 
     try:
         url = _get_cru_ts_url(config.variable_type, config.year_range)
@@ -176,16 +168,20 @@ def download_cru_ts_data(config: ClimateDataConfig) -> None:
         logger.error(f"Cannot download data: {e}")
         raise
 
-    data_dir = Path(config.filepath)
     data_dir.mkdir(parents=True, exist_ok=True)
+    temp_zip = data_dir / f"cru_{abbr}_clim_{year_str}.zip"
 
-    temp_zip = data_dir / f"cru_{abbr}_clim_{config.year_range[0]}-{config.year_range[1]}.zip"
-
-    _download_file(url, temp_zip)
+    _download_file(url, temp_zip, verify=False)
     _extract_zip(temp_zip, data_dir)
 
+    for month in range(1, 13):
+        month_file = data_dir / file_pattern.format(month)
+        if month_file.exists() and not verify_geotiff_file(month_file):
+            logger.warning(f"Extracted CRU-TS file for month {month:02d} failed verification")
+            raise ValueError(f"Extracted CRU-TS file for month {month:02d} failed verification")
 
-def download_chelsa_data(config: ClimateDataConfig) -> None:
+
+def download_chelsa_data(config: ClimateDataConfig, force_redownload: bool = False) -> None:
     # Create the base directory for CHELSA data
     base_dir = Path(config.filepath)
     base_dir.mkdir(parents=True, exist_ok=True)
@@ -203,10 +199,18 @@ def download_chelsa_data(config: ClimateDataConfig) -> None:
 
         destination = base_dir / filename
 
-        # Check if this month's data already exists
-        if destination.exists():
-            logger.info(f"CHELSA data for month {month:02d} already exists at {destination}")
-            continue
+        # Check if this month's data already exists and is valid
+        if destination.exists() and not force_redownload:
+            if verify_geotiff_file(destination):
+                logger.info(
+                    f"CHELSA data for month {month:02d} already exists and is valid at {destination}"
+                )
+                continue
+            else:
+                logger.warning(
+                    f"CHELSA data for month {month:02d} exists but is corrupted, will re-download"
+                )
+                destination.unlink()
 
         logger.info(f"Downloading CHELSA data for month {month:02d}...")
 
@@ -218,12 +222,24 @@ def download_chelsa_data(config: ClimateDataConfig) -> None:
             raise
 
 
-def download_historical_data(config: ClimateDataConfig) -> None:
-    if _check_historical_data_exists(config.filepath):
-        logger.info(f"Historical data already exists at {config.filepath}")
-        return
+def download_historical_data(config: ClimateDataConfig, force_redownload: bool = False) -> None:
+    data_dir = Path(config.filepath)
+    data_type = config.filepath.split("/")[-1]
+    first_month_file = data_dir / f"{data_type}_01.tif"
 
-    logger.info(f"Historical data not found at {config.filepath}, downloading...")
+    if first_month_file.exists() and not force_redownload:
+        if verify_geotiff_file(first_month_file):
+            logger.info(f"Historical data already exists and is valid at {config.filepath}")
+            return
+        else:
+            logger.warning(f"Historical data exists but is corrupted, will re-download")
+            # Delete all month files
+            for month in range(1, 13):
+                month_file = data_dir / f"{data_type}_{month:02d}.tif"
+                if month_file.exists():
+                    month_file.unlink()
+
+    logger.info(f"Historical data not found or invalid at {config.filepath}, downloading...")
 
     try:
         url = _get_worldclim_historical_url(config.resolution, config.variable_type)
@@ -232,11 +248,17 @@ def download_historical_data(config: ClimateDataConfig) -> None:
         raise
 
     # Download to temporary location
-    data_dir = Path(config.filepath)
     temp_zip = data_dir.parent / f"{data_dir.name}.zip"
 
-    _download_file(url, temp_zip)
+    _download_file(url, temp_zip, verify=False)
     _extract_zip(temp_zip, data_dir)
+
+    # Verify extracted files
+    for month in range(1, 13):
+        month_file = data_dir / f"{data_type}_{month:02d}.tif"
+        if month_file.exists() and not verify_geotiff_file(month_file):
+            logger.warning(f"Extracted historical file for month {month:02d} failed verification")
+            raise ValueError(f"Extracted historical file for month {month:02d} failed verification")
 
 
 def _create_ensemble_mean(config: FutureClimateDataConfig) -> None:
@@ -271,10 +293,16 @@ def _create_ensemble_std_dev(config: FutureClimateDataConfig) -> None:
     )
 
 
-def download_future_data(config: FutureClimateDataConfig) -> None:
-    if _check_future_data_exists(config.filepath):
-        logger.info(f"Future data already exists at {config.filepath}")
-        return
+def download_future_data(config: FutureClimateDataConfig, force_redownload: bool = False) -> None:
+    destination = Path(config.filepath)
+
+    if destination.exists() and not force_redownload:
+        if verify_geotiff_file(destination):
+            logger.info(f"Future data already exists and is valid at {config.filepath}")
+            return
+        else:
+            logger.warning(f"Future data exists but is corrupted, will re-download")
+            destination.unlink()
 
     if config.climate_model == ClimateModel.ENSEMBLE_MEAN:
         logger.info("Ensemble mean requested, creating from available models...")
@@ -286,7 +314,7 @@ def download_future_data(config: FutureClimateDataConfig) -> None:
         _create_ensemble_std_dev(config)
         return
 
-    logger.info(f"Future data not found at {config.filepath}, downloading...")
+    logger.info(f"Future data not found or invalid at {config.filepath}, downloading...")
 
     try:
         url = _get_worldclim_future_url(
@@ -300,21 +328,20 @@ def download_future_data(config: FutureClimateDataConfig) -> None:
         logger.error(f"Cannot download data: {e}")
         raise
 
-    destination = Path(config.filepath)
     _download_file(url, destination)
 
 
-def ensure_data_available(config: ClimateDataConfig) -> None:
+def ensure_data_available(config: ClimateDataConfig, force_redownload: bool = False) -> None:
     if config.format == DataFormat.GEOTIFF_WORLDCLIM_HISTORY:
-        download_historical_data(config)
+        download_historical_data(config, force_redownload)
     elif config.format == DataFormat.GEOTIFF_WORLDCLIM_CMIP6:
         if isinstance(config, FutureClimateDataConfig):
-            download_future_data(config)
+            download_future_data(config, force_redownload)
         else:
             logger.warning(f"Future data format but not FutureClimateDataConfig: {config}")
     elif config.format == DataFormat.CRU_TS:
-        download_cru_ts_data(config)
+        download_cru_ts_data(config, force_redownload)
     elif config.format == DataFormat.CHELSA:
-        download_chelsa_data(config)
+        download_chelsa_data(config, force_redownload)
     else:
         logger.warning(f"Unsupported format for auto-download: {config.format}")

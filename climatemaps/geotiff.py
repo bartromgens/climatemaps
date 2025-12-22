@@ -1,9 +1,41 @@
 import os
+from pathlib import Path
 from typing import Tuple
 
 import numpy as np
 import rasterio
+import rasterio.errors
 from climatemaps.logger import logger
+
+
+def verify_geotiff_file(filepath: str | Path) -> bool:
+    """
+    Verify that a GeoTIFF file is valid and can be read.
+    Returns True if the file is valid, False otherwise.
+    """
+    filepath = Path(filepath)
+    if not filepath.exists():
+        return False
+    
+    try:
+        with rasterio.open(filepath) as src:
+            # Try to read metadata
+            _ = src.width
+            _ = src.height
+            _ = src.count
+            _ = src.transform
+            _ = src.bounds
+            # Try to read the entire first band to catch corruption issues
+            # This will fail if there are read errors like the one in the user's error message
+            array = src.read(1)
+            _ = array.shape
+            # Verify we got some data
+            if array.size == 0:
+                return False
+        return True
+    except (rasterio.errors.RasterioIOError, Exception) as e:
+        logger.warning(f"GeoTIFF file verification failed for {filepath}: {e}")
+        return False
 
 
 def _process_coordinate_arrays(transform, width: int, height: int) -> Tuple[np.ndarray, np.ndarray]:

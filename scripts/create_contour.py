@@ -61,7 +61,6 @@ class DatasetGroup:
 
 
 DEFAULT_TEST_SET_HISTORIC = TestCriteria(
-    variable_type=ClimateVarKey.CLOUD_COVER,
     resolution=SpatialResolution.MIN0_5,
 )
 
@@ -112,7 +111,9 @@ def _create_tasks_for_datasets(
         for config in data_sets
         for month in range(1, month_upper + 1)
     ]
-    logger.info(f"Added {len(tasks)} {name} tasks")
+    logger.info(
+        f"Added {len(tasks)} {name} tasks (months 1-{month_upper}, {len(data_sets)} datasets)"
+    )
     return tasks
 
 
@@ -191,6 +192,8 @@ def main(
     dataset_type: str | None = None,
 ) -> None:
     month_upper = 1 if limited_test_set else 12
+    if limited_test_set:
+        logger.info(f"Limited test set mode: processing only month 1 (month_upper={month_upper})")
     all_tasks = []
     all_datasets = []
 
@@ -212,18 +215,20 @@ def main(
     for group in dataset_groups:
         if limited_test_set:
             group.datasets = _filter_by_criteria(group.datasets, group.test_criteria)
-        else:
-            if climate_model is not None:
-                if group.name == "historic":
-                    group.datasets = []
-                else:
-                    group.datasets = [
-                        ds for ds in group.datasets if ds.get_climate_model() == climate_model
-                    ]
-            if variable_type is not None:
+
+        if climate_model is not None:
+            if group.name == "historic":
+                group.datasets = []
+            else:
                 group.datasets = [
-                    ds for ds in group.datasets if ds.get_variable_type() == variable_type
+                    ds for ds in group.datasets if ds.get_climate_model() == climate_model
                 ]
+
+        if variable_type is not None:
+            group.datasets = [
+                ds for ds in group.datasets if ds.get_variable_type() == variable_type
+            ]
+
         all_datasets.extend(group.datasets)
         all_tasks.extend(
             _create_tasks_for_datasets(
