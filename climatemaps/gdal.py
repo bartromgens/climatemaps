@@ -93,6 +93,50 @@ class GdalCalculator:
         return max_zoom
 
     @staticmethod
+    def calculate_min_resolution_for_zoom_level(
+        zoom_level: int,
+        aspect_ratio_width: float = 1.0,
+        aspect_ratio_height: float = 1.0,
+        tile_size: int = 256,
+    ) -> tuple[int, int]:
+        """Calculate the minimum required resolution (width, height in pixels) to achieve a given zoom level.
+
+        The zoom level determines how many times the image can be subdivided into tiles.
+        This function calculates the minimum pixel dimensions needed to support the specified zoom level
+        while maintaining the given aspect ratio.
+
+        Args:
+            zoom_level: Target zoom level (0 = entire image as 1 tile, higher = more subdivisions)
+            aspect_ratio_width: Width component of aspect ratio (default: 1.0)
+            aspect_ratio_height: Height component of aspect ratio (default: 1.0)
+            tile_size: Size of each tile in pixels (default: 256)
+
+        Returns:
+            Tuple of (width_pixels, height_pixels) representing minimum required resolution
+        """
+        if zoom_level < 0:
+            raise ValueError("Zoom level must be non-negative")
+
+        # Calculate the minimum max dimension needed for this zoom level
+        # max_dimension = tile_size * 2^zoom_level
+        min_max_dimension = tile_size * (2**zoom_level)
+
+        # Calculate aspect ratio
+        aspect = aspect_ratio_width / aspect_ratio_height
+
+        # Determine which dimension is larger based on aspect ratio
+        if aspect >= 1.0:
+            # Width is larger or equal
+            width = min_max_dimension
+            height = int(min_max_dimension / aspect)
+        else:
+            # Height is larger
+            height = min_max_dimension
+            width = int(min_max_dimension * aspect)
+
+        return width, height
+
+    @staticmethod
     def get_overview_levels_list(max_levels: int) -> list[str]:
         """Generate list of overview level factors for gdaladdo.
 
