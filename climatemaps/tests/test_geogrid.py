@@ -205,3 +205,121 @@ class TestGeoGridDownsample:
         assert downsampled.lat_max == self.geo_grid.lat_max
         assert downsampled.lon_min == self.geo_grid.lon_min
         assert downsampled.lon_max == self.geo_grid.lon_max
+
+    def test_downsample_preserves_pixel_centers(self):
+        """Test that downsampling preserves geographical location of pixel centers"""
+        # Create a grid with known coordinates
+        lon_range = np.array([-180, -90, 0, 90, 180])
+        lat_range = np.array([90, 45, 0, -45, -90])
+        values = np.random.rand(5, 5)
+        geo_grid = GeoGrid(lon_range=lon_range, lat_range=lat_range, values=values)
+
+        # Downsample by factor 2
+        downsampled = geo_grid.downsample(factor=2)
+
+        # The downsampled coordinates should be a subset of the original coordinates
+        # Specifically, for factor 2, we should get every 2nd coordinate
+        # Original: [-180, -90, 0, 90, 180] -> Downsampled should include -180, 0, 180
+        # Check that all downsampled coordinates exist in the original array
+        for lon in downsampled.lon_range:
+            assert lon in lon_range, f"Longitude {lon} not found in original range"
+        for lat in downsampled.lat_range:
+            assert lat in lat_range, f"Latitude {lat} not found in original range"
+
+
+class TestGeoGridBinWidth:
+    """Test bin_width calculation to prevent regression of coordinate shift bug"""
+
+    def test_bin_width_uses_actual_coordinate_spacing(self):
+        """Test that bin_width is calculated from actual coordinate spacing, not full world assumption"""
+        # Simulate CHELSA-like data with non-full-world bounds
+        lon_min = -180.00013888885002
+        lon_max = 179.99985967115003
+        lat_min = -90.00013888884999
+        lat_max = 83.99986041515001
+
+        # Create coordinate arrays with actual spacing
+        n_lon = 100
+        n_lat = 50
+        lon_range = np.linspace(lon_min, lon_max, n_lon)
+        lat_range = np.linspace(lat_max, lat_min, n_lat)
+        values = np.random.rand(n_lat, n_lon)
+
+        geo_grid = GeoGrid(lon_range=lon_range, lat_range=lat_range, values=values)
+
+        # Calculate expected bin_width from actual spacing
+        expected_bin_width_lon = np.mean(np.diff(lon_range))
+        expected_bin_width_lat = np.mean(np.abs(np.diff(lat_range)))
+
+        # Verify bin_width uses actual spacing, not full world assumption
+        npt.assert_almost_equal(geo_grid.bin_width_lon, expected_bin_width_lon, decimal=10)
+        npt.assert_almost_equal(geo_grid.bin_width_lat, expected_bin_width_lat, decimal=10)
+
+        # Verify it's NOT using the old hardcoded calculation
+        wrong_bin_width_lon = 360.0 / len(lon_range)
+        wrong_bin_width_lat = 180.0 / len(lat_range)
+        assert abs(geo_grid.bin_width_lon - wrong_bin_width_lon) > 1e-6
+        assert abs(geo_grid.bin_width_lat - wrong_bin_width_lat) > 1e-6
+
+    def test_corner_coordinates_match_geotiff_bounds(self):
+        """Test that corner coordinates are calculated correctly from actual spacing"""
+        # Simulate CHELSA data bounds
+        lon_min = -180.00013888885002
+        lon_max = 179.99985967115003
+        lat_min = -90.00013888884999
+        lat_max = 83.99986041515001
+
+        n_lon = 4320
+        n_lat = 2088
+        lon_range = np.linspace(lon_min, lon_max, n_lon)
+        lat_range = np.linspace(lat_max, lat_min, n_lat)
+        values = np.random.rand(n_lat, n_lon)
+
+        geo_grid = GeoGrid(lon_range=lon_range, lat_range=lat_range, values=values)
+
+        # Calculate expected corner coordinates from actual bin_width
+        expected_bin_width_lon = np.mean(np.diff(lon_range))
+        expected_bin_width_lat = np.mean(np.abs(np.diff(lat_range)))
+
+        expected_llcrnrlon = lon_min - expected_bin_width_lon / 2
+        expected_llcrnrlat = lat_min - expected_bin_width_lat / 2
+        expected_urcrnrlon = lon_max + expected_bin_width_lon / 2
+        expected_urcrnrlat = lat_max + expected_bin_width_lat / 2
+
+        # Verify corner coordinates match expected values
+        npt.assert_almost_equal(geo_grid.llcrnrlon, expected_llcrnrlon, decimal=10)
+        npt.assert_almost_equal(geo_grid.llcrnrlat, expected_llcrnrlat, decimal=10)
+        npt.assert_almost_equal(geo_grid.urcrnrlon, expected_urcrnrlon, decimal=10)
+        npt.assert_almost_equal(geo_grid.urcrnrlat, expected_urcrnrlat, decimal=10)
+
+    def test_bin_width_after_downsampling(self):
+        """Test that bin_width calculation works correctly after downsampling"""
+        # Create grid with non-full-world bounds
+        lon_min = -180.00013888885002
+        lon_max = 179.99985967115003
+        lat_min = -90.00013888884999
+        lat_max = 83.99986041515001
+
+        n_lon = 1000
+        n_lat = 500
+        lon_range = np.linspace(lon_min, lon_max, n_lon)
+        lat_range = np.linspace(lat_max, lat_min, n_lat)
+        values = np.random.rand(n_lat, n_lon)
+
+        geo_grid = GeoGrid(lon_range=lon_range, lat_range=lat_range, values=values)
+        original_bin_width_lon = geo_grid.bin_width_lon
+        original_bin_width_lat = geo_grid.bin_width_lat
+
+        # Downsample
+        downsampled = geo_grid.downsample(factor=2.5)
+
+        # After downsampling, bin_width should be larger (fewer pixels, larger spacing)
+        assert downsampled.bin_width_lon > original_bin_width_lon
+        assert downsampled.bin_width_lat > original_bin_width_lat
+
+        # Verify bin_width is still calculated from actual spacing
+        expected_bin_width_lon = np.mean(np.diff(downsampled.lon_range))
+        expected_bin_width_lat = np.mean(np.abs(np.diff(downsampled.lat_range)))
+
+        npt.assert_almost_equal(downsampled.bin_width_lon, expected_bin_width_lon, decimal=10)
+        npt.assert_almost_equal(downsampled.bin_width_lat, expected_bin_width_lat, decimal=10)

@@ -118,11 +118,17 @@ class GeoGrid(BaseModel):
 
     @property
     def bin_width_lon(self):
-        return 360.0 / len(self.lon_range)
+        """Calculate bin width from actual coordinate spacing"""
+        if len(self.lon_range) > 1:
+            return np.mean(np.diff(self.lon_range))
+        return 360.0 / len(self.lon_range) if len(self.lon_range) > 0 else 0
 
     @property
     def bin_width_lat(self):
-        return 180.0 / len(self.lat_range)
+        """Calculate bin width from actual coordinate spacing"""
+        if len(self.lat_range) > 1:
+            return np.mean(np.abs(np.diff(self.lat_range)))
+        return 180.0 / len(self.lat_range) if len(self.lat_range) > 0 else 0
 
     @property
     def llcrnrlon(self):
