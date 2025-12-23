@@ -58,6 +58,29 @@ class GdalCalculator:
         """
         width_pixels = int(fig_width * dpi)
         height_pixels = int(fig_height * dpi)
+        return GdalCalculator.calculate_max_zoom_level_from_pixels(
+            width_pixels, height_pixels, tile_size
+        )
+
+    @staticmethod
+    def calculate_max_zoom_level_from_pixels(
+        width_pixels: int, height_pixels: int, tile_size: int = 256
+    ) -> int:
+        """Calculate the maximum MBTiles zoom level based on pixel dimensions.
+
+        The maximum zoom level is determined by how many times the image can be
+        subdivided into tiles of the specified size (default 256×256 pixels).
+        This is different from overview levels - zoom levels represent how the
+        image is tiled, not just downsampled.
+
+        Args:
+            width_pixels: Image width in pixels
+            height_pixels: Image height in pixels
+            tile_size: Size of each tile in pixels (default: 256)
+
+        Returns:
+            Maximum zoom level (0 = entire image as 1 tile, higher = more subdivisions)
+        """
         max_dimension = max(width_pixels, height_pixels)
 
         if max_dimension <= tile_size:

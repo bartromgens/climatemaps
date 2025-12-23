@@ -22,6 +22,7 @@ from climatemaps.data import (
     load_climate_data,
     load_climate_data_for_difference,
 )
+from climatemaps.geogrid import GeoGrid
 from climatemaps.datasets import ClimateModel
 from climatemaps.datasets import ClimateScenario
 from climatemaps.datasets import ClimateVarKey
@@ -34,6 +35,7 @@ from climatemaps.datasets import SpatialResolution
 from climatemaps.logger import logger
 from climatemaps.tile import tile_files_exist, difference_tile_files_exist
 from climatemaps.download import ensure_data_available
+from climatemaps.gdal import GdalCalculator
 
 
 maps_config: ClimateMapsConfig = get_config()
@@ -328,6 +330,17 @@ def process(config, month: int, force_recreate: bool, if_older_than: datetime | 
         raise
 
 
+def _log_max_zoom_level(geo_grid: GeoGrid) -> None:
+    width_pixels = len(geo_grid.lon_range)
+    height_pixels = len(geo_grid.lat_range)
+    max_zoom_level = GdalCalculator.calculate_max_zoom_level_from_pixels(
+        width_pixels, height_pixels
+    )
+    logger.info(
+        f"Max zoom level for geo_grid (resolution: {width_pixels}x{height_pixels}): {max_zoom_level}"
+    )
+
+
 def _create_contour(data_set_config, month: int) -> None:
     if isinstance(data_set_config, ClimateDifferenceDataConfig):
         geo_grid = load_climate_data_for_difference(
@@ -335,6 +348,8 @@ def _create_contour(data_set_config, month: int) -> None:
         )
     else:
         geo_grid = load_climate_data(data_set_config, month)
+
+    _log_max_zoom_level(geo_grid)
 
     contour_map = ContourTileBuilder(
         data_set_config.contour_config,
