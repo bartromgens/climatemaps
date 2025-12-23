@@ -15,6 +15,7 @@ from climatemaps.geogrid import GeoGrid
 from climatemaps.settings import settings
 from climatemaps.logger import logger
 from climatemaps.config import get_config
+from climatemaps.gdal import GdalCalculator
 
 
 class ContourTileBuilder:
@@ -66,7 +67,7 @@ class ContourTileBuilder:
         plt.close(figure)
         del figure, ax, contourf
         gc.collect()
-        self._create_raster_mbtiles(filepath)
+        self._create_raster_mbtiles(filepath, adjusted_dpi, fig_width, fig_height)
         self._create_contour_vector_mbtiles(filepath)
         logger.info(f"DONE: contour for {name} and month {month} and zoomfactor {zoom_factor}")
 
@@ -202,7 +203,7 @@ class ContourTileBuilder:
         logger.info(f"DONE: create matplotlib contourf")
         return ax, contourf, figure
 
-    def _create_raster_mbtiles(self, filepath):
+    def _create_raster_mbtiles(self, filepath, dpi: int, fig_width: float, fig_height: float):
         contour_image_path = f"{filepath}.png"
         mbtiles_path = f"{filepath}_raster.mbtiles"
         mbtiles_temp_path = f"{mbtiles_path}.tmp"
@@ -223,19 +224,16 @@ class ContourTileBuilder:
             mbtiles_temp_path,
         ]
 
+        max_levels = GdalCalculator.calculate_max_overview_levels(dpi, fig_width, fig_height)
+        overview_levels = GdalCalculator.get_overview_levels_list(max_levels)
+        logger.info(f"Creating {len(overview_levels)} overview levels: {overview_levels}")
+
         addo_cmd = [
             "gdaladdo",
             "-r",
             "gauss",
             mbtiles_temp_path,
-            "2",
-            "4",
-            "8",
-            "16",
-            "32",
-            "64",
-            "128",
-        ]
+        ] + overview_levels
 
         try:
             logger.debug(f"Running: {' '.join(translate_cmd)}")
