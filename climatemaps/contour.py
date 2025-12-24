@@ -166,16 +166,23 @@ class ContourTileBuilder:
         figure, ax = self._create_figure_and_axes(fig_width, fig_height)
         logger.info(f"Using 2D histogram for high-resolution data")
 
-        # Use pcolormesh for high-resolution data (much faster than contourf)
-        lon_grid, lat_grid = np.meshgrid(self.geo_grid.lon_range, self.geo_grid.lat_range)
-        im = ax.pcolormesh(
-            lon_grid,
-            lat_grid,
-            self.values,
+        # Use imshow instead of pcolormesh to avoid creating memory-intensive meshgrids
+        # imshow works directly with the 2D array and extent, using much less memory
+        values = self.values
+        extent = [
+            self.geo_grid.llcrnrlon,
+            self.geo_grid.urcrnrlon,
+            self.geo_grid.llcrnrlat,
+            self.geo_grid.urcrnrlat,
+        ]
+        im = ax.imshow(
+            values,
+            extent=extent,
             transform=ccrs.PlateCarree(),
             cmap=self.config.colormap,
             norm=self.config.norm,
-            shading="auto",
+            origin="upper",
+            interpolation="nearest",
         )
         ax.axis("off")
         logger.info(f"DONE: create 2D histogram")
