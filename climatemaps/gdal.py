@@ -1,5 +1,7 @@
 import numpy as np
 
+from climatemaps.datasets import SpatialResolution
+
 
 class GdalCalculator:
     """Calculate GDAL overview levels for raster tiles based on image resolution."""
@@ -13,12 +15,6 @@ class GdalCalculator:
         GDAL overview levels are powers of 2 (2, 4, 8, 16, 32, 64, 128, 256, ...).
         The maximum level depends on the image dimensions - gdaladdo stops when the
         smallest overview would be smaller than the minsize threshold (default 256 pixels).
-
-        Args:
-            dpi: DPI used to render the image
-            fig_width: Figure width in inches
-            fig_height: Figure height in inches
-            minsize: Minimum size for the smallest overview (default: 256, matching gdaladdo default)
 
         Returns:
             Maximum number of overview levels (where level 0 is the original, level 1 is 2x downsampled, etc.)
@@ -47,12 +43,6 @@ class GdalCalculator:
         This is different from overview levels - zoom levels represent how the
         image is tiled, not just downsampled.
 
-        Args:
-            dpi: DPI used to render the image
-            fig_width: Figure width in inches
-            fig_height: Figure height in inches
-            tile_size: Size of each tile in pixels (default: 256)
-
         Returns:
             Maximum zoom level (0 = entire image as 1 tile, higher = more subdivisions)
         """
@@ -72,11 +62,6 @@ class GdalCalculator:
         subdivided into tiles of the specified size (default 256×256 pixels).
         This is different from overview levels - zoom levels represent how the
         image is tiled, not just downsampled.
-
-        Args:
-            width_pixels: Image width in pixels
-            height_pixels: Image height in pixels
-            tile_size: Size of each tile in pixels (default: 256)
 
         Returns:
             Maximum zoom level (0 = entire image as 1 tile, higher = more subdivisions)
@@ -104,12 +89,6 @@ class GdalCalculator:
         The zoom level determines how many times the image can be subdivided into tiles.
         This function calculates the minimum pixel dimensions needed to support the specified zoom level
         while maintaining the given aspect ratio.
-
-        Args:
-            zoom_level: Target zoom level (0 = entire image as 1 tile, higher = more subdivisions)
-            aspect_ratio_width: Width component of aspect ratio (default: 1.0)
-            aspect_ratio_height: Height component of aspect ratio (default: 1.0)
-            tile_size: Size of each tile in pixels (default: 256)
 
         Returns:
             Tuple of (width_pixels, height_pixels) representing minimum required resolution
@@ -140,9 +119,6 @@ class GdalCalculator:
     def get_overview_levels_list(max_levels: int) -> list[str]:
         """Generate list of overview level factors for gdaladdo.
 
-        Args:
-            max_levels: Maximum number of levels to create
-
         Returns:
             List of level factors as strings (e.g., ["2", "4", "8", ...])
         """
@@ -151,3 +127,8 @@ class GdalCalculator:
             factor = 2**i
             levels.append(str(factor))
         return levels
+
+    @staticmethod
+    def calculate_max_zoom_raster(resolution: SpatialResolution) -> int:
+        """Calculate the maximum zoom level for raster tiles based on spatial resolution."""
+        return 6 if resolution == SpatialResolution.MIN0_5 else 5
