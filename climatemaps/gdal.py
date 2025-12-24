@@ -130,5 +130,50 @@ class GdalCalculator:
 
     @staticmethod
     def calculate_max_zoom_raster(resolution: SpatialResolution) -> int:
-        """Calculate the maximum zoom level for raster tiles based on spatial resolution."""
-        return 6 if resolution == SpatialResolution.MIN0_5 else 5
+        """Calculate the maximum zoom level for raster tiles based on spatial resolution.
+
+        The resolution is in minutes of longitude. For a world map:
+        - Longitude spans 360 degrees = 21,600 minutes
+        - Latitude spans 180 degrees = 10,800 minutes
+        Pixel dimensions are calculated from these spans divided by the resolution.
+        """
+        resolution_str = resolution.value
+        resolution_minutes = float(resolution_str.rstrip("m"))
+
+        world_width_minutes = 360 * 60
+        world_height_minutes = 180 * 60
+
+        width_pixels = int(world_width_minutes / resolution_minutes)
+        height_pixels = int(world_height_minutes / resolution_minutes)
+
+        return GdalCalculator.calculate_max_zoom_level_from_pixels(width_pixels, height_pixels)
+
+    @staticmethod
+    def calculate_spatial_resolution_for_zoom_level(zoom_level: int) -> float:
+        """Calculate the spatial resolution needed for a given zoom level.
+
+        For a world map, calculates the minimum resolution in minutes needed to support
+        the specified zoom level. Returns the exact resolution in minutes.
+
+        The resolution is in minutes of longitude. For a world map:
+        - Longitude spans 360 degrees = 21,600 minutes
+        - Latitude spans 180 degrees = 10,800 minutes
+
+        Returns:
+            Exact resolution in minutes needed to support the given zoom level
+        """
+        if zoom_level < 0:
+            raise ValueError("Zoom level must be non-negative")
+
+        world_width_minutes = 360 * 60
+        world_height_minutes = 180 * 60
+
+        width_pixels, height_pixels = GdalCalculator.calculate_min_resolution_for_zoom_level(
+            zoom_level,
+            aspect_ratio_width=world_width_minutes,
+            aspect_ratio_height=world_height_minutes,
+        )
+
+        resolution_minutes = world_width_minutes / width_pixels
+
+        return resolution_minutes
