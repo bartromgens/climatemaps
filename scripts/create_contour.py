@@ -326,7 +326,7 @@ def process(config, month: int, force_recreate: bool, if_older_than: datetime | 
 
         return f"{config.data_type_slug}-{month}"
     except Exception as e:
-        logger.error(f"Failed to process {config.data_type_slug}, month {month}: {e}")
+        logger.exception(f"Failed to process {config.data_type_slug}, month {month}: {e}")
         raise
 
 

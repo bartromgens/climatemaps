@@ -124,7 +124,7 @@ def _get_cru_ts_url(variable: ClimateVarKey, year_range: tuple[int, int]) -> str
 
 
 def _get_chelsa_url(variable: ClimateVarKey, year_range: tuple[int, int], month: int = 1) -> str:
-    base_url = "https://os.zhdk.cloud.switch.ch/chelsav2/GLOBAL/climatologies/1981-2010"
+    base_url = "https://os.unil.cloud.switch.ch/chelsa02/chelsa/global/climatologies"
 
     # Use the variable mapping from datasets.py
     from climatemaps.datasets import CHELSA_FILE_ABBREVIATIONS
@@ -133,13 +133,10 @@ def _get_chelsa_url(variable: ClimateVarKey, year_range: tuple[int, int], month:
     if not var_str:
         raise ValueError(f"Unsupported CHELSA variable: {variable}")
 
-    # RADIATION variable has a different filename format: month comes after year range
-    if variable == ClimateVarKey.RADIATION:
-        filename = f"CHELSA_{var_str}_{year_range[0]}-{year_range[1]}_{month:02d}_V.2.1.tif"
-    else:
-        filename = f"CHELSA_{var_str}_{month:02d}_{year_range[0]}-{year_range[1]}_V.2.1.tif"
+    filename = f"CHELSA_{var_str}_{month:02d}_{year_range[0]}-{year_range[1]}_V.2.1.tif"
 
-    return f"{base_url}/{var_str}/{filename}"
+    year_range_str = f"{year_range[0]}-{year_range[1]}"
+    return f"{base_url}/{var_str}/{year_range_str}/{filename}"
 
 
 def download_cru_ts_data(config: ClimateDataConfig, force_redownload: bool = False) -> None:
@@ -181,7 +178,9 @@ def download_cru_ts_data(config: ClimateDataConfig, force_redownload: bool = Fal
             raise ValueError(f"Extracted CRU-TS file for month {month:02d} failed verification")
 
 
-def download_chelsa_data(config: ClimateDataConfig, force_redownload: bool = False, month_upper: int = 12) -> None:
+def download_chelsa_data(
+    config: ClimateDataConfig, force_redownload: bool = False, month_upper: int = 12
+) -> None:
     # Create the base directory for CHELSA data
     base_dir = Path(config.filepath)
     base_dir.mkdir(parents=True, exist_ok=True)
@@ -331,7 +330,9 @@ def download_future_data(config: FutureClimateDataConfig, force_redownload: bool
     _download_file(url, destination)
 
 
-def ensure_data_available(config: ClimateDataConfig, force_redownload: bool = False, month_upper: int = 12) -> None:
+def ensure_data_available(
+    config: ClimateDataConfig, force_redownload: bool = False, month_upper: int = 12
+) -> None:
     if config.format == DataFormat.GEOTIFF_WORLDCLIM_HISTORY:
         download_historical_data(config, force_redownload)
     elif config.format == DataFormat.GEOTIFF_WORLDCLIM_CMIP6:

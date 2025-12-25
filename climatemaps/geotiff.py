@@ -13,6 +13,7 @@ def verify_geotiff_file(filepath: str | Path) -> bool:
     """
     Verify that a GeoTIFF file is valid and can be read.
     Returns True if the file is valid, False otherwise.
+    Checks multiple locations to detect incomplete/corrupt downloads.
     """
     filepath = Path(filepath)
     if not filepath.exists():
@@ -26,17 +27,37 @@ def verify_geotiff_file(filepath: str | Path) -> bool:
             _ = src.count
             _ = src.transform
             _ = src.bounds
+            
             # Read a small sample window instead of the entire file for faster verification
             # This catches corruption issues without loading the full file
             sample_size = min(10, src.width, src.height)
-            window = Window(0, 0, sample_size, sample_size)
-            array = src.read(1, window=window)
-            _ = array.shape
-            # Verify we got some data
+            
+            # Test reading from beginning
+            window_start = Window(0, 0, sample_size, sample_size)
+            array = src.read(1, window=window_start)
             if array.size == 0:
                 return False
+            
+            # Test reading from middle (catches incomplete downloads)
+            if src.width > sample_size * 2 and src.height > sample_size * 2:
+                mid_col = (src.width - sample_size) // 2
+                mid_row = (src.height - sample_size) // 2
+                window_mid = Window(mid_col, mid_row, sample_size, sample_size)
+                array = src.read(1, window=window_mid)
+                if array.size == 0:
+                    return False
+            
+            # Test reading from near end (catches truncated files)
+            if src.width > sample_size and src.height > sample_size:
+                end_col = max(0, src.width - sample_size)
+                end_row = max(0, src.height - sample_size)
+                window_end = Window(end_col, end_row, sample_size, sample_size)
+                array = src.read(1, window=window_end)
+                if array.size == 0:
+                    return False
+            
         return True
-    except (rasterio.errors.RasterioIOError, Exception) as e:
+    except (rasterio.errors.RasterioIOError, OSError, Exception) as e:
         logger.warning(f"GeoTIFF file verification failed for {filepath}: {e}")
         return False
 
