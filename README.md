@@ -12,7 +12,7 @@ An interactive web application for visualizing global historical climate data an
 
 ### Historic
 
-- CRU TS (Climatic Research Unit Time-Series): https://catalogue.ceda.ac.uk/uuid/ec331e93d21347e6bf5fa4b9c68dbd2c/
+- CHELSA Climatologies at high resolution for the earth’s land surface areas: https://www.chelsa-climate.org/datasets
 - Historic 1970-2000 WorldClim data: https://www.worldclim.org/data/worldclim21.html
 
 ### Projections (predictions)
@@ -21,14 +21,13 @@ An interactive web application for visualizing global historical climate data an
 
 ### Other (not used)
 
-- CHELSA Climatologies at high resolution for the earth’s land surface areas: https://chelsa-climate.org/downloads/
 - https://interactive-atlas.ipcc.ch/
+- CRU TS (Climatic Research Unit Time-Series): https://catalogue.ceda.ac.uk/uuid/ec331e93d21347e6bf5fa4b9c68dbd2c/
 - ERA5 monthly averaged data on single levels from 1940 to present: https://cds.climate.copernicus.eu/datasets/reanalysis-era5-single-levels-monthly-means?tab=overview
 - ERA5 post-processed daily statistics on single levels from 1940 to present: https://cds.climate.copernicus.eu/datasets/derived-era5-single-levels-daily-statistics?tab=overview
 - Copernicus Climate Data Store - CMIP6 climate projections:
   https://cds.climate.copernicus.eu/datasets/projections-cmip6?tab=overview
 - NASA NEX-GDDP-CMIP6 (~25 km resolution): https://registry.opendata.aws/nex-gddp-cmip6/
-- CHELSA (~1km resolution): https://chelsa-climate.org/
 
 ## Development
 

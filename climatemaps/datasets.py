@@ -55,6 +55,7 @@ class ClimateVarKey(enum.Enum):
     DIURNAL_TEMP_RANGE = "DIURNAL_TEMP_RANGE"
     VAPOUR_PRESSURE = "VAPOUR_PRESSURE"
     RELATIVE_HUMIDITY = "RELATIVE_HUMIDITY"
+    POTENTIAL_EVAPOTRANSPIRATION = "POTENTIAL_EVAPOTRANSPIRATION"
     MOISTURE_INDEX = "MOISTURE_INDEX"
     VAPOUR_PRESSURE_DEFICIT = "VAPOUR_PRESSURE_DEFICIT"
 
@@ -156,6 +157,12 @@ CLIMATE_VARIABLES: Dict[ClimateVarKey, ClimateVariable] = {
         unit="Pa",
         filename="vapourpressuredeficit",
     ),
+    ClimateVarKey.POTENTIAL_EVAPOTRANSPIRATION: ClimateVariable(
+        name="PotentialEvapotranspiration",
+        display_name="Potential Evapotranspiration",
+        unit="mm/month",
+        filename="pet",
+    ),
 }
 
 
@@ -222,6 +229,14 @@ CLIMATE_CONTOUR_CONFIGS: Dict[ClimateVarKey, ContourPlotConfig] = {
         title="Vapour Pressure Deficit",
         unit="Pa",
         n_contours=16,
+    ),
+    ClimateVarKey.POTENTIAL_EVAPOTRANSPIRATION: ContourPlotConfig(
+        level_lower=10,
+        level_upper=300,
+        colormap=plt.cm.RdYlBu,
+        title="Potential Evapotranspiration",
+        unit="mm/month",
+        log_scale=True,
     ),
 }
 
@@ -495,6 +510,7 @@ CHELSA_FILE_ABBREVIATIONS: Dict[ClimateVarKey, str] = {
     ClimateVarKey.PRECIPITATION: "pr",
     ClimateVarKey.WIND_SPEED: "sfcWind",
     ClimateVarKey.RELATIVE_HUMIDITY: "hurs",
+    ClimateVarKey.POTENTIAL_EVAPOTRANSPIRATION: "pet",
     ClimateVarKey.RADIATION: "rsds",
     ClimateVarKey.MOISTURE_INDEX: "cmi",
     ClimateVarKey.VAPOUR_PRESSURE_DEFICIT: "vpd",
@@ -547,6 +563,7 @@ class CHELSAClimateDataConfigGroup(ClimateDataConfigGroup):
                         ClimateVarKey.RELATIVE_HUMIDITY: 0.01,
                         ClimateVarKey.RADIATION: 0.01,
                         ClimateVarKey.MOISTURE_INDEX: 0.1,
+                        ClimateVarKey.POTENTIAL_EVAPOTRANSPIRATION: 0.1,
                         ClimateVarKey.VAPOUR_PRESSURE_DEFICIT: 0.1,
                     }
 
@@ -624,6 +641,7 @@ HISTORIC_DATA_GROUPS: List[ClimateDataConfigGroup] = [
             ClimateVarKey.RELATIVE_HUMIDITY,
             ClimateVarKey.RADIATION,
             ClimateVarKey.MOISTURE_INDEX,
+            ClimateVarKey.POTENTIAL_EVAPOTRANSPIRATION,
             ClimateVarKey.VAPOUR_PRESSURE_DEFICIT,
         ],
         format=DataFormat.CHELSA,
