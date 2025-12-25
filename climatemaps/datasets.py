@@ -314,7 +314,14 @@ class ClimateDataConfig:
     @property
     def target_resolution_raster(self) -> int | None:
         """Target maximum number of pixels to reduce memory usage for contour maps"""
-        return 50_000_000
+        from climatemaps.gdal import GdalCalculator
+
+        world_width_minutes = 360 * 60
+        world_height_minutes = 180 * 60
+        width, height = GdalCalculator.calculate_min_resolution_for_zoom_level(
+            6, aspect_ratio_width=world_width_minutes, aspect_ratio_height=world_height_minutes
+        )
+        return width * height
 
     @property
     def target_resolution_vector(self) -> int:
