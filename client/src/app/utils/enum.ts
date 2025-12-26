@@ -11,6 +11,7 @@ export enum ClimateVarKey {
   DIURNAL_TEMP_RANGE = 'DIURNAL_TEMP_RANGE',
   VAPOUR_PRESSURE = 'VAPOUR_PRESSURE',
   RELATIVE_HUMIDITY = 'RELATIVE_HUMIDITY',
+  POTENTIAL_EVAPOTRANSPIRATION = 'POTENTIAL_EVAPOTRANSPIRATION',
   MOISTURE_INDEX = 'MOISTURE_INDEX',
   VAPOUR_PRESSURE_DEFICIT = 'VAPOUR_PRESSURE_DEFICIT',
 }
@@ -27,6 +28,7 @@ export const CLIMATE_VAR_KEY_TO_NAME: Record<ClimateVarKey, string> = {
   [ClimateVarKey.DIURNAL_TEMP_RANGE]: 'diurnal_temp_range',
   [ClimateVarKey.VAPOUR_PRESSURE]: 'vapour_pressure',
   [ClimateVarKey.RELATIVE_HUMIDITY]: 'relative_humidity',
+  [ClimateVarKey.POTENTIAL_EVAPOTRANSPIRATION]: 'potential_evapotranspiration',
   [ClimateVarKey.MOISTURE_INDEX]: 'moisture_index',
   [ClimateVarKey.VAPOUR_PRESSURE_DEFICIT]: 'vapour_pressure_deficit',
 };
@@ -50,6 +52,7 @@ export const CLIMATE_VAR_DISPLAY_NAMES: Record<ClimateVarKey, string> = {
   [ClimateVarKey.DIURNAL_TEMP_RANGE]: 'Diurnal Temperature Range',
   [ClimateVarKey.VAPOUR_PRESSURE]: 'Vapour Pressure',
   [ClimateVarKey.RELATIVE_HUMIDITY]: 'Relative Humidity',
+  [ClimateVarKey.POTENTIAL_EVAPOTRANSPIRATION]: 'Potential Evapotranspiration',
   [ClimateVarKey.MOISTURE_INDEX]: 'Moisture Index',
   [ClimateVarKey.VAPOUR_PRESSURE_DEFICIT]: 'Vapour Pressure Deficit',
 };
@@ -66,6 +69,7 @@ export const CLIMATE_VAR_UNITS: Record<ClimateVarKey, string> = {
   [ClimateVarKey.DIURNAL_TEMP_RANGE]: '°C',
   [ClimateVarKey.VAPOUR_PRESSURE]: 'hPa',
   [ClimateVarKey.RELATIVE_HUMIDITY]: '%',
+  [ClimateVarKey.POTENTIAL_EVAPOTRANSPIRATION]: 'mm/month',
   [ClimateVarKey.MOISTURE_INDEX]: 'mm/month',
   [ClimateVarKey.VAPOUR_PRESSURE_DEFICIT]: 'Pa',
 };

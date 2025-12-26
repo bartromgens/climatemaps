@@ -36,6 +36,7 @@ export class MetadataService {
     ClimateVarKey.RADIATION,
     ClimateVarKey.WIND_SPEED,
     ClimateVarKey.RELATIVE_HUMIDITY,
+    ClimateVarKey.POTENTIAL_EVAPOTRANSPIRATION,
     ClimateVarKey.MOISTURE_INDEX,
   ];
 
@@ -220,6 +221,7 @@ export class MetadataService {
       VapourPressure: ClimateVarKey.VAPOUR_PRESSURE,
       VapourPressureDeficit: ClimateVarKey.VAPOUR_PRESSURE_DEFICIT,
       RelativeHumidity: ClimateVarKey.RELATIVE_HUMIDITY,
+      PotentialEvapotranspiration: ClimateVarKey.POTENTIAL_EVAPOTRANSPIRATION,
       MoistureIndex: ClimateVarKey.MOISTURE_INDEX,
     };
 

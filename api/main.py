@@ -2,8 +2,7 @@ from typing import List, Optional
 import time
 from pathlib import Path
 
-from fastapi import FastAPI, HTTPException, Request
-from fastapi.staticfiles import StaticFiles
+from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from citipy import citipy
