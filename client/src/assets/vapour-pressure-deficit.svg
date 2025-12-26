@@ -1,11 +1,7 @@
 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <!-- Saturated Capacity: The Cloud at the top -->
-  <path d="M18 9C18 6.79 16.21 5 14 5C13.74 5 13.49 5.03 13.25 5.08C12.79 3.28 11.1 2 9 2C6.24 2 4 4.24 4 7C4 7.15 4.01 7.3 4.03 7.45C2.79 7.9 2 9.1 2 10.5C2 12.43 3.57 14 5.5 14H18.5C20.43 14 22 12.43 22 10.5C22 8.57 20.43 7 18.5 7C18.33 7 18.17 7.01 18 7.03V9Z" fill="#ECEFF1" stroke="#424242" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-
-  <!-- Actual Moisture: Wavy lines at the bottom representing existing vapor -->
-  <path d="M4 22C4 22 5 20 6 20C7 20 8 22 9 22C10 22 11 20 12 20C13 20 14 22 15 22C16 22 17 20 18 20C19 20 20 22 20 22" stroke="#4FC3F7" stroke-width="1.5" stroke-linecap="round"/>
-  <path d="M5 19C5 19 6 17 7 17C8 17 9 19 10 19C11 19 12 17 13 17C14 17 15 19 16 19C17 19 18 17 19 17" stroke="#4FC3F7" stroke-width="1.5" stroke-linecap="round" stroke-opacity="0.6"/>
-
-  <!-- The Deficit: Strong upward red arrow representing the 'pull' or deficit -->
-  <path d="M12 16V10M12 10L10 12M12 10L14 12" stroke="#E53935" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Saturated Air Capacity (Cloud at the top) -->
+  <path d="M18 10C18 7.79 16.21 6 14 6C13.74 6 13.49 6.03 13.25 6.08C12.79 4.28 11.1 3 9 3C6.24 3 4 5.24 4 8C4 8.15 4.01 8.3 4.03 8.45C2.79 8.9 2 10.1 2 11.5C2 13.43 3.57 15 5.5 15H18.5C20.43 15 22 13.43 22 11.5C22 9.57 20.43 8 18.5 8C18.33 8 18.17 8.01 18 8.03V10Z" fill="#ECEFF1" stroke="#424242" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+  
+  <!-- The Deficit (Large bold arrow indicating 'Atmospheric Hunger') -->
+  <path d="M12 21V15M12 15L9 18M12 15L15 18" stroke="#E53935" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>
