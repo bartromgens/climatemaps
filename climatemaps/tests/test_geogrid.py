@@ -152,11 +152,11 @@ class TestGeoGridDownsample:
         assert len(downsampled.lat_range) == len(self.geo_grid.lat_range) // 2
         assert len(downsampled.lon_range) == len(self.geo_grid.lon_range) // 2
 
-        # Check that geographic bounds are preserved
-        assert downsampled.lat_min == self.geo_grid.lat_min
-        assert downsampled.lat_max == self.geo_grid.lat_max
-        assert downsampled.lon_min == self.geo_grid.lon_min
-        assert downsampled.lon_max == self.geo_grid.lon_max
+        # Check that the bounding box (outer edges) is preserved, not the pixel centers
+        npt.assert_almost_equal(downsampled.llcrnrlon, self.geo_grid.llcrnrlon, decimal=10)
+        npt.assert_almost_equal(downsampled.urcrnrlon, self.geo_grid.urcrnrlon, decimal=10)
+        npt.assert_almost_equal(downsampled.llcrnrlat, self.geo_grid.llcrnrlat, decimal=10)
+        npt.assert_almost_equal(downsampled.urcrnrlat, self.geo_grid.urcrnrlat, decimal=10)
 
     def test_downsample_factor_4(self):
         """Test downsampling by factor of 4"""
@@ -197,34 +197,46 @@ class TestGeoGridDownsample:
         assert len(downsampled.lon_range) == 1
 
     def test_downsample_preserves_geographic_bounds(self):
-        """Test that downsampling preserves the geographic extent"""
+        """Test that downsampling preserves the geographic bounding box (outer edges)"""
         downsampled = self.geo_grid.downsample(factor=3)
 
-        # Geographic bounds should be exactly the same
-        assert downsampled.lat_min == self.geo_grid.lat_min
-        assert downsampled.lat_max == self.geo_grid.lat_max
-        assert downsampled.lon_min == self.geo_grid.lon_min
-        assert downsampled.lon_max == self.geo_grid.lon_max
+        # The bounding box (outer edges of pixels) should be preserved
+        npt.assert_almost_equal(downsampled.llcrnrlon, self.geo_grid.llcrnrlon, decimal=10)
+        npt.assert_almost_equal(downsampled.urcrnrlon, self.geo_grid.urcrnrlon, decimal=10)
+        npt.assert_almost_equal(downsampled.llcrnrlat, self.geo_grid.llcrnrlat, decimal=10)
+        npt.assert_almost_equal(downsampled.urcrnrlat, self.geo_grid.urcrnrlat, decimal=10)
 
-    def test_downsample_preserves_pixel_centers(self):
-        """Test that downsampling preserves geographical location of pixel centers"""
+    def test_downsample_preserves_bounding_box(self):
+        """Test that downsampled grid properly tiles the same bounding box"""
         # Create a grid with known coordinates
-        lon_range = np.array([-180, -90, 0, 90, 180])
-        lat_range = np.array([90, 45, 0, -45, -90])
+        # Original: 5 pixels at centers [-180, -90, 0, 90, 180] with bin_width=90
+        # Bounding box: [-225, 225] (width=450)
+        lon_range = np.array([-180.0, -90.0, 0.0, 90.0, 180.0])
+        lat_range = np.array([90.0, 45.0, 0.0, -45.0, -90.0])
         values = np.random.rand(5, 5)
         geo_grid = GeoGrid(lon_range=lon_range, lat_range=lat_range, values=values)
 
-        # Downsample by factor 2
+        # Downsample by factor 2 -> 2 pixels
         downsampled = geo_grid.downsample(factor=2)
 
-        # The downsampled coordinates should be a subset of the original coordinates
-        # Specifically, for factor 2, we should get every 2nd coordinate
-        # Original: [-180, -90, 0, 90, 180] -> Downsampled should include -180, 0, 180
-        # Check that all downsampled coordinates exist in the original array
-        for lon in downsampled.lon_range:
-            assert lon in lon_range, f"Longitude {lon} not found in original range"
-        for lat in downsampled.lat_range:
-            assert lat in lat_range, f"Latitude {lat} not found in original range"
+        # The bounding box should be preserved exactly
+        npt.assert_almost_equal(downsampled.llcrnrlon, geo_grid.llcrnrlon, decimal=10)
+        npt.assert_almost_equal(downsampled.urcrnrlon, geo_grid.urcrnrlon, decimal=10)
+        npt.assert_almost_equal(downsampled.llcrnrlat, geo_grid.llcrnrlat, decimal=10)
+        npt.assert_almost_equal(downsampled.urcrnrlat, geo_grid.urcrnrlat, decimal=10)
+
+        # For longitude: 2 pixels spanning bbox of 450 degrees (from -225 to 225):
+        # new_bin_width = 450/2 = 225
+        # centers at: -225 + 225/2 = -112.5 and 225 - 225/2 = 112.5
+        expected_lon_centers = np.array([-112.5, 112.5])
+
+        # For latitude: 2 pixels spanning bbox of 225 degrees (from -112.5 to 112.5):
+        # new_bin_width = 225/2 = 112.5
+        # centers at: 112.5 - 112.5/2 = 56.25 (north) and -112.5 + 112.5/2 = -56.25 (south)
+        expected_lat_centers = np.array([56.25, -56.25])
+
+        npt.assert_almost_equal(downsampled.lon_range, expected_lon_centers, decimal=10)
+        npt.assert_almost_equal(downsampled.lat_range, expected_lat_centers, decimal=10)
 
 
 class TestGeoGridBinWidth:

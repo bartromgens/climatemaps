@@ -87,9 +87,22 @@ class GeoGrid(BaseModel):
         new_lat_size = max(1, int(self.lat_range.size / factor))
         new_lon_size = max(1, int(self.lon_range.size / factor))
 
-        # Create new coordinate arrays
-        new_lat_range = np.linspace(self.lat_max, self.lat_min, new_lat_size)
-        new_lon_range = np.linspace(self.lon_min, self.lon_max, new_lon_size)
+        # Preserve the bounding box when creating new coordinate arrays
+        # The new pixel centers must be positioned so that the outer edges
+        # of the new grid match the outer edges of the original grid
+        new_bin_width_lon = (self.urcrnrlon - self.llcrnrlon) / new_lon_size
+        new_bin_width_lat = (self.urcrnrlat - self.llcrnrlat) / new_lat_size
+
+        new_lon_range = np.linspace(
+            self.llcrnrlon + new_bin_width_lon / 2,
+            self.urcrnrlon - new_bin_width_lon / 2,
+            new_lon_size,
+        )
+        new_lat_range = np.linspace(
+            self.urcrnrlat - new_bin_width_lat / 2,
+            self.llcrnrlat + new_bin_width_lat / 2,
+            new_lat_size,
+        )
 
         # Downsample values using scipy's zoom function
         zoom_factors = (new_lat_size / self.lat_range.size, new_lon_size / self.lon_range.size)
@@ -207,14 +220,20 @@ class GeoGrid(BaseModel):
             # Interpolate the land mask to match data coordinates using efficient method
             logger.info("Interpolating land mask to match data coordinates")
 
-            # Create coordinate arrays for the land mask
+            # Create coordinate arrays for the land mask at pixel centers
+            # The bounds represent pixel edges, so we need to shift by half pixel
+            pixel_width = (mask_src.bounds.right - mask_src.bounds.left) / mask_src.width
+            pixel_height = (mask_src.bounds.top - mask_src.bounds.bottom) / mask_src.height
+
             mask_lon_array = np.linspace(
                 mask_src.bounds.left, mask_src.bounds.right, mask_src.width, endpoint=False
             )
+            mask_lon_array += pixel_width / 2
 
             mask_lat_array = np.linspace(
                 mask_src.bounds.top, mask_src.bounds.bottom, mask_src.height, endpoint=False
             )
+            mask_lat_array -= pixel_height / 2
 
             # Create interpolator for the land mask
             interpolator = RegularGridInterpolator(
