@@ -616,46 +616,6 @@ class CHELSAClimateDataConfigGroup(ClimateDataConfigGroup):
 
 
 HISTORIC_DATA_GROUPS: List[ClimateDataConfigGroup] = [
-    ClimateDataConfigGroup(
-        variable_types=[ClimateVarKey.T_MAX, ClimateVarKey.T_MIN, ClimateVarKey.PRECIPITATION],
-        format=DataFormat.GEOTIFF_WORLDCLIM_HISTORY,
-        source="https://www.worldclim.org/data/worldclim21.html",
-        resolutions=[SpatialResolution.MIN10, SpatialResolution.MIN5],
-        year_ranges=[(1970, 2000)],
-        filepath_template="data/raw/worldclim/history/wc2.1_{resolution}_{variable_name}",
-    ),
-    CRUTSClimateDataConfigGroup(
-        variable_types=[
-            ClimateVarKey.WET_DAYS,
-            ClimateVarKey.FROST_DAYS,
-        ],
-        format=DataFormat.CRU_TS,
-        source="https://ipcc-browser.ipcc-data.org/browser/dataset/653/0",
-        resolutions=[SpatialResolution.MIN30],
-        year_ranges=[(1961, 1990)],
-        conversion_factor=0.124,
-    ),
-    CRUTSClimateDataConfigGroup(
-        variable_types=[
-            ClimateVarKey.DIURNAL_TEMP_RANGE,
-        ],
-        format=DataFormat.CRU_TS,
-        source="https://ipcc-browser.ipcc-data.org/browser/dataset/653/0",
-        resolutions=[SpatialResolution.MIN30],
-        year_ranges=[(1961, 1990)],
-        conversion_factor=0.16,
-    ),
-    CRUTSClimateDataConfigGroup(
-        variable_types=[
-            ClimateVarKey.VAPOUR_PRESSURE,
-            ClimateVarKey.VAPOUR_PRESSURE_DEFICIT,
-        ],
-        format=DataFormat.CRU_TS,
-        source="https://ipcc-browser.ipcc-data.org/browser/dataset/653/0",
-        resolutions=[SpatialResolution.MIN30],
-        year_ranges=[(1961, 1990)],
-        conversion_factor=0.2,
-    ),
     CHELSAClimateDataConfigGroup(
         variable_types=[
             ClimateVarKey.CLOUD_COVER,
