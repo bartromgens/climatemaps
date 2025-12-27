@@ -150,9 +150,6 @@ export class YearRangeGridComponent extends BaseMapComponent {
     const availableYearRanges = this.getAvailableYearRanges();
 
     this.yearRangeOptions = availableYearRanges
-      .filter((yearRange) => {
-        return !(yearRange.value[0] === 1970 && yearRange.value[1] === 2000);
-      })
       .map((yearRange) => {
         const matchingLayer = this.findLayerForYearRange(yearRange);
         return {

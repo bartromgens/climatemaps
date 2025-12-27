@@ -115,30 +115,6 @@ export class MetadataService {
       })
       .sort((a, b) => a.value[0] - b.value[0]);
 
-    const historicalRange1 = ranges.find(
-      (r) => r.value[0] === 1961 && r.value[1] === 1990,
-    );
-    const historicalRange2 = ranges.find(
-      (r) => r.value[0] === 1970 && r.value[1] === 2000,
-    );
-
-    if (historicalRange1 && historicalRange2) {
-      const mergedRange: YearRange = {
-        value: historicalRange2.value,
-        label: '1970-2000',
-        additionalValues: [historicalRange1.value],
-      };
-
-      return ranges
-        .filter(
-          (r) =>
-            !(r.value[0] === 1961 && r.value[1] === 1990) &&
-            !(r.value[0] === 1970 && r.value[1] === 2000),
-        )
-        .concat([mergedRange])
-        .sort((a, b) => a.value[0] - b.value[0]);
-    }
-
     return ranges;
   }
 
@@ -231,19 +207,8 @@ export class MetadataService {
   }
 
   private formatYearRangeLabel(start: number, end: number): string {
-    // Show specific labels for known historical ranges
-    if (start === 1961 && end === 1990) {
-      return '1961-1990';
-    }
-    if (start === 1970 && end === 2000) {
-      return '1970-2000';
-    }
     if (start === 1981 && end === 2010) {
       return '1981-2010';
-    }
-    // For other historical ranges, show the actual range
-    if (start < 2000) {
-      return `${start}-${end}`;
     }
     return `${start}-${end}`;
   }
