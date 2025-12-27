@@ -194,8 +194,8 @@ export class ClimateMonthlyPlotComponent
 
     const variableName = CLIMATE_VAR_KEY_TO_NAME[variable];
     const [startYear, endYear] = this.yearRange.value;
-    const resolution = '10m';
     const isFuture = startYear >= 2000;
+    const resolution = isFuture ? '10m' : '0_5m';
 
     if (isFuture && this.climateScenario && this.climateModel) {
       const scenario = this.climateScenario.toLowerCase();

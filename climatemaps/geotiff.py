@@ -118,12 +118,8 @@ def read_geotiff_cru_ts(filepath: str, month: int) -> Tuple[np.ndarray, np.ndarr
 
 
 def read_geotiff_chelsa(filepath: str, month: int) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
-    """
-    Read CHELSA data. CHELSA files are named with different months (01, 02, 03, etc.).
-    """
     assert month > 0 and month <= 12, f"Month must be between 1 and 12, got {month}"
 
-    # Format the filepath template with the month parameter
     data_type = filepath.split("/")[-1]
     formatted_filepath = os.path.join(filepath, f"{data_type}_{month:02d}.tif")
 
@@ -135,3 +131,37 @@ def read_geotiff_chelsa(filepath: str, month: int) -> Tuple[np.ndarray, np.ndarr
         lon_array, lat_array = _process_coordinate_arrays(src.transform, src.width, src.height)
 
     return lon_array, lat_array, array
+
+
+def read_geotiff_chelsa_point(
+    filepath: str, month: int, lon: float, lat: float
+) -> float:
+    assert month > 0 and month <= 12, f"Month must be between 1 and 12, got {month}"
+
+    data_type = filepath.split("/")[-1]
+    formatted_filepath = os.path.join(filepath, f"{data_type}_{month:02d}.tif")
+
+    with rasterio.open(formatted_filepath) as src:
+        row, col = src.index(lon, lat)
+        
+        if row < 0 or row >= src.height or col < 0 or col >= src.width:
+            raise ValueError(
+                f"Coordinates ({lon}, {lat}) are outside the raster bounds"
+            )
+        
+        window = Window(col, row, 3, 3)
+        
+        col_start = max(0, col - 1)
+        row_start = max(0, row - 1)
+        col_end = min(src.width, col + 2)
+        row_end = min(src.height, row + 2)
+        
+        window = Window(col_start, row_start, col_end - col_start, row_end - row_start)
+        data = src.read(1, window=window).astype(float)
+        
+        local_col = col - col_start
+        local_row = row - row_start
+        
+        value = float(data[local_row, local_col])
+    
+    return value

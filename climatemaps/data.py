@@ -12,6 +12,7 @@ from climatemaps.geotiff import (
     read_geotiff_history,
     read_geotiff_cru_ts,
     read_geotiff_chelsa,
+    read_geotiff_chelsa_point,
 )
 from climatemaps.geogrid import GeoGrid
 from climatemaps.logger import logger
@@ -63,8 +64,29 @@ def load_climate_data(data_config: ClimateDataConfig, month: int) -> GeoGrid:
 
 
 def load_climate_data_for_single_value(data_config: ClimateDataConfig, month: int) -> GeoGrid:
-    """Load climate data for single value extraction without downsampling or land masking."""
     return _load_climate_data_base(data_config, month)
+
+
+def load_single_point_value(
+    data_config: ClimateDataConfig, month: int, lon: float, lat: float
+) -> float:
+    ensure_data_available(data_config, month_upper=month)
+
+    if data_config.format == DataFormat.CHELSA:
+        value = read_geotiff_chelsa_point(data_config.filepath, month, lon, lat)
+    else:
+        geo_grid = _load_climate_data_base(data_config, month)
+        return geo_grid.get_value_at_coordinate(lon, lat)
+
+    value = value * data_config.conversion_factor
+
+    if data_config.conversion_function is not None:
+        value = data_config.conversion_function(numpy.array([value]), month)[0]
+
+    if numpy.isnan(value):
+        raise ValueError(f"No data available at coordinates (lat={lat}, lon={lon})")
+
+    return float(value)
 
 
 def _calculate_difference(

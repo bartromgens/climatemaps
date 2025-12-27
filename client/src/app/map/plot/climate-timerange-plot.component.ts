@@ -239,7 +239,7 @@ export class ClimateTimerangePlotComponent
     isFuture: boolean,
   ): string {
     const variableName = CLIMATE_VAR_KEY_TO_NAME[variable];
-    const resolution = '10m';
+    const resolution = isFuture ? '10m' : '0_5m';
 
     if (isFuture) {
       const scenario = (

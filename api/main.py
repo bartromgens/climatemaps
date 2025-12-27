@@ -12,10 +12,11 @@ from geopy.exc import GeocoderTimedOut, GeocoderServiceError
 
 from climatemaps.config import ClimateMap
 from climatemaps.settings import settings
-from climatemaps.datasets import ClimateDifferenceDataConfig
+from climatemaps.datasets import ClimateDifferenceDataConfig, DataFormat
 from climatemaps.data import (
     load_climate_data_for_single_value,
     load_climate_data_for_difference_single_value,
+    load_single_point_value,
 )
 
 from .middleware import RateLimitMiddleware
@@ -102,18 +103,22 @@ def get_climate_value(data_type: str, month: int, lat: float, lon: float):
     data_config = data_config_map[data_type]
 
     try:
-        geo_grid = geo_grid_cache.get(data_type, month)
-
-        if geo_grid is None:
-            if isinstance(data_config, ClimateDifferenceDataConfig):
+        if isinstance(data_config, ClimateDifferenceDataConfig):
+            geo_grid = geo_grid_cache.get(data_type, month)
+            if geo_grid is None:
                 geo_grid = load_climate_data_for_difference_single_value(
                     data_config.historical_config, data_config.future_config, month
                 )
-            else:
+                geo_grid_cache.set(data_type, month, geo_grid)
+            value = geo_grid.get_value_at_coordinate(lon, lat)
+        elif data_config.format == DataFormat.CHELSA:
+            value = load_single_point_value(data_config, month, lon, lat)
+        else:
+            geo_grid = geo_grid_cache.get(data_type, month)
+            if geo_grid is None:
                 geo_grid = load_climate_data_for_single_value(data_config, month)
-            geo_grid_cache.set(data_type, month, geo_grid)
-
-        value = geo_grid.get_value_at_coordinate(lon, lat)
+                geo_grid_cache.set(data_type, month, geo_grid)
+            value = geo_grid.get_value_at_coordinate(lon, lat)
 
         return ClimateValueResponse(
             value=value,
