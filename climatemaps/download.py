@@ -179,15 +179,15 @@ def download_cru_ts_data(config: ClimateDataConfig, force_redownload: bool = Fal
 
 
 def download_chelsa_data(
-    config: ClimateDataConfig, force_redownload: bool = False, month_upper: int = 12
+    config: ClimateDataConfig,
+    force_redownload: bool = False,
+    month_upper: int = 12,
+    skip_verification: bool = False,
 ) -> None:
-    # Create the base directory for CHELSA data
     base_dir = Path(config.filepath)
     base_dir.mkdir(parents=True, exist_ok=True)
 
-    # Download data for months 1 to month_upper
     for month in range(1, month_upper + 1):
-        # Construct the filename for this month
         from climatemaps.datasets import CHELSA_FILE_ABBREVIATIONS
 
         var_str = CHELSA_FILE_ABBREVIATIONS.get(config.variable_type)
@@ -198,8 +198,9 @@ def download_chelsa_data(
 
         destination = base_dir / filename
 
-        # Check if this month's data already exists and is valid
         if destination.exists() and not force_redownload:
+            if skip_verification:
+                continue
             if verify_geotiff_file(destination):
                 logger.info(
                     f"CHELSA data for month {month:02d} already exists and is valid at {destination}"
@@ -331,7 +332,10 @@ def download_future_data(config: FutureClimateDataConfig, force_redownload: bool
 
 
 def ensure_data_available(
-    config: ClimateDataConfig, force_redownload: bool = False, month_upper: int = 12
+    config: ClimateDataConfig,
+    force_redownload: bool = False,
+    month_upper: int = 12,
+    skip_verification: bool = False,
 ) -> None:
     if config.format == DataFormat.GEOTIFF_WORLDCLIM_HISTORY:
         download_historical_data(config, force_redownload)
@@ -343,6 +347,6 @@ def ensure_data_available(
     elif config.format == DataFormat.CRU_TS:
         download_cru_ts_data(config, force_redownload)
     elif config.format == DataFormat.CHELSA:
-        download_chelsa_data(config, force_redownload, month_upper)
+        download_chelsa_data(config, force_redownload, month_upper, skip_verification)
     else:
         logger.warning(f"Unsupported format for auto-download: {config.format}")
