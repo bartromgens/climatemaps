@@ -35,7 +35,6 @@ const CLIMATE_VARIABLE_ROUTES: Record<
     path: 'cloud-cover',
     title: 'Cloud Cover Map',
   },
-  [ClimateVarKey.FROST_DAYS]: { path: 'frost-days', title: 'Frost Days Map' },
   [ClimateVarKey.RADIATION]: {
     path: 'radiation',
     title: 'Solar Radiation Map',
