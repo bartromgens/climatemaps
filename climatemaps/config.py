@@ -96,6 +96,8 @@ class ClimateMap(BaseModel):
                 climate_model = config.future_config.climate_model
                 climate_scenario = config.future_config.climate_scenario
 
+        effective_resolution_minutes = config.get_effective_resolution_minutes()
+
         return ClimateMap(
             data_type=config.data_type_slug,
             year_range=config.year_range,
@@ -103,7 +105,9 @@ class ClimateMap(BaseModel):
             resolution=config.resolution,
             tiles_url=f"{settings.TILE_SERVER_URL}/{config.data_type_slug}",
             colormap_url=f"{settings.API_BASE_URL}/colorbar/{config.data_type_slug}",
-            max_zoom_raster=GdalCalculator.calculate_max_zoom_raster(config.resolution),
+            max_zoom_raster=GdalCalculator.calculate_max_zoom_raster_from_minutes(
+                effective_resolution_minutes
+            ),
             max_zoom_vector=get_config().zoom_max_vector,
             source=config.source,
             climate_model=climate_model,

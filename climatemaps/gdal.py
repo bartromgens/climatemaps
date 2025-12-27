@@ -139,7 +139,17 @@ class GdalCalculator:
         """
         resolution_str = resolution.value
         resolution_minutes = float(resolution_str.rstrip("m"))
+        return GdalCalculator.calculate_max_zoom_raster_from_minutes(resolution_minutes)
 
+    @staticmethod
+    def calculate_max_zoom_raster_from_minutes(resolution_minutes: float) -> int:
+        """Calculate the maximum zoom level for raster tiles based on spatial resolution in minutes.
+
+        The resolution is in minutes of longitude. For a world map:
+        - Longitude spans 360 degrees = 21,600 minutes
+        - Latitude spans 180 degrees = 10,800 minutes
+        Pixel dimensions are calculated from these spans divided by the resolution.
+        """
         world_width_minutes = 360 * 60
         world_height_minutes = 180 * 60
 

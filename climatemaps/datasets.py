@@ -343,6 +343,30 @@ class ClimateDataConfig:
         """Target maximum number of pixels for vector contour downsampling"""
         return 25_000_000
 
+    def get_effective_resolution_minutes(self) -> float:
+        """Calculate the effective spatial resolution in minutes after potential downsampling.
+
+        Returns the original resolution if no downsampling would occur, otherwise
+        calculates the coarser resolution that results from downsampling.
+        """
+        # Calculate original grid size
+        resolution_minutes = float(self.resolution.value.rstrip("m"))
+        world_width_minutes = 360 * 60
+        world_height_minutes = 180 * 60
+        width_pixels = int(world_width_minutes / resolution_minutes)
+        height_pixels = int(world_height_minutes / resolution_minutes)
+        original_size = width_pixels * height_pixels
+
+        # Check if downsampling would occur
+        if self.target_resolution_raster is None or original_size <= self.target_resolution_raster:
+            return resolution_minutes
+
+        # Calculate downsample factor (same logic as in load_climate_data)
+        downsample_factor = float(np.sqrt(original_size / self.target_resolution_raster))
+
+        # Calculate new resolution after downsampling
+        return resolution_minutes * downsample_factor
+
     def get_climate_model(self) -> Optional[ClimateModel]:
         return None
 

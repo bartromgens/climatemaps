@@ -1,3 +1,4 @@
+import pytest
 from climatemaps.gdal import GdalCalculator
 from climatemaps.logger import logger
 
@@ -39,3 +40,17 @@ class TestGdalCalculator:
                 f"Resolution {width}x{height} should achieve zoom level {zoom_level}, "
                 f"but calculated zoom is {calculated_zoom}"
             )
+
+    def test_calculate_max_zoom_raster_from_minutes(self):
+        resolution_minutes = 2.5
+        max_zoom = GdalCalculator.calculate_max_zoom_raster_from_minutes(resolution_minutes)
+
+        world_width_minutes = 360 * 60
+        world_height_minutes = 180 * 60
+        width_pixels = int(world_width_minutes / resolution_minutes)
+        height_pixels = int(world_height_minutes / resolution_minutes)
+        expected_zoom = GdalCalculator.calculate_max_zoom_level_from_pixels(
+            width_pixels, height_pixels
+        )
+
+        assert max_zoom == expected_zoom
