@@ -136,8 +136,9 @@ export class MonthlyGridComponent extends BaseMapComponent {
     }
 
     if (!availableResolutions.includes(this.controlsData.selectedResolution)) {
+      const highestResolution = this.getHighestAvailableResolution();
       this.controlsData.selectedResolution =
-        availableResolutions[0] || this.DEFAULT_RESOLUTION;
+        highestResolution || this.DEFAULT_RESOLUTION;
     }
 
     const isFutureData =

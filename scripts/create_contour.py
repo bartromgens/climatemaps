@@ -84,7 +84,7 @@ def _filter_by_criteria(
             and config.get_variable_type() != criteria.variable_type
         ):
             return False
-        if criteria.resolution is not None and config.resolution != criteria.resolution:
+        if criteria.resolution is not None and config.resolution_input != criteria.resolution:
             return False
 
         year_match = criteria.year_range is None or config.get_year_range() == criteria.year_range

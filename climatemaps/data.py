@@ -52,7 +52,7 @@ def load_climate_data(data_config: ClimateDataConfig, month: int) -> GeoGrid:
             numpy.sqrt(geo_grid.values.size / data_config.target_resolution_raster)
         )
         logger.info(
-            f"Downsampling {data_config.data_type_slug} from {data_config.resolution} with factor {downsample_factor}"
+            f"Downsampling {data_config.data_type_slug} from {data_config.resolution_input} with factor {downsample_factor}"
         )
         geo_grid = geo_grid.downsample(downsample_factor)
 

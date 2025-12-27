@@ -207,6 +207,33 @@ export abstract class BaseMapComponent implements OnInit {
     );
   }
 
+  protected getHighestAvailableResolution(): SpatialResolution | null {
+    const availableResolutions = this.getAvailableResolutions();
+    
+    if (availableResolutions.length === 0) {
+      return null;
+    }
+
+    // Order resolutions from highest to lowest resolution
+    const resolutionOrder = [
+      SpatialResolution.MIN0_5,
+      SpatialResolution.MIN2_5,
+      SpatialResolution.MIN5,
+      SpatialResolution.MIN10,
+      SpatialResolution.MIN30,
+    ];
+
+    // Find the highest available resolution
+    for (const resolution of resolutionOrder) {
+      if (availableResolutions.includes(resolution)) {
+        return resolution;
+      }
+    }
+
+    // Fallback to first available if none match the order
+    return availableResolutions[0];
+  }
+
   protected getAvailableClimateScenarios(): ClimateScenario[] {
     return this.layerFilter.getAvailableClimateScenarios(
       this.climateMaps,

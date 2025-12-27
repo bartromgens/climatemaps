@@ -241,7 +241,7 @@ def download_historical_data(config: ClimateDataConfig, force_redownload: bool =
     logger.info(f"Historical data not found or invalid at {config.filepath}, downloading...")
 
     try:
-        url = _get_worldclim_historical_url(config.resolution, config.variable_type)
+        url = _get_worldclim_historical_url(config.resolution_input, config.variable_type)
     except ValueError as e:
         logger.error(f"Cannot download data: {e}")
         raise
@@ -268,7 +268,7 @@ def _create_ensemble_mean(config: FutureClimateDataConfig) -> None:
 
     compute_ensemble_mean(
         base_dir=base_dir,
-        resolution=config.resolution,
+        resolution=config.resolution_input,
         variable=config.variable_type,
         scenario=config.climate_scenario,
         year_range=config.year_range,
@@ -284,7 +284,7 @@ def _create_ensemble_std_dev(config: FutureClimateDataConfig) -> None:
 
     compute_ensemble_std_dev(
         base_dir=base_dir,
-        resolution=config.resolution,
+        resolution=config.resolution_input,
         variable=config.variable_type,
         scenario=config.climate_scenario,
         year_range=config.year_range,
@@ -317,7 +317,7 @@ def download_future_data(config: FutureClimateDataConfig, force_redownload: bool
 
     try:
         url = _get_worldclim_future_url(
-            config.resolution,
+            config.resolution_input,
             config.variable_type,
             config.climate_model,
             config.climate_scenario,

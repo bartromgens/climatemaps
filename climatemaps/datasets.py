@@ -306,7 +306,7 @@ class ClimateDataConfig:
     variable_type: ClimateVarKey
     filepath: str
     format: DataFormat
-    resolution: SpatialResolution
+    resolution_input: SpatialResolution
     year_range: Tuple[int, int]
     conversion_function: Callable[[npt.NDArray[np.floating], int], npt.NDArray[np.floating]] = None
     conversion_factor: float = 1
@@ -318,7 +318,7 @@ class ClimateDataConfig:
 
     @property
     def data_type_slug(self) -> str:
-        return f"{self.variable.name}_{self.year_range[0]}_{self.year_range[1]}_{self.resolution.value}".lower().replace(
+        return f"{self.variable.name}_{self.year_range[0]}_{self.year_range[1]}_{self.resolution_input.value}".lower().replace(
             ".", "_"
         )
 
@@ -343,14 +343,15 @@ class ClimateDataConfig:
         """Target maximum number of pixels for vector contour downsampling"""
         return 25_000_000
 
-    def get_effective_resolution_minutes(self) -> float:
+    @property
+    def resolution_effective(self) -> float:
         """Calculate the effective spatial resolution in minutes after potential downsampling.
 
         Returns the original resolution if no downsampling would occur, otherwise
         calculates the coarser resolution that results from downsampling.
         """
         # Calculate original grid size
-        resolution_minutes = float(self.resolution.value.rstrip("m"))
+        resolution_minutes = float(self.resolution_input.value.rstrip("m"))
         world_width_minutes = 360 * 60
         world_height_minutes = 180 * 60
         width_pixels = int(world_width_minutes / resolution_minutes)
@@ -409,7 +410,7 @@ class ClimateDifferenceDataConfig(ClimateDataConfig):
     @property
     def data_type_slug(self) -> str:
         if self.future_config and self.historical_config:
-            return f"difference_{self.variable.name}_{self.historical_config.year_range[0]}_{self.historical_config.year_range[1]}_to_{self.future_config.year_range[0]}_{self.future_config.year_range[1]}_{self.resolution.value}_{self.future_config.climate_scenario.name}_{self.future_config.climate_model.name}".lower().replace(
+            return f"difference_{self.variable.name}_{self.historical_config.year_range[0]}_{self.historical_config.year_range[1]}_to_{self.future_config.year_range[0]}_{self.future_config.year_range[1]}_{self.resolution_input.value}_{self.future_config.climate_scenario.name}_{self.future_config.climate_model.name}".lower().replace(
                 ".", "_"
             )
         return super().data_type_slug
@@ -466,7 +467,7 @@ class ClimateDataConfigGroup:
                     config = ClimateDataConfig(
                         variable_type=variable_type,
                         format=self.format,
-                        resolution=resolution,
+                        resolution_input=resolution,
                         year_range=year_range,
                         filepath=self.filepath_template.format(
                             resolution=resolution.value,
@@ -496,7 +497,7 @@ class FutureClimateDataConfigGroup(ClimateDataConfigGroup):
                             config = FutureClimateDataConfig(
                                 variable_type=variable_type,
                                 format=self.format,
-                                resolution=resolution,
+                                resolution_input=resolution,
                                 year_range=year_range,
                                 climate_scenario=climate_scenario,
                                 climate_model=climate_model,
@@ -552,7 +553,7 @@ class CRUTSClimateDataConfigGroup(ClimateDataConfigGroup):
                     config = ClimateDataConfig(
                         variable_type=variable_type,
                         format=self.format,
-                        resolution=resolution,
+                        resolution_input=resolution,
                         year_range=year_range,
                         filepath=f"data/raw/cruts/cru_{abbr}_clim_{year_range[0]}-{year_range[1]}",
                         conversion_function=self.conversion_function,
@@ -603,7 +604,7 @@ class CHELSAClimateDataConfigGroup(ClimateDataConfigGroup):
                     config = ClimateDataConfig(
                         variable_type=variable_type,
                         format=self.format,
-                        resolution=resolution,
+                        resolution_input=resolution,
                         year_range=year_range,
                         filepath=filepath,
                         conversion_function=conversion_function,
@@ -755,7 +756,7 @@ def create_difference_map_configs() -> List[ClimateDifferenceDataConfig]:
         for hist_config in HISTORIC_DATA_SETS:
             if (
                 hist_config.variable_type == future_config.variable_type
-                and hist_config.resolution == future_config.resolution
+                and hist_config.resolution_input == future_config.resolution_input
             ):
                 historical_config = hist_config
                 break
@@ -765,7 +766,7 @@ def create_difference_map_configs() -> List[ClimateDifferenceDataConfig]:
                 variable_type=future_config.variable_type,
                 filepath="",  # Not used for difference maps
                 format=future_config.format,
-                resolution=future_config.resolution,
+                resolution_input=future_config.resolution_input,
                 year_range=future_config.year_range,
                 conversion_function=None,
                 conversion_factor=1,
