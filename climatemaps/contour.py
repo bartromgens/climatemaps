@@ -97,35 +97,43 @@ class ContourTileBuilder:
     def _calculate_appropriate_dpi(
         self, base_dpi: int, standard_fig_width: float = 10.0
     ) -> tuple[int, float, float]:
-        """Calculate appropriate DPI to maintain grid resolution in the output image"""
-        # Calculate the aspect ratio of the geographic extent
+        """Calculate appropriate DPI to maintain grid resolution in the output image.
+
+        For high-resolution data, calculates exact figure dimensions so that
+        output_pixels = grid_pixels, avoiding any resampling artifacts.
+        """
         lon_extent = self.geo_grid.urcrnrlon - self.geo_grid.llcrnrlon
         lat_extent = self.geo_grid.urcrnrlat - self.geo_grid.llcrnrlat
         aspect_ratio = lon_extent / lat_extent
 
-        # Calculate figure height based on aspect ratio
         standard_fig_height = standard_fig_width / aspect_ratio
 
         if not self._is_high_resolution():
             return base_dpi, standard_fig_width, standard_fig_height
 
-        # For high-resolution data, calculate DPI needed to maintain grid resolution
         grid_width = len(self.geo_grid.lon_range)
         grid_height = len(self.geo_grid.lat_range)
 
-        # Calculate DPI needed to maintain grid resolution
+        # Calculate the minimum DPI needed
         required_dpi_width = grid_width / standard_fig_width
         required_dpi_height = grid_height / standard_fig_height
         required_dpi = max(required_dpi_width, required_dpi_height)
 
-        # Use the higher of the required DPI or base DPI
-        adjusted_dpi = max(int(required_dpi), base_dpi)
+        # Round UP to ensure we don't lose resolution
+        adjusted_dpi = max(int(np.ceil(required_dpi)), base_dpi)
+
+        # Calculate EXACT figure dimensions so output matches grid exactly:
+        # output_pixels = fig_size * dpi, so fig_size = grid_pixels / dpi
+        exact_fig_width = grid_width / adjusted_dpi
+        exact_fig_height = grid_height / adjusted_dpi
 
         logger.info(f"Grid resolution: {grid_width} x {grid_height}")
-        logger.info(f'Figure size: {standard_fig_width:.1f}" x {standard_fig_height:.1f}"')
-        logger.info(f"Required DPI: {required_dpi:.1f}, using: {adjusted_dpi}")
+        logger.info(
+            f'Figure size: {exact_fig_width:.6f}" x {exact_fig_height:.6f}" '
+            f"(exact for {grid_width}x{grid_height} at {adjusted_dpi} DPI)"
+        )
 
-        return adjusted_dpi, standard_fig_width, standard_fig_height
+        return adjusted_dpi, exact_fig_width, exact_fig_height
 
     def _calculate_fig_height(self, fig_width: float) -> float:
         """Calculate figure height based on geographic extent aspect ratio"""
