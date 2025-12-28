@@ -52,10 +52,35 @@ class GeoGrid(BaseModel):
         Returns a new zoomed GeoGrid object.
         """
         assert self.resolution_mega_pixel < 25, "Zooming is not supported for low-resolution data"
-        values = scipy.ndimage.zoom(self.values, zoom=zoom_factor, order=1)
-        lon_range = scipy.ndimage.zoom(self.lon_range, zoom=zoom_factor, order=1)
-        lat_range = scipy.ndimage.zoom(self.lat_range, zoom=zoom_factor, order=1)
-        return GeoGrid(lon_range=lon_range, lat_range=lat_range, values=values)
+        logger.info(f"Zooming geogrid from {self.resolution_mega_pixel:.1f} megapixels")
+
+        new_lat_size = int(self.lat_range.size * zoom_factor)
+        new_lon_size = int(self.lon_range.size * zoom_factor)
+
+        # Preserve the bounding box when creating new coordinate arrays
+        # The new pixel centers must be positioned so that the outer edges
+        # of the new grid match the outer edges of the original grid
+        new_bin_width_lon = (self.urcrnrlon - self.llcrnrlon) / new_lon_size
+        new_bin_width_lat = (self.urcrnrlat - self.llcrnrlat) / new_lat_size
+
+        new_lon_range = np.linspace(
+            self.llcrnrlon + new_bin_width_lon / 2,
+            self.urcrnrlon - new_bin_width_lon / 2,
+            new_lon_size,
+        )
+        new_lat_range = np.linspace(
+            self.urcrnrlat - new_bin_width_lat / 2,
+            self.llcrnrlat + new_bin_width_lat / 2,
+            new_lat_size,
+        )
+
+        zoom_factors = (new_lat_size / self.lat_range.size, new_lon_size / self.lon_range.size)
+        new_values = scipy.ndimage.zoom(self.values, zoom=zoom_factors, order=1)
+
+        new_geogrid = GeoGrid(lon_range=new_lon_range, lat_range=new_lat_range, values=new_values)
+        logger.info(f"Zoomed geogrid to {new_geogrid.resolution_mega_pixel:.1f} megapixels")
+
+        return new_geogrid
 
     def difference(self, other: "GeoGrid") -> "GeoGrid":
         """
@@ -219,20 +244,32 @@ class GeoGrid(BaseModel):
             # Interpolate the land mask to match data coordinates using efficient method
             logger.info("Interpolating land mask to match data coordinates")
 
-            # Create coordinate arrays for the land mask at pixel centers
-            # The bounds represent pixel edges, so we need to shift by half pixel
+            # Check pixel registration convention
+            area_or_point = mask_src.tags().get("AREA_OR_POINT")
+            is_point_registration = area_or_point == "Point"
+
             pixel_width = (mask_src.bounds.right - mask_src.bounds.left) / mask_src.width
             pixel_height = (mask_src.bounds.top - mask_src.bounds.bottom) / mask_src.height
 
-            mask_lon_array = np.linspace(
-                mask_src.bounds.left, mask_src.bounds.right, mask_src.width, endpoint=False
-            )
-            mask_lon_array += pixel_width / 2
+            if is_point_registration:
+                # Point registration: bounds already represent pixel centers at edges
+                mask_lon_array = np.linspace(
+                    mask_src.bounds.left, mask_src.bounds.right, mask_src.width
+                )
+                mask_lat_array = np.linspace(
+                    mask_src.bounds.top, mask_src.bounds.bottom, mask_src.height
+                )
+            else:
+                # Area registration: bounds represent pixel edges, shift to centers
+                mask_lon_array = np.linspace(
+                    mask_src.bounds.left, mask_src.bounds.right, mask_src.width, endpoint=False
+                )
+                mask_lon_array += pixel_width / 2
 
-            mask_lat_array = np.linspace(
-                mask_src.bounds.top, mask_src.bounds.bottom, mask_src.height, endpoint=False
-            )
-            mask_lat_array -= pixel_height / 2
+                mask_lat_array = np.linspace(
+                    mask_src.bounds.top, mask_src.bounds.bottom, mask_src.height, endpoint=False
+                )
+                mask_lat_array -= pixel_height / 2
 
             # Create interpolator for the land mask
             interpolator = RegularGridInterpolator(

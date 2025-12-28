@@ -205,6 +205,7 @@ class ContourTileBuilder:
             cmap=self.config.colormap,
             levels=self.config.levels_image,
             norm=self.config.norm,
+            extend="both",
         )
         ax.axis("off")
         logger.info(f"DONE: create matplotlib contourf")
@@ -215,6 +216,22 @@ class ContourTileBuilder:
         mbtiles_path = f"{filepath}_raster.mbtiles"
         mbtiles_temp_path = f"{mbtiles_path}.tmp"
         logger.info(f"BEGIN: creating raster mbtiles: {mbtiles_path}")
+
+        # Log georeferencing details for debugging coordinate alignment
+        expected_width = int(fig_width * dpi)
+        expected_height = int(fig_height * dpi)
+        lon_extent = self.geo_grid.urcrnrlon - self.geo_grid.llcrnrlon
+        lat_extent = self.geo_grid.urcrnrlat - self.geo_grid.llcrnrlat
+        expected_lon_resolution = lon_extent / expected_width
+        expected_lat_resolution = lat_extent / expected_height
+        logger.info(
+            f"Georeferencing: extent=({self.geo_grid.llcrnrlon:.6f}, {self.geo_grid.llcrnrlat:.6f}) "
+            f"to ({self.geo_grid.urcrnrlon:.6f}, {self.geo_grid.urcrnrlat:.6f})"
+        )
+        logger.info(
+            f"Expected image: {expected_width}x{expected_height} px, "
+            f"resolution: {expected_lon_resolution:.6f}°/px lon, {expected_lat_resolution:.6f}°/px lat"
+        )
 
         translate_cmd = [
             "gdal_translate",
@@ -277,7 +294,23 @@ class ContourTileBuilder:
         logger.info(f"BEGIN: save contour to image")
         # For high-resolution data, don't use bbox_inches="tight" as it crops the image
         # and can result in different dimensions than expected
-        figure.savefig(filepath + ".png", dpi=figure_dpi, pad_inches=0, transparent=True)
+        png_path = filepath + ".png"
+        figure.savefig(png_path, dpi=figure_dpi, pad_inches=0, transparent=True)
+
+        # Verify actual image dimensions match expected
+        from PIL import Image
+
+        with Image.open(png_path) as img:
+            actual_width, actual_height = img.size
+        expected_width = int(figure.get_figwidth() * figure_dpi)
+        expected_height = int(figure.get_figheight() * figure_dpi)
+        if actual_width != expected_width or actual_height != expected_height:
+            logger.warning(
+                f"Image dimension mismatch! Expected: {expected_width}x{expected_height}, "
+                f"Actual: {actual_width}x{actual_height}"
+            )
+        else:
+            logger.info(f"Image dimensions verified: {actual_width}x{actual_height}")
         logger.info(f"END: save contour to image")
 
     def _create_contour_vector_mbtiles(self, filepath):
