@@ -103,6 +103,7 @@ def _filter_by_criteria(
 
 def _create_tasks_for_datasets(
     data_sets: List[ClimateDataConfig],
+    month_lower: int,
     month_upper: int,
     force_recreate: bool,
     name: str,
@@ -111,10 +112,11 @@ def _create_tasks_for_datasets(
     tasks = [
         (config, month, force_recreate, if_older_than)
         for config in data_sets
-        for month in range(1, month_upper + 1)
+        for month in range(month_lower, month_upper + 1)
     ]
+    month_range = f"{month_lower}-{month_upper}" if month_lower != month_upper else str(month_lower)
     logger.info(
-        f"Added {len(tasks)} {name} tasks (months 1-{month_upper}, {len(data_sets)} datasets)"
+        f"Added {len(tasks)} {name} tasks (months {month_range}, {len(data_sets)} datasets)"
     )
     return tasks
 
@@ -186,6 +188,16 @@ def _mbtiles_are_older_than_date(
     return False
 
 
+def _get_month_range(month: int | None, limited_test_set: bool) -> tuple[int, int]:
+    if month is not None:
+        logger.info(f"Processing only month {month}")
+        return month, month
+    if limited_test_set:
+        logger.info("Limited test set mode: processing only month 1")
+        return 1, 1
+    return 1, 12
+
+
 def main(
     force_recreate: bool = False,
     limited_test_set: bool = False,
@@ -194,10 +206,9 @@ def main(
     if_older_than: datetime | None = None,
     processes: int = 1,
     dataset_type: str | None = None,
+    month: int | None = None,
 ) -> None:
-    month_upper = 1 if limited_test_set else 12
-    if limited_test_set:
-        logger.info(f"Limited test set mode: processing only month 1 (month_upper={month_upper})")
+    month_lower, month_upper = _get_month_range(month, limited_test_set)
     all_tasks = []
     all_datasets = []
 
@@ -236,7 +247,7 @@ def main(
         all_datasets.extend(group.datasets)
         all_tasks.extend(
             _create_tasks_for_datasets(
-                group.datasets, month_upper, force_recreate, group.name, if_older_than
+                group.datasets, month_lower, month_upper, force_recreate, group.name, if_older_than
             )
         )
 
@@ -417,6 +428,14 @@ if __name__ == "__main__":
         choices=["historic", "future", "difference"],
         help="Process only specific dataset type: historic, future, or difference. Defaults to all types.",
     )
+    parser.add_argument(
+        "--month",
+        type=int,
+        default=None,
+        choices=range(1, 13),
+        metavar="1-12",
+        help="Process only a specific month (1-12). Defaults to all months.",
+    )
     args = parser.parse_args()
 
     climate_model = None
@@ -442,4 +461,5 @@ if __name__ == "__main__":
         if_older_than=if_older_than,
         processes=args.processes,
         dataset_type=args.dataset_type,
+        month=args.month,
     )
