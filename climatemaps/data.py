@@ -1,9 +1,13 @@
+import gc
+
 import numpy
 
 from climatemaps.datasets import (
     ClimateDataConfig,
     ClimateModel,
+    ClimateVarKey,
     DataFormat,
+    DerivedClimateDataConfig,
     FutureClimateDataConfig,
 )
 from climatemaps.download import ensure_data_available
@@ -16,6 +20,14 @@ from climatemaps.geotiff import (
 )
 from climatemaps.geogrid import GeoGrid
 from climatemaps.logger import logger
+
+
+def _maybe_downsample(grid: GeoGrid, target_resolution: int | None) -> GeoGrid:
+    if target_resolution is None or grid.values.size <= target_resolution:
+        return grid
+    downsample_factor = float(numpy.sqrt(grid.values.size / target_resolution))
+    logger.info(f"Downsampling with factor {downsample_factor:.2f}")
+    return grid.downsample(downsample_factor)
 
 
 def _load_climate_data_base(data_config: ClimateDataConfig, month: int) -> GeoGrid:
@@ -41,21 +53,42 @@ def _load_climate_data_base(data_config: ClimateDataConfig, month: int) -> GeoGr
     return GeoGrid(lon_range=lon_range, lat_range=lat_range, values=values)
 
 
-def load_climate_data(data_config: ClimateDataConfig, month: int) -> GeoGrid:
-    geo_grid = _load_climate_data_base(data_config, month)
+def _load_derived_climate_data(
+    data_config: DerivedClimateDataConfig, month: int, apply_downsampling: bool = True
+) -> GeoGrid:
+    """Load and compute derived climate data from multiple source variables.
 
-    logger.info(f"Grid data size size: {geo_grid.values.size/1_000_000:.1f} mega pixels")
-    if (
-        data_config.target_resolution_raster is not None
-        and geo_grid.values.size > data_config.target_resolution_raster
-    ):
-        downsample_factor = float(
-            numpy.sqrt(geo_grid.values.size / data_config.target_resolution_raster)
-        )
-        logger.info(
-            f"Downsampling {data_config.data_type_slug} from {data_config.resolution_input} with factor {downsample_factor}"
-        )
-        geo_grid = geo_grid.downsample(downsample_factor)
+    To avoid memory issues, each source grid is loaded and downsampled individually
+    before loading the next one. The computation is then performed on the
+    downsampled grids.
+    """
+    target_resolution = data_config.target_resolution_raster if apply_downsampling else None
+    source_grids: dict[ClimateVarKey, GeoGrid] = {}
+
+    for var_key, source_cfg in data_config.source_configs.items():
+        logger.info(f"Loading source variable {var_key.value} for derived computation")
+        grid = _load_climate_data_base(source_cfg, month)
+        grid = _maybe_downsample(grid, target_resolution)
+        gc.collect()
+        source_grids[var_key] = grid
+
+    first_grid = next(iter(source_grids.values()))
+    source_values = [source_grids[var_key].values for var_key in data_config.source_configs.keys()]
+    computed_values = data_config.compute_function(*source_values)
+
+    return GeoGrid(
+        lon_range=first_grid.lon_range,
+        lat_range=first_grid.lat_range,
+        values=computed_values,
+    )
+
+
+def load_climate_data(data_config: ClimateDataConfig, month: int) -> GeoGrid:
+    if isinstance(data_config, DerivedClimateDataConfig):
+        geo_grid = _load_derived_climate_data(data_config, month, apply_downsampling=True)
+    else:
+        geo_grid = _load_climate_data_base(data_config, month)
+        geo_grid = _maybe_downsample(geo_grid, data_config.target_resolution_raster)
 
     if data_config.format == DataFormat.CHELSA:
         geo_grid = geo_grid.apply_land_mask()
@@ -64,6 +97,8 @@ def load_climate_data(data_config: ClimateDataConfig, month: int) -> GeoGrid:
 
 
 def load_climate_data_for_single_value(data_config: ClimateDataConfig, month: int) -> GeoGrid:
+    if isinstance(data_config, DerivedClimateDataConfig):
+        return _load_derived_climate_data(data_config, month, apply_downsampling=False)
     return _load_climate_data_base(data_config, month)
 
 
@@ -89,7 +124,7 @@ def load_single_point_value(
     return float(value)
 
 
-def _calculate_difference(
+def load_climate_data_for_difference(
     historical_config: ClimateDataConfig, future_config: FutureClimateDataConfig, month: int
 ) -> GeoGrid:
     future_grid = load_climate_data(future_config, month)
@@ -107,16 +142,19 @@ def _calculate_difference(
     return future_grid.difference(historical_grid)
 
 
-def load_climate_data_for_difference(
-    historical_config: ClimateDataConfig, future_config: FutureClimateDataConfig, month: int
-) -> GeoGrid:
-    return _calculate_difference(historical_config, future_config, month, load_climate_data)
-
-
 def load_climate_data_for_difference_single_value(
     historical_config: ClimateDataConfig, future_config: FutureClimateDataConfig, month: int
 ) -> GeoGrid:
-    """Load climate data for difference calculation without downsampling or land masking for single value extraction."""
-    return _calculate_difference(
-        historical_config, future_config, month, load_climate_data_for_single_value
-    )
+    future_grid = load_climate_data_for_single_value(future_config, month)
+
+    if future_config.climate_model == ClimateModel.ENSEMBLE_STD_DEV:
+        return future_grid
+
+    historical_grid = load_climate_data_for_single_value(historical_config, month)
+
+    if not numpy.allclose(historical_grid.lon_range, future_grid.lon_range) or not numpy.allclose(
+        historical_grid.lat_range, future_grid.lat_range
+    ):
+        raise ValueError("Coordinate arrays don't match between historical and future data")
+
+    return future_grid.difference(historical_grid)

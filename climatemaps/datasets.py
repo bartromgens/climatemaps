@@ -58,6 +58,7 @@ class ClimateVarKey(enum.Enum):
     POTENTIAL_EVAPOTRANSPIRATION = "POTENTIAL_EVAPOTRANSPIRATION"
     MOISTURE_INDEX = "MOISTURE_INDEX"
     VAPOUR_PRESSURE_DEFICIT = "VAPOUR_PRESSURE_DEFICIT"
+    APPARENT_TEMPERATURE = "APPARENT_TEMPERATURE"
 
 
 class ClimateScenario(enum.Enum):
@@ -163,6 +164,12 @@ CLIMATE_VARIABLES: Dict[ClimateVarKey, ClimateVariable] = {
         unit="mm/month",
         filename="pet",
     ),
+    ClimateVarKey.APPARENT_TEMPERATURE: ClimateVariable(
+        name="ApparentTemperature",
+        display_name="Apparent Temperature",
+        unit="°C",
+        filename="apparenttemp",
+    ),
 }
 
 
@@ -238,6 +245,13 @@ CLIMATE_CONTOUR_CONFIGS: Dict[ClimateVarKey, ContourPlotConfig] = {
         unit="mm/month",
         log_scale=True,
     ),
+    ClimateVarKey.APPARENT_TEMPERATURE: ContourPlotConfig(
+        level_lower=-25,
+        level_upper=50,
+        colormap=plt.cm.jet,
+        title="Apparent Temperature",
+        unit="°C",
+    ),
 }
 
 # Contour configurations for difference maps (future - historical)
@@ -311,6 +325,7 @@ class ClimateDataConfig:
     conversion_function: Callable[[npt.NDArray[np.floating], int], npt.NDArray[np.floating]] = None
     conversion_factor: float = 1
     source: Optional[str] = None
+    TARGET_ZOOM_LEVEL = 6
 
     @property
     def variable(self) -> ClimateVariable:
@@ -334,7 +349,9 @@ class ClimateDataConfig:
         world_width_minutes = 360 * 60
         world_height_minutes = 180 * 60
         width, height = GdalCalculator.calculate_min_resolution_for_zoom_level(
-            6, aspect_ratio_width=world_width_minutes, aspect_ratio_height=world_height_minutes
+            self.TARGET_ZOOM_LEVEL,
+            aspect_ratio_width=world_width_minutes,
+            aspect_ratio_height=world_height_minutes,
         )
         return width * height
 
@@ -440,6 +457,50 @@ class ClimateDifferenceDataConfig(ClimateDataConfig):
         if self.future_config:
             return self.future_config.year_range
         return self.year_range
+
+
+def calculate_apparent_temperature(
+    temp_max: npt.NDArray[np.floating],
+    relative_humidity: npt.NDArray[np.floating],
+    wind_speed: npt.NDArray[np.floating],
+) -> npt.NDArray[np.floating]:
+    """
+    Calculate the Apparent Temperature (AT) using the Australian Bureau of Meteorology formula.
+
+    AT = Ta + 0.33 × e - 0.70 × ws - 4.00
+
+    Where:
+    - Ta = dry bulb temperature (°C)
+    - e = water vapor pressure (hPa)
+    - ws = wind speed (m/s) at 10m height
+
+    The vapor pressure is calculated from relative humidity and temperature:
+    e = (rh/100) × 6.105 × exp(17.27 × Ta / (237.7 + Ta))
+
+    This formula accounts for both:
+    - Heat stress at high temperatures (humidity makes it feel hotter)
+    - Wind chill at all temperatures (wind makes it feel cooler)
+    """
+    rh_fraction = relative_humidity / 100.0
+    vapor_pressure = rh_fraction * 6.105 * np.exp((17.27 * temp_max) / (237.7 + temp_max))
+    apparent_temp = temp_max + 0.33 * vapor_pressure - 0.70 * wind_speed - 4.00
+    return apparent_temp
+
+
+@dataclass
+class DerivedClimateDataConfig(ClimateDataConfig):
+    source_configs: Dict[ClimateVarKey, ClimateDataConfig] = field(default_factory=dict)
+    compute_function: Callable[..., npt.NDArray[np.floating]] = None
+
+    @property
+    def data_type_slug(self) -> str:
+        return f"{self.variable.name}_{self.year_range[0]}_{self.year_range[1]}_{self.resolution_input.value}".lower().replace(
+            ".", "_"
+        )
+
+    @property
+    def contour_config(self) -> ContourPlotConfig:
+        return CLIMATE_CONTOUR_CONFIGS[self.variable_type]
 
 
 @dataclass
@@ -698,6 +759,59 @@ FUTURE_DATA_GROUPS: List[FutureClimateDataConfigGroup] = [
 HISTORIC_DATA_SETS: List[ClimateDataConfig] = [
     cfg for data_group in HISTORIC_DATA_GROUPS for cfg in data_group.create_configs()
 ]
+
+
+def create_apparent_temperature_configs() -> List[DerivedClimateDataConfig]:
+    configs: List[DerivedClimateDataConfig] = []
+
+    tmax_configs = [c for c in HISTORIC_DATA_SETS if c.variable_type == ClimateVarKey.T_MAX]
+    rh_configs = [
+        c for c in HISTORIC_DATA_SETS if c.variable_type == ClimateVarKey.RELATIVE_HUMIDITY
+    ]
+    wind_configs = [c for c in HISTORIC_DATA_SETS if c.variable_type == ClimateVarKey.WIND_SPEED]
+
+    for tmax_cfg in tmax_configs:
+        rh_cfg = next(
+            (
+                c
+                for c in rh_configs
+                if c.year_range == tmax_cfg.year_range
+                and c.resolution_input == tmax_cfg.resolution_input
+            ),
+            None,
+        )
+        wind_cfg = next(
+            (
+                c
+                for c in wind_configs
+                if c.year_range == tmax_cfg.year_range
+                and c.resolution_input == tmax_cfg.resolution_input
+            ),
+            None,
+        )
+
+        if rh_cfg and wind_cfg:
+            config = DerivedClimateDataConfig(
+                variable_type=ClimateVarKey.APPARENT_TEMPERATURE,
+                filepath="",
+                format=tmax_cfg.format,
+                resolution_input=tmax_cfg.resolution_input,
+                year_range=tmax_cfg.year_range,
+                source=tmax_cfg.source,
+                source_configs={
+                    ClimateVarKey.T_MAX: tmax_cfg,
+                    ClimateVarKey.RELATIVE_HUMIDITY: rh_cfg,
+                    ClimateVarKey.WIND_SPEED: wind_cfg,
+                },
+                compute_function=calculate_apparent_temperature,
+            )
+            configs.append(config)
+
+    return configs
+
+
+DERIVED_DATA_SETS: List[DerivedClimateDataConfig] = create_apparent_temperature_configs()
+HISTORIC_DATA_SETS = HISTORIC_DATA_SETS + DERIVED_DATA_SETS
 
 FUTURE_DATA_SETS: List[FutureClimateDataConfig] = [
     cfg for data_group in FUTURE_DATA_GROUPS for cfg in data_group.create_configs()

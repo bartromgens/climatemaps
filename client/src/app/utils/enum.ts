@@ -12,6 +12,7 @@ export enum ClimateVarKey {
   POTENTIAL_EVAPOTRANSPIRATION = 'POTENTIAL_EVAPOTRANSPIRATION',
   MOISTURE_INDEX = 'MOISTURE_INDEX',
   VAPOUR_PRESSURE_DEFICIT = 'VAPOUR_PRESSURE_DEFICIT',
+  APPARENT_TEMPERATURE = 'APPARENT_TEMPERATURE',
 }
 
 export const CLIMATE_VAR_KEY_TO_NAME: Record<ClimateVarKey, string> = {
@@ -27,6 +28,7 @@ export const CLIMATE_VAR_KEY_TO_NAME: Record<ClimateVarKey, string> = {
   [ClimateVarKey.POTENTIAL_EVAPOTRANSPIRATION]: 'potential_evapotranspiration',
   [ClimateVarKey.MOISTURE_INDEX]: 'moisture_index',
   [ClimateVarKey.VAPOUR_PRESSURE_DEFICIT]: 'vapour_pressure_deficit',
+  [ClimateVarKey.APPARENT_TEMPERATURE]: 'apparent_temperature',
 };
 
 export const CLIMATE_VAR_NAME_TO_KEY: Record<string, ClimateVarKey> =
@@ -49,6 +51,7 @@ export const CLIMATE_VAR_DISPLAY_NAMES: Record<ClimateVarKey, string> = {
   [ClimateVarKey.POTENTIAL_EVAPOTRANSPIRATION]: 'Potential Evapotranspiration',
   [ClimateVarKey.MOISTURE_INDEX]: 'Moisture Index',
   [ClimateVarKey.VAPOUR_PRESSURE_DEFICIT]: 'Vapour Pressure Deficit',
+  [ClimateVarKey.APPARENT_TEMPERATURE]: 'Apparent Temperature',
 };
 
 export const CLIMATE_VAR_UNITS: Record<ClimateVarKey, string> = {
@@ -64,6 +67,7 @@ export const CLIMATE_VAR_UNITS: Record<ClimateVarKey, string> = {
   [ClimateVarKey.POTENTIAL_EVAPOTRANSPIRATION]: 'mm/month',
   [ClimateVarKey.MOISTURE_INDEX]: 'mm/month',
   [ClimateVarKey.VAPOUR_PRESSURE_DEFICIT]: 'Pa',
+  [ClimateVarKey.APPARENT_TEMPERATURE]: '°C',
 };
 
 // Spatial Resolution enum matching the backend

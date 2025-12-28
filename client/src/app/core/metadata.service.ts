@@ -26,6 +26,7 @@ export class MetadataService {
   private readonly VARIABLE_ORDER: ClimateVarKey[] = [
     ClimateVarKey.T_MAX,
     ClimateVarKey.T_MIN,
+    ClimateVarKey.APPARENT_TEMPERATURE,
     ClimateVarKey.PRECIPITATION,
     ClimateVarKey.CLOUD_COVER,
     ClimateVarKey.DIURNAL_TEMP_RANGE,
@@ -195,6 +196,7 @@ export class MetadataService {
       RelativeHumidity: ClimateVarKey.RELATIVE_HUMIDITY,
       PotentialEvapotranspiration: ClimateVarKey.POTENTIAL_EVAPOTRANSPIRATION,
       MoistureIndex: ClimateVarKey.MOISTURE_INDEX,
+      ApparentTemperature: ClimateVarKey.APPARENT_TEMPERATURE,
     };
 
     const result = nameToKey[name];

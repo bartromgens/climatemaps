@@ -64,6 +64,10 @@ const CLIMATE_VARIABLE_ROUTES: Record<
     path: 'vapour-pressure-deficit',
     title: 'Vapour Pressure Deficit Map',
   },
+  [ClimateVarKey.APPARENT_TEMPERATURE]: {
+    path: 'apparent-temperature',
+    title: 'Apparent Temperature Map',
+  },
 };
 
 /**

@@ -39,6 +39,12 @@ export class VariableSelectorOverlayComponent {
       isSvg: true,
     },
     {
+      key: ClimateVarKey.APPARENT_TEMPERATURE,
+      icon: 'assets/apparent-temperature.svg',
+      shortName: 'Feels Like',
+      isSvg: true,
+    },
+    {
       key: ClimateVarKey.PRECIPITATION,
       icon: 'assets/precipitation.svg',
       shortName: 'Precipitation',
