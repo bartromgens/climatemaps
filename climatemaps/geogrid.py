@@ -192,13 +192,12 @@ class GeoGrid(BaseModel):
 
         return value
 
-    def apply_land_mask(self, land_mask_path: str = "data/raw/land_mask.tif") -> "GeoGrid":
+    def apply_land_mask(self, land_mask_path: str = "data/raw/land_mask_osm.tif") -> "GeoGrid":
         """
         Apply land-sea mask to remove sea areas from the data array.
 
-        The default land mask is taken from https://zenodo.org/records/10076199 (Strandgren, J. (2023). Global Land Water Mask [Data set]. Zenodo.)
-
-        TODO: find high resolution land mask.
+        The default land mask is derived from OpenStreetMap coastlines at ~1km resolution.
+        See: https://osmdata.openstreetmap.de/data/land-polygons.html
 
         Args:
             land_mask_path: Path to the land mask file

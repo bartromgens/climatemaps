@@ -2,6 +2,8 @@ import zipfile
 from pathlib import Path
 from urllib.request import urlretrieve
 
+from osgeo import gdal, ogr
+
 from climatemaps.datasets import (
     ClimateDataConfig,
     ClimateModel,
@@ -15,6 +17,8 @@ from climatemaps.datasets import (
 from climatemaps.ensemble import compute_ensemble_mean, compute_ensemble_std_dev
 from climatemaps.geotiff import verify_geotiff_file
 from climatemaps.logger import logger
+
+OSM_LAND_POLYGONS_URL = "https://osmdata.openstreetmap.de/download/land-polygons-complete-4326.zip"
 
 
 def _get_worldclim_historical_url(resolution: SpatialResolution, variable: ClimateVarKey) -> str:
@@ -350,3 +354,105 @@ def ensure_data_available(
         download_chelsa_data(config, force_redownload, month_upper, skip_verification)
     else:
         logger.warning(f"Unsupported format for auto-download: {config.format}")
+
+
+def download_osm_land_polygons(
+    output_dir: Path | str = "data/raw/osm_land",
+    force_redownload: bool = False,
+) -> Path:
+    output_dir = Path(output_dir)
+    shapefile_path = output_dir / "land_polygons.shp"
+
+    if shapefile_path.exists() and not force_redownload:
+        logger.info(f"OSM land polygons already exist at {shapefile_path}")
+        return shapefile_path
+
+    output_dir.mkdir(parents=True, exist_ok=True)
+    zip_path = output_dir / "land-polygons-complete-4326.zip"
+
+    logger.info(f"Downloading OSM land polygons from {OSM_LAND_POLYGONS_URL}")
+    _download_file(OSM_LAND_POLYGONS_URL, zip_path, verify=False)
+
+    logger.info(f"Extracting OSM land polygons to {output_dir}")
+    with zipfile.ZipFile(zip_path, "r") as zip_ref:
+        zip_ref.extractall(output_dir)
+
+    zip_path.unlink()
+
+    extracted_dir = output_dir / "land-polygons-complete-4326"
+    if extracted_dir.exists():
+        for file in extracted_dir.iterdir():
+            file.rename(output_dir / file.name)
+        extracted_dir.rmdir()
+
+    logger.info(f"OSM land polygons extracted to {shapefile_path}")
+    return shapefile_path
+
+
+def create_land_mask_from_osm(
+    shapefile_path: Path | str,
+    output_path: Path | str = "data/raw/land_mask_osm.tif",
+    resolution: float = 0.008333333333333,  # ~30 arcsec, ~1km at equator
+    bounds: tuple[float, float, float, float] = (-180, -90, 180, 90),
+) -> Path:
+    shapefile_path = Path(shapefile_path)
+    output_path = Path(output_path)
+
+    if not shapefile_path.exists():
+        raise FileNotFoundError(f"Shapefile not found: {shapefile_path}")
+
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+
+    min_lon, min_lat, max_lon, max_lat = bounds
+    width = int((max_lon - min_lon) / resolution)
+    height = int((max_lat - min_lat) / resolution)
+
+    logger.info(f"Creating land mask: {width}x{height} pixels at {resolution}° resolution")
+
+    driver = gdal.GetDriverByName("GTiff")
+    out_raster = driver.Create(
+        str(output_path),
+        width,
+        height,
+        1,
+        gdal.GDT_Byte,
+        options=["COMPRESS=LZW", "TILED=YES"],
+    )
+
+    out_raster.SetGeoTransform((min_lon, resolution, 0, max_lat, 0, -resolution))
+
+    srs = ogr.osr.SpatialReference()
+    srs.ImportFromEPSG(4326)
+    out_raster.SetProjection(srs.ExportToWkt())
+
+    band = out_raster.GetRasterBand(1)
+    band.SetNoDataValue(255)
+    band.Fill(0)
+
+    logger.info("Rasterizing land polygons (this may take a while)...")
+    shp_ds = ogr.Open(str(shapefile_path))
+    layer = shp_ds.GetLayer()
+
+    gdal.RasterizeLayer(out_raster, [1], layer, burn_values=[1])
+
+    band.FlushCache()
+    out_raster = None
+    shp_ds = None
+
+    logger.info(f"Land mask created at {output_path}")
+    return output_path
+
+
+def ensure_osm_land_mask(
+    output_path: Path | str = "data/raw/land_mask_osm.tif",
+    resolution: float = 0.008333333333333,
+    force_redownload: bool = False,
+) -> Path:
+    output_path = Path(output_path)
+
+    if output_path.exists() and not force_redownload:
+        logger.info(f"OSM land mask already exists at {output_path}")
+        return output_path
+
+    shapefile_path = download_osm_land_polygons(force_redownload=force_redownload)
+    return create_land_mask_from_osm(shapefile_path, output_path, resolution)
