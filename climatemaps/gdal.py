@@ -8,29 +8,21 @@ class GdalCalculator:
 
     @staticmethod
     def calculate_max_overview_levels(
-        dpi: int, fig_width: float, fig_height: float, minsize: int = 256
+        dpi: int, fig_width: float, fig_height: float, target_min_zoom: int = 0
     ) -> int:
-        """Calculate the maximum number of overview levels that can be created based on image resolution.
+        """Calculate the number of overview levels needed to reach the target minimum zoom level.
 
         GDAL overview levels are powers of 2 (2, 4, 8, 16, 32, 64, 128, 256, ...).
-        The maximum level depends on the image dimensions - gdaladdo stops when the
-        smallest overview would be smaller than the minsize threshold (default 256 pixels).
+        Each overview level provides one additional lower zoom level in the mbtiles output.
+        To reach zoom level 0 from a base zoom of N, we need N overview levels.
 
         Returns:
-            Maximum number of overview levels (where level 0 is the original, level 1 is 2x downsampled, etc.)
+            Number of overview levels needed to reach the target minimum zoom level.
         """
         width_pixels = int(fig_width * dpi)
         height_pixels = int(fig_height * dpi)
-        min_dimension = min(width_pixels, height_pixels)
-
-        if min_dimension <= minsize:
-            return 0
-
-        # Calculate max level where dimension / (2^level) >= minsize
-        # So: 2^level <= dimension / minsize
-        # Therefore: level <= log2(dimension / minsize)
-        max_level = int(np.floor(np.log2(min_dimension / minsize)))
-        return max_level
+        base_zoom = GdalCalculator.calculate_max_zoom_level_from_pixels(width_pixels, height_pixels)
+        return max(0, base_zoom - target_min_zoom)
 
     @staticmethod
     def calculate_max_zoom_level(

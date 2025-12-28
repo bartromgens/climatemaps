@@ -28,7 +28,7 @@ class TestContour:
         month = 1
         name = "test"
         expected_files = {
-            f"{month}_colorbar.png": "c1c96094eb0fabb6d38dd1e4adff2379351d1d80376dbd5e6fc19c61cc5d4e04",
+            f"{month}_colorbar.png": "29fdab6692bea3d1274285bd5ad4a0575bc73afba721b15c3fa9f7f9d38f0d69",
             f"{month}_raster.mbtiles": None,
             f"{month}_vector.mbtiles": None,  # This checksum changes each run, no idea why (timestamp?)
         }

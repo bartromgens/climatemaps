@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class ClimateMapsConfig:
     data_dir_out = "data/tiles"
-    zoom_min = 1
+    zoom_min = 0
 
     @property
     def dev_mode(self) -> bool:
