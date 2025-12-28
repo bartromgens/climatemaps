@@ -586,7 +586,7 @@ class CHELSAClimateDataConfigGroup(ClimateDataConfigGroup):
                         ClimateVarKey.PRECIPITATION: 0.1,
                         ClimateVarKey.WIND_SPEED: 0.001,
                         ClimateVarKey.RELATIVE_HUMIDITY: 0.01,
-                        ClimateVarKey.RADIATION: 0.01,
+                        ClimateVarKey.RADIATION: 1.0,
                         ClimateVarKey.MOISTURE_INDEX: 0.1,
                         ClimateVarKey.POTENTIAL_EVAPOTRANSPIRATION: 0.1,
                         ClimateVarKey.VAPOUR_PRESSURE_DEFICIT: 0.1,
