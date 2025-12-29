@@ -92,6 +92,12 @@ export class VariableSelectorOverlayComponent {
       shortName: 'Vapour Pressure Deficit',
       isSvg: true,
     },
+    {
+      key: ClimateVarKey.SUNSHINE_HOURS,
+      icon: 'assets/sunshine-hours.svg',
+      shortName: 'Sunshine Hours',
+      isSvg: true,
+    },
   ];
 
   onVariableClick(variableType: ClimateVarKey): void {

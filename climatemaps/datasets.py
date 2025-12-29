@@ -13,6 +13,7 @@ import matplotlib.pyplot as plt
 from pydantic import BaseModel
 
 from climatemaps.contour_config import ContourPlotConfig
+from climatemaps.sunshine import calculate_sunshine_hours
 
 
 def chelsa_temperature_conversion(
@@ -59,6 +60,7 @@ class ClimateVarKey(enum.Enum):
     MOISTURE_INDEX = "MOISTURE_INDEX"
     VAPOUR_PRESSURE_DEFICIT = "VAPOUR_PRESSURE_DEFICIT"
     APPARENT_TEMPERATURE = "APPARENT_TEMPERATURE"
+    SUNSHINE_HOURS = "SUNSHINE_HOURS"
 
 
 class ClimateScenario(enum.Enum):
@@ -170,6 +172,12 @@ CLIMATE_VARIABLES: Dict[ClimateVarKey, ClimateVariable] = {
         unit="°C",
         filename="apparenttemp",
     ),
+    ClimateVarKey.SUNSHINE_HOURS: ClimateVariable(
+        name="SunshineHours",
+        display_name="Sunshine Hours",
+        unit="hours/day",
+        filename="sunshinehours",
+    ),
 }
 
 
@@ -251,6 +259,14 @@ CLIMATE_CONTOUR_CONFIGS: Dict[ClimateVarKey, ContourPlotConfig] = {
         colormap=plt.cm.jet,
         title="Apparent Temperature",
         unit="°C",
+    ),
+    ClimateVarKey.SUNSHINE_HOURS: ContourPlotConfig(
+        level_lower=0,
+        level_upper=14,
+        colormap=plt.cm.YlOrRd,
+        title="Sunshine Hours",
+        unit="hours/day",
+        n_contours=15,
     ),
 }
 
@@ -491,6 +507,8 @@ def calculate_apparent_temperature(
 class DerivedClimateDataConfig(ClimateDataConfig):
     source_configs: Dict[ClimateVarKey, ClimateDataConfig] = field(default_factory=dict)
     compute_function: Callable[..., npt.NDArray[np.floating]] = None
+    needs_lat_and_month: bool = False
+    needs_terrain: bool = False
 
     @property
     def data_type_slug(self) -> str:
@@ -810,7 +828,36 @@ def create_apparent_temperature_configs() -> List[DerivedClimateDataConfig]:
     return configs
 
 
-DERIVED_DATA_SETS: List[DerivedClimateDataConfig] = create_apparent_temperature_configs()
+def create_sunshine_hours_configs() -> List[DerivedClimateDataConfig]:
+    configs: List[DerivedClimateDataConfig] = []
+
+    radiation_configs = [
+        c for c in HISTORIC_DATA_SETS if c.variable_type == ClimateVarKey.RADIATION
+    ]
+
+    for radiation_cfg in radiation_configs:
+        config = DerivedClimateDataConfig(
+            variable_type=ClimateVarKey.SUNSHINE_HOURS,
+            filepath="",
+            format=radiation_cfg.format,
+            resolution_input=radiation_cfg.resolution_input,
+            year_range=radiation_cfg.year_range,
+            source=radiation_cfg.source,
+            source_configs={
+                ClimateVarKey.RADIATION: radiation_cfg,
+            },
+            compute_function=calculate_sunshine_hours,
+            needs_lat_and_month=True,
+            needs_terrain=True,
+        )
+        configs.append(config)
+
+    return configs
+
+
+DERIVED_DATA_SETS: List[DerivedClimateDataConfig] = (
+    create_apparent_temperature_configs() + create_sunshine_hours_configs()
+)
 HISTORIC_DATA_SETS = HISTORIC_DATA_SETS + DERIVED_DATA_SETS
 
 FUTURE_DATA_SETS: List[FutureClimateDataConfig] = [

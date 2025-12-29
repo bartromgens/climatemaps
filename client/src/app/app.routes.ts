@@ -68,6 +68,10 @@ const CLIMATE_VARIABLE_ROUTES: Record<
     path: 'apparent-temperature',
     title: 'Apparent Temperature Map',
   },
+  [ClimateVarKey.SUNSHINE_HOURS]: {
+    path: 'sunshine-hours',
+    title: 'Sunshine Hours Map',
+  },
 };
 
 /**

@@ -20,6 +20,7 @@ from climatemaps.geotiff import (
 )
 from climatemaps.geogrid import GeoGrid
 from climatemaps.logger import logger
+from climatemaps.sunshine import interpolate_terrain_to_grid
 
 
 def _maybe_downsample(grid: GeoGrid, target_resolution: int | None) -> GeoGrid:
@@ -74,7 +75,27 @@ def _load_derived_climate_data(
 
     first_grid = next(iter(source_grids.values()))
     source_values = [source_grids[var_key].values for var_key in data_config.source_configs.keys()]
-    computed_values = data_config.compute_function(*source_values)
+
+    if data_config.needs_lat_and_month:
+        lat_grid = numpy.tile(
+            first_grid.lat_range[:, numpy.newaxis], (1, first_grid.values.shape[1])
+        )
+
+        if data_config.needs_terrain:
+            terrain_data = interpolate_terrain_to_grid(first_grid.lon_range, first_grid.lat_range)
+            if terrain_data is not None:
+                slope, aspect = terrain_data
+                logger.info("Applying slope correction to derived computation")
+                computed_values = data_config.compute_function(
+                    *source_values, lat_grid, month, slope, aspect
+                )
+            else:
+                logger.info("No terrain data available, using horizontal surface assumption")
+                computed_values = data_config.compute_function(*source_values, lat_grid, month)
+        else:
+            computed_values = data_config.compute_function(*source_values, lat_grid, month)
+    else:
+        computed_values = data_config.compute_function(*source_values)
 
     return GeoGrid(
         lon_range=first_grid.lon_range,

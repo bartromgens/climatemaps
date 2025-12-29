@@ -29,6 +29,7 @@ export class MetadataService {
     ClimateVarKey.APPARENT_TEMPERATURE,
     ClimateVarKey.PRECIPITATION,
     ClimateVarKey.CLOUD_COVER,
+    ClimateVarKey.SUNSHINE_HOURS,
     ClimateVarKey.DIURNAL_TEMP_RANGE,
     ClimateVarKey.VAPOUR_PRESSURE,
     ClimateVarKey.VAPOUR_PRESSURE_DEFICIT,
@@ -197,6 +198,7 @@ export class MetadataService {
       PotentialEvapotranspiration: ClimateVarKey.POTENTIAL_EVAPOTRANSPIRATION,
       MoistureIndex: ClimateVarKey.MOISTURE_INDEX,
       ApparentTemperature: ClimateVarKey.APPARENT_TEMPERATURE,
+      SunshineHours: ClimateVarKey.SUNSHINE_HOURS,
     };
 
     const result = nameToKey[name];
