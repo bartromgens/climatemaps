@@ -20,6 +20,9 @@ from climatemaps.logger import logger
 
 OSM_LAND_POLYGONS_URL = "https://osmdata.openstreetmap.de/download/land-polygons-complete-4326.zip"
 
+ETOPO2022_30S_URL = "https://www.ngdc.noaa.gov/mgg/global/relief/ETOPO2022/data/30s/30s_surface_elev_gtif/ETOPO_2022_v1_30s_N90W180_surface.tif"
+ETOPO1_1MIN_URL = "https://www.ngdc.noaa.gov/mgg/global/relief/ETOPO1/data/ice_surface/grid_registered/georeferenced_tiff/ETOPO1_Ice_g_geotiff.zip"
+
 
 def _get_worldclim_historical_url(resolution: SpatialResolution, variable: ClimateVarKey) -> str:
     base_url = "https://geodata.ucdavis.edu/climate/worldclim/2_1/base"
@@ -456,3 +459,101 @@ def ensure_osm_land_mask(
 
     shapefile_path = download_osm_land_polygons(force_redownload=force_redownload)
     return create_land_mask_from_osm(shapefile_path, output_path, resolution)
+
+
+def download_etopo2022_30s(
+    output_path: Path | str = "data/raw/elevation/etopo2022_30s.tif",
+    force_redownload: bool = False,
+) -> Path:
+    """
+    Download ETOPO2022 30 arc-second (~1km) global elevation data.
+
+    This is the highest resolution version of ETOPO2022, providing detailed
+    terrain information suitable for high-resolution climate data analysis.
+    File size: ~1.5GB
+
+    Args:
+        output_path: Path where the DEM file will be saved
+        force_redownload: If True, re-download even if file exists
+
+    Returns:
+        Path to the downloaded file
+    """
+    output_path = Path(output_path)
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+
+    if output_path.exists() and not force_redownload:
+        if verify_geotiff_file(output_path):
+            logger.info(f"ETOPO2022 30s data already exists and is valid at {output_path}")
+            return output_path
+        else:
+            logger.warning("ETOPO2022 30s data exists but is corrupted, will re-download")
+            output_path.unlink()
+
+    logger.info("Downloading ETOPO2022 30 arc-second elevation data (~1.5GB)...")
+    logger.info(f"URL: {ETOPO2022_30S_URL}")
+    _download_file(ETOPO2022_30S_URL, output_path, verify=True)
+
+    return output_path
+
+
+def download_etopo1_1min(
+    output_path: Path | str = "data/raw/elevation/etopo1_1min.tif",
+    force_redownload: bool = False,
+) -> Path:
+    """
+    Download ETOPO1 1 arc-minute (~1.85km) global elevation data.
+
+    Lower resolution version suitable for applications where high detail
+    is not required. ETOPO1 is an older dataset but still widely used.
+    File size: ~300MB (compressed), extracts to ~500MB GeoTIFF
+
+    Note: ETOPO2022 does not provide a 2-minute resolution, so ETOPO1
+    1 arc-minute is used as the lower-resolution alternative.
+
+    Args:
+        output_path: Path where the DEM file will be saved
+        force_redownload: If True, re-download even if file exists
+
+    Returns:
+        Path to the downloaded file
+    """
+    output_path = Path(output_path)
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+
+    if output_path.exists() and not force_redownload:
+        if verify_geotiff_file(output_path):
+            logger.info(f"ETOPO1 1min data already exists and is valid at {output_path}")
+            return output_path
+        else:
+            logger.warning("ETOPO1 1min data exists but is corrupted, will re-download")
+            output_path.unlink()
+
+    logger.info("Downloading ETOPO1 1 arc-minute elevation data (~300MB compressed)...")
+    logger.info(f"URL: {ETOPO1_1MIN_URL}")
+
+    # ETOPO1 comes as a zip file, need to extract it
+    temp_zip = output_path.parent / "etopo1_temp.zip"
+    _download_file(ETOPO1_1MIN_URL, temp_zip, verify=False)
+
+    logger.info("Extracting ETOPO1 GeoTIFF from zip archive...")
+    _extract_zip(temp_zip, output_path.parent)
+
+    # Find the extracted GeoTIFF file
+    extracted_tif = output_path.parent / "ETOPO1_Ice_g_geotiff.tif"
+    if extracted_tif.exists():
+        extracted_tif.rename(output_path)
+        logger.info(f"ETOPO1 data extracted and saved to {output_path}")
+    else:
+        # Try to find any .tif file in the directory
+        tif_files = list(output_path.parent.glob("*.tif"))
+        if tif_files:
+            tif_files[0].rename(output_path)
+            logger.info(f"ETOPO1 data extracted and saved to {output_path}")
+        else:
+            raise ValueError(f"Could not find extracted GeoTIFF file in {output_path.parent}")
+
+    if verify_geotiff_file(output_path):
+        return output_path
+    else:
+        raise ValueError(f"Downloaded ETOPO1 file {output_path} failed verification")

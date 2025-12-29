@@ -8,7 +8,8 @@ from scipy.interpolate import RegularGridInterpolator
 from climatemaps.logger import logger
 
 
-DEM_PATH = "data/raw/elevation/etopo2022_30s.tif"
+DEM_PATH_30S = "data/raw/elevation/etopo2022_30s.tif"
+DEM_PATH_1MIN = "data/raw/elevation/etopo1_1min.tif"
 _terrain_grids_cache: dict[
     str,
     tuple[
@@ -18,6 +19,19 @@ _terrain_grids_cache: dict[
         npt.NDArray[np.floating],
     ],
 ] = {}
+
+
+def _get_dem_path() -> str | None:
+    """
+    Get the path to the available DEM file.
+    Prefers 30s resolution, falls back to 1min if 30s is not available.
+    """
+    if os.path.exists(DEM_PATH_30S):
+        return DEM_PATH_30S
+    elif os.path.exists(DEM_PATH_1MIN):
+        logger.info(f"Using 1min resolution DEM (30s not found at {DEM_PATH_30S})")
+        return DEM_PATH_1MIN
+    return None
 
 
 def calculate_daylight_hours(
@@ -199,21 +213,43 @@ def load_terrain_grids() -> (
     ]
     | None
 ):
-    """Load DEM and compute slope/aspect grids. Returns (slope, aspect, lon_range, lat_range) or None."""
-    if not os.path.exists(DEM_PATH):
-        logger.warning(f"DEM file not found at {DEM_PATH}, slope correction disabled")
-        return None
+    """
+    Load DEM and compute slope/aspect grids.
+    Tries 30s resolution first, falls back to 1min if not available.
+    Automatically downloads 1min version if no DEM files are found.
+    Returns (slope, aspect, lon_range, lat_range) or None.
+    """
+    dem_path = _get_dem_path()
+    if dem_path is None:
+        logger.info(
+            f"No DEM file found. Attempting to download 1min resolution version (~300MB compressed)..."
+        )
+        try:
+            from climatemaps.download import download_etopo1_1min
 
-    cache_key = DEM_PATH
+            download_etopo1_1min()
+            dem_path = _get_dem_path()
+            if dem_path is None:
+                logger.error("Failed to download DEM file")
+                return None
+        except Exception as e:
+            logger.error(
+                f"Failed to automatically download DEM: {e}. "
+                "Slope correction disabled. You can manually download using "
+                "download_etopo1_1min() or download_etopo2022_30s() from climatemaps.download"
+            )
+            return None
+
+    cache_key = dem_path
     if cache_key in _terrain_grids_cache:
         return _terrain_grids_cache[cache_key]
 
     import rasterio
     from scipy.ndimage import sobel
 
-    logger.info(f"Loading DEM from {DEM_PATH} for slope/aspect calculation...")
+    logger.info(f"Loading DEM from {dem_path} for slope/aspect calculation...")
 
-    with rasterio.open(DEM_PATH) as src:
+    with rasterio.open(dem_path) as src:
         dem = src.read(1).astype(np.float32)
         transform = src.transform
         bounds = src.bounds
