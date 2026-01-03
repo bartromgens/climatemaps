@@ -44,59 +44,12 @@ np.set_printoptions(3, threshold=100, suppress=True)  # .3f
 
 
 @dataclass
-class TestCriteria:
-    variable_type: Optional[ClimateVarKey] = None
-    resolution: Optional[SpatialResolution] = None
-    climate_scenario: Optional[ClimateScenario] = None
-    climate_model: Optional[ClimateModel] = None
-    year_range: Optional[tuple[int, int]] = None
-
-
-@dataclass
 class DatasetGroup:
     """Represents a group of datasets with their configuration and metadata."""
 
     datasets: List[Union[ClimateDataConfig, ClimateDifferenceDataConfig]]
-    test_criteria: TestCriteria
     is_difference: bool
     name: str
-
-
-DEFAULT_TEST_SET_HISTORIC = TestCriteria()
-
-DEFAULT_TEST_SET_FUTURE = TestCriteria(
-    variable_type=ClimateVarKey.T_MAX,
-    resolution=SpatialResolution.MIN10,
-    climate_scenario=ClimateScenario.SSP370,
-    climate_model=ClimateModel.ENSEMBLE_MEAN,
-    year_range=(2021, 2040),
-)
-
-
-def _filter_by_criteria(
-    data_sets: List[ClimateDataConfig], criteria: TestCriteria
-) -> List[ClimateDataConfig]:
-    def matches(config: ClimateDataConfig) -> bool:
-        if (
-            criteria.variable_type is not None
-            and config.get_variable_type() != criteria.variable_type
-        ):
-            return False
-        if criteria.resolution is not None and config.resolution_input != criteria.resolution:
-            return False
-
-        year_match = criteria.year_range is None or config.get_year_range() == criteria.year_range
-        scenario_match = (
-            criteria.climate_scenario is None
-            or config.get_climate_scenario() == criteria.climate_scenario
-        )
-        model_match = (
-            criteria.climate_model is None or config.get_climate_model() == criteria.climate_model
-        )
-
-        return year_match and scenario_match and model_match
-
-    return [ds for ds in data_sets if matches(ds)]
 
 
 def _create_tasks_for_datasets(
@@ -186,19 +139,15 @@ def _mbtiles_are_older_than_date(
     return False
 
 
-def _get_month_range(month: int | None, limited_test_set: bool) -> tuple[int, int]:
+def _get_month_range(month: int | None) -> tuple[int, int]:
     if month is not None:
         logger.info(f"Processing only month {month}")
         return month, month
-    if limited_test_set:
-        logger.info("Limited test set mode: processing only month 1")
-        return 1, 1
     return 1, 12
 
 
 def main(
     force_recreate: bool = False,
-    limited_test_set: bool = False,
     climate_model: ClimateModel | None = None,
     variable_type: ClimateVarKey | None = None,
     if_older_than: datetime | None = None,
@@ -206,14 +155,14 @@ def main(
     dataset_type: str | None = None,
     month: int | None = None,
 ) -> None:
-    month_lower, month_upper = _get_month_range(month, limited_test_set)
+    month_lower, month_upper = _get_month_range(month)
     all_tasks = []
     all_datasets = []
 
     dataset_groups = [
-        DatasetGroup(HISTORIC_DATA_SETS, DEFAULT_TEST_SET_HISTORIC, False, "historic"),
-        DatasetGroup(FUTURE_DATA_SETS, DEFAULT_TEST_SET_FUTURE, False, "future"),
-        DatasetGroup(DIFFERENCE_DATA_SETS, DEFAULT_TEST_SET_FUTURE, True, "difference"),
+        DatasetGroup(HISTORIC_DATA_SETS, False, "historic"),
+        DatasetGroup(FUTURE_DATA_SETS, False, "future"),
+        DatasetGroup(DIFFERENCE_DATA_SETS, True, "difference"),
     ]
 
     # Filter dataset groups based on dataset_type argument
@@ -226,9 +175,6 @@ def main(
             return
 
     for group in dataset_groups:
-        if limited_test_set:
-            group.datasets = _filter_by_criteria(group.datasets, group.test_criteria)
-
         if climate_model is not None:
             if group.name == "historic":
                 group.datasets = []
@@ -386,12 +332,6 @@ if __name__ == "__main__":
         help="Force recreation of resources. Defaults to False.",
     )
     parser.add_argument(
-        "--test-set",
-        action="store_true",
-        default=False,
-        help="Use default test set for development testing (process only a subset of data sets).",
-    )
-    parser.add_argument(
         "--climate-model",
         type=str,
         default=None,
@@ -452,7 +392,6 @@ if __name__ == "__main__":
 
     main(
         force_recreate=args.force_recreate,
-        limited_test_set=args.test_set,
         climate_model=climate_model,
         variable_type=variable_type,
         if_older_than=if_older_than,
