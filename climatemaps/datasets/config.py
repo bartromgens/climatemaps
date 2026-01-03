@@ -83,6 +83,7 @@ CLIMATE_CONTOUR_CONFIGS: Dict[ClimateVarKey, ContourPlotConfig] = {
         title="Precipitation",
         unit="mm/month",
         log_scale=True,
+        n_contours=11,
     ),
     ClimateVarKey.T_MAX: ContourPlotConfig(
         level_lower=-20, level_upper=45, colormap=plt.cm.jet, title="Temperature (Day)", unit="C"
@@ -145,6 +146,7 @@ CLIMATE_CONTOUR_CONFIGS: Dict[ClimateVarKey, ContourPlotConfig] = {
         colormap=plt.cm.RdYlBu_r,
         title="Potential Evapotranspiration",
         unit="mm/month",
+        n_contours=8,
     ),
 }
 
