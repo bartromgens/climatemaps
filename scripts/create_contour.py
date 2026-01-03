@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import argparse
 import os
+import subprocess
 import sys
 from datetime import datetime
 
@@ -216,3 +217,7 @@ if __name__ == "__main__":
         dataset_type=args.dataset_type,
         month=args.month,
     )
+
+    logger.info("Running create_tileserver_config.py --dev-only")
+    tileserver_script = os.path.join(os.path.dirname(__file__), "create_tileserver_config.py")
+    subprocess.run([sys.executable, tileserver_script, "--dev-only"], check=True)
