@@ -63,7 +63,7 @@ def load_climate_data(
         )
         geo_grid = geo_grid.downsample(downsample_factor)
 
-    if data_config.format == DataFormat.CHELSA:
+    if data_config.apply_land_mask:
         geo_grid = apply_land_mask(geo_grid)
 
     return geo_grid

@@ -39,6 +39,7 @@ class ClimateDataConfig:
     ] = None
     conversion_factor: float = 1
     source: Optional[str] = None
+    apply_land_mask: bool = False
 
     @property
     def variable(self) -> ClimateVariable:
@@ -334,6 +335,7 @@ class CHELSAClimateDataConfigGroup(ClimateDataConfigGroup):
                         conversion_function=conversion_function,
                         conversion_factor=conversion_factor,
                         source=self.source,
+                        apply_land_mask=True,
                     )
                     configs.append(config)
         return configs
