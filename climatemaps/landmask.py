@@ -9,6 +9,110 @@ from climatemaps.geogrid import GeoGrid
 from climatemaps.logger import logger
 
 
+def _calculate_bounded_bbox_with_margin(
+    geo_grid: GeoGrid, margin: float = 1.0
+) -> tuple[float, float, float, float]:
+    return (
+        max(-180, geo_grid.llcrnrlon - margin),
+        max(-90, geo_grid.llcrnrlat - margin),
+        min(180, geo_grid.urcrnrlon + margin),
+        min(90, geo_grid.urcrnrlat + margin),
+    )
+
+
+def _calculate_safe_window(
+    window: rasterio.windows.Window, mask_src: rasterio.DatasetReader
+) -> rasterio.windows.Window:
+    col_off = max(0, int(np.floor(window.col_off)))
+    row_off = max(0, int(np.floor(window.row_off)))
+
+    return rasterio.windows.Window(
+        col_off=col_off,
+        row_off=row_off,
+        width=min(
+            mask_src.width - col_off,
+            int(np.ceil(window.width)),
+        ),
+        height=min(
+            mask_src.height - row_off,
+            int(np.ceil(window.height)),
+        ),
+    )
+
+
+def _create_mask_coordinate_arrays(
+    window: rasterio.windows.Window, transform: rasterio.Affine, is_point_registration: bool
+) -> tuple[np.ndarray, np.ndarray]:
+    pixel_width = transform.a
+    pixel_height = abs(transform.e)
+
+    if is_point_registration:
+        mask_lon_array = np.linspace(
+            transform.c,
+            transform.c + (window.width - 1) * transform.a,
+            window.width,
+        )
+        mask_lat_array = np.linspace(
+            transform.f,
+            transform.f + (window.height - 1) * transform.e,
+            window.height,
+        )
+    else:
+        mask_lon_array = np.linspace(
+            transform.c,
+            transform.c + window.width * transform.a,
+            window.width,
+            endpoint=False,
+        )
+        mask_lon_array += pixel_width / 2
+
+        mask_lat_array = np.linspace(
+            transform.f,
+            transform.f + window.height * transform.e,
+            window.height,
+            endpoint=False,
+        )
+        mask_lat_array -= pixel_height / 2
+
+    return mask_lon_array, mask_lat_array
+
+
+def _interpolate_mask_to_grid(
+    land_mask_data: np.ndarray,
+    mask_lon_array: np.ndarray,
+    mask_lat_array: np.ndarray,
+    geo_grid: GeoGrid,
+) -> np.ndarray:
+    interpolator = RegularGridInterpolator(
+        (mask_lat_array, mask_lon_array),
+        land_mask_data,
+        method="nearest",
+        bounds_error=False,
+        fill_value=0,
+    )
+
+    lon_grid, lat_grid = np.meshgrid(geo_grid.lon_range, geo_grid.lat_range)
+    return interpolator((lat_grid, lon_grid)).astype(np.uint8)
+
+
+def _apply_mask_and_log_stats(geo_grid: GeoGrid, interpolated_mask: np.ndarray) -> np.ndarray:
+    land_pixels = np.sum(interpolated_mask == 1)
+    sea_pixels = np.sum(interpolated_mask == 0)
+    logger.info(f"Land-sea mask applied: {land_pixels} land pixels, {sea_pixels} sea pixels")
+
+    new_values = geo_grid.values.copy()
+    new_values[interpolated_mask == 0] = np.nan
+
+    final_land_pixels = np.count_nonzero(~np.isnan(new_values))
+    final_sea_pixels = np.count_nonzero(np.isnan(new_values))
+    logger.info(
+        f"After masking: {final_land_pixels} land pixels, {final_sea_pixels} sea pixels "
+        f"({final_sea_pixels/new_values.size*100:.1f}% masked)"
+    )
+
+    return new_values
+
+
 def apply_land_mask(
     geo_grid: GeoGrid, land_mask_path: str = "data/raw/land_mask_osm.tif"
 ) -> GeoGrid:
@@ -32,28 +136,9 @@ def apply_land_mask(
     logger.info(f"Applying land-sea mask from {land_mask_path}")
 
     with rasterio.open(land_mask_path) as mask_src:
-        # Calculate window to read only the portion of the mask we need
-        data_bbox_with_margin = (
-            max(-180, geo_grid.llcrnrlon - 1),
-            max(-90, geo_grid.llcrnrlat - 1),
-            min(180, geo_grid.urcrnrlon + 1),
-            min(90, geo_grid.urcrnrlat + 1),
-        )
-
+        data_bbox_with_margin = _calculate_bounded_bbox_with_margin(geo_grid)
         window = rasterio.windows.from_bounds(*data_bbox_with_margin, transform=mask_src.transform)
-
-        window_int = rasterio.windows.Window(
-            col_off=max(0, int(np.floor(window.col_off))),
-            row_off=max(0, int(np.floor(window.row_off))),
-            width=min(
-                mask_src.width - max(0, int(np.floor(window.col_off))),
-                int(np.ceil(window.width)),
-            ),
-            height=min(
-                mask_src.height - max(0, int(np.floor(window.row_off))),
-                int(np.ceil(window.height)),
-            ),
-        )
+        window_int = _calculate_safe_window(window, mask_src)
 
         logger.info(
             f"Reading land mask window: col={window_int.col_off}, row={window_int.row_off}, "
@@ -62,84 +147,26 @@ def apply_land_mask(
             f"{geo_grid.urcrnrlon:.2f}, {geo_grid.urcrnrlat:.2f})"
         )
 
-        # Read only the relevant portion of the land mask
         land_mask_data = mask_src.read(1, window=window_int)
         logger.debug(
             f"Land mask window shape: {land_mask_data.shape} "
             f"(full mask: {mask_src.width}x{mask_src.height})"
         )
 
-        # Get the transform for the windowed region
         window_transform = rasterio.windows.transform(window_int, mask_src.transform)
 
-        # Interpolate the land mask to match data coordinates using efficient method
         logger.info("Interpolating land mask to match data coordinates")
-
-        # Check pixel registration convention
         area_or_point = mask_src.tags().get("AREA_OR_POINT")
         is_point_registration = area_or_point == "Point"
 
-        pixel_width = window_transform.a
-        pixel_height = abs(window_transform.e)
-
-        if is_point_registration:
-            mask_lon_array = np.linspace(
-                window_transform.c,
-                window_transform.c + (window_int.width - 1) * window_transform.a,
-                window_int.width,
-            )
-            mask_lat_array = np.linspace(
-                window_transform.f,
-                window_transform.f + (window_int.height - 1) * window_transform.e,
-                window_int.height,
-            )
-        else:
-            mask_lon_array = np.linspace(
-                window_transform.c,
-                window_transform.c + window_int.width * window_transform.a,
-                window_int.width,
-                endpoint=False,
-            )
-            mask_lon_array += pixel_width / 2
-
-            mask_lat_array = np.linspace(
-                window_transform.f,
-                window_transform.f + window_int.height * window_transform.e,
-                window_int.height,
-                endpoint=False,
-            )
-            mask_lat_array -= pixel_height / 2
-
-        # Create interpolator for the land mask
-        interpolator = RegularGridInterpolator(
-            (mask_lat_array, mask_lon_array),
-            land_mask_data,
-            method="nearest",
-            bounds_error=False,
-            fill_value=0,
+        mask_lon_array, mask_lat_array = _create_mask_coordinate_arrays(
+            window_int, window_transform, is_point_registration
         )
 
-        # Create coordinate grids for data
-        lon_grid, lat_grid = np.meshgrid(geo_grid.lon_range, geo_grid.lat_range)
-
-        # Interpolate using the efficient RegularGridInterpolator
-        interpolated_mask = interpolator((lat_grid, lon_grid)).astype(np.uint8)
-
-        # Apply the land mask (1 = land, 0 = sea)
-        land_pixels = np.sum(interpolated_mask == 1)
-        sea_pixels = np.sum(interpolated_mask == 0)
-        logger.info(f"Land-sea mask applied: {land_pixels} land pixels, {sea_pixels} sea pixels")
-
-        # Create new values array with masking applied
-        new_values = geo_grid.values.copy()
-        new_values[interpolated_mask == 0] = np.nan
-
-        # Log final statistics
-        final_land_pixels = np.count_nonzero(~np.isnan(new_values))
-        final_sea_pixels = np.count_nonzero(np.isnan(new_values))
-        logger.info(
-            f"After masking: {final_land_pixels} land pixels, {final_sea_pixels} sea pixels "
-            f"({final_sea_pixels/new_values.size*100:.1f}% masked)"
+        interpolated_mask = _interpolate_mask_to_grid(
+            land_mask_data, mask_lon_array, mask_lat_array, geo_grid
         )
+
+        new_values = _apply_mask_and_log_stats(geo_grid, interpolated_mask)
 
     return GeoGrid(lon_range=geo_grid.lon_range, lat_range=geo_grid.lat_range, values=new_values)
