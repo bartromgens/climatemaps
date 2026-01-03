@@ -20,15 +20,14 @@ class WorldClimHistoricalDownloader(DataDownloader):
         self.data_dir = Path(config.filepath)
         self.data_type = config.filepath.split("/")[-1]
 
-    def is_available(self) -> bool:
-        first_month_file = self.data_dir / f"{self.data_type}_01.tif"
-        return first_month_file.exists()
+    def _get_month_filepath(self, month: int) -> Path:
+        return self.data_dir / f"{self.data_type}_{month:02d}.tif"
 
-    def verify(self) -> bool:
-        first_month_file = self.data_dir / f"{self.data_type}_01.tif"
-        if not first_month_file.exists():
-            return False
-        return verify_geotiff_file(first_month_file)
+    def _is_available_single_file(self) -> bool:
+        return False
+
+    def _verify_single_file(self) -> bool:
+        return False
 
     def _get_url(self) -> str:
         base_url = "https://geodata.ucdavis.edu/climate/worldclim/2_1/base"
@@ -89,10 +88,10 @@ class WorldClimFutureDownloader(DataDownloader):
         self.config: FutureClimateDataConfig = config
         self.destination = Path(config.filepath)
 
-    def is_available(self) -> bool:
+    def _is_available_single_file(self) -> bool:
         return self.destination.exists()
 
-    def verify(self) -> bool:
+    def _verify_single_file(self) -> bool:
         if not self.destination.exists():
             return False
         return verify_geotiff_file(self.destination)

@@ -18,15 +18,14 @@ class CRUTSDownloader(DataDownloader):
         self.year_str = f"{config.year_range[0]}-{config.year_range[1]}"
         self.file_pattern = f"cru_{self.abbr}_clim_{self.year_str}_{{:02d}}.tif"
 
-    def is_available(self) -> bool:
-        first_month_file = self.data_dir / self.file_pattern.format(1)
-        return first_month_file.exists()
+    def _get_month_filepath(self, month: int) -> Path:
+        return self.data_dir / self.file_pattern.format(month)
 
-    def verify(self) -> bool:
-        first_month_file = self.data_dir / self.file_pattern.format(1)
-        if not first_month_file.exists():
-            return False
-        return verify_geotiff_file(first_month_file)
+    def _is_available_single_file(self) -> bool:
+        return False
+
+    def _verify_single_file(self) -> bool:
+        return False
 
     def _get_url(self) -> str:
         base_url = "https://dap.ceda.ac.uk/badc/ipcc-ddc/data/obs/cru_ts2_1/clim_30"

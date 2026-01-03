@@ -3,7 +3,6 @@ from pathlib import Path
 from climatemaps.datasets import ClimateDataConfig, ClimateVarKey, CHELSA_FILE_ABBREVIATIONS
 from climatemaps.download.base import DataDownloader
 from climatemaps.download.utils import download_file
-from climatemaps.geotiff import verify_geotiff_file
 from climatemaps.logger import logger
 
 
@@ -16,19 +15,15 @@ class CHELSADownloader(DataDownloader):
 
         self.base_dir = Path(config.filepath)
 
-    def is_available(self) -> bool:
-        first_month_file = self._get_month_filepath(1)
-        return first_month_file.exists()
-
-    def verify(self) -> bool:
-        first_month_file = self._get_month_filepath(1)
-        if not first_month_file.exists():
-            return False
-        return verify_geotiff_file(first_month_file)
-
     def _get_month_filepath(self, month: int) -> Path:
         filename = f"CHELSA_{self.var_str}_{self.config.year_range[0]}-{self.config.year_range[1]}_{month:02d}.tif"
         return self.base_dir / filename
+
+    def _is_available_single_file(self) -> bool:
+        return False
+
+    def _verify_single_file(self) -> bool:
+        return False
 
     def _get_url(self, month: int) -> str:
         base_url = "https://os.unil.cloud.switch.ch/chelsa02/chelsa/global/climatologies"
@@ -42,10 +37,20 @@ class CHELSADownloader(DataDownloader):
             month_file.unlink(missing_ok=True)
 
     def _do_download(self, skip_verification: bool = False, month_upper: int = 12) -> None:
+        from climatemaps.geotiff import verify_geotiff_file
+        
         self.base_dir.mkdir(parents=True, exist_ok=True)
 
         for month in range(1, month_upper + 1):
             destination = self._get_month_filepath(month)
+            
+            if destination.exists():
+                if skip_verification or verify_geotiff_file(destination):
+                    logger.info(f"Month {month:02d} already exists and is valid, skipping...")
+                    continue
+                else:
+                    logger.warning(f"Month {month:02d} exists but is corrupted, re-downloading...")
+            
             logger.info(f"Downloading CHELSA data for month {month:02d}...")
 
             try:

@@ -1,5 +1,6 @@
 import tempfile
 from pathlib import Path
+from unittest.mock import MagicMock, patch
 
 import pytest
 
@@ -19,7 +20,7 @@ from climatemaps.download.worldclim import (
 from climatemaps.download.cru_ts import CRUTSDownloader
 from climatemaps.download.chelsa import CHELSADownloader
 from climatemaps.download.osm import OSMLandPolygonsDownloader, OSMLandMaskCreator
-from climatemaps.download import get_downloader, DOWNLOADER_REGISTRY
+from climatemaps.download import get_downloader, ensure_data_available, DOWNLOADER_REGISTRY
 
 
 def test_historical_url_generation() -> None:
@@ -540,3 +541,177 @@ def test_future_downloader_multiple_time_periods() -> None:
         downloader = WorldClimFutureDownloader(config)
         url = downloader._get_url()
         assert f"{year_range[0]}-{year_range[1]}" in url
+
+
+def test_chelsa_is_available_checks_all_months() -> None:
+    with tempfile.TemporaryDirectory() as tmpdir:
+        config = ClimateDataConfig(
+            variable_type=ClimateVarKey.T_MIN,
+            resolution_input=SpatialResolution.MIN0_5,
+            year_range=(1981, 2010),
+            format=DataFormat.CHELSA,
+            filepath=tmpdir,
+        )
+        downloader = CHELSADownloader(config)
+
+        month_01 = downloader._get_month_filepath(1)
+        month_01.parent.mkdir(parents=True, exist_ok=True)
+        month_01.touch()
+
+        assert downloader.is_available(month_upper=1), "Month 1 exists, should return True"
+        assert not downloader.is_available(
+            month_upper=2
+        ), "Month 2 missing, should return False even though month 1 exists"
+        assert not downloader.is_available(
+            month_upper=6
+        ), "Months 2-6 missing, should return False"
+        assert not downloader.is_available(
+            month_upper=12
+        ), "Months 2-12 missing, should return False"
+
+        for month in range(2, 7):
+            month_file = downloader._get_month_filepath(month)
+            month_file.touch()
+
+        assert downloader.is_available(month_upper=6), "Months 1-6 exist, should return True"
+        assert not downloader.is_available(
+            month_upper=7
+        ), "Month 7 missing, should return False even though 1-6 exist"
+        assert not downloader.is_available(
+            month_upper=12
+        ), "Months 7-12 missing, should return False"
+
+
+def test_worldclim_historical_is_available_checks_all_months() -> None:
+    with tempfile.TemporaryDirectory() as tmpdir:
+        config = ClimateDataConfig(
+            variable_type=ClimateVarKey.T_MIN,
+            resolution_input=SpatialResolution.MIN10,
+            year_range=(1970, 2000),
+            format=DataFormat.GEOTIFF_WORLDCLIM_HISTORY,
+            filepath=f"{tmpdir}/wc2.1_10m_tmin",
+        )
+        downloader = WorldClimHistoricalDownloader(config)
+
+        downloader.data_dir.mkdir(parents=True, exist_ok=True)
+        month_01 = downloader._get_month_filepath(1)
+        month_01.touch()
+
+        assert downloader.is_available(month_upper=1)
+        assert not downloader.is_available(month_upper=2)
+        assert not downloader.is_available(month_upper=12)
+
+        for month in range(2, 4):
+            month_file = downloader._get_month_filepath(month)
+            month_file.touch()
+
+        assert downloader.is_available(month_upper=3)
+        assert not downloader.is_available(month_upper=4)
+
+
+def test_cru_ts_is_available_checks_all_months() -> None:
+    with tempfile.TemporaryDirectory() as tmpdir:
+        config = ClimateDataConfig(
+            variable_type=ClimateVarKey.CLOUD_COVER,
+            resolution_input=SpatialResolution.MIN30,
+            year_range=(1961, 1990),
+            format=DataFormat.CRU_TS,
+            filepath=tmpdir,
+        )
+        downloader = CRUTSDownloader(config)
+
+        downloader.data_dir.mkdir(parents=True, exist_ok=True)
+        month_01 = downloader._get_month_filepath(1)
+        month_01.touch()
+
+        assert downloader.is_available(month_upper=1)
+        assert not downloader.is_available(month_upper=2)
+        assert not downloader.is_available(month_upper=12)
+
+
+def test_chelsa_verify_checks_all_months() -> None:
+    with tempfile.TemporaryDirectory() as tmpdir:
+        config = ClimateDataConfig(
+            variable_type=ClimateVarKey.T_MIN,
+            resolution_input=SpatialResolution.MIN0_5,
+            year_range=(1981, 2010),
+            format=DataFormat.CHELSA,
+            filepath=tmpdir,
+        )
+        downloader = CHELSADownloader(config)
+
+        downloader.base_dir.mkdir(parents=True, exist_ok=True)
+
+        month_01 = downloader._get_month_filepath(1)
+        month_01.touch()
+
+        with patch("climatemaps.download.base.verify_geotiff_file") as mock_verify:
+            mock_verify.return_value = True
+
+            assert downloader.verify(month_upper=1)
+            assert not downloader.verify(month_upper=2)
+
+            for month in range(2, 4):
+                month_file = downloader._get_month_filepath(month)
+                month_file.touch()
+
+            assert downloader.verify(month_upper=3)
+            assert not downloader.verify(month_upper=4)
+
+
+def test_ensure_data_available_downloads_when_partial_months_exist() -> None:
+    with tempfile.TemporaryDirectory() as tmpdir:
+        config = ClimateDataConfig(
+            variable_type=ClimateVarKey.T_MIN,
+            resolution_input=SpatialResolution.MIN0_5,
+            year_range=(1981, 2010),
+            format=DataFormat.CHELSA,
+            filepath=tmpdir,
+        )
+
+        downloader = CHELSADownloader(config)
+        downloader.base_dir.mkdir(parents=True, exist_ok=True)
+
+        for month in range(1, 4):
+            month_file = downloader._get_month_filepath(month)
+            month_file.touch()
+
+        assert downloader.is_available(month_upper=3)
+        assert not downloader.is_available(month_upper=6)
+
+        with patch.object(downloader, "_do_download") as mock_download:
+            downloader.ensure_available(month_upper=3, skip_verification=True)
+            mock_download.assert_not_called()
+
+            downloader.ensure_available(month_upper=6, skip_verification=True)
+            mock_download.assert_called_once_with(skip_verification=True, month_upper=6)
+
+
+def test_chelsa_do_download_skips_existing_valid_files() -> None:
+    with tempfile.TemporaryDirectory() as tmpdir:
+        config = ClimateDataConfig(
+            variable_type=ClimateVarKey.T_MIN,
+            resolution_input=SpatialResolution.MIN0_5,
+            year_range=(1981, 2010),
+            format=DataFormat.CHELSA,
+            filepath=tmpdir,
+        )
+
+        downloader = CHELSADownloader(config)
+        downloader.base_dir.mkdir(parents=True, exist_ok=True)
+
+        month_01 = downloader._get_month_filepath(1)
+        month_01.touch()
+        month_02 = downloader._get_month_filepath(2)
+        month_02.touch()
+
+        with patch("climatemaps.geotiff.verify_geotiff_file") as mock_verify:
+            mock_verify.return_value = True
+
+            with patch("climatemaps.download.chelsa.download_file") as mock_download_file:
+                downloader._do_download(skip_verification=False, month_upper=3)
+
+                assert mock_download_file.call_count == 1
+
+                called_destination = mock_download_file.call_args[0][1]
+                assert called_destination == downloader._get_month_filepath(3)
