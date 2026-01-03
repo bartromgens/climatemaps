@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import argparse
+import gc
 import os
 import subprocess
 import sys
@@ -244,4 +245,8 @@ if __name__ == "__main__":
 
     logger.info("Running create_tileserver_config.py --dev-only")
     tileserver_script = os.path.join(os.path.dirname(__file__), "create_tileserver_config.py")
-    subprocess.run([sys.executable, tileserver_script, "--dev-only"], check=True)
+    subprocess.run(
+        [sys.executable, tileserver_script, "--dev-only"],
+        check=True,
+        stdout=subprocess.DEVNULL,
+    )

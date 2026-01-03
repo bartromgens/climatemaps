@@ -20,6 +20,7 @@ HISTORIC_DATA_GROUPS: List[ClimateDataConfigGroup] = [
             ClimateVarKey.MOISTURE_INDEX,
             ClimateVarKey.POTENTIAL_EVAPOTRANSPIRATION,
             ClimateVarKey.VAPOUR_PRESSURE_DEFICIT,
+            ClimateVarKey.WIND_SPEED,
         ],
         format=DataFormat.CHELSA,
         source="https://www.chelsa-climate.org/datasets/chelsa_climatologies",
@@ -30,7 +31,6 @@ HISTORIC_DATA_GROUPS: List[ClimateDataConfigGroup] = [
     CHELSAClimateDataConfigGroup(
         variable_types=[
             ClimateVarKey.CLOUD_COVER,
-            ClimateVarKey.WIND_SPEED,
         ],
         format=DataFormat.CHELSA,
         source="https://www.chelsa-climate.org/datasets/chelsa_climatologies",
