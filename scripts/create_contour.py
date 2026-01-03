@@ -1,149 +1,40 @@
 #!/usr/bin/env python3
 import argparse
-import multiprocessing
 import os
 import sys
-import concurrent.futures
-from dataclasses import dataclass
 from datetime import datetime
-from typing import List, Optional, Union
 
 import numpy as np
-
 
 module_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 if module_dir not in sys.path:
     sys.path.insert(0, module_dir)
 
-from climatemaps.config import ClimateMapsConfig
-from climatemaps.config import get_config
+from climatemaps.config import ClimateMapsConfig, get_config
 from climatemaps.contour import ContourTileBuilder
-from climatemaps.data import (
-    load_climate_data,
-    load_climate_data_for_difference,
+from climatemaps.data import load_climate_data, load_climate_data_for_difference
+from climatemaps.datasets import (
+    ClimateDataConfig,
+    ClimateDifferenceDataConfig,
+    ClimateModel,
+    ClimateVarKey,
 )
-from climatemaps.geogrid import GeoGrid
-from climatemaps.datasets import ClimateModel
-from climatemaps.datasets import ClimateScenario
-from climatemaps.datasets import ClimateVarKey
-from climatemaps.datasets import ClimateDataConfig
-from climatemaps.datasets import ClimateDifferenceDataConfig
-from climatemaps.datasets import HISTORIC_DATA_SETS
-from climatemaps.datasets import FUTURE_DATA_SETS
-from climatemaps.datasets import DIFFERENCE_DATA_SETS
-from climatemaps.datasets import SpatialResolution
-from climatemaps.logger import logger
-from climatemaps.tile import tile_files_exist, difference_tile_files_exist
-from climatemaps.download import ensure_data_available
 from climatemaps.gdal import GdalCalculator
+from climatemaps.geogrid import GeoGrid
+from climatemaps.logger import logger
+from climatemaps.tile import difference_tile_files_exist, tile_files_exist
+
+from scripts.utils import (
+    check_if_mbtiles_older_than,
+    create_tasks,
+    filter_datasets,
+    pre_download_all_data,
+    run_tasks_in_parallel,
+)
 
 
 maps_config: ClimateMapsConfig = get_config()
-
-np.set_printoptions(3, threshold=100, suppress=True)  # .3f
-
-
-@dataclass
-class DatasetGroup:
-    """Represents a group of datasets with their configuration and metadata."""
-
-    datasets: List[Union[ClimateDataConfig, ClimateDifferenceDataConfig]]
-    is_difference: bool
-    name: str
-
-
-def _create_tasks_for_datasets(
-    data_sets: List[ClimateDataConfig],
-    month_lower: int,
-    month_upper: int,
-    force_recreate: bool,
-    name: str,
-    if_older_than: datetime | None = None,
-) -> List[tuple]:
-    tasks = [
-        (config, month, force_recreate, if_older_than)
-        for config in data_sets
-        for month in range(month_lower, month_upper + 1)
-    ]
-    month_range = f"{month_lower}-{month_upper}" if month_lower != month_upper else str(month_lower)
-    logger.info(
-        f"Added {len(tasks)} {name} tasks (months {month_range}, {len(data_sets)} datasets)"
-    )
-    return tasks
-
-
-def _pre_ensure_all_data_available(
-    data_sets: List[ClimateDataConfig], month_upper: int = 12
-) -> None:
-    unique_configs = set()
-
-    for config in data_sets:
-        if isinstance(config, ClimateDifferenceDataConfig):
-            unique_configs.add(id(config.historical_config))
-            unique_configs.add(id(config.future_config))
-        else:
-            unique_configs.add(id(config))
-
-    logger.info(f"Pre-downloading/generating data for {len(unique_configs)} unique configurations")
-
-    processed_configs = set()
-    failed_downloads = []
-
-    def try_ensure_data(cfg: ClimateDataConfig, description: str) -> None:
-        if id(cfg) in processed_configs:
-            return
-
-        logger.info(f"Ensuring data available for {description}: {cfg.data_type_slug}")
-        try:
-            ensure_data_available(cfg, month_upper=month_upper)
-            processed_configs.add(id(cfg))
-        except Exception as e:
-            failed_downloads.append((cfg.data_type_slug, str(e)))
-            logger.warning(f"Failed to ensure data for {description} {cfg.data_type_slug}: {e}")
-
-    for config in data_sets:
-        if isinstance(config, ClimateDifferenceDataConfig):
-            try_ensure_data(config.historical_config, "historical")
-            try_ensure_data(config.future_config, "future")
-        else:
-            try_ensure_data(config, "")
-
-    if failed_downloads:
-        logger.error(f"Failed to download/generate {len(failed_downloads)} dataset(s):")
-        for data_slug, error in failed_downloads:
-            logger.error(f"  - {data_slug}: {error}")
-
-    logger.info(
-        f"Data pre-download/generation completed ({len(processed_configs)} successful, {len(failed_downloads)} failed)"
-    )
-
-
-def _mbtiles_are_older_than_date(
-    config: ClimateDataConfig, month: int, threshold_date: datetime
-) -> bool:
-    directory = os.path.join(maps_config.data_dir_out, config.data_type_slug)
-
-    mbtiles_files = [
-        os.path.join(directory, f"{month}_raster.mbtiles"),
-        os.path.join(directory, f"{month}_vector.mbtiles"),
-    ]
-
-    for file_path in mbtiles_files:
-        if not os.path.isfile(file_path):
-            return True
-
-        file_mtime = datetime.fromtimestamp(os.path.getmtime(file_path))
-        if file_mtime < threshold_date:
-            return True
-
-    return False
-
-
-def _get_month_range(month: int | None) -> tuple[int, int]:
-    if month is not None:
-        logger.info(f"Processing only month {month}")
-        return month, month
-    return 1, 12
+np.set_printoptions(3, threshold=100, suppress=True)
 
 
 def main(
@@ -156,133 +47,89 @@ def main(
     month: int | None = None,
 ) -> None:
     month_lower, month_upper = _get_month_range(month)
-    all_tasks = []
-    all_datasets = []
 
-    dataset_groups = [
-        DatasetGroup(HISTORIC_DATA_SETS, False, "historic"),
-        DatasetGroup(FUTURE_DATA_SETS, False, "future"),
-        DatasetGroup(DIFFERENCE_DATA_SETS, True, "difference"),
-    ]
-
-    # Filter dataset groups based on dataset_type argument
-    if dataset_type is not None:
-        dataset_groups = [group for group in dataset_groups if group.name == dataset_type]
-        if not dataset_groups:
-            logger.warning(
-                f"No datasets found for type '{dataset_type}'. Available types: historic, future, difference"
-            )
-            return
-
-    for group in dataset_groups:
-        if climate_model is not None:
-            if group.name == "historic":
-                group.datasets = []
-            else:
-                group.datasets = [
-                    ds for ds in group.datasets if ds.get_climate_model() == climate_model
-                ]
-
-        if variable_type is not None:
-            group.datasets = [
-                ds for ds in group.datasets if ds.get_variable_type() == variable_type
-            ]
-
-        all_datasets.extend(group.datasets)
-        all_tasks.extend(
-            _create_tasks_for_datasets(
-                group.datasets, month_lower, month_upper, force_recreate, group.name, if_older_than
-            )
-        )
-
-    logger.info("Pre-ensuring all data files exist before multiprocessing")
-    _pre_ensure_all_data_available(all_datasets, month_upper)
-
-    logger.info(f"Processing all data sets with {len(all_tasks)} total tasks")
-    run_tasks_with_process_pool(all_tasks, process, processes)
-
-
-def run_tasks_with_process_pool(tasks: List[tuple], process, num_processes: int) -> None:
-    total = len(tasks)
-    executor = None
-    try:
-        executor = concurrent.futures.ProcessPoolExecutor(max_workers=num_processes)
-        futures = {executor.submit(process, *task): task for task in tasks}
-        for counter, future in enumerate(concurrent.futures.as_completed(futures)):
-            result = future.result()
-            progress = int((counter / total) * 100)
-            logger.info(f"Completed: {result} | Progress: {progress}%")
-    except KeyboardInterrupt:
-        logger.warning("KeyboardInterrupt received! Attempting to shut down executor...")
-        for future in futures:
-            future.cancel()
-        if executor:
-            executor.shutdown(wait=False, cancel_futures=True)
-        terminate_process_pool_children()
-        raise
-    finally:
-        if executor:
-            executor.shutdown(wait=True)
-
-
-def terminate_process_pool_children() -> None:
-    children = multiprocessing.active_children()
-    if not children:
-        logger.info("No child processes to terminate.")
+    datasets = filter_datasets(climate_model, variable_type, dataset_type)
+    if not datasets:
         return
 
-    logger.info(f"Terminating {len(children)} child processes...")
-    for proc in children:
-        logger.info(f"Terminating child process PID={proc.pid}")
-        proc.terminate()
+    tasks = create_tasks(datasets, month_lower, month_upper, force_recreate, if_older_than)
 
-    for proc in children:
-        try:
-            proc.join(timeout=3)
-        except:
-            pass
+    logger.info("Pre-ensuring all data files exist before multiprocessing")
+    pre_download_all_data(datasets, month_upper)
 
-    remaining = [p for p in children if p.is_alive()]
-    if remaining:
-        logger.warning(f"Force killing {len(remaining)} remaining processes...")
-        for proc in remaining:
-            logger.warning(f"Force killing process PID={proc.pid}")
-            proc.kill()
-            try:
-                proc.join(timeout=2)
-            except:
-                pass
-
-    logger.info("All child processes terminated.")
+    logger.info(f"Processing {len(datasets)} datasets with {len(tasks)} total tasks")
+    run_tasks_in_parallel(tasks, _process_single_task, processes)
 
 
-def process(config, month: int, force_recreate: bool, if_older_than: datetime | None = None) -> str:
-    logger.info(f'Creating image and tiles for "{config.data_type_slug}" and month {month}')
+def _get_month_range(month: int | None) -> tuple[int, int]:
+    if month is not None:
+        logger.info(f"Processing only month {month}")
+        return month, month
+    return 1, 12
+
+
+def _process_single_task(
+    config: ClimateDataConfig | ClimateDifferenceDataConfig,
+    month: int,
+    force_recreate: bool,
+    if_older_than: datetime | None = None,
+) -> str:
+    logger.info(f'Creating tiles for "{config.data_type_slug}" - month {month}')
 
     try:
-        if isinstance(config, ClimateDifferenceDataConfig):
-            files_exist = difference_tile_files_exist(config, month, maps_config)
-        else:
-            files_exist = tile_files_exist(config, month, maps_config)
+        should_create = force_recreate or not _tile_files_exist(config, month)
 
-        should_create = force_recreate or not files_exist
-
-        if not should_create and if_older_than is not None and files_exist:
-            should_create = _mbtiles_are_older_than_date(config, month, if_older_than)
+        if not should_create and if_older_than is not None:
+            should_create = check_if_mbtiles_older_than(config, month, if_older_than, maps_config)
             if should_create:
                 logger.info(
-                    f'Recreating "{config.data_type_slug}" - {month} (files older than {if_older_than.date()})'
+                    f'Recreating "{config.data_type_slug}" - {month} '
+                    f"(files older than {if_older_than.date()})"
                 )
 
         if should_create:
-            _create_contour(config, month)
+            _create_contour_tiles(config, month)
         else:
             logger.info(f'Skip creation of "{config.data_type_slug}" - {month} (already exists)')
 
         return f"{config.data_type_slug}-{month}"
+
     except Exception as e:
         logger.exception(f"Failed to process {config.data_type_slug}, month {month}: {e}")
         raise
+
+
+def _tile_files_exist(config: ClimateDataConfig | ClimateDifferenceDataConfig, month: int) -> bool:
+    if isinstance(config, ClimateDifferenceDataConfig):
+        return difference_tile_files_exist(config, month, maps_config)
+    return tile_files_exist(config, month, maps_config)
+
+
+def _create_contour_tiles(
+    config: ClimateDataConfig | ClimateDifferenceDataConfig, month: int
+) -> None:
+    if isinstance(config, ClimateDifferenceDataConfig):
+        geo_grid = load_climate_data_for_difference(
+            config.historical_config, config.future_config, month
+        )
+    else:
+        geo_grid = load_climate_data(config, month)
+
+    _log_max_zoom_level(geo_grid)
+
+    contour_map = ContourTileBuilder(
+        config.contour_config,
+        geo_grid=geo_grid,
+        zoom_min=maps_config.zoom_min,
+        zoom_max_vector=maps_config.zoom_max_vector,
+        target_resolution_vector=config.target_resolution_vector,
+    )
+    contour_map.create_tiles(
+        maps_config.data_dir_out,
+        config.data_type_slug,
+        month,
+        zoom_factor=config.zoom_factor,
+    )
 
 
 def _log_max_zoom_level(geo_grid: GeoGrid) -> None:
@@ -292,103 +139,73 @@ def _log_max_zoom_level(geo_grid: GeoGrid) -> None:
         width_pixels, height_pixels
     )
     logger.info(
-        f"Max zoom level for geo_grid (resolution: {width_pixels}x{height_pixels}): {max_zoom_level}"
+        f"Max zoom level for geo_grid (resolution: {width_pixels}x{height_pixels}): "
+        f"{max_zoom_level}"
     )
 
 
-def _create_contour(data_set_config, month: int) -> None:
-    if isinstance(data_set_config, ClimateDifferenceDataConfig):
-        geo_grid = load_climate_data_for_difference(
-            data_set_config.historical_config, data_set_config.future_config, month
-        )
-    else:
-        geo_grid = load_climate_data(data_set_config, month)
-
-    _log_max_zoom_level(geo_grid)
-
-    contour_map = ContourTileBuilder(
-        data_set_config.contour_config,
-        geo_grid=geo_grid,
-        zoom_min=maps_config.zoom_min,
-        zoom_max_vector=maps_config.zoom_max_vector,
-        target_resolution_vector=data_set_config.target_resolution_vector,
-    )
-    contour_map.create_tiles(
-        maps_config.data_dir_out,
-        data_set_config.data_type_slug,
-        month,
-        zoom_factor=data_set_config.zoom_factor,
-    )
-
-
-if __name__ == "__main__":
+def _parse_arguments() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Create climate map contour tiles for all data set types."
     )
     parser.add_argument(
         "--force-recreate",
         action="store_true",
-        default=False,
-        help="Force recreation of resources. Defaults to False.",
+        help="Force recreation of existing tiles",
     )
     parser.add_argument(
         "--climate-model",
         type=str,
-        default=None,
         choices=[model.value for model in ClimateModel],
-        help="Process only datasets for a specific climate model (e.g., ENSEMBLE_MEAN, EC_Earth3_Veg).",
+        help="Process only datasets for a specific climate model",
     )
     parser.add_argument(
         "--variable-type",
         type=str,
-        default=None,
         choices=[var.value for var in ClimateVarKey],
-        help="Process only datasets for a specific variable type (e.g., PRECIPITATION, T_MAX, CLOUD_COVER).",
+        help="Process only datasets for a specific variable type",
     )
     parser.add_argument(
         "--if-older-than",
         type=str,
-        default=None,
         metavar="YYYY-MM-DD",
-        help="Only update tiles if mbtiles files are older than the specified date (format: YYYY-MM-DD).",
+        help="Only update tiles older than the specified date (format: YYYY-MM-DD)",
     )
     parser.add_argument(
         "--processes",
         type=int,
         default=1,
-        help="Number of parallel processes to use for tile creation. Defaults to 1.",
+        help="Number of parallel processes to use (default: 1)",
     )
     parser.add_argument(
         "--dataset-type",
         type=str,
-        default=None,
         choices=["historic", "future", "difference"],
-        help="Process only specific dataset type: historic, future, or difference. Defaults to all types.",
+        help="Process only specific dataset type (default: all types)",
     )
     parser.add_argument(
         "--month",
         type=int,
-        default=None,
         choices=range(1, 13),
         metavar="1-12",
-        help="Process only a specific month (1-12). Defaults to all months.",
+        help="Process only a specific month 1-12 (default: all months)",
     )
-    args = parser.parse_args()
+    return parser.parse_args()
 
-    climate_model = None
-    if args.climate_model:
-        climate_model = ClimateModel(args.climate_model)
 
-    variable_type = None
-    if args.variable_type:
-        variable_type = ClimateVarKey(args.variable_type)
+if __name__ == "__main__":
+    args = _parse_arguments()
+
+    climate_model = ClimateModel(args.climate_model) if args.climate_model else None
+    variable_type = ClimateVarKey(args.variable_type) if args.variable_type else None
 
     if_older_than = None
     if args.if_older_than:
         try:
             if_older_than = datetime.strptime(args.if_older_than, "%Y-%m-%d")
-        except ValueError:
-            parser.error(f"Invalid date format: {args.if_older_than}. Expected format: YYYY-MM-DD")
+        except ValueError as e:
+            print(f"Error: Invalid date format '{args.if_older_than}'. Expected: YYYY-MM-DD")
+            sys.exit(1)
 
     main(
         force_recreate=args.force_recreate,
