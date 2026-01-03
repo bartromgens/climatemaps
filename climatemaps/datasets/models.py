@@ -86,7 +86,7 @@ class ClimateDataConfig:
 
     @property
     def target_resolution_vector(self) -> int:
-        return 25_000_000
+        return 100_000_000
 
     @property
     def resolution_effective(self) -> float:

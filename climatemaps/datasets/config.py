@@ -83,7 +83,6 @@ CLIMATE_CONTOUR_CONFIGS: Dict[ClimateVarKey, ContourPlotConfig] = {
         title="Precipitation",
         unit="mm/month",
         log_scale=True,
-        n_contours=11,
     ),
     ClimateVarKey.T_MAX: ContourPlotConfig(
         level_lower=-20, level_upper=45, colormap=plt.cm.jet, title="Temperature (Day)", unit="C"
@@ -97,7 +96,6 @@ CLIMATE_CONTOUR_CONFIGS: Dict[ClimateVarKey, ContourPlotConfig] = {
         colormap=plt.cm.RdYlBu,
         title="Cloud coverage",
         unit="%",
-        n_contours=11,
     ),
     ClimateVarKey.WET_DAYS: ContourPlotConfig(
         level_lower=0, level_upper=30, colormap=plt.cm.RdYlBu, title="Wet days", unit="days"
@@ -130,7 +128,6 @@ CLIMATE_CONTOUR_CONFIGS: Dict[ClimateVarKey, ContourPlotConfig] = {
         colormap=plt.cm.viridis,
         title="Moisture Index",
         unit="mm/month",
-        n_contours=16,
     ),
     ClimateVarKey.VAPOUR_PRESSURE_DEFICIT: ContourPlotConfig(
         level_lower=0,
@@ -138,7 +135,6 @@ CLIMATE_CONTOUR_CONFIGS: Dict[ClimateVarKey, ContourPlotConfig] = {
         colormap=plt.cm.viridis,
         title="Vapour Pressure Deficit",
         unit="Pa",
-        n_contours=16,
     ),
     ClimateVarKey.POTENTIAL_EVAPOTRANSPIRATION: ContourPlotConfig(
         level_lower=50,
@@ -146,7 +142,6 @@ CLIMATE_CONTOUR_CONFIGS: Dict[ClimateVarKey, ContourPlotConfig] = {
         colormap=plt.cm.RdYlBu_r,
         title="Potential Evapotranspiration",
         unit="mm/month",
-        n_contours=8,
     ),
 }
 
@@ -158,6 +153,7 @@ CLIMATE_DIFFERENCE_CONTOUR_CONFIGS: Dict[ClimateVarKey, ContourPlotConfig] = {
         colormap=plt.cm.RdBu,
         title="Precipitation Change",
         unit="mm/month",
+        n_contours=21,
     ),
     ClimateVarKey.T_MAX: ContourPlotConfig(
         level_lower=-6,
@@ -165,6 +161,7 @@ CLIMATE_DIFFERENCE_CONTOUR_CONFIGS: Dict[ClimateVarKey, ContourPlotConfig] = {
         colormap=plt.cm.RdYlBu_r,
         title="Temperature (Day) Change",
         unit="°C",
+        n_contours=21,
     ),
     ClimateVarKey.T_MIN: ContourPlotConfig(
         level_lower=-5,
@@ -172,6 +169,7 @@ CLIMATE_DIFFERENCE_CONTOUR_CONFIGS: Dict[ClimateVarKey, ContourPlotConfig] = {
         colormap=plt.cm.RdYlBu_r,
         title="Temperature (Night) Change",
         unit="°C",
+        n_contours=21,
     ),
 }
 
@@ -184,6 +182,7 @@ CLIMATE_DIFFERENCE_CONTOUR_CONFIGS_STD_DEV: Dict[ClimateVarKey, ContourPlotConfi
         title="Precipitation Change",
         unit="mm/month",
         log_scale=True,
+        n_contours=21,
     ),
     ClimateVarKey.T_MAX: ContourPlotConfig(
         level_lower=0,
@@ -191,6 +190,7 @@ CLIMATE_DIFFERENCE_CONTOUR_CONFIGS_STD_DEV: Dict[ClimateVarKey, ContourPlotConfi
         colormap=plt.cm.RdYlGn_r,
         title="Temperature (Day) Change",
         unit="°C",
+        n_contours=21,
     ),
     ClimateVarKey.T_MIN: ContourPlotConfig(
         level_lower=0,
@@ -198,6 +198,7 @@ CLIMATE_DIFFERENCE_CONTOUR_CONFIGS_STD_DEV: Dict[ClimateVarKey, ContourPlotConfi
         colormap=plt.cm.RdYlGn_r,
         title="Temperature (Night) Change",
         unit="°C",
+        n_contours=21,
     ),
 }
 

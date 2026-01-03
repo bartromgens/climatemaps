@@ -17,7 +17,7 @@ class ContourPlotConfig(BaseModel):
     title: str = Field("", description="Plot title")
     unit: str = Field("", description="Unit label for colorbar")
     log_scale: bool = Field(False, description="Use symmetric log scale?")
-    n_contours: int = Field(21, description="Number of contour intervals")
+    n_contours: int = Field(11, description="Number of contour intervals")
     linthresh: float = Field(1.0, description="Linear threshold for SymLogNorm")
 
     # allow matplotlib & numpy types
