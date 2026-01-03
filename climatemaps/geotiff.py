@@ -5,7 +5,8 @@ from typing import Tuple
 import numpy as np
 import rasterio
 import rasterio.errors
-from rasterio.windows import Window
+from rasterio.windows import Window, from_bounds
+from climatemaps.bbox import BoundingBox
 from climatemaps.logger import logger
 
 
@@ -111,56 +112,119 @@ def _get_area_or_point(src) -> str | None:
     return tags.get("AREA_OR_POINT")
 
 
-def read_geotiff_future(filepath: str, month: int) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+def _read_with_bbox(
+    src, band: int, bbox: BoundingBox | None = None
+) -> Tuple[np.ndarray, int, int, int, int]:
+    if bbox is None:
+        array = src.read(band).astype(float)
+        return array, 0, 0, src.width, src.height
+
+    window = from_bounds(
+        bbox.lon_min, bbox.lat_min, bbox.lon_max, bbox.lat_max, transform=src.transform
+    )
+
+    window_int = Window(
+        col_off=max(0, int(np.floor(window.col_off))),
+        row_off=max(0, int(np.floor(window.row_off))),
+        width=min(src.width - max(0, int(np.floor(window.col_off))), int(np.ceil(window.width))),
+        height=min(src.height - max(0, int(np.floor(window.row_off))), int(np.ceil(window.height))),
+    )
+
+    logger.info(
+        f"Reading window: col={window_int.col_off}, row={window_int.row_off}, "
+        f"width={window_int.width}, height={window_int.height} "
+        f"(bbox: {bbox.lon_min:.2f}, {bbox.lat_min:.2f}, {bbox.lon_max:.2f}, {bbox.lat_max:.2f})"
+    )
+
+    array = src.read(band, window=window_int).astype(float)
+    return array, window_int.col_off, window_int.row_off, window_int.width, window_int.height
+
+
+def read_geotiff_future(
+    filepath: str, month: int, bbox: BoundingBox | None = None
+) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     assert month > 0 and month <= 12, f"Month must be between 1 and 12, got {month}"
 
     with rasterio.open(filepath) as src:
-        array = src.read(month).astype(float)
+        array, col_off, row_off, width, height = _read_with_bbox(src, month, bbox)
         area_or_point = _get_area_or_point(src)
-        lon_array, lat_array = _process_coordinate_arrays(
-            src.transform, src.width, src.height, area_or_point
-        )
+
+        if bbox is not None:
+            window_transform = rasterio.windows.transform(
+                Window(col_off, row_off, width, height), src.transform
+            )
+            lon_array, lat_array = _process_coordinate_arrays(
+                window_transform, width, height, area_or_point
+            )
+        else:
+            lon_array, lat_array = _process_coordinate_arrays(
+                src.transform, src.width, src.height, area_or_point
+            )
 
     return lon_array, lat_array, array
 
 
-def read_geotiff_history(filepath: str, month: int) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+def read_geotiff_history(
+    filepath: str, month: int, bbox: BoundingBox | None = None
+) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     data_type = filepath.split("/")[-1]
     filepath = os.path.join(filepath, f"{data_type}_{month:02d}.tif")
 
     with rasterio.open(filepath) as src:
-        array = src.read(1).astype(float)
+        array, col_off, row_off, width, height = _read_with_bbox(src, 1, bbox)
 
         array[array == -32768] = np.nan  # Sea
         array[array <= -300] = np.nan  # Sea
 
         area_or_point = _get_area_or_point(src)
-        lon_array, lat_array = _process_coordinate_arrays(
-            src.transform, src.width, src.height, area_or_point
-        )
+
+        if bbox is not None:
+            window_transform = rasterio.windows.transform(
+                Window(col_off, row_off, width, height), src.transform
+            )
+            lon_array, lat_array = _process_coordinate_arrays(
+                window_transform, width, height, area_or_point
+            )
+        else:
+            lon_array, lat_array = _process_coordinate_arrays(
+                src.transform, src.width, src.height, area_or_point
+            )
 
     return lon_array, lat_array, array
 
 
-def read_geotiff_cru_ts(filepath: str, month: int) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+def read_geotiff_cru_ts(
+    filepath: str, month: int, bbox: BoundingBox | None = None
+) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     data_type = filepath.split("/")[-1]
     filepath = os.path.join(filepath, f"{data_type}_{month:02d}.tif")
 
     with rasterio.open(filepath) as src:
-        array = src.read(1).astype(float)
+        array, col_off, row_off, width, height = _read_with_bbox(src, 1, bbox)
 
         array[array == 254] = np.nan  # NoData value
         array[array <= -9000] = np.nan  # Invalid values
 
         area_or_point = _get_area_or_point(src)
-        lon_array, lat_array = _process_coordinate_arrays(
-            src.transform, src.width, src.height, area_or_point
-        )
+
+        if bbox is not None:
+            window_transform = rasterio.windows.transform(
+                Window(col_off, row_off, width, height), src.transform
+            )
+            lon_array, lat_array = _process_coordinate_arrays(
+                window_transform, width, height, area_or_point
+            )
+        else:
+            lon_array, lat_array = _process_coordinate_arrays(
+                src.transform, src.width, src.height, area_or_point
+            )
 
     return lon_array, lat_array, array
 
 
-def read_geotiff_chelsa(filepath: str, month: int) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+def read_geotiff_chelsa(
+    filepath: str, month: int, bbox: BoundingBox | None = None
+) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     assert month > 0 and month <= 12, f"Month must be between 1 and 12, got {month}"
 
     data_type = filepath.split("/")[-1]
@@ -169,12 +233,21 @@ def read_geotiff_chelsa(filepath: str, month: int) -> Tuple[np.ndarray, np.ndarr
     logger.info(f"Loading CHELSA data from {formatted_filepath}, month {month}")
 
     with rasterio.open(formatted_filepath) as src:
-        array = src.read(1).astype(float)
+        array, col_off, row_off, width, height = _read_with_bbox(src, 1, bbox)
         logger.debug(f"CHELSA data loaded: shape {array.shape}, bounds {src.bounds}")
         area_or_point = _get_area_or_point(src)
-        lon_array, lat_array = _process_coordinate_arrays(
-            src.transform, src.width, src.height, area_or_point
-        )
+
+        if bbox is not None:
+            window_transform = rasterio.windows.transform(
+                Window(col_off, row_off, width, height), src.transform
+            )
+            lon_array, lat_array = _process_coordinate_arrays(
+                window_transform, width, height, area_or_point
+            )
+        else:
+            lon_array, lat_array = _process_coordinate_arrays(
+                src.transform, src.width, src.height, area_or_point
+            )
 
     return lon_array, lat_array, array
 

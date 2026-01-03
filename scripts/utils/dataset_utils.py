@@ -1,6 +1,7 @@
 from datetime import datetime
 from typing import List, Union
 
+from climatemaps.bbox import BoundingBox
 from climatemaps.datasets import (
     ClimateDataConfig,
     ClimateDifferenceDataConfig,
@@ -58,9 +59,10 @@ def create_tasks(
     month_upper: int,
     force_recreate: bool,
     if_older_than: datetime | None = None,
+    bbox: BoundingBox | None = None,
 ) -> List[tuple]:
     tasks = [
-        (config, month, force_recreate, if_older_than)
+        (config, month, force_recreate, if_older_than, bbox)
         for config in datasets
         for month in range(month_lower, month_upper + 1)
     ]

@@ -1,5 +1,6 @@
 import numpy
 
+from climatemaps.bbox import BoundingBox
 from climatemaps.datasets import (
     ClimateDataConfig,
     ClimateModel,
@@ -15,21 +16,24 @@ from climatemaps.geotiff import (
     read_geotiff_chelsa_point,
 )
 from climatemaps.geogrid import GeoGrid
+from climatemaps.landmask import apply_land_mask
 from climatemaps.logger import logger
 
 
-def _load_climate_data_base(data_config: ClimateDataConfig, month: int) -> GeoGrid:
+def _load_climate_data_base(
+    data_config: ClimateDataConfig, month: int, bbox: BoundingBox | None = None
+) -> GeoGrid:
     """Base function to load climate data without post-processing."""
     ensure_data_available(data_config, month_upper=month)
 
     if data_config.format == DataFormat.CRU_TS:
-        lon_range, lat_range, values = read_geotiff_cru_ts(data_config.filepath, month)
+        lon_range, lat_range, values = read_geotiff_cru_ts(data_config.filepath, month, bbox)
     elif data_config.format == DataFormat.GEOTIFF_WORLDCLIM_CMIP6:
-        lon_range, lat_range, values = read_geotiff_future(data_config.filepath, month)
+        lon_range, lat_range, values = read_geotiff_future(data_config.filepath, month, bbox)
     elif data_config.format == DataFormat.GEOTIFF_WORLDCLIM_HISTORY:
-        lon_range, lat_range, values = read_geotiff_history(data_config.filepath, month)
+        lon_range, lat_range, values = read_geotiff_history(data_config.filepath, month, bbox)
     elif data_config.format == DataFormat.CHELSA:
-        lon_range, lat_range, values = read_geotiff_chelsa(data_config.filepath, month)
+        lon_range, lat_range, values = read_geotiff_chelsa(data_config.filepath, month, bbox)
     else:
         raise ValueError(f"Unsupported data format: {data_config.format}")
 
@@ -41,8 +45,10 @@ def _load_climate_data_base(data_config: ClimateDataConfig, month: int) -> GeoGr
     return GeoGrid(lon_range=lon_range, lat_range=lat_range, values=values)
 
 
-def load_climate_data(data_config: ClimateDataConfig, month: int) -> GeoGrid:
-    geo_grid = _load_climate_data_base(data_config, month)
+def load_climate_data(
+    data_config: ClimateDataConfig, month: int, bbox: BoundingBox | None = None
+) -> GeoGrid:
+    geo_grid = _load_climate_data_base(data_config, month, bbox)
 
     logger.info(f"Grid data size size: {geo_grid.values.size/1_000_000:.1f} mega pixels")
     if (
@@ -58,13 +64,15 @@ def load_climate_data(data_config: ClimateDataConfig, month: int) -> GeoGrid:
         geo_grid = geo_grid.downsample(downsample_factor)
 
     if data_config.format == DataFormat.CHELSA:
-        geo_grid = geo_grid.apply_land_mask()
+        geo_grid = apply_land_mask(geo_grid)
 
     return geo_grid
 
 
-def load_climate_data_for_single_value(data_config: ClimateDataConfig, month: int) -> GeoGrid:
-    return _load_climate_data_base(data_config, month)
+def load_climate_data_for_single_value(
+    data_config: ClimateDataConfig, month: int, bbox: BoundingBox | None = None
+) -> GeoGrid:
+    return _load_climate_data_base(data_config, month, bbox)
 
 
 def load_single_point_value(
@@ -90,14 +98,17 @@ def load_single_point_value(
 
 
 def _calculate_difference(
-    historical_config: ClimateDataConfig, future_config: FutureClimateDataConfig, month: int
+    historical_config: ClimateDataConfig,
+    future_config: FutureClimateDataConfig,
+    month: int,
+    bbox: BoundingBox | None = None,
 ) -> GeoGrid:
-    future_grid = load_climate_data(future_config, month)
+    future_grid = load_climate_data(future_config, month, bbox)
 
     if future_config.climate_model == ClimateModel.ENSEMBLE_STD_DEV:
         return future_grid
 
-    historical_grid = load_climate_data(historical_config, month)
+    historical_grid = load_climate_data(historical_config, month, bbox)
 
     if not numpy.allclose(historical_grid.lon_range, future_grid.lon_range) or not numpy.allclose(
         historical_grid.lat_range, future_grid.lat_range
@@ -108,15 +119,19 @@ def _calculate_difference(
 
 
 def load_climate_data_for_difference(
-    historical_config: ClimateDataConfig, future_config: FutureClimateDataConfig, month: int
+    historical_config: ClimateDataConfig,
+    future_config: FutureClimateDataConfig,
+    month: int,
+    bbox: BoundingBox | None = None,
 ) -> GeoGrid:
-    return _calculate_difference(historical_config, future_config, month, load_climate_data)
+    return _calculate_difference(historical_config, future_config, month, bbox)
 
 
 def load_climate_data_for_difference_single_value(
-    historical_config: ClimateDataConfig, future_config: FutureClimateDataConfig, month: int
+    historical_config: ClimateDataConfig,
+    future_config: FutureClimateDataConfig,
+    month: int,
+    bbox: BoundingBox | None = None,
 ) -> GeoGrid:
     """Load climate data for difference calculation without downsampling or land masking for single value extraction."""
-    return _calculate_difference(
-        historical_config, future_config, month, load_climate_data_for_single_value
-    )
+    return _calculate_difference(historical_config, future_config, month, bbox)

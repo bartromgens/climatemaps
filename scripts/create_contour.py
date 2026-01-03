@@ -11,6 +11,7 @@ module_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 if module_dir not in sys.path:
     sys.path.insert(0, module_dir)
 
+from climatemaps.bbox import BoundingBox, Region, get_region_bbox
 from climatemaps.config import ClimateMapsConfig, get_config
 from climatemaps.contour import ContourTileBuilder
 from climatemaps.data import load_climate_data, load_climate_data_for_difference
@@ -46,14 +47,22 @@ def main(
     processes: int = 1,
     dataset_type: str | None = None,
     month: int | None = None,
+    region: Region | None = None,
 ) -> None:
     month_lower, month_upper = _get_month_range(month)
+
+    bbox = get_region_bbox(region) if region else None
+    if bbox:
+        logger.info(
+            f"Processing region {region.value}: "
+            f"lon=[{bbox.lon_min}, {bbox.lon_max}], lat=[{bbox.lat_min}, {bbox.lat_max}]"
+        )
 
     datasets = filter_datasets(climate_model, variable_type, dataset_type)
     if not datasets:
         return
 
-    tasks = create_tasks(datasets, month_lower, month_upper, force_recreate, if_older_than)
+    tasks = create_tasks(datasets, month_lower, month_upper, force_recreate, if_older_than, bbox)
 
     logger.info("Pre-ensuring all data files exist before multiprocessing")
     pre_download_all_data(datasets, month_upper)
@@ -74,6 +83,7 @@ def _process_single_task(
     month: int,
     force_recreate: bool,
     if_older_than: datetime | None = None,
+    bbox: BoundingBox | None = None,
 ) -> str:
     logger.info(f'Creating tiles for "{config.data_type_slug}" - month {month}')
 
@@ -89,7 +99,7 @@ def _process_single_task(
                 )
 
         if should_create:
-            _create_contour_tiles(config, month)
+            _create_contour_tiles(config, month, bbox)
         else:
             logger.info(f'Skip creation of "{config.data_type_slug}" - {month} (already exists)')
 
@@ -107,14 +117,16 @@ def _tile_files_exist(config: ClimateDataConfig | ClimateDifferenceDataConfig, m
 
 
 def _create_contour_tiles(
-    config: ClimateDataConfig | ClimateDifferenceDataConfig, month: int
+    config: ClimateDataConfig | ClimateDifferenceDataConfig,
+    month: int,
+    bbox: BoundingBox | None = None,
 ) -> None:
     if isinstance(config, ClimateDifferenceDataConfig):
         geo_grid = load_climate_data_for_difference(
-            config.historical_config, config.future_config, month
+            config.historical_config, config.future_config, month, bbox
         )
     else:
-        geo_grid = load_climate_data(config, month)
+        geo_grid = load_climate_data(config, month, bbox)
 
     _log_max_zoom_level(geo_grid)
 
@@ -191,6 +203,16 @@ def _parse_arguments() -> argparse.Namespace:
         metavar="1-12",
         help="Process only a specific month 1-12 (default: all months)",
     )
+    parser.add_argument(
+        "--region",
+        type=str,
+        choices=[region.value for region in Region],
+        help=(
+            "Process only a specific geographic region for faster feedback "
+            "(e.g., 'europe-africa'). This loads only the relevant portion of the data "
+            "while maintaining full resolution and zoom levels."
+        ),
+    )
     return parser.parse_args()
 
 
@@ -199,6 +221,7 @@ if __name__ == "__main__":
 
     climate_model = ClimateModel(args.climate_model) if args.climate_model else None
     variable_type = ClimateVarKey(args.variable_type) if args.variable_type else None
+    region = Region(args.region) if args.region else None
 
     if_older_than = None
     if args.if_older_than:
@@ -216,6 +239,7 @@ if __name__ == "__main__":
         processes=args.processes,
         dataset_type=args.dataset_type,
         month=args.month,
+        region=region,
     )
 
     logger.info("Running create_tileserver_config.py --dev-only")

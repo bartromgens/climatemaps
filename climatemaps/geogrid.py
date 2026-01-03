@@ -53,7 +53,6 @@ class GeoGrid(BaseModel):
         Increase resolution of the data by using spline interpolation.
         Returns a new zoomed GeoGrid object.
         """
-        assert self.resolution_mega_pixel >= 10, "Zooming is not supported for low-resolution data"
         logger.info(f"Zooming geogrid from {self.resolution_mega_pixel:.1f} megapixels")
 
         new_lat_size = int(self.lat_range.size * zoom_factor)
