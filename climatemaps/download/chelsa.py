@@ -36,32 +36,16 @@ class CHELSADownloader(DataDownloader):
         year_range_str = f"{self.config.year_range[0]}-{self.config.year_range[1]}"
         return f"{base_url}/{self.var_str}/{year_range_str}/{filename}"
 
-    def download(
-        self,
-        force_redownload: bool = False,
-        month_upper: int = 12,
-        skip_verification: bool = False,
-        **kwargs: dict,
-    ) -> None:
+    def _cleanup_corrupted_data(self) -> None:
+        for month in range(1, 13):
+            month_file = self._get_month_filepath(month)
+            month_file.unlink(missing_ok=True)
+
+    def _do_download(self, skip_verification: bool = False, month_upper: int = 12) -> None:
         self.base_dir.mkdir(parents=True, exist_ok=True)
 
         for month in range(1, month_upper + 1):
             destination = self._get_month_filepath(month)
-
-            if destination.exists() and not force_redownload:
-                if skip_verification:
-                    continue
-                if verify_geotiff_file(destination):
-                    logger.info(
-                        f"CHELSA data for month {month:02d} already exists and is valid at {destination}"
-                    )
-                    continue
-                else:
-                    logger.warning(
-                        f"CHELSA data for month {month:02d} exists but is corrupted, will re-download"
-                    )
-                    destination.unlink()
-
             logger.info(f"Downloading CHELSA data for month {month:02d}...")
 
             try:

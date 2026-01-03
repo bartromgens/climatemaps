@@ -1,16 +1,9 @@
 from typing import Type
 
-from climatemaps.datasets import ClimateDataConfig, DataFormat, FutureClimateDataConfig
+from climatemaps.datasets import ClimateDataConfig, DataFormat
 from climatemaps.download.base import DataDownloader
 from climatemaps.download.chelsa import CHELSADownloader
 from climatemaps.download.cru_ts import CRUTSDownloader
-from climatemaps.download.osm import (
-    OSMLandMaskCreator,
-    OSMLandPolygonsDownloader,
-    create_land_mask_from_osm,
-    download_osm_land_polygons,
-    ensure_osm_land_mask,
-)
 from climatemaps.download.worldclim import (
     WorldClimFutureDownloader,
     WorldClimHistoricalDownloader,
@@ -28,10 +21,10 @@ DOWNLOADER_REGISTRY: dict[DataFormat, Type[DataDownloader]] = {
 
 def get_downloader(config: ClimateDataConfig) -> DataDownloader:
     downloader_class = DOWNLOADER_REGISTRY.get(config.format)
-    
+
     if downloader_class is None:
         raise ValueError(f"No downloader registered for format: {config.format}")
-    
+
     return downloader_class(config)
 
 
@@ -43,31 +36,18 @@ def ensure_data_available(
 ) -> None:
     try:
         downloader = get_downloader(config)
-        
-        kwargs = {}
-        if config.format == DataFormat.CHELSA:
-            kwargs['month_upper'] = month_upper
-            kwargs['skip_verification'] = skip_verification
-        
-        downloader.ensure_available(force_redownload=force_redownload, **kwargs)
+        downloader.ensure_available(
+            force_redownload=force_redownload,
+            month_upper=month_upper,
+            skip_verification=skip_verification,
+        )
     except ValueError as e:
         logger.warning(f"Cannot download data: {e}")
         raise
 
 
 __all__ = [
-    'DataDownloader',
-    'WorldClimHistoricalDownloader',
-    'WorldClimFutureDownloader',
-    'CRUTSDownloader',
-    'CHELSADownloader',
-    'OSMLandPolygonsDownloader',
-    'OSMLandMaskCreator',
-    'DOWNLOADER_REGISTRY',
-    'get_downloader',
-    'ensure_data_available',
-    'download_osm_land_polygons',
-    'create_land_mask_from_osm',
-    'ensure_osm_land_mask',
+    "DOWNLOADER_REGISTRY",
+    "get_downloader",
+    "ensure_data_available",
 ]
-

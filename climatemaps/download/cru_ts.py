@@ -33,17 +33,11 @@ class CRUTSDownloader(DataDownloader):
         filename = f"cru_{self.abbr}_clim_{self.year_str}.zip"
         return f"{base_url}/{self.abbr}/{filename}"
 
-    def download(self, force_redownload: bool = False, **kwargs: dict) -> None:
-        if self.is_available() and not force_redownload:
-            if self.verify():
-                logger.info(f"CRU-TS data already exists and is valid at {self.config.filepath}")
-                return
-            logger.warning("CRU-TS data exists but is corrupted, will re-download")
-            for month in range(1, 13):
-                (self.data_dir / self.file_pattern.format(month)).unlink(missing_ok=True)
+    def _cleanup_corrupted_data(self) -> None:
+        for month in range(1, 13):
+            (self.data_dir / self.file_pattern.format(month)).unlink(missing_ok=True)
 
-        logger.info(f"CRU-TS data not found or invalid at {self.config.filepath}, downloading...")
-
+    def _do_download(self, skip_verification: bool = False, month_upper: int = 12) -> None:
         try:
             url = self._get_url()
         except ValueError as e:
@@ -56,8 +50,9 @@ class CRUTSDownloader(DataDownloader):
         download_file(url, temp_zip, verify=False)
         extract_zip(temp_zip, self.data_dir)
 
-        for month in range(1, 13):
-            month_file = self.data_dir / self.file_pattern.format(month)
-            if month_file.exists() and not verify_geotiff_file(month_file):
-                logger.warning(f"Extracted CRU-TS file for month {month:02d} failed verification")
-                raise ValueError(f"Extracted CRU-TS file for month {month:02d} failed verification")
+        if not skip_verification:
+            for month in range(1, 13):
+                month_file = self.data_dir / self.file_pattern.format(month)
+                if month_file.exists() and not verify_geotiff_file(month_file):
+                    logger.warning(f"Extracted CRU-TS file for month {month:02d} failed verification")
+                    raise ValueError(f"Extracted CRU-TS file for month {month:02d} failed verification")
