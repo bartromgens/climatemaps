@@ -45,6 +45,12 @@ export class VariableSelectorOverlayComponent {
       isSvg: true,
     },
     {
+      key: ClimateVarKey.RADIATION,
+      icon: 'assets/radiation.svg',
+      shortName: 'Radiation',
+      isSvg: true,
+    },
+    {
       key: ClimateVarKey.CLOUD_COVER,
       icon: 'assets/cloud-cover.svg',
       shortName: 'Cloud Cover',
@@ -60,12 +66,6 @@ export class VariableSelectorOverlayComponent {
       key: ClimateVarKey.RELATIVE_HUMIDITY,
       icon: 'assets/relative-humidity.svg',
       shortName: 'Humidity',
-      isSvg: true,
-    },
-    {
-      key: ClimateVarKey.RADIATION,
-      icon: 'assets/radiation.svg',
-      shortName: 'Radiation',
       isSvg: true,
     },
     {
