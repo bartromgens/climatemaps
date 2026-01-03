@@ -62,9 +62,7 @@ class DatasetGroup:
     name: str
 
 
-DEFAULT_TEST_SET_HISTORIC = TestCriteria(
-    resolution=SpatialResolution.MIN0_5,
-)
+DEFAULT_TEST_SET_HISTORIC = TestCriteria()
 
 DEFAULT_TEST_SET_FUTURE = TestCriteria(
     variable_type=ClimateVarKey.T_MAX,
@@ -366,15 +364,14 @@ def _create_contour(data_set_config, month: int) -> None:
         data_set_config.contour_config,
         geo_grid=geo_grid,
         zoom_min=maps_config.zoom_min,
-        zoom_max=maps_config.zoom_max_vector,
+        zoom_max_vector=maps_config.zoom_max_vector,
         target_resolution_vector=data_set_config.target_resolution_vector,
     )
     contour_map.create_tiles(
         maps_config.data_dir_out,
         data_set_config.data_type_slug,
         month,
-        figure_dpi=maps_config.figure_dpi,
-        zoom_factor=maps_config.zoom_factor,
+        zoom_factor=data_set_config.zoom_factor,
     )
 
 

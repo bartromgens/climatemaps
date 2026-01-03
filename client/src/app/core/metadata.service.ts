@@ -40,6 +40,7 @@ export class MetadataService {
 
   private readonly RESOLUTION_ORDER: SpatialResolution[] = [
     SpatialResolution.MIN0_5,
+    SpatialResolution.MIN1_5,
     SpatialResolution.MIN2_5,
     SpatialResolution.MIN5,
     SpatialResolution.MIN10,

@@ -13,7 +13,6 @@ from climatemaps.datasets import ClimateDifferenceDataConfig
 from climatemaps.datasets import ClimateVariable
 from climatemaps.datasets import ClimateModel
 from climatemaps.datasets import ClimateScenario
-from climatemaps.gdal import GdalCalculator
 
 logger = logging.getLogger(__name__)
 
@@ -31,14 +30,6 @@ class ClimateMapsConfig:
     def zoom_max_vector(self) -> int:
         return 8
 
-    @property
-    def zoom_factor(self) -> Optional[float]:
-        return 2.0
-
-    @property
-    def figure_dpi(self) -> int:
-        return 1000
-
 
 class ClimateMapsConfigDev(ClimateMapsConfig):
 
@@ -49,14 +40,6 @@ class ClimateMapsConfigDev(ClimateMapsConfig):
     @property
     def zoom_max_vector(self) -> int:
         return 8
-
-    @property
-    def zoom_factor(self) -> Optional[float]:
-        return 2.0
-
-    @property
-    def figure_dpi(self) -> int:
-        return 1000
 
 
 def get_config() -> ClimateMapsConfig:
@@ -107,9 +90,7 @@ class ClimateMap(BaseModel):
             resolution_effective=resolution_effective,
             tiles_url=f"{settings.TILE_SERVER_URL}/{config.data_type_slug}",
             colormap_url=f"{settings.API_BASE_URL}/colorbar/{config.data_type_slug}",
-            max_zoom_raster=GdalCalculator.calculate_max_zoom_raster_from_minutes(
-                resolution_effective
-            ),
+            max_zoom_raster=config.target_max_zoom_raster,
             max_zoom_vector=get_config().zoom_max_vector,
             source=config.source,
             climate_model=climate_model,

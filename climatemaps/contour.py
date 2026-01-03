@@ -27,12 +27,12 @@ class ContourTileBuilder:
         config: ContourPlotConfig,
         geo_grid: GeoGrid,
         zoom_min: int = 0,
-        zoom_max: int = 5,
+        zoom_max_vector: int = 5,
         target_resolution_vector: int | None = None,
     ):
-        logger.info(f"Contour zoom {zoom_min}-{zoom_max}")
+        logger.info(f"Contour zoom {zoom_min}-{zoom_max_vector}")
         self.zoom_min = zoom_min
-        self.zoom_max = zoom_max
+        self.zoom_max_vector = zoom_max_vector
         self.config = config
         self.target_resolution_vector = target_resolution_vector
         self.geo_grid_orig = geo_grid
@@ -51,7 +51,7 @@ class ContourTileBuilder:
         logger.info(f"BEGIN: contour for {name} and month {month} and zoomfactor {zoom_factor}")
         data_dir = self._create_output_dir(data_dir_out, name)
         filepath = os.path.join(str(data_dir), str(month))
-        if zoom_factor is not None and not self._is_high_resolution():
+        if zoom_factor is not None:
             self.geo_grid = self.geo_grid_orig.zoom(zoom_factor)
         else:
             self.geo_grid = self.geo_grid_orig
@@ -107,9 +107,6 @@ class ContourTileBuilder:
         aspect_ratio = lon_extent / lat_extent
 
         standard_fig_height = standard_fig_width / aspect_ratio
-
-        if not self._is_high_resolution():
-            return base_dpi, standard_fig_width, standard_fig_height
 
         grid_width = len(self.geo_grid.lon_range)
         grid_height = len(self.geo_grid.lat_range)
@@ -377,7 +374,7 @@ class ContourTileBuilder:
                 tippecanoe_dir=settings.TIPPECANOE_DIR,
                 mbtiles_file=mbtiles_temp_filepath,
                 minzoom=self.zoom_min,
-                maxzoom=self.zoom_max,
+                maxzoom=self.zoom_max_vector,
                 full_detail=12,
                 lower_detail=8,
                 min_detail=7,

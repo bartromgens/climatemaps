@@ -1,3 +1,4 @@
+import gc
 import logging
 import os
 
@@ -51,7 +52,7 @@ class GeoGrid(BaseModel):
         Increase resolution of the data by using spline interpolation.
         Returns a new zoomed GeoGrid object.
         """
-        assert self.resolution_mega_pixel < 25, "Zooming is not supported for low-resolution data"
+        assert self.resolution_mega_pixel >= 10, "Zooming is not supported for low-resolution data"
         logger.info(f"Zooming geogrid from {self.resolution_mega_pixel:.1f} megapixels")
 
         new_lat_size = int(self.lat_range.size * zoom_factor)
@@ -79,6 +80,10 @@ class GeoGrid(BaseModel):
 
         new_geogrid = GeoGrid(lon_range=new_lon_range, lat_range=new_lat_range, values=new_values)
         logger.info(f"Zoomed geogrid to {new_geogrid.resolution_mega_pixel:.1f} megapixels")
+
+        # Clean up intermediate variables to free memory
+        del new_bin_width_lon, new_bin_width_lat, zoom_factors
+        gc.collect()
 
         return new_geogrid
 

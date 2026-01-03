@@ -1,6 +1,7 @@
 import calendar
 import enum
 from dataclasses import dataclass, field
+import logging
 from typing import Callable
 from typing import Dict
 from typing import List
@@ -13,6 +14,8 @@ import matplotlib.pyplot as plt
 from pydantic import BaseModel
 
 from climatemaps.contour_config import ContourPlotConfig
+
+logger = logging.getLogger(__name__)
 
 
 def chelsa_temperature_conversion(
@@ -39,6 +42,7 @@ class SpatialResolution(enum.Enum):
     MIN30 = "30m"
     MIN10 = "10m"
     MIN5 = "5m"
+    MIN1_5 = "1.5m"
     MIN2_5 = "2.5m"
     MIN0_5 = "0.5m"
 
@@ -327,6 +331,19 @@ class ClimateDataConfig:
         return CLIMATE_CONTOUR_CONFIGS[self.variable_type]
 
     @property
+    def target_max_zoom_raster(self) -> int:
+        """Target maximum zoom level for raster tiles, calculated from resolution"""
+        from climatemaps.gdal import GdalCalculator
+
+        current_max_zoom = GdalCalculator.calculate_max_zoom_raster(self.resolution_input)
+        max_target_zoom = 6
+
+        if current_max_zoom >= max_target_zoom:
+            return max_target_zoom
+
+        return current_max_zoom + 1
+
+    @property
     def target_resolution_raster(self) -> int | None:
         """Target maximum number of pixels to reduce memory usage for contour maps"""
         from climatemaps.gdal import GdalCalculator
@@ -334,7 +351,9 @@ class ClimateDataConfig:
         world_width_minutes = 360 * 60
         world_height_minutes = 180 * 60
         width, height = GdalCalculator.calculate_min_resolution_for_zoom_level(
-            6, aspect_ratio_width=world_width_minutes, aspect_ratio_height=world_height_minutes
+            self.target_max_zoom_raster,
+            aspect_ratio_width=world_width_minutes,
+            aspect_ratio_height=world_height_minutes,
         )
         return width * height
 
@@ -367,6 +386,33 @@ class ClimateDataConfig:
 
         # Calculate new resolution after downsampling
         return resolution_minutes * downsample_factor
+
+    @property
+    def zoom_factor(self) -> Optional[float]:
+        """Calculate zoom factor based on input data resolution.
+
+        Calculates the zoom factor needed to increase the resolution by one zoom level.
+        If the resolution already supports the target max zoom level or higher, return None
+        (no zoom factor needed).
+        """
+        from climatemaps.gdal import GdalCalculator
+
+        current_max_zoom = GdalCalculator.calculate_max_zoom_raster(self.resolution_input)
+
+        if current_max_zoom >= self.target_max_zoom_raster:
+            return None
+
+        target_max_zoom = self.target_max_zoom_raster
+        resolution_minutes = float(self.resolution_input.value.rstrip("m"))
+        target_resolution_minutes = GdalCalculator.calculate_spatial_resolution_for_zoom_level(
+            target_max_zoom
+        )
+        zoom_factor = resolution_minutes / target_resolution_minutes
+        logger.info(
+            f"Resolution {self.resolution_input.value} supports zoom level {current_max_zoom}, "
+            f"applying zoom factor {zoom_factor:.3f} to reach zoom level {target_max_zoom}"
+        )
+        return zoom_factor
 
     def get_climate_model(self) -> Optional[ClimateModel]:
         return None
@@ -618,11 +664,9 @@ class CHELSAClimateDataConfigGroup(ClimateDataConfigGroup):
 HISTORIC_DATA_GROUPS: List[ClimateDataConfigGroup] = [
     CHELSAClimateDataConfigGroup(
         variable_types=[
-            ClimateVarKey.CLOUD_COVER,
             ClimateVarKey.T_MAX,
             ClimateVarKey.T_MIN,
             ClimateVarKey.PRECIPITATION,
-            ClimateVarKey.WIND_SPEED,
             ClimateVarKey.RELATIVE_HUMIDITY,
             ClimateVarKey.RADIATION,
             ClimateVarKey.MOISTURE_INDEX,
@@ -632,6 +676,16 @@ HISTORIC_DATA_GROUPS: List[ClimateDataConfigGroup] = [
         format=DataFormat.CHELSA,
         source="https://www.chelsa-climate.org/datasets/chelsa_climatologies",
         resolutions=[SpatialResolution.MIN0_5],
+        year_ranges=[(1981, 2010)],
+    ),
+    CHELSAClimateDataConfigGroup(
+        variable_types=[
+            ClimateVarKey.CLOUD_COVER,
+            ClimateVarKey.WIND_SPEED,
+        ],
+        format=DataFormat.CHELSA,
+        source="https://www.chelsa-climate.org/datasets/chelsa_climatologies",
+        resolutions=[SpatialResolution.MIN1_5],
         year_ranges=[(1981, 2010)],
     ),
 ]
