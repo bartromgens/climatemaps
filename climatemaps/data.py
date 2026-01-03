@@ -38,10 +38,10 @@ def load_climate_data(
     logger.info(f"Grid data size size: {geo_grid.values.size/1_000_000:.1f} mega pixels")
     if (
         data_config.target_resolution_raster is not None
-        and geo_grid.values.size > data_config.target_resolution_raster
+        and geo_grid.world_equivalent_pixels > data_config.target_resolution_raster
     ):
         downsample_factor = float(
-            numpy.sqrt(geo_grid.values.size / data_config.target_resolution_raster)
+            numpy.sqrt(geo_grid.world_equivalent_pixels / data_config.target_resolution_raster)
         )
         logger.info(
             f"Downsampling {data_config.data_type_slug} from {data_config.resolution_input} with factor {downsample_factor}"

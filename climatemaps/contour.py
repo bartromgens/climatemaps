@@ -20,7 +20,7 @@ from climatemaps.gdal import GdalCalculator
 
 class ContourTileBuilder:
     world_bounding_box_filepath = "data/raw/world_bounding_box.geojson"
-    HIGH_RESOLUTION_PIXEL_THRESHOLD = 10_000_000
+    HIGH_RESOLUTION_DEGREES_PER_PIXEL_THRESHOLD = 0.01
     WEB_MERCATOR_MAX_LAT = 85.05112878
 
     def __init__(
@@ -113,8 +113,8 @@ class ContourTileBuilder:
 
     def _is_high_resolution(self):
         """Check if the data is high-resolution and should use 2D histogram instead of contours"""
-        total_pixels = len(self.geo_grid.lon_range) * len(self.geo_grid.lat_range)
-        return total_pixels > self.HIGH_RESOLUTION_PIXEL_THRESHOLD
+        avg_spatial_resolution = (self.geo_grid.bin_width_lon + self.geo_grid.bin_width_lat) / 2.0
+        return avg_spatial_resolution < self.HIGH_RESOLUTION_DEGREES_PER_PIXEL_THRESHOLD
 
     def _calculate_appropriate_dpi(
         self, base_dpi: int, standard_fig_width: float = 10.0
@@ -346,10 +346,11 @@ class ContourTileBuilder:
         # For very high-resolution data, downsample before creating contours
         if self._is_high_resolution() and self.target_resolution_vector is not None:
             logger.info("Downsampling high-resolution data for vector contours")
-            total_pixels = len(self.geo_grid.lon_range) * len(self.geo_grid.lat_range)
-            target_pixels = self.target_resolution_vector
-            downsample_factor = float(np.sqrt(total_pixels / target_pixels))
-            logger.info(f"Downsampling by factor of {downsample_factor}")
+            total_pixels = self.geo_grid.world_equivalent_pixels
+            downsample_factor = float(np.sqrt(total_pixels / self.target_resolution_vector))
+            logger.info(
+                f"Downsampling by factor of {downsample_factor:.2f} (world-equivalent pixels: {total_pixels:.0f})"
+            )
 
             # Create downsampled grid for contours
             downsampled_grid = self.geo_grid.downsample(factor=downsample_factor)

@@ -195,6 +195,13 @@ class GeoGrid(BaseModel):
         total_pixels = self.values.size
         return total_pixels / 1_000_000
 
+    @property
+    def world_equivalent_pixels(self) -> float:
+        """Calculate total pixels if bounding box covered the complete world at current spatial resolution"""
+        world_pixels_lon = 360.0 / self.bin_width_lon
+        world_pixels_lat = 180.0 / self.bin_width_lat
+        return world_pixels_lon * world_pixels_lat
+
     def get_value_at_coordinate(self, lon: float, lat: float) -> float:
         if lon < self.lon_min or lon > self.lon_max:
             raise ValueError(f"Longitude {lon} is out of range [{self.lon_min}, {self.lon_max}]")
