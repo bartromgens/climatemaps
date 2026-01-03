@@ -1,3 +1,4 @@
+from ast import Return
 import gc
 import logging
 import os
@@ -20,7 +21,7 @@ class GeoGrid(BaseModel):
     lat_range: npt.NDArray[np.floating]
     values: npt.NDArray[np.floating]
 
-    model_config = ConfigDict(arbitrary_types_allowed=True, frozen=True)
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
     @field_validator("lon_range")
     def lon_range_must_increase(cls, v: npt.NDArray[np.floating]) -> npt.NDArray[np.floating]:
@@ -174,22 +175,22 @@ class GeoGrid(BaseModel):
         return 180.0 / len(self.lat_range) if len(self.lat_range) > 0 else 0
 
     @property
-    def llcrnrlon(self):
+    def llcrnrlon(self) -> float:
         """lower left corner longitude"""
         return self.lon_min - self.bin_width_lon / 2
 
     @property
-    def llcrnrlat(self):
+    def llcrnrlat(self) -> float:
         """lower left corner latitude"""
         return self.lat_min - self.bin_width_lat / 2
 
     @property
-    def urcrnrlon(self):
+    def urcrnrlon(self) -> float:
         """upper right corner longitude"""
         return self.lon_max + self.bin_width_lon / 2
 
     @property
-    def urcrnrlat(self):
+    def urcrnrlat(self) -> float:
         """upper right corner latitude"""
         return self.lat_max + self.bin_width_lat / 2
 
@@ -221,6 +222,42 @@ class GeoGrid(BaseModel):
             raise ValueError(f"No data available at coordinates (lat={lat}, lon={lon})")
 
         return value
+
+    def crop_to_lat_range(self, lat_min: float, lat_max: float) -> None:
+        """
+        Crop the grid to a specific latitude range in place.
+
+        This is useful for restricting data to Web Mercator limits (±85.05°) or other constraints.
+        Modifies the object in place to reduce memory consumption.
+        """
+        if lat_min >= lat_max:
+            raise ValueError(f"lat_min ({lat_min}) must be less than lat_max ({lat_max})")
+
+        actual_lat_min = self.lat_min
+        actual_lat_max = self.lat_max
+
+        if lat_min >= actual_lat_max or lat_max <= actual_lat_min:
+            raise ValueError(
+                f"Requested range [{lat_min}, {lat_max}] does not overlap with "
+                f"data range [{actual_lat_min}, {actual_lat_max}]"
+            )
+
+        if lat_min <= actual_lat_min and lat_max >= actual_lat_max:
+            logger.info("No cropping needed, requested range contains entire data range")
+            return
+
+        crop_lat_min = max(lat_min, actual_lat_min)
+        crop_lat_max = min(lat_max, actual_lat_max)
+
+        lat_mask = (self.lat_range >= crop_lat_min) & (self.lat_range <= crop_lat_max)
+
+        self.lat_range = self.lat_range[lat_mask]
+        self.values = self.values[lat_mask, :]
+
+        logger.info(
+            f"Cropped latitude range from [{actual_lat_min:.6f}, {actual_lat_max:.6f}] "
+            f"to [{self.lat_range[-1]:.6f}, {self.lat_range[0]:.6f}]"
+        )
 
     def apply_land_mask(self, land_mask_path: str = "data/raw/land_mask_osm.tif") -> "GeoGrid":
         """

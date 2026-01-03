@@ -21,6 +21,7 @@ from climatemaps.gdal import GdalCalculator
 class ContourTileBuilder:
     world_bounding_box_filepath = "data/raw/world_bounding_box.geojson"
     HIGH_RESOLUTION_PIXEL_THRESHOLD = 10_000_000
+    WEB_MERCATOR_MAX_LAT = 85.05112878
 
     def __init__(
         self,
@@ -35,6 +36,7 @@ class ContourTileBuilder:
         self.zoom_max_vector = zoom_max_vector
         self.config = config
         self.target_resolution_vector = target_resolution_vector
+        self._crop_to_web_mercator(geo_grid)
         self.geo_grid_orig = geo_grid
         self.geo_grid = geo_grid
         logger.info(f"lon min, max: {self.geo_grid.lon_min}, {self.geo_grid.lon_max}")
@@ -70,6 +72,26 @@ class ContourTileBuilder:
         self._create_raster_mbtiles(filepath, adjusted_dpi, fig_width, fig_height)
         self._create_contour_vector_mbtiles(filepath)
         logger.info(f"DONE: contour for {name} and month {month} and zoomfactor {zoom_factor}")
+
+    @classmethod
+    def _crop_to_web_mercator(cls, geo_grid: GeoGrid) -> None:
+        """
+        Crop the geo_grid to Web Mercator latitude limits in place.
+
+        Web Mercator (EPSG:3857) has latitude limits of approximately ±85.05°.
+        If the data extends beyond these limits, we crop it so that the image
+        corners match the actual data coordinates.
+        """
+        if (
+            geo_grid.llcrnrlat < -cls.WEB_MERCATOR_MAX_LAT
+            or geo_grid.urcrnrlat > cls.WEB_MERCATOR_MAX_LAT
+        ):
+            logger.info(
+                f"Data extends beyond Web Mercator limits "
+                f"[{geo_grid.llcrnrlat:.6f}, {geo_grid.urcrnrlat:.6f}], cropping to "
+                f"[±{cls.WEB_MERCATOR_MAX_LAT:.6f}]"
+            )
+            geo_grid.crop_to_lat_range(-cls.WEB_MERCATOR_MAX_LAT, cls.WEB_MERCATOR_MAX_LAT)
 
     @classmethod
     def _create_output_dir(cls, data_dir_out, name):

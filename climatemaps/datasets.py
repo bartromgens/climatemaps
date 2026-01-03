@@ -408,6 +408,11 @@ class ClimateDataConfig:
             target_max_zoom
         )
         zoom_factor = resolution_minutes / target_resolution_minutes
+
+        # Add 1.5% safety margin to ensure we're safely above the zoom level threshold
+        # to account for any rounding in the image generation pipeline
+        zoom_factor *= 1.015
+
         logger.info(
             f"Resolution {self.resolution_input.value} supports zoom level {current_max_zoom}, "
             f"applying zoom factor {zoom_factor:.3f} to reach zoom level {target_max_zoom}"

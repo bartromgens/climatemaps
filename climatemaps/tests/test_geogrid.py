@@ -210,7 +210,8 @@ class TestGeoGridDownsample:
         """Test that downsampled grid properly tiles the same bounding box"""
         # Create a grid with known coordinates
         # Original: 5 pixels at centers [-180, -90, 0, 90, 180] with bin_width=90
-        # Bounding box: [-225, 225] (width=450)
+        # Longitude: bounding box extends to [-225, 225]
+        # Latitude: bounding box extends to [-112.5, 112.5]
         lon_range = np.array([-180.0, -90.0, 0.0, 90.0, 180.0])
         lat_range = np.array([90.0, 45.0, 0.0, -45.0, -90.0])
         values = np.random.rand(5, 5)
@@ -225,18 +226,99 @@ class TestGeoGridDownsample:
         npt.assert_almost_equal(downsampled.llcrnrlat, geo_grid.llcrnrlat, decimal=10)
         npt.assert_almost_equal(downsampled.urcrnrlat, geo_grid.urcrnrlat, decimal=10)
 
-        # For longitude: 2 pixels spanning bbox of 450 degrees (from -225 to 225):
-        # new_bin_width = 450/2 = 225
-        # centers at: -225 + 225/2 = -112.5 and 225 - 225/2 = 112.5
-        expected_lon_centers = np.array([-112.5, 112.5])
+        # Verify bounding box values (no clamping applied)
+        assert geo_grid.llcrnrlon == -225.0
+        assert geo_grid.urcrnrlon == 225.0
+        assert geo_grid.llcrnrlat == -112.5
+        assert geo_grid.urcrnrlat == 112.5
+        assert downsampled.llcrnrlon == -225.0
+        assert downsampled.urcrnrlon == 225.0
+        assert downsampled.llcrnrlat == -112.5
+        assert downsampled.urcrnrlat == 112.5
 
-        # For latitude: 2 pixels spanning bbox of 225 degrees (from -112.5 to 112.5):
-        # new_bin_width = 225/2 = 112.5
-        # centers at: 112.5 - 112.5/2 = 56.25 (north) and -112.5 + 112.5/2 = -56.25 (south)
+        # For downsampled grid: 2 pixels spanning the original bounding box
+        # Original bbox: lon [-225, 225], lat [-112.5, 112.5]
+        # With 2 pixels: centers at -112.5 and 112.5 for lon, 56.25 and -56.25 for lat
+        expected_lon_centers = np.array([-112.5, 112.5])
         expected_lat_centers = np.array([56.25, -56.25])
 
         npt.assert_almost_equal(downsampled.lon_range, expected_lon_centers, decimal=10)
         npt.assert_almost_equal(downsampled.lat_range, expected_lat_centers, decimal=10)
+
+
+class TestGeoGridCropToLatRange:
+
+    @pytest.fixture(autouse=True)
+    def setup(self):
+        self.lon_range = np.linspace(-180, 180, 20)
+        self.lat_range = np.linspace(90, -90, 10)
+        self.values = np.arange(200).reshape(10, 20)
+        self.geo_grid = GeoGrid(
+            lon_range=self.lon_range, lat_range=self.lat_range, values=self.values
+        )
+
+    def test_crop_to_lat_range_basic(self):
+        """Test basic cropping functionality"""
+        original_lon_len = len(self.geo_grid.lon_range)
+        original_values_width = self.geo_grid.values.shape[1]
+
+        self.geo_grid.crop_to_lat_range(-45, 45)
+
+        assert self.geo_grid.lat_min >= -45
+        assert self.geo_grid.lat_max <= 45
+        assert len(self.geo_grid.lon_range) == original_lon_len
+        assert self.geo_grid.values.shape[1] == original_values_width
+
+    def test_crop_to_lat_range_web_mercator(self):
+        """Test cropping to Web Mercator limits"""
+        WEB_MERCATOR_MAX_LAT = 85.05112878
+        self.geo_grid.crop_to_lat_range(-WEB_MERCATOR_MAX_LAT, WEB_MERCATOR_MAX_LAT)
+
+        assert self.geo_grid.lat_min >= -WEB_MERCATOR_MAX_LAT
+        assert self.geo_grid.lat_max <= WEB_MERCATOR_MAX_LAT
+
+    def test_crop_to_lat_range_no_cropping_needed(self):
+        """Test that no cropping occurs when range contains entire grid"""
+        original_lat_range = self.geo_grid.lat_range.copy()
+        original_lon_range = self.geo_grid.lon_range.copy()
+        original_values = self.geo_grid.values.copy()
+
+        self.geo_grid.crop_to_lat_range(-100, 100)
+
+        npt.assert_array_equal(self.geo_grid.lat_range, original_lat_range)
+        npt.assert_array_equal(self.geo_grid.lon_range, original_lon_range)
+        npt.assert_array_equal(self.geo_grid.values, original_values)
+
+    def test_crop_to_lat_range_invalid_range(self):
+        """Test that invalid ranges raise ValueError"""
+        with pytest.raises(ValueError, match="lat_min .* must be less than lat_max"):
+            self.geo_grid.crop_to_lat_range(45, -45)
+
+    def test_crop_to_lat_range_no_overlap(self):
+        """Test that non-overlapping ranges raise ValueError"""
+        with pytest.raises(ValueError, match="does not overlap"):
+            self.geo_grid.crop_to_lat_range(95, 100)
+
+    def test_crop_preserves_longitude(self):
+        """Test that cropping preserves longitude range and data"""
+        original_lon_range = self.geo_grid.lon_range.copy()
+
+        self.geo_grid.crop_to_lat_range(-45, 45)
+
+        npt.assert_array_equal(self.geo_grid.lon_range, original_lon_range)
+
+    def test_crop_maintains_coordinate_data_alignment(self):
+        """Test that after cropping, coordinates still match data values"""
+        original_lat_60 = self.lat_range[1]
+        original_lon_0 = self.lon_range[10]
+        original_value = self.values[1, 10]
+
+        self.geo_grid.crop_to_lat_range(-45, 80)
+
+        cropped_value = self.geo_grid.get_value_at_coordinate(
+            lon=original_lon_0, lat=original_lat_60
+        )
+        npt.assert_almost_equal(cropped_value, original_value, decimal=6)
 
 
 class TestGeoGridBinWidth:
@@ -293,9 +375,10 @@ class TestGeoGridBinWidth:
         expected_bin_width_lon = np.mean(np.diff(lon_range))
         expected_bin_width_lat = np.mean(np.abs(np.diff(lat_range)))
 
+        # No clamping is applied in the new implementation
         expected_llcrnrlon = lon_min - expected_bin_width_lon / 2
-        expected_llcrnrlat = lat_min - expected_bin_width_lat / 2
         expected_urcrnrlon = lon_max + expected_bin_width_lon / 2
+        expected_llcrnrlat = lat_min - expected_bin_width_lat / 2
         expected_urcrnrlat = lat_max + expected_bin_width_lat / 2
 
         # Verify corner coordinates match expected values

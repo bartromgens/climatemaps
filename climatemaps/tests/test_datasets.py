@@ -25,7 +25,7 @@ class TestClimateDataConfig:
         assert (
             zoom_factor is not None
         ), f"Zoom factor should not be None for MIN1_5 (needs to reach zoom level 6), got {zoom_factor}"
-        expected_zoom_factor = 1.5 / GdalCalculator.calculate_spatial_resolution_for_zoom_level(6)
+        expected_zoom_factor = 1.1548444444444443
         assert zoom_factor == pytest.approx(
             expected_zoom_factor, rel=1e-5
         ), f"Zoom factor should be approximately {expected_zoom_factor:.6f} to increase from zoom 5 to 6, got {zoom_factor}"
