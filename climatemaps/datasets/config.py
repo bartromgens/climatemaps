@@ -140,12 +140,11 @@ CLIMATE_CONTOUR_CONFIGS: Dict[ClimateVarKey, ContourPlotConfig] = {
         n_contours=16,
     ),
     ClimateVarKey.POTENTIAL_EVAPOTRANSPIRATION: ContourPlotConfig(
-        level_lower=10,
-        level_upper=300,
-        colormap=plt.cm.RdYlBu,
+        level_lower=50,
+        level_upper=350,
+        colormap=plt.cm.RdYlBu_r,
         title="Potential Evapotranspiration",
         unit="mm/month",
-        log_scale=True,
     ),
 }
 

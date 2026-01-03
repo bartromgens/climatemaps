@@ -249,4 +249,5 @@ if __name__ == "__main__":
         [sys.executable, tileserver_script, "--dev-only"],
         check=True,
         stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
     )
