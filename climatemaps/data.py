@@ -8,13 +8,7 @@ from climatemaps.datasets import (
     FutureClimateDataConfig,
 )
 from climatemaps.download import ensure_data_available
-from climatemaps.geotiff import (
-    read_geotiff_future,
-    read_geotiff_history,
-    read_geotiff_cru_ts,
-    read_geotiff_chelsa,
-    read_geotiff_chelsa_point,
-)
+from climatemaps.geotiff import read_geotiff_chelsa_point
 from climatemaps.geogrid import GeoGrid
 from climatemaps.landmask import apply_land_mask
 from climatemaps.logger import logger
@@ -26,16 +20,7 @@ def _load_climate_data_base(
     """Base function to load climate data without post-processing."""
     ensure_data_available(data_config, month_upper=month)
 
-    if data_config.format == DataFormat.CRU_TS:
-        lon_range, lat_range, values = read_geotiff_cru_ts(data_config.filepath, month, bbox)
-    elif data_config.format == DataFormat.GEOTIFF_WORLDCLIM_CMIP6:
-        lon_range, lat_range, values = read_geotiff_future(data_config.filepath, month, bbox)
-    elif data_config.format == DataFormat.GEOTIFF_WORLDCLIM_HISTORY:
-        lon_range, lat_range, values = read_geotiff_history(data_config.filepath, month, bbox)
-    elif data_config.format == DataFormat.CHELSA:
-        lon_range, lat_range, values = read_geotiff_chelsa(data_config.filepath, month, bbox)
-    else:
-        raise ValueError(f"Unsupported data format: {data_config.format}")
+    lon_range, lat_range, values = data_config.reader_function(data_config.filepath, month, bbox)
 
     values = values * data_config.conversion_factor
 

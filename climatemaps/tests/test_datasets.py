@@ -1,6 +1,7 @@
 import pytest
 from climatemaps.datasets import ClimateDataConfig, ClimateVarKey, SpatialResolution, DataFormat
 from climatemaps.gdal import GdalCalculator
+from climatemaps.geotiff import read_geotiff_future
 
 
 class TestClimateDataConfig:
@@ -12,6 +13,7 @@ class TestClimateDataConfig:
             format=DataFormat.GEOTIFF_WORLDCLIM_CMIP6,
             resolution_input=SpatialResolution.MIN1_5,
             year_range=(2021, 2040),
+            reader_function=read_geotiff_future,
         )
 
         current_max_zoom = GdalCalculator.calculate_max_zoom_raster(SpatialResolution.MIN1_5)

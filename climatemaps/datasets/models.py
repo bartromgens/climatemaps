@@ -5,6 +5,7 @@ from typing import Callable, List, Optional, Tuple
 import numpy as np
 import numpy.typing as npt
 
+from climatemaps.bbox import BoundingBox
 from climatemaps.contour_config import ContourPlotConfig
 from climatemaps.datasets.config import (
     CHELSA_FILE_ABBREVIATIONS,
@@ -26,6 +27,8 @@ from climatemaps.datasets.enums import (
 
 logger = logging.getLogger(__name__)
 
+ReaderFunction = Callable[[str, int, BoundingBox | None], Tuple[np.ndarray, np.ndarray, np.ndarray]]
+
 
 @dataclass
 class ClimateDataConfig:
@@ -34,6 +37,7 @@ class ClimateDataConfig:
     format: DataFormat
     resolution_input: SpatialResolution
     year_range: Tuple[int, int]
+    reader_function: ReaderFunction
     conversion_function: Optional[
         Callable[[npt.NDArray[np.floating], int], npt.NDArray[np.floating]]
     ] = None
@@ -200,6 +204,7 @@ class ClimateDataConfigGroup:
     format: DataFormat
     resolutions: List[SpatialResolution]
     year_ranges: List[Tuple[int, int]]
+    reader_function: ReaderFunction
     conversion_function: Optional[
         Callable[[npt.NDArray[np.floating], int], npt.NDArray[np.floating]]
     ] = None
@@ -228,6 +233,7 @@ class ClimateDataConfigGroup:
                             year_range=year_range,
                             variable_name=variable.filename.lower(),
                         ),
+                        reader_function=self.reader_function,
                         conversion_function=self.conversion_function,
                         conversion_factor=self.conversion_factor,
                     )
@@ -262,6 +268,7 @@ class FutureClimateDataConfigGroup(ClimateDataConfigGroup):
                                     climate_scenario=climate_scenario.name.lower(),
                                     climate_model=climate_model.filename,
                                 ),
+                                reader_function=self.reader_function,
                                 conversion_function=self.conversion_function,
                                 conversion_factor=self.conversion_factor,
                                 source=self.source,
@@ -284,6 +291,7 @@ class CRUTSClimateDataConfigGroup(ClimateDataConfigGroup):
                         resolution_input=resolution,
                         year_range=year_range,
                         filepath=f"data/raw/cruts/cru_{abbr}_clim_{year_range[0]}-{year_range[1]}",
+                        reader_function=self.reader_function,
                         conversion_function=self.conversion_function,
                         conversion_factor=self.conversion_factor,
                         source=self.source,
@@ -332,6 +340,7 @@ class CHELSAClimateDataConfigGroup(ClimateDataConfigGroup):
                         resolution_input=resolution,
                         year_range=year_range,
                         filepath=filepath,
+                        reader_function=self.reader_function,
                         conversion_function=conversion_function,
                         conversion_factor=conversion_factor,
                         source=self.source,

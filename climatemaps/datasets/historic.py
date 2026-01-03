@@ -6,6 +6,7 @@ from climatemaps.datasets.models import (
     ClimateDataConfig,
     ClimateDataConfigGroup,
 )
+from climatemaps.geotiff import read_geotiff_chelsa
 
 
 HISTORIC_DATA_GROUPS: List[ClimateDataConfigGroup] = [
@@ -24,6 +25,7 @@ HISTORIC_DATA_GROUPS: List[ClimateDataConfigGroup] = [
         source="https://www.chelsa-climate.org/datasets/chelsa_climatologies",
         resolutions=[SpatialResolution.MIN0_5],
         year_ranges=[(1981, 2010)],
+        reader_function=read_geotiff_chelsa,
     ),
     CHELSAClimateDataConfigGroup(
         variable_types=[
@@ -34,6 +36,7 @@ HISTORIC_DATA_GROUPS: List[ClimateDataConfigGroup] = [
         source="https://www.chelsa-climate.org/datasets/chelsa_climatologies",
         resolutions=[SpatialResolution.MIN1_5],
         year_ranges=[(1981, 2010)],
+        reader_function=read_geotiff_chelsa,
     ),
 ]
 

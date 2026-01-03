@@ -11,6 +11,7 @@ from climatemaps.datasets.models import (
     FutureClimateDataConfig,
     FutureClimateDataConfigGroup,
 )
+from climatemaps.geotiff import read_geotiff_future
 
 
 FUTURE_FILE_TEMPLATE = "data/raw/worldclim/future/wc2.1_{resolution}_{variable_name}_{climate_model}_{climate_scenario}_{year_range[0]}-{year_range[1]}.tif"
@@ -34,6 +35,7 @@ FUTURE_DATA_GROUPS: List[FutureClimateDataConfigGroup] = [
             ClimateModel.ENSEMBLE_MEAN,
         ],
         filepath_template=FUTURE_FILE_TEMPLATE,
+        reader_function=read_geotiff_future,
     ),
     FutureClimateDataConfigGroup(
         variable_types=[ClimateVarKey.T_MIN, ClimateVarKey.T_MAX, ClimateVarKey.PRECIPITATION],
@@ -54,6 +56,7 @@ FUTURE_DATA_GROUPS: List[FutureClimateDataConfigGroup] = [
             ClimateModel.MPI_ESM1_2_HR,
         ],
         filepath_template=FUTURE_FILE_TEMPLATE,
+        reader_function=read_geotiff_future,
     ),
     FutureClimateDataConfigGroup(
         variable_types=[ClimateVarKey.T_MIN, ClimateVarKey.T_MAX, ClimateVarKey.PRECIPITATION],
@@ -69,6 +72,7 @@ FUTURE_DATA_GROUPS: List[FutureClimateDataConfigGroup] = [
             ClimateModel.GFDL_ESM4,
         ],
         filepath_template=FUTURE_FILE_TEMPLATE,
+        reader_function=read_geotiff_future,
     ),
 ]
 
