@@ -1,6 +1,6 @@
 [tool.pytest.ini_options]
 minversion = "7.0"
-testpaths = ["climatemaps/tests"]
+testpaths = ["climatemaps/tests", "climatemaps/download/tests"]
 log_cli = true
 log_cli_level = "WARNING"
 

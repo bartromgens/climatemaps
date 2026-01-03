@@ -60,7 +60,7 @@ def get_available_models(
     scenario: ClimateScenario,
     year_range: tuple[int, int],
 ) -> List[Path]:
-    from climatemaps.download import download_future_data
+    from climatemaps.download import ensure_data_available
 
     available_files = []
 
@@ -88,7 +88,7 @@ def get_available_models(
             )
 
             try:
-                download_future_data(config)
+                ensure_data_available(config)
                 if filepath.exists():
                     available_files.append(filepath)
                     logger.info(f"Downloaded model file: {filepath.name}")
