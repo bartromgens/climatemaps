@@ -10,7 +10,7 @@ import {
 import { CommonModule } from '@angular/common';
 import { LeafletModule } from '@bluehalo/ngx-leaflet';
 import { control, latLng, Layer, Map, tileLayer } from 'leaflet';
-import 'leaflet.vectorgrid';
+import vectorTileLayer from 'leaflet-vector-tile-layer';
 import { Subject, takeUntil } from 'rxjs';
 import { MatomoTracker } from 'ngx-matomo-client';
 
@@ -209,19 +209,17 @@ export class SmallMapComponent implements OnInit, OnDestroy, OnChanges {
         },
       );
 
-      this.vectorLayer = (window as any).L.vectorGrid.protobuf(
+      this.vectorLayer = vectorTileLayer(
         `${this.selectedOption.vectorUrl}_${this.month}/{z}/{x}/{y}.pbf`,
         {
-          vectorTileLayerStyles: {
-            contours: (properties: any) => ({
-              color: properties.stroke,
-              weight: 1.5,
-              opacity: 0.8,
-              crossOrigin: 'anonymous',
-            }),
-          },
+          style: (feature: any) => ({
+            color: feature.properties.stroke,
+            weight: 1.5,
+            opacity: 0.8,
+            fill: false,
+          }),
           interactive: true,
-          maxNativeZoom: this.selectedOption.vectorMaxZoom,
+          maxDetailZoom: this.selectedOption.vectorMaxZoom,
           maxZoom: 18,
         },
       );

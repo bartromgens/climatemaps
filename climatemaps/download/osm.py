@@ -1,13 +1,20 @@
+import json
+import os
 import zipfile
 from pathlib import Path
 
 from osgeo import gdal, ogr
+import togeojsontiles
 
 from climatemaps.download.utils import download_file
 from climatemaps.logger import logger
+from climatemaps.settings import settings
 
 
 OSM_LAND_POLYGONS_URL = "https://osmdata.openstreetmap.de/download/land-polygons-complete-4326.zip"
+NATURAL_EARTH_COUNTRIES_URL = (
+    "https://naciscdn.org/naturalearth/50m/cultural/ne_50m_admin_0_countries.zip"
+)
 
 
 class OSMLandPolygonsDownloader:
@@ -142,3 +149,175 @@ def ensure_osm_land_mask(
 
     shapefile_path = download_osm_land_polygons(force_redownload=force_redownload)
     return create_land_mask_from_osm(shapefile_path, output_path, resolution)
+
+
+class OSMCountryBordersDownloader:
+    def __init__(self, output_dir: Path | str = "data/raw/osm_countries"):
+        self.output_dir = Path(output_dir)
+        self.shapefile_path = self.output_dir / "ne_50m_admin_0_countries.shp"
+
+    def is_available(self) -> bool:
+        return self.shapefile_path.exists()
+
+    def download(self, force_redownload: bool = False) -> Path:
+        if self.is_available() and not force_redownload:
+            logger.info(f"Country borders already exist at {self.shapefile_path}")
+            return self.shapefile_path
+
+        self.output_dir.mkdir(parents=True, exist_ok=True)
+        zip_path = self.output_dir / "ne_50m_admin_0_countries.zip"
+
+        logger.info(f"Downloading country borders from {NATURAL_EARTH_COUNTRIES_URL}")
+        download_file(NATURAL_EARTH_COUNTRIES_URL, zip_path, verify=False)
+
+        logger.info(f"Extracting country borders to {self.output_dir}")
+        with zipfile.ZipFile(zip_path, "r") as zip_ref:
+            zip_ref.extractall(self.output_dir)
+
+        zip_path.unlink()
+
+        extracted_dir = self.output_dir / "ne_50m_admin_0_countries"
+        if extracted_dir.exists():
+            for file in extracted_dir.iterdir():
+                file.rename(self.output_dir / file.name)
+            extracted_dir.rmdir()
+
+        logger.info(f"Country borders extracted to {self.shapefile_path}")
+        return self.shapefile_path
+
+    def to_geojson(
+        self, output_path: Path | str | None = None, simplify_tolerance: float = 0.01
+    ) -> dict:
+        if not self.is_available():
+            raise FileNotFoundError(f"Shapefile not found: {self.shapefile_path}")
+
+        if output_path:
+            output_path = Path(output_path)
+            if output_path.exists():
+                with open(output_path, "r") as f:
+                    return json.load(f)
+
+        logger.info(
+            f"Converting country borders to GeoJSON (simplify tolerance: {simplify_tolerance})"
+        )
+
+        driver = ogr.GetDriverByName("ESRI Shapefile")
+        data_source = driver.Open(str(self.shapefile_path), 0)
+
+        if data_source is None:
+            raise RuntimeError(f"Could not open shapefile: {self.shapefile_path}")
+
+        layer = data_source.GetLayer()
+
+        geojson = {"type": "FeatureCollection", "features": []}
+
+        feature_count = layer.GetFeatureCount()
+        logger.info(f"Processing {feature_count} country features")
+
+        for i, feature in enumerate(layer):
+            if i % 100 == 0 and i > 0:
+                logger.info(f"Processed {i}/{feature_count} features")
+
+            geometry = feature.GetGeometryRef()
+            if geometry is None:
+                continue
+
+            geometry_type = geometry.GetGeometryType()
+            properties = {}
+            for j in range(feature.GetFieldCount()):
+                field_name = feature.GetFieldDefnRef(j).GetName()
+                field_value = feature.GetField(j)
+                if field_value:
+                    properties[field_name] = field_value
+
+            if geometry_type == ogr.wkbMultiPolygon or geometry_type == ogr.wkbMultiPolygon25D:
+                logger.debug(f"Converting MultiPolygon with {geometry.GetGeometryCount()} polygons")
+                for j in range(geometry.GetGeometryCount()):
+                    polygon = geometry.GetGeometryRef(j)
+                    if polygon is None:
+                        continue
+                    if simplify_tolerance > 0:
+                        polygon = polygon.Simplify(simplify_tolerance)
+                    geom_json = json.loads(polygon.ExportToJson())
+                    if geom_json.get("type") == "Polygon":
+                        geojson["features"].append(
+                            {"type": "Feature", "geometry": geom_json, "properties": properties}
+                        )
+            else:
+                if simplify_tolerance > 0:
+                    geometry = geometry.Simplify(simplify_tolerance)
+                geom_json = json.loads(geometry.ExportToJson())
+                geom_type = geom_json.get("type")
+                if geom_type in ["Polygon", "LineString", "Point"]:
+                    geojson["features"].append(
+                        {"type": "Feature", "geometry": geom_json, "properties": properties}
+                    )
+                else:
+                    logger.warning(f"Skipping unsupported geometry type: {geom_type}")
+
+        data_source = None
+
+        if output_path:
+            output_path = Path(output_path)
+            output_path.parent.mkdir(parents=True, exist_ok=True)
+            with open(output_path, "w") as f:
+                json.dump(geojson, f)
+            logger.info(f"GeoJSON saved to {output_path}")
+
+        logger.info(f"Converted {len(geojson['features'])} country features to GeoJSON")
+        return geojson
+
+    def to_mbtiles(
+        self,
+        geojson_path: Path | str,
+        mbtiles_path: Path | str,
+        minzoom: int = 0,
+        maxzoom: int = 5,
+    ) -> Path:
+        if not self.is_available():
+            raise FileNotFoundError(f"Shapefile not found: {self.shapefile_path}")
+
+        geojson_path = Path(geojson_path)
+        mbtiles_path = Path(mbtiles_path)
+        mbtiles_temp_path = Path(f"{mbtiles_path}.tmp")
+
+        if mbtiles_path.exists():
+            logger.info(f"MBTiles already exists at {mbtiles_path}")
+            return mbtiles_path
+
+        if not geojson_path.exists():
+            raise FileNotFoundError(f"GeoJSON file not found: {geojson_path}")
+
+        logger.info(f"Converting country borders GeoJSON to MBTiles: {mbtiles_path}")
+
+        mbtiles_path.parent.mkdir(parents=True, exist_ok=True)
+
+        try:
+            togeojsontiles.geojson_to_mbtiles(
+                filepaths=[str(geojson_path)],
+                tippecanoe_dir=settings.TIPPECANOE_DIR,
+                mbtiles_file=str(mbtiles_temp_path),
+                minzoom=minzoom,
+                maxzoom=maxzoom,
+                full_detail=12,
+                lower_detail=8,
+                min_detail=7,
+                extra_args=[
+                    "--layer",
+                    "countries",
+                    "--no-feature-limit",
+                    "--no-tile-size-limit",
+                    "--force",
+                ],
+            )
+
+            logger.info(f"Atomically moving {mbtiles_temp_path} to {mbtiles_path}")
+            os.replace(mbtiles_temp_path, mbtiles_path)
+            logger.info(f"Country borders MBTiles created at {mbtiles_path}")
+            return mbtiles_path
+        except Exception as e:
+            logger.error(f"Failed to create country borders MBTiles: {e}")
+            if mbtiles_temp_path.exists():
+                logger.info(f"Removing incomplete temp file: {mbtiles_temp_path}")
+                os.remove(mbtiles_temp_path)
+            raise

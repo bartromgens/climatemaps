@@ -44,7 +44,7 @@
             "scripts": [],
             "allowedCommonJsDependencies": [
               "leaflet",
-              "leaflet.vectorgrid"
+              "leaflet-vector-tile-layer"
             ]
           },
           "configurations": {

@@ -18,7 +18,7 @@ import {
   Map,
   tileLayer,
 } from 'leaflet';
-import 'leaflet.vectorgrid';
+import vectorTileLayer from 'leaflet-vector-tile-layer';
 
 import { environment } from '../../environments/environment';
 import { MapControlsComponent } from './controls/map-controls.component';
@@ -159,6 +159,7 @@ export class MapComponent extends BaseMapComponent implements OnInit {
   private map: Map | null = null;
   private rasterLayer: Layer | null = null;
   private vectorLayer: Layer | null = null;
+  private countryBordersLayer: Layer | null = null;
   plotData: { lat: number; lon: number; dataType: string } | null = null;
   timerangePlotData: { lat: number; lon: number; month: number } | null = null;
   private lastMouseMoveCall = 0;
@@ -374,6 +375,7 @@ export class MapComponent extends BaseMapComponent implements OnInit {
       this.map?.removeLayer(this.vectorLayer);
       this.vectorLayer = null;
     }
+    // Note: countryBordersLayer is not removed here as it should persist across layer updates
     // Clean up tooltips
     if (this.map) {
       this.tooltipManager.removeAllTooltips(this.map);
@@ -401,19 +403,17 @@ export class MapComponent extends BaseMapComponent implements OnInit {
         },
       );
 
-      this.vectorLayer = (window as any).L.vectorGrid.protobuf(
+      this.vectorLayer = vectorTileLayer(
         `${this.selectedOption.vectorUrl}_${this.monthSelected}/{z}/{x}/{y}.pbf`,
         {
-          vectorTileLayerStyles: {
-            contours: (properties: any) => ({
-              color: this.intensifyColor(properties.stroke),
-              weight: 1,
-              opacity: 1,
-              crossOrigin: 'anonymous',
-            }),
-          },
+          style: (feature: any) => ({
+            color: this.intensifyColor(feature.properties.stroke),
+            weight: 1,
+            opacity: 1,
+            fill: false,
+          }),
           interactive: true,
-          maxNativeZoom: this.selectedOption.vectorMaxZoom,
+          maxDetailZoom: this.selectedOption.vectorMaxZoom,
           maxZoom: 18,
         },
       );
@@ -556,6 +556,7 @@ export class MapComponent extends BaseMapComponent implements OnInit {
   onMapReady(map: Map): void {
     this.map = map;
     this.initializeMap();
+    this.loadCountryBordersLayer();
 
     map.on('dragstart', () => {
       this.isDragging = true;
@@ -570,6 +571,50 @@ export class MapComponent extends BaseMapComponent implements OnInit {
       // Set initial resolution to highest available
       this.handleZoomBasedResolutionChange();
     }, 0);
+  }
+
+  private loadCountryBordersLayer(): void {
+    if (!this.map) {
+      return;
+    }
+
+    // Create a pane for country borders with higher z-index to render on top
+    if (!this.map.getPane('countryBordersPane')) {
+      this.map.createPane('countryBordersPane');
+      const pane = this.map.getPane('countryBordersPane');
+      if (pane) {
+        pane.style.zIndex = '650';
+      }
+    }
+
+    try {
+      this.countryBordersLayer = vectorTileLayer(
+        `${environment.tilesBaseUrl}/country_borders/{z}/{x}/{y}.pbf`,
+        {
+          style: {
+            color: '#000000',
+            weight: 0.2,
+            opacity: 1,
+            fillOpacity: 0,
+            fill: false,
+          },
+          interactive: false,
+          minZoom: 0,
+          maxDetailZoom: 5,
+          pane: 'countryBordersPane',
+        },
+      );
+
+      this.countryBordersLayer?.on('tileerror', (error: any) => {
+        console.warn('Country borders tile error (non-fatal):', error);
+      });
+
+      if (this.countryBordersLayer) {
+        this.map.addLayer(this.countryBordersLayer);
+      }
+    } catch (error) {
+      console.error('Failed to load country borders layer:', error);
+    }
   }
 
   onMove(event: LeafletEvent): void {

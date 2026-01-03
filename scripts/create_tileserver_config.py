@@ -64,7 +64,15 @@ def _create_config(data_configs, dev_mode: bool = False):
                 "mbtiles": f"{data_config.data_type_slug}/{month}_raster.mbtiles"
             }
             logger.info(f"Added {data_config.data_type_slug} {month} to config")
+
+    _add_country_borders_to_config(config, dev_mode)
+
     return config
+
+
+def _add_country_borders_to_config(config: dict, dev_mode: bool = False) -> None:
+    config["data"]["country_borders"] = {"mbtiles": "country_borders/country_borders.mbtiles"}
+    logger.info("Added country_borders to config")
 
 
 if __name__ == "__main__":
