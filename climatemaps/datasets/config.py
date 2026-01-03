@@ -104,10 +104,20 @@ CLIMATE_CONTOUR_CONFIGS: Dict[ClimateVarKey, ContourPlotConfig] = {
         level_lower=0, level_upper=30, colormap=plt.cm.RdYlBu, title="Frost days", unit="days"
     ),
     ClimateVarKey.WIND_SPEED: ContourPlotConfig(
-        level_lower=0, level_upper=8, colormap=plt.cm.viridis, title="Wind Speed", unit="m/s"
+        level_lower=0,
+        level_upper=8,
+        colormap=plt.cm.viridis,
+        title="Wind Speed",
+        unit="m/s",
+        n_contours=6,
     ),
     ClimateVarKey.RADIATION: ContourPlotConfig(
-        level_lower=0, level_upper=320, colormap=plt.cm.RdYlBu_r, title="Radiation", unit="W/m^2"
+        level_lower=0,
+        level_upper=320,
+        colormap=plt.cm.RdYlBu_r,
+        title="Radiation",
+        unit="W/m^2",
+        n_contours=31,
     ),
     ClimateVarKey.DIURNAL_TEMP_RANGE: ContourPlotConfig(
         level_lower=5,
@@ -120,7 +130,12 @@ CLIMATE_CONTOUR_CONFIGS: Dict[ClimateVarKey, ContourPlotConfig] = {
         level_lower=1, level_upper=34, colormap=plt.cm.jet, title="Vapour pressure", unit="hPa"
     ),
     ClimateVarKey.RELATIVE_HUMIDITY: ContourPlotConfig(
-        level_lower=25, level_upper=100, colormap=plt.cm.RdYlBu, title="Relative Humidity", unit="%"
+        level_lower=25,
+        level_upper=100,
+        colormap=plt.cm.RdYlBu,
+        title="Relative Humidity",
+        unit="%",
+        n_contours=21,
     ),
     ClimateVarKey.MOISTURE_INDEX: ContourPlotConfig(
         level_lower=-250,
