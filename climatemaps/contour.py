@@ -20,7 +20,7 @@ from climatemaps.gdal import GdalCalculator
 
 class ContourTileBuilder:
     world_bounding_box_filepath = "data/raw/world_bounding_box.geojson"
-    HIGH_RESOLUTION_DEGREES_PER_PIXEL_THRESHOLD = 0.01
+    HIGH_RESOLUTION_DEGREES_PER_PIXEL_THRESHOLD = 0.07  # ~10 megapixel world image
     WEB_MERCATOR_MAX_LAT = 85.05112878
 
     def __init__(
@@ -114,6 +114,9 @@ class ContourTileBuilder:
     def _is_high_resolution(self):
         """Check if the data is high-resolution and should use 2D histogram instead of contours"""
         avg_spatial_resolution = (self.geo_grid.bin_width_lon + self.geo_grid.bin_width_lat) / 2.0
+        logger.info(
+            f"avg_spatial_resolution: {avg_spatial_resolution}, threshold: {self.HIGH_RESOLUTION_DEGREES_PER_PIXEL_THRESHOLD}"
+        )
         return avg_spatial_resolution < self.HIGH_RESOLUTION_DEGREES_PER_PIXEL_THRESHOLD
 
     def _calculate_appropriate_dpi(
