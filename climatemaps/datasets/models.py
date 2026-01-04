@@ -318,7 +318,7 @@ class CHELSAClimateDataConfigGroup(ClimateDataConfigGroup):
                         ClimateVarKey.T_MAX: 0.1,
                         ClimateVarKey.T_MIN: 0.1,
                         ClimateVarKey.PRECIPITATION: 0.1,
-                        ClimateVarKey.WIND_SPEED: 0.001,
+                        ClimateVarKey.WIND_SPEED: 0.01,
                         ClimateVarKey.RELATIVE_HUMIDITY: 0.01,
                         ClimateVarKey.RADIATION: 1.0,
                         ClimateVarKey.MOISTURE_INDEX: 0.1,
