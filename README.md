@@ -71,7 +71,7 @@ npm install -g tileserver-gl
 Run:
 
 ```bash
-python scrips/create_contour.py
+python scrips/create_contour.py [--month=1] [-dataset-type=historic]
 ```
 
 to create contour and raster mbtiles.
@@ -96,6 +96,12 @@ uvicorn api.main:app --reload
 tileserver-gl --config tileserver_config_dev.json --port 8080
 ```
 
+Or with auto-restart on config changes (requires nodemon: `npm install -g nodemon`):
+
+```bash
+nodemon --watch tileserver_config_dev.json --exec "tileserver-gl --config tileserver_config_dev.json --port 8080"
+```
+
 #### Run the client (Angular)
 
 In `./client` run:
@@ -109,6 +115,33 @@ Or run against the openclimatemap.org API and tileserver:
 ```
 ng serve --configuration=production-backend
 ```
+
+#### Alternative: Docker Compose (recommended for production-like setup)
+
+Start both the API server and tileserver using Docker Compose:
+
+```bash
+docker compose up -d
+```
+
+This will start:
+
+- **API server** on `localhost:8000`
+- **Tileserver** on `localhost:8080`
+
+To view logs:
+
+```bash
+docker compose logs -f
+```
+
+To stop the services:
+
+```bash
+docker compose down
+```
+
+Note: Make sure you have already created the tiles and tileserver config before starting the services.
 
 ### Tests
 
