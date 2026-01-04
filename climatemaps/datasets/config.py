@@ -109,7 +109,7 @@ CLIMATE_CONTOUR_CONFIGS: Dict[ClimateVarKey, ContourPlotConfig] = {
         colormap=plt.cm.viridis,
         title="Wind Speed",
         unit="m/s",
-        n_contours=6,
+        n_contours=5,
     ),
     ClimateVarKey.RADIATION: ContourPlotConfig(
         level_lower=0,
@@ -152,7 +152,7 @@ CLIMATE_CONTOUR_CONFIGS: Dict[ClimateVarKey, ContourPlotConfig] = {
         unit="Pa",
     ),
     ClimateVarKey.POTENTIAL_EVAPOTRANSPIRATION: ContourPlotConfig(
-        level_lower=50,
+        level_lower=0,
         level_upper=350,
         colormap=plt.cm.RdYlBu_r,
         title="Potential Evapotranspiration",
