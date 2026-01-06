@@ -401,38 +401,14 @@ export class MapComponent extends BaseMapComponent implements OnInit {
         },
       );
 
-      this.vectorLayer = (window as any).L.vectorGrid.protobuf(
-        `${this.selectedOption.vectorUrl}_${this.monthSelected}/{z}/{x}/{y}.pbf`,
-        {
-          vectorTileLayerStyles: {
-            contours: (properties: any) => ({
-              color: this.intensifyColor(properties.stroke),
-              weight: 1,
-              opacity: 1,
-              crossOrigin: 'anonymous',
-            }),
-          },
-          interactive: true,
-          maxNativeZoom: this.selectedOption.vectorMaxZoom,
-          maxZoom: 18,
-        },
-      );
-
-      // Add hover event listeners
-      this.vectorLayer?.on('mouseover', (e: any) => {
-        this.onVectorLayerHover(e);
-      });
-
-      this.vectorLayer?.on('mouseout', () => {
-        this.onVectorLayerMouseOut();
-      });
-
-      // Add new layers to map
+      // Add raster layer to map first
       if (this.rasterLayer) {
         this.map?.addLayer(this.rasterLayer);
-      }
-      if (this.vectorLayer && this.controlsData.showContourLines) {
-        this.map?.addLayer(this.vectorLayer);
+
+        // Wait for raster layer to load before adding vector layer
+        this.rasterLayer.once('load', () => {
+          this.addVectorLayer();
+        });
       }
 
       setTimeout(() => {
@@ -440,6 +416,43 @@ export class MapComponent extends BaseMapComponent implements OnInit {
       }, 0);
     } else {
       console.log('No layer selected - not adding any layers to map');
+    }
+  }
+
+  private addVectorLayer(): void {
+    if (!this.selectedOption || this.vectorLayer) {
+      return;
+    }
+
+    this.vectorLayer = (window as any).L.vectorGrid.protobuf(
+      `${this.selectedOption.vectorUrl}_${this.monthSelected}/{z}/{x}/{y}.pbf`,
+      {
+        vectorTileLayerStyles: {
+          contours: (properties: any) => ({
+            color: this.intensifyColor(properties.stroke),
+            weight: 1,
+            opacity: 1,
+            crossOrigin: 'anonymous',
+          }),
+        },
+        interactive: true,
+        maxNativeZoom: this.selectedOption.vectorMaxZoom,
+        maxZoom: 18,
+      },
+    );
+
+    // Add hover event listeners
+    this.vectorLayer?.on('mouseover', (e: any) => {
+      this.onVectorLayerHover(e);
+    });
+
+    this.vectorLayer?.on('mouseout', () => {
+      this.onVectorLayerMouseOut();
+    });
+
+    // Add vector layer to map if contour lines are enabled
+    if (this.vectorLayer && this.controlsData.showContourLines) {
+      this.map?.addLayer(this.vectorLayer);
     }
   }
 
