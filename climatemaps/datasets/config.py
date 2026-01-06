@@ -79,21 +79,29 @@ CLIMATE_CONTOUR_CONFIGS: Dict[ClimateVarKey, ContourPlotConfig] = {
     ClimateVarKey.PRECIPITATION: ContourPlotConfig(
         level_lower=5,
         level_upper=400,
-        colormap=plt.cm.RdYlBu,
+        colormap=plt.cm.YlGnBu,
         title="Precipitation",
         unit="mm/month",
         log_scale=True,
     ),
     ClimateVarKey.T_MAX: ContourPlotConfig(
-        level_lower=-20, level_upper=45, colormap=plt.cm.jet, title="Temperature (Day)", unit="C"
+        level_lower=-20,
+        level_upper=45,
+        colormap=plt.cm.turbo,
+        title="Temperature (Day)",
+        unit="C",
     ),
     ClimateVarKey.T_MIN: ContourPlotConfig(
-        level_lower=-30, level_upper=28, colormap=plt.cm.jet, title="Temperature (Night)", unit="C"
+        level_lower=-30,
+        level_upper=28,
+        colormap=plt.cm.turbo,
+        title="Temperature (Night)",
+        unit="C",
     ),
     ClimateVarKey.CLOUD_COVER: ContourPlotConfig(
         level_lower=10,
         level_upper=90,
-        colormap=plt.cm.RdYlBu,
+        colormap=plt.cm.Greys,
         title="Cloud coverage",
         unit="%",
     ),
@@ -114,7 +122,7 @@ CLIMATE_CONTOUR_CONFIGS: Dict[ClimateVarKey, ContourPlotConfig] = {
     ClimateVarKey.RADIATION: ContourPlotConfig(
         level_lower=0,
         level_upper=320,
-        colormap=plt.cm.RdYlBu_r,
+        colormap=plt.cm.plasma,
         title="Radiation",
         unit="W/m^2",
         n_contours=31,
@@ -132,7 +140,7 @@ CLIMATE_CONTOUR_CONFIGS: Dict[ClimateVarKey, ContourPlotConfig] = {
     ClimateVarKey.RELATIVE_HUMIDITY: ContourPlotConfig(
         level_lower=25,
         level_upper=100,
-        colormap=plt.cm.RdYlBu,
+        colormap=plt.cm.Blues,
         title="Relative Humidity",
         unit="%",
         n_contours=21,
@@ -140,21 +148,21 @@ CLIMATE_CONTOUR_CONFIGS: Dict[ClimateVarKey, ContourPlotConfig] = {
     ClimateVarKey.MOISTURE_INDEX: ContourPlotConfig(
         level_lower=-250,
         level_upper=250,
-        colormap=plt.cm.viridis,
+        colormap=plt.cm.RdYlBu,
         title="Moisture Index",
         unit="mm/month",
     ),
     ClimateVarKey.VAPOUR_PRESSURE_DEFICIT: ContourPlotConfig(
         level_lower=0,
         level_upper=2500,
-        colormap=plt.cm.viridis,
+        colormap=plt.cm.cividis,
         title="Vapour Pressure Deficit",
         unit="Pa",
     ),
     ClimateVarKey.POTENTIAL_EVAPOTRANSPIRATION: ContourPlotConfig(
         level_lower=0,
         level_upper=350,
-        colormap=plt.cm.RdYlBu_r,
+        colormap=plt.cm.inferno,
         title="Potential Evapotranspiration",
         unit="mm/month",
     ),
