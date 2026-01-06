@@ -117,7 +117,7 @@ CLIMATE_CONTOUR_CONFIGS: Dict[ClimateVarKey, ContourPlotConfig] = {
         colormap=plt.cm.viridis,
         title="Wind Speed",
         unit="m/s",
-        n_contours=5,
+        n_contours=4,
     ),
     ClimateVarKey.RADIATION: ContourPlotConfig(
         level_lower=0,
@@ -125,7 +125,7 @@ CLIMATE_CONTOUR_CONFIGS: Dict[ClimateVarKey, ContourPlotConfig] = {
         colormap=plt.cm.plasma,
         title="Radiation",
         unit="W/m^2",
-        n_contours=31,
+        n_contours=16,
     ),
     ClimateVarKey.DIURNAL_TEMP_RANGE: ContourPlotConfig(
         level_lower=5,
@@ -143,7 +143,6 @@ CLIMATE_CONTOUR_CONFIGS: Dict[ClimateVarKey, ContourPlotConfig] = {
         colormap=plt.cm.Blues,
         title="Relative Humidity",
         unit="%",
-        n_contours=21,
     ),
     ClimateVarKey.MOISTURE_INDEX: ContourPlotConfig(
         level_lower=-250,
@@ -161,7 +160,7 @@ CLIMATE_CONTOUR_CONFIGS: Dict[ClimateVarKey, ContourPlotConfig] = {
     ),
     ClimateVarKey.POTENTIAL_EVAPOTRANSPIRATION: ContourPlotConfig(
         level_lower=0,
-        level_upper=350,
+        level_upper=300,
         colormap=plt.cm.inferno,
         title="Potential Evapotranspiration",
         unit="mm/month",
