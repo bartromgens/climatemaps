@@ -123,6 +123,7 @@ export abstract class BaseMapComponent implements OnInit {
     this.climateVariables =
       this.metadataService.getClimateVariables(climateMaps);
     this.yearRanges = this.metadataService.getYearRanges(climateMaps);
+    console.log('All year ranges from API:', this.yearRanges.map(yr => yr.value));
     this.resolutions = this.metadataService.getResolutions(climateMaps);
     this.climateScenarios =
       this.metadataService.getClimateScenarios(climateMaps);
@@ -171,12 +172,19 @@ export abstract class BaseMapComponent implements OnInit {
       this.controlsData.selectedYearRange &&
       !this.isHistoricalYearRange(this.controlsData.selectedYearRange.value)
     ) {
+      console.log('setDefaultFutureSelections - Setting defaults for future data');
       if (!this.controlsData.selectedClimateScenario) {
+        console.log('  Setting scenario to SSP370');
         this.controlsData.selectedClimateScenario = ClimateScenario.SSP370;
       }
       if (!this.controlsData.selectedClimateModel) {
+        console.log('  Setting model to ENSEMBLE_MEAN');
         this.controlsData.selectedClimateModel = ClimateModel.ENSEMBLE_MEAN;
       }
+      console.log('setDefaultFutureSelections - After setting:', {
+        scenario: this.controlsData.selectedClimateScenario,
+        model: this.controlsData.selectedClimateModel,
+      });
     }
   }
 
