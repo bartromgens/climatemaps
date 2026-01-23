@@ -25,8 +25,7 @@ export class BaseOverlaySelectComponent<T> {
   @Input() show = false;
   @Input() trackingCategory = 'Control Selection';
   @Input() trackingAction = 'Selection Change (Overlay)';
-  @Input() getDisplayName: (value: T) => string = (value: T) =>
-    String(value);
+  @Input() getDisplayName: (value: T) => string = (value: T) => String(value);
   @Input() bottomPosition = 20;
   @Output() valueChange = new EventEmitter<T | null>();
 
@@ -48,4 +47,3 @@ export class BaseOverlaySelectComponent<T> {
     return this.availableOptions.includes(option);
   }
 }
-

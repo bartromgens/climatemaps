@@ -147,7 +147,8 @@ import { getClimateVarKeyFromDataType } from '../utils/enum';
         font-size: 11px;
         color: #333;
         white-space: nowrap;
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+        font-family:
+          -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
           'Helvetica Neue', Arial, sans-serif;
       }
 
@@ -160,7 +161,8 @@ import { getClimateVarKeyFromDataType } from '../utils/enum';
         justify-content: center;
         font-size: 11px;
         color: #333;
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+        font-family:
+          -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
           'Helvetica Neue', Arial, sans-serif;
         white-space: nowrap;
         transform: rotate(-90deg);

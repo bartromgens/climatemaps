@@ -81,12 +81,16 @@ export class LayerFilterService {
       const hasData = climateMaps.some((map) =>
         this.matchesVariableType(map, variableType, climateVariables),
       );
-      
+
       if (!hasData) {
         return false;
       }
 
-      if (selectedYearRange && isHistoricalYearRange && !isHistoricalYearRange(selectedYearRange.value)) {
+      if (
+        selectedYearRange &&
+        isHistoricalYearRange &&
+        !isHistoricalYearRange(selectedYearRange.value)
+      ) {
         return this.climateVariableHelper.hasFuturePredictions(variableType);
       }
 

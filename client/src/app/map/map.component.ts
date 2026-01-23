@@ -320,13 +320,20 @@ export class MapComponent extends BaseMapComponent implements OnInit {
       }
 
       // Ensure scenario has a default if still null
-      if (!this.controlsData.selectedClimateScenario && availableClimateScenarios.length > 0) {
-        this.controlsData.selectedClimateScenario = availableClimateScenarios[0];
+      if (
+        !this.controlsData.selectedClimateScenario &&
+        availableClimateScenarios.length > 0
+      ) {
+        this.controlsData.selectedClimateScenario =
+          availableClimateScenarios[0];
       }
 
       // Now get available models AFTER scenario has been validated/set
       const availableClimateModels = this.getAvailableClimateModels();
-      console.log('resetInvalidSelections - Available models (after scenario set):', availableClimateModels);
+      console.log(
+        'resetInvalidSelections - Available models (after scenario set):',
+        availableClimateModels,
+      );
 
       // Validate and set model
       if (
@@ -338,7 +345,10 @@ export class MapComponent extends BaseMapComponent implements OnInit {
       }
 
       // Ensure model has a default if still null
-      if (!this.controlsData.selectedClimateModel && availableClimateModels.length > 0) {
+      if (
+        !this.controlsData.selectedClimateModel &&
+        availableClimateModels.length > 0
+      ) {
         this.controlsData.selectedClimateModel = availableClimateModels[0];
       }
     }

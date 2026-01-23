@@ -85,7 +85,11 @@
     </div>
 
     <app-colorbar-json
-      [dataType]="yearRangeOptions.length > 0 ? yearRangeOptions[0].option?.climateMap?.dataType || null : null"
+      [dataType]="
+        yearRangeOptions.length > 0
+          ? yearRangeOptions[0].option?.climateMap?.dataType || null
+          : null
+      "
       [width]="12"
       [height]="180"
       [showLabel]="!isMobile"
