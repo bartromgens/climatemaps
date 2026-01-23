@@ -6,10 +6,23 @@ from climatemaps.datasets.models import (
     ClimateDataConfig,
     ClimateDataConfigGroup,
 )
-from climatemaps.geotiff import read_geotiff_chelsa
+from climatemaps.geotiff import read_geotiff_chelsa, read_geotiff_history
 
 
 HISTORIC_DATA_GROUPS: List[ClimateDataConfigGroup] = [
+    ClimateDataConfigGroup(
+        variable_types=[
+            ClimateVarKey.T_MAX,
+            ClimateVarKey.T_MIN,
+            ClimateVarKey.PRECIPITATION,
+        ],
+        format=DataFormat.GEOTIFF_WORLDCLIM_HISTORY,
+        source="https://www.worldclim.org/data/worldclim21.html",
+        resolutions=[SpatialResolution.MIN10, SpatialResolution.MIN5],
+        year_ranges=[(1970, 2000)],
+        filepath_template="data/raw/worldclim/history/wc2.1_{resolution}_{variable_name}",
+        reader_function=read_geotiff_history,
+    ),
     CHELSAClimateDataConfigGroup(
         variable_types=[
             ClimateVarKey.T_MAX,
@@ -43,4 +56,8 @@ HISTORIC_DATA_GROUPS: List[ClimateDataConfigGroup] = [
 
 HISTORIC_DATA_SETS: List[ClimateDataConfig] = [
     cfg for data_group in HISTORIC_DATA_GROUPS for cfg in data_group.create_configs()
+]
+
+HISTORIC_DATA_SETS_API: List[ClimateDataConfig] = [
+    cfg for cfg in HISTORIC_DATA_SETS if cfg.format != DataFormat.GEOTIFF_WORLDCLIM_HISTORY
 ]

@@ -1,5 +1,6 @@
 from typing import List
 
+from climatemaps.datasets.enums import DataFormat
 from climatemaps.datasets.future import FUTURE_DATA_SETS
 from climatemaps.datasets.historic import HISTORIC_DATA_SETS
 from climatemaps.datasets.models import ClimateDifferenceDataConfig
@@ -8,9 +9,13 @@ from climatemaps.datasets.models import ClimateDifferenceDataConfig
 def create_difference_map_configs() -> List[ClimateDifferenceDataConfig]:
     difference_configs = []
 
+    worldclim_historic_datasets = [
+        cfg for cfg in HISTORIC_DATA_SETS if cfg.format == DataFormat.GEOTIFF_WORLDCLIM_HISTORY
+    ]
+
     for future_config in FUTURE_DATA_SETS:
         historical_config = None
-        for hist_config in HISTORIC_DATA_SETS:
+        for hist_config in worldclim_historic_datasets:
             if (
                 hist_config.variable_type == future_config.variable_type
                 and hist_config.resolution_input == future_config.resolution_input

@@ -13,7 +13,7 @@ from climatemaps.datasets.enums import (
     SpatialResolution,
 )
 from climatemaps.datasets.future import FUTURE_DATA_SETS
-from climatemaps.datasets.historic import HISTORIC_DATA_SETS
+from climatemaps.datasets.historic import HISTORIC_DATA_SETS, HISTORIC_DATA_SETS_API
 from climatemaps.datasets.models import (
     ClimateDataConfig,
     ClimateDifferenceDataConfig,
@@ -35,5 +35,6 @@ __all__ = [
     "FUTURE_DATA_SETS",
     "FutureClimateDataConfig",
     "HISTORIC_DATA_SETS",
+    "HISTORIC_DATA_SETS_API",
     "SpatialResolution",
 ]

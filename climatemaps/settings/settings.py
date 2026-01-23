@@ -1,4 +1,4 @@
-from climatemaps.datasets import HISTORIC_DATA_SETS
+from climatemaps.datasets import HISTORIC_DATA_SETS_API
 from climatemaps.datasets import FUTURE_DATA_SETS
 from climatemaps.datasets import DIFFERENCE_DATA_SETS
 
@@ -7,7 +7,7 @@ DEV_MODE = False
 TILE_SERVER_URL = "http://localhost:8080/data"
 API_BASE_URL = "http://localhost:8000/v1"
 
-DATA_SETS_API = HISTORIC_DATA_SETS + FUTURE_DATA_SETS + DIFFERENCE_DATA_SETS
+DATA_SETS_API = HISTORIC_DATA_SETS_API + FUTURE_DATA_SETS + DIFFERENCE_DATA_SETS
 
 TIPPECANOE_DIR = "/usr/local/bin/"
 

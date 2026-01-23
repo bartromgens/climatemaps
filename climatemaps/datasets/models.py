@@ -236,6 +236,7 @@ class ClimateDataConfigGroup:
                         reader_function=self.reader_function,
                         conversion_function=self.conversion_function,
                         conversion_factor=self.conversion_factor,
+                        source=self.source,
                     )
                     configs.append(config)
         return configs
