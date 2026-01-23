@@ -13,6 +13,7 @@ from climatemaps.datasets import (
     FutureClimateDataConfig,
     SpatialResolution,
 )
+from climatemaps.geotiff import read_geotiff_future
 from climatemaps.logger import logger
 
 """
@@ -61,6 +62,7 @@ def get_available_models(
     year_range: tuple[int, int],
 ) -> List[Path]:
     from climatemaps.download import ensure_data_available
+    from climatemaps.geotiff import verify_geotiff_file
 
     available_files = []
 
@@ -72,29 +74,36 @@ def get_available_models(
         )
 
         if filepath.exists():
-            available_files.append(filepath)
-            logger.info(f"Found model file: {filepath.name}")
-        else:
-            logger.info(f"Model file not found: {filepath.name}, attempting to download...")
+            if not verify_geotiff_file(filepath, thorough=True):
+                logger.warning(f"Model file {filepath.name} exists but is corrupted, will re-download")
+                filepath.unlink()
+            else:
+                available_files.append(filepath)
+                logger.info(f"Found model file: {filepath.name}")
+                continue
 
-            config = FutureClimateDataConfig(
-                variable_type=variable,
-                resolution=resolution,
-                year_range=year_range,
-                climate_model=model_enum,
-                climate_scenario=scenario,
-                format=DataFormat.GEOTIFF_WORLDCLIM_CMIP6,
-                filepath=str(filepath),
-            )
+        logger.info(f"Model file not found: {filepath.name}, attempting to download...")
 
-            try:
-                ensure_data_available(config)
-                if filepath.exists():
-                    available_files.append(filepath)
-                    logger.info(f"Downloaded model file: {filepath.name}")
-            except Exception as e:
-                # Not all models are available for all scenarios and variables. Example: https://geodata.ucdavis.edu/cmip6/10m/GFDL-ESM4/
-                logger.error(f"Failed to download {filepath.name}: {e}")
+        config = FutureClimateDataConfig(
+            variable_type=variable,
+            resolution_input=resolution,
+            year_range=year_range,
+            climate_model=model_enum,
+            climate_scenario=scenario,
+            format=DataFormat.GEOTIFF_WORLDCLIM_CMIP6,
+            filepath=str(filepath),
+            reader_function=read_geotiff_future,
+        )
+
+        try:
+            ensure_data_available(config)
+            if filepath.exists() and verify_geotiff_file(filepath):
+                available_files.append(filepath)
+                logger.info(f"Downloaded model file: {filepath.name}")
+            else:
+                logger.error(f"Downloaded file {filepath.name} failed verification")
+        except Exception as e:
+            logger.error(f"Failed to download {filepath.name}: {e}")
 
     return available_files
 

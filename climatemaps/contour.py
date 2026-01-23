@@ -348,18 +348,27 @@ class ContourTileBuilder:
 
         # For very high-resolution data, downsample before creating contours
         if self._is_high_resolution() and self.target_resolution_vector is not None:
-            logger.info("Downsampling high-resolution data for vector contours")
             total_pixels = self.geo_grid.world_equivalent_pixels
             downsample_factor = float(np.sqrt(total_pixels / self.target_resolution_vector))
-            logger.info(
-                f"Downsampling by factor of {downsample_factor:.2f} (world-equivalent pixels: {total_pixels:.0f})"
-            )
 
-            # Create downsampled grid for contours
-            downsampled_grid = self.geo_grid.downsample(factor=downsample_factor)
-            contour_lon_range = downsampled_grid.lon_range
-            contour_lat_range = downsampled_grid.lat_range
-            contour_values = downsampled_grid.values
+            if downsample_factor >= 1:
+                logger.info(
+                    f"Downsampling high-resolution data for vector contours by factor of {downsample_factor:.2f} "
+                    f"(world-equivalent pixels: {total_pixels:.0f})"
+                )
+                # Create downsampled grid for contours
+                downsampled_grid = self.geo_grid.downsample(factor=downsample_factor)
+                contour_lon_range = downsampled_grid.lon_range
+                contour_lat_range = downsampled_grid.lat_range
+                contour_values = downsampled_grid.values
+            else:
+                logger.info(
+                    f"Data resolution ({total_pixels:.0f} world-equivalent pixels) is already lower than "
+                    f"target ({self.target_resolution_vector}), skipping downsampling"
+                )
+                contour_lon_range = self.geo_grid.lon_range
+                contour_lat_range = self.geo_grid.lat_range
+                contour_values = self.values
         else:
             contour_lon_range = self.geo_grid.lon_range
             contour_lat_range = self.geo_grid.lat_range

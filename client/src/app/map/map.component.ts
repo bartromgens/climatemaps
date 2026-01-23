@@ -308,6 +308,7 @@ export class MapComponent extends BaseMapComponent implements OnInit {
       !this.isHistoricalYearRange(this.controlsData.selectedYearRange.value);
 
     if (isFutureData) {
+      // Validate and set scenario first
       if (
         this.controlsData.selectedClimateScenario &&
         !availableClimateScenarios.includes(
@@ -318,12 +319,27 @@ export class MapComponent extends BaseMapComponent implements OnInit {
           availableClimateScenarios[0] || null;
       }
 
+      // Ensure scenario has a default if still null
+      if (!this.controlsData.selectedClimateScenario && availableClimateScenarios.length > 0) {
+        this.controlsData.selectedClimateScenario = availableClimateScenarios[0];
+      }
+
+      // Now get available models AFTER scenario has been validated/set
+      const availableClimateModels = this.getAvailableClimateModels();
+      console.log('resetInvalidSelections - Available models (after scenario set):', availableClimateModels);
+
+      // Validate and set model
       if (
         this.controlsData.selectedClimateModel &&
         !availableClimateModels.includes(this.controlsData.selectedClimateModel)
       ) {
         this.controlsData.selectedClimateModel =
           availableClimateModels[0] || null;
+      }
+
+      // Ensure model has a default if still null
+      if (!this.controlsData.selectedClimateModel && availableClimateModels.length > 0) {
+        this.controlsData.selectedClimateModel = availableClimateModels[0];
       }
     }
 
@@ -335,6 +351,9 @@ export class MapComponent extends BaseMapComponent implements OnInit {
       variableType: this.controlsData.selectedVariableType,
       yearRange: this.controlsData.selectedYearRange,
       resolution: this.controlsData.selectedResolution,
+      scenario: this.controlsData.selectedClimateScenario,
+      model: this.controlsData.selectedClimateModel,
+      showDifferenceMap: this.controlsData.showDifferenceMap,
     });
 
     const matchingLayer = this.findMatchingLayerOption();

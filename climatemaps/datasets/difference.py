@@ -25,6 +25,7 @@ def create_difference_map_configs() -> List[ClimateDifferenceDataConfig]:
                 format=future_config.format,
                 resolution_input=future_config.resolution_input,
                 year_range=future_config.year_range,
+                reader_function=future_config.reader_function,
                 conversion_function=None,
                 conversion_factor=1,
                 source=f"Difference: {future_config.source} - {historical_config.source}",

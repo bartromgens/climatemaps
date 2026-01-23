@@ -20,6 +20,7 @@ from climatemaps.datasets import (
     ClimateDataConfig,
     ClimateDifferenceDataConfig,
     ClimateModel,
+    ClimateScenario,
     ClimateVarKey,
 )
 from climatemaps.gdal import GdalCalculator
@@ -49,6 +50,8 @@ def main(
     dataset_type: str | None = None,
     month: int | None = None,
     region: Region | None = None,
+    future_date_range: tuple[int, int] | None = None,
+    climate_scenario: ClimateScenario | None = None,
 ) -> None:
     month_lower, month_upper = _get_month_range(month)
 
@@ -59,7 +62,9 @@ def main(
             f"lon=[{bbox.lon_min}, {bbox.lon_max}], lat=[{bbox.lat_min}, {bbox.lat_max}]"
         )
 
-    datasets = filter_datasets(climate_model, variable_type, dataset_type)
+    datasets = filter_datasets(
+        climate_model, variable_type, dataset_type, future_date_range, climate_scenario
+    )
     if not datasets:
         return
 
@@ -214,6 +219,18 @@ def _parse_arguments() -> argparse.Namespace:
             "while maintaining full resolution and zoom levels."
         ),
     )
+    parser.add_argument(
+        "--future-date-range",
+        type=str,
+        choices=["2021-2040", "2041-2060", "2061-2080", "2081-2100"],
+        help="Process only datasets for a specific future date range (e.g., '2021-2040')",
+    )
+    parser.add_argument(
+        "--climate-scenario",
+        type=str,
+        choices=[scenario.value for scenario in ClimateScenario],
+        help="Process only datasets for a specific climate scenario (e.g., 'SSP126', 'SSP585')",
+    )
     return parser.parse_args()
 
 
@@ -223,6 +240,7 @@ if __name__ == "__main__":
     climate_model = ClimateModel(args.climate_model) if args.climate_model else None
     variable_type = ClimateVarKey(args.variable_type) if args.variable_type else None
     region = Region(args.region) if args.region else None
+    climate_scenario = ClimateScenario(args.climate_scenario) if args.climate_scenario else None
 
     if_older_than = None
     if args.if_older_than:
@@ -231,6 +249,11 @@ if __name__ == "__main__":
         except ValueError as e:
             print(f"Error: Invalid date format '{args.if_older_than}'. Expected: YYYY-MM-DD")
             sys.exit(1)
+
+    future_date_range = None
+    if args.future_date_range:
+        start_year, end_year = args.future_date_range.split("-")
+        future_date_range = (int(start_year), int(end_year))
 
     main(
         force_recreate=args.force_recreate,
@@ -241,6 +264,8 @@ if __name__ == "__main__":
         dataset_type=args.dataset_type,
         month=args.month,
         region=region,
+        future_date_range=future_date_range,
+        climate_scenario=climate_scenario,
     )
 
     logger.info("Running create_tileserver_config.py --dev-only")

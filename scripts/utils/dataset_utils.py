@@ -6,6 +6,7 @@ from climatemaps.datasets import (
     ClimateDataConfig,
     ClimateDifferenceDataConfig,
     ClimateModel,
+    ClimateScenario,
     ClimateVarKey,
     HISTORIC_DATA_SETS,
     FUTURE_DATA_SETS,
@@ -18,6 +19,8 @@ def filter_datasets(
     climate_model: ClimateModel | None = None,
     variable_type: ClimateVarKey | None = None,
     dataset_type: str | None = None,
+    future_date_range: tuple[int, int] | None = None,
+    climate_scenario: ClimateScenario | None = None,
 ) -> List[Union[ClimateDataConfig, ClimateDifferenceDataConfig]]:
     dataset_groups = {
         "historic": HISTORIC_DATA_SETS,
@@ -47,6 +50,12 @@ def filter_datasets(
 
         if variable_type is not None:
             filtered = [ds for ds in filtered if ds.get_variable_type() == variable_type]
+
+        if future_date_range is not None and name in ("future", "difference"):
+            filtered = [ds for ds in filtered if ds.get_year_range() == future_date_range]
+
+        if climate_scenario is not None and name in ("future", "difference"):
+            filtered = [ds for ds in filtered if ds.get_climate_scenario() == climate_scenario]
 
         all_datasets.extend(filtered)
 

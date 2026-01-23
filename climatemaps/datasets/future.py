@@ -23,7 +23,7 @@ FUTURE_DATA_GROUPS: List[FutureClimateDataConfigGroup] = [
         variable_types=[ClimateVarKey.T_MIN, ClimateVarKey.T_MAX, ClimateVarKey.PRECIPITATION],
         format=DataFormat.GEOTIFF_WORLDCLIM_CMIP6,
         source="https://www.worldclim.org/data/cmip6/cmip6climate.html",
-        resolutions=[SpatialResolution.MIN10, SpatialResolution.MIN5],
+        resolutions=[SpatialResolution.MIN5],
         year_ranges=FUTURE_DATE_RANGES,
         climate_scenarios=[
             ClimateScenario.SSP126,
