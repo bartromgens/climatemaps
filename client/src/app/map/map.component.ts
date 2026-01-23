@@ -57,6 +57,7 @@ import { SeoService } from '../core/seo.service';
 import { ToastService } from '../core/toast.service';
 import { ClimateVariableHelperService } from '../core/climate-variable-helper.service';
 import { CoordinateUtils } from '../utils/coordinate-utils';
+import { ColorUtils } from '../utils/color-utils';
 import { MatomoTracker } from 'ngx-matomo-client';
 
 @Component({
@@ -91,6 +92,7 @@ export class MapComponent extends BaseMapComponent implements OnInit {
 
   private readonly tracker = inject(MatomoTracker);
   private readonly DEFAULT_RESOLUTION = SpatialResolution.MIN10;
+  private readonly CONTOUR_DARKEN_FACTOR = 0.17;
 
   environment = environment;
 
@@ -429,7 +431,10 @@ export class MapComponent extends BaseMapComponent implements OnInit {
       {
         vectorTileLayerStyles: {
           contours: (properties: any) => ({
-            color: this.intensifyColor(properties.stroke),
+            color: ColorUtils.intensifyColor(
+              properties.stroke,
+              this.CONTOUR_DARKEN_FACTOR,
+            ),
             weight: 1,
             opacity: 1,
             crossOrigin: 'anonymous',
@@ -688,41 +693,6 @@ export class MapComponent extends BaseMapComponent implements OnInit {
     if (this.map) {
       this.vectorLayerTooltip.handleVectorLayerMouseOut(this.map);
     }
-  }
-
-  private intensifyColor(color: string): string {
-    if (!color) {
-      return '#000000';
-    }
-
-    const hexMatch = color.match(/^#([0-9a-f]{6})$/i);
-    const darkenFactor = 0.15;
-    if (hexMatch) {
-      const r = parseInt(hexMatch[1].substring(0, 2), 16);
-      const g = parseInt(hexMatch[1].substring(2, 4), 16);
-      const b = parseInt(hexMatch[1].substring(4, 6), 16);
-
-      const newR = Math.max(0, Math.floor(r * (1 - darkenFactor)));
-      const newG = Math.max(0, Math.floor(g * (1 - darkenFactor)));
-      const newB = Math.max(0, Math.floor(b * (1 - darkenFactor)));
-
-      return `#${newR.toString(16).padStart(2, '0')}${newG.toString(16).padStart(2, '0')}${newB.toString(16).padStart(2, '0')}`;
-    }
-
-    const rgbMatch = color.match(/^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/i);
-    if (rgbMatch) {
-      const r = parseInt(rgbMatch[1], 10);
-      const g = parseInt(rgbMatch[2], 10);
-      const b = parseInt(rgbMatch[3], 10);
-
-      const newR = Math.max(0, Math.floor(r * (1 - darkenFactor)));
-      const newG = Math.max(0, Math.floor(g * (1 - darkenFactor)));
-      const newB = Math.max(0, Math.floor(b * (1 - darkenFactor)));
-
-      return `rgb(${newR}, ${newG}, ${newB})`;
-    }
-
-    return color;
   }
 
   private setupNavigationListener(): void {
