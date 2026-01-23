@@ -101,6 +101,15 @@ export class YearRangeGridComponent extends BaseMapComponent {
   }
 
   protected initializeDefaultSelections(): void {
+    if (!this.controlsData.selectedYearRange && this.yearRanges.length > 0) {
+      const futureYearRange = this.yearRanges.find(
+        (range) => !this.isHistoricalYearRange(range.value),
+      );
+      if (futureYearRange) {
+        this.controlsData.selectedYearRange = futureYearRange;
+      }
+    }
+
     if (!this.controlsData.selectedClimateScenario) {
       this.controlsData.selectedClimateScenario = this.DEFAULT_SCENARIO;
     }
@@ -147,9 +156,8 @@ export class YearRangeGridComponent extends BaseMapComponent {
   }
 
   private findMatchingLayers(): void {
-    const availableYearRanges = this.getAvailableYearRanges();
-
-    this.yearRangeOptions = availableYearRanges
+    this.yearRangeOptions = this.yearRanges
+      .filter((yearRange) => !this.isHistoricalYearRange(yearRange.value))
       .map((yearRange) => {
         const matchingLayer = this.findLayerForYearRange(yearRange);
         return {

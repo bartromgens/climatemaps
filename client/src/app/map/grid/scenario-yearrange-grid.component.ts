@@ -104,6 +104,15 @@ export class ScenarioYearRangeGridComponent extends BaseMapComponent {
   }
 
   protected initializeDefaultSelections(): void {
+    if (!this.controlsData.selectedYearRange && this.yearRanges.length > 0) {
+      const futureYearRange = this.yearRanges.find(
+        (range) => !this.isHistoricalYearRange(range.value),
+      );
+      if (futureYearRange) {
+        this.controlsData.selectedYearRange = futureYearRange;
+      }
+    }
+
     if (!this.controlsData.selectedClimateModel) {
       this.controlsData.selectedClimateModel = this.DEFAULT_MODEL;
     }
@@ -135,8 +144,7 @@ export class ScenarioYearRangeGridComponent extends BaseMapComponent {
   }
 
   private updateFutureYearRanges(): void {
-    const availableYearRanges = this.getAvailableYearRanges();
-    this.futureYearRanges = availableYearRanges.filter(
+    this.futureYearRanges = this.yearRanges.filter(
       (range) => !this.isHistoricalYearRange(range.value),
     );
   }

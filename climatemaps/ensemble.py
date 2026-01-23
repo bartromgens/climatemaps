@@ -75,7 +75,9 @@ def get_available_models(
 
         if filepath.exists():
             if not verify_geotiff_file(filepath, thorough=True):
-                logger.warning(f"Model file {filepath.name} exists but is corrupted, will re-download")
+                logger.warning(
+                    f"Model file {filepath.name} exists but is corrupted, will re-download"
+                )
                 filepath.unlink()
             else:
                 available_files.append(filepath)
