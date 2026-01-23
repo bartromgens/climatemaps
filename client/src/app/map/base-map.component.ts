@@ -193,6 +193,8 @@ export abstract class BaseMapComponent implements OnInit {
       this.climateMaps,
       this.variableTypes,
       this.climateVariables,
+      this.controlsData.selectedYearRange,
+      this.isHistoricalYearRange,
     );
   }
 

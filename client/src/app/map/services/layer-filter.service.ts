@@ -8,11 +8,13 @@ import {
 } from '../../utils/enum';
 import { ClimateVariableConfig, YearRange } from '../../core/metadata.service';
 import { MapControlsData } from '../controls/map-controls.component';
+import { ClimateVariableHelperService } from '../../core/climate-variable-helper.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class LayerFilterService {
+  constructor(private climateVariableHelper: ClimateVariableHelperService) {}
   private matchesYearRange(map: ClimateMap, yearRange: YearRange): boolean {
     const matchesPrimary =
       map.yearRange[0] === yearRange.value[0] &&
@@ -72,12 +74,24 @@ export class LayerFilterService {
     climateMaps: ClimateMap[],
     variableTypes: ClimateVarKey[],
     climateVariables: Record<ClimateVarKey, ClimateVariableConfig>,
+    selectedYearRange?: YearRange | null,
+    isHistoricalYearRange?: (yearRange: readonly [number, number]) => boolean,
   ): ClimateVarKey[] {
-    return variableTypes.filter((variableType) =>
-      climateMaps.some((map) =>
+    return variableTypes.filter((variableType) => {
+      const hasData = climateMaps.some((map) =>
         this.matchesVariableType(map, variableType, climateVariables),
-      ),
-    );
+      );
+      
+      if (!hasData) {
+        return false;
+      }
+
+      if (selectedYearRange && isHistoricalYearRange && !isHistoricalYearRange(selectedYearRange.value)) {
+        return this.climateVariableHelper.hasFuturePredictions(variableType);
+      }
+
+      return true;
+    });
   }
 
   getAvailableYearRanges(
