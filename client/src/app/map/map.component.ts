@@ -30,6 +30,7 @@ import { ShowChangeToggleOverlayComponent } from './controls/overlays/show-chang
 import { ContourToggleOverlayComponent } from './controls/overlays/contour-toggle-overlay.component';
 import { ClimateModelOverlayComponent } from './controls/overlays/climate-model-overlay.component';
 import { ClimateScenarioOverlayComponent } from './controls/overlays/climate-scenario-overlay.component';
+import { VariableInfoOverlayComponent } from './controls/overlays/variable-info-overlay.component';
 import { LocationSearchComponent } from '../core/location-search.component';
 import { ClimateMapService } from '../core/climatemap.service';
 import { MetadataService, YearRange } from '../core/metadata.service';
@@ -87,6 +88,7 @@ import { MatomoTracker } from 'ngx-matomo-client';
     ContourToggleOverlayComponent,
     ClimateModelOverlayComponent,
     ClimateScenarioOverlayComponent,
+    VariableInfoOverlayComponent,
     LocationSearchComponent,
   ],
   templateUrl: './map.component.html',

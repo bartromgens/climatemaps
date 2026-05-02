@@ -1,0 +1,30 @@
+<ng-container *ngIf="selectedVariableType && description">
+  <!-- Collapsed: just an info icon button -->
+  <button
+    *ngIf="!expanded"
+    mat-icon-button
+    class="info-toggle-button"
+    (click)="toggle()"
+    aria-label="Show variable description"
+    title="About this variable"
+  >
+    <mat-icon>info_outline</mat-icon>
+  </button>
+
+  <!-- Expanded: full description card -->
+  <div *ngIf="expanded" class="variable-info-overlay">
+    <div class="info-header">
+      <span class="info-title">{{ displayName }}</span>
+      <button
+        mat-icon-button
+        class="close-button"
+        (click)="toggle()"
+        aria-label="Collapse variable description"
+        title="Collapse"
+      >
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+    <p class="info-description">{{ description }}</p>
+  </div>
+</ng-container>
