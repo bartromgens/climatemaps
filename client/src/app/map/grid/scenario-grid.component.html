@@ -7,6 +7,7 @@
   >
     <div class="sidebar-content">
       <button
+        *ngIf="isMobile"
         mat-icon-button
         class="sidebar-close-button"
         (click)="toggleSidebar()"
@@ -25,7 +26,7 @@
   </mat-sidenav>
   <mat-sidenav-content>
     <button
-      *ngIf="!sidebarOpened"
+      *ngIf="isMobile && !sidebarOpened"
       mat-icon-button
       class="sidebar-toggle-button"
       (click)="toggleSidebar()"
