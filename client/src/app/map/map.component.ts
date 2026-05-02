@@ -59,6 +59,10 @@ import { SelectedMonthService } from '../core/selected-month.service';
 import { ClimateVariableHelperService } from '../core/climate-variable-helper.service';
 import { CoordinateUtils } from '../utils/coordinate-utils';
 import { ColorUtils } from '../utils/color-utils';
+import {
+  OSM_ATTRIBUTION,
+  getDataAttribution,
+} from '../utils/attribution-utils';
 import { MatomoTracker } from 'ngx-matomo-client';
 
 @Component({
@@ -153,7 +157,7 @@ export class MapComponent extends BaseMapComponent implements OnInit {
     'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
     {
       maxZoom: 20,
-      attribution: '...',
+      attribution: OSM_ATTRIBUTION,
       subdomains: '',
       crossOrigin: true,
     },
@@ -431,7 +435,7 @@ export class MapComponent extends BaseMapComponent implements OnInit {
       this.rasterLayer = tileLayer(
         `${this.selectedOption.rasterUrl}_${this.monthSelected}/{z}/{x}/{y}.png`,
         {
-          // attribution: '&copy; My Raster Tiles',
+          attribution: getDataAttribution(this.selectedOption.climateMap?.source),
           minZoom: 0,
           maxNativeZoom: this.selectedOption.rasterMaxZoom,
           maxZoom: 12,

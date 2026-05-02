@@ -23,6 +23,10 @@ import { LayerOption } from '../services/layer-builder.service';
 import { TooltipManagerService } from '../services/tooltip-manager.service';
 import { VectorLayerTooltipService } from '../services/vector-layer-tooltip.service';
 import { RasterTooltipService } from '../services/raster-tooltip.service';
+import {
+  OSM_ATTRIBUTION,
+  getDataAttribution,
+} from '../../utils/attribution-utils';
 
 @Component({
   selector: 'app-small-map',
@@ -90,7 +94,7 @@ export class SmallMapComponent implements OnInit, OnDestroy, OnChanges {
     'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
     {
       maxZoom: 20,
-      attribution: '...',
+      attribution: OSM_ATTRIBUTION,
       subdomains: '',
       crossOrigin: true,
     },
@@ -202,6 +206,7 @@ export class SmallMapComponent implements OnInit, OnDestroy, OnChanges {
       this.rasterLayer = tileLayer(
         `${this.selectedOption.rasterUrl}_${this.month}/{z}/{x}/{y}.png`,
         {
+          attribution: getDataAttribution(this.selectedOption.climateMap?.source),
           minZoom: 0,
           maxNativeZoom: this.selectedOption.rasterMaxZoom,
           maxZoom: 12,
