@@ -55,6 +55,7 @@ import { MapSyncService } from './services/map-sync.service';
 import { BaseMapComponent } from './base-map.component';
 import { SeoService } from '../core/seo.service';
 import { ToastService } from '../core/toast.service';
+import { SelectedMonthService } from '../core/selected-month.service';
 import { ClimateVariableHelperService } from '../core/climate-variable-helper.service';
 import { CoordinateUtils } from '../utils/coordinate-utils';
 import { ColorUtils } from '../utils/color-utils';
@@ -175,6 +176,7 @@ export class MapComponent extends BaseMapComponent implements OnInit {
     layerFilter: LayerFilterService,
     toastService: ToastService,
     mapSyncService: MapSyncService,
+    selectedMonthService: SelectedMonthService,
     private tooltipManager: TooltipManagerService,
     private vectorLayerTooltip: VectorLayerTooltipService,
     private mapNavigationService: MapNavigationService,
@@ -192,6 +194,7 @@ export class MapComponent extends BaseMapComponent implements OnInit {
       layerFilter,
       toastService,
       mapSyncService,
+      selectedMonthService,
     );
 
     const initialState = mapSyncService.getInitialViewState();

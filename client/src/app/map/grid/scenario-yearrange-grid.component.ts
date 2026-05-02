@@ -28,6 +28,7 @@ import { MapSyncService } from '../services/map-sync.service';
 import { BaseMapComponent } from '../base-map.component';
 import { SeoService } from '../../core/seo.service';
 import { ToastService } from '../../core/toast.service';
+import { SelectedMonthService } from '../../core/selected-month.service';
 
 interface GridCell {
   scenario: ClimateScenario;
@@ -75,6 +76,7 @@ export class ScenarioYearRangeGridComponent extends BaseMapComponent {
     layerFilter: LayerFilterService,
     toastService: ToastService,
     mapSyncService: MapSyncService,
+    selectedMonthService: SelectedMonthService,
     private seoService: SeoService,
   ) {
     super(
@@ -86,6 +88,7 @@ export class ScenarioYearRangeGridComponent extends BaseMapComponent {
       layerFilter,
       toastService,
       mapSyncService,
+      selectedMonthService,
     );
     this.seoService.updateMetaTags({
       title:

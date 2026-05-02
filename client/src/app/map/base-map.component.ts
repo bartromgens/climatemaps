@@ -27,6 +27,7 @@ import {
 } from './controls/map-controls.component';
 import { MapSyncService, MapViewState } from './services/map-sync.service';
 import { ToastService } from '../core/toast.service';
+import { SelectedMonthService } from '../core/selected-month.service';
 
 @Directive()
 export abstract class BaseMapComponent implements OnInit {
@@ -41,7 +42,7 @@ export abstract class BaseMapComponent implements OnInit {
     selectedClimateModel: null,
     showDifferenceMap: true,
     showContourLines: true,
-    selectedMonth: new Date().getMonth() + 1,
+    selectedMonth: 0,
   };
 
   controlsOptions: MapControlsOptions | undefined;
@@ -70,9 +71,12 @@ export abstract class BaseMapComponent implements OnInit {
     protected layerFilter: LayerFilterService,
     protected toastService: ToastService,
     protected mapSyncService?: MapSyncService,
+    protected selectedMonthService?: SelectedMonthService,
   ) {
     this.isHistoricalYearRange =
       this.metadataService.isHistoricalYearRange.bind(this.metadataService);
+    this.controlsData.selectedMonth =
+      this.selectedMonthService?.getMonth() ?? new Date().getMonth() + 1;
   }
 
   ngOnInit(): void {
@@ -164,6 +168,7 @@ export abstract class BaseMapComponent implements OnInit {
   protected handleControlsChange(): void {
     this.setDefaultFutureSelections();
     this.resetInvalidSelections();
+    this.selectedMonthService?.setMonth(this.controlsData.selectedMonth);
     this.onControlsUpdated();
     this.updateUrlWithControls();
   }
