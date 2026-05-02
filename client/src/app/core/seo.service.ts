@@ -55,7 +55,8 @@ export class SeoService {
 
   setDefaultMetaTags(): void {
     this.updateMetaTags({
-      title: 'Climate Map – World Temperature & Precipitation Map by Month',
+      title:
+        'Climate Map – Temperature & Precipitation by Month | OpenClimateMap',
       description:
         'Interactive climate map of the world. Explore average temperature and precipitation by month, with historical data and CMIP6 future climate projections across all climate scenarios.',
       keywords:
