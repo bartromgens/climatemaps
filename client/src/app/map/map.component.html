@@ -173,5 +173,17 @@
       [climateModel]="controlsData.selectedClimateModel"
       (plotDataRequested)="onPlotDataRequested($event)"
     ></app-climate-plots>
+    <section *ngIf="routePath" class="seo-content">
+      <h1>{{ routeTitle }}</h1>
+      <p>{{ routeDescription }}</p>
+      <img
+        *ngFor="let month of monthNames"
+        [src]="'/assets/previews/' + routePath + '-' + month + '.jpg'"
+        [alt]="routeTitle + ' – ' + month"
+        width="2400"
+        height="1260"
+        loading="lazy"
+      />
+    </section>
   </mat-sidenav-content>
 </mat-sidenav-container>

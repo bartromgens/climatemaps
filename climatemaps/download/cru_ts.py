@@ -53,5 +53,9 @@ class CRUTSDownloader(DataDownloader):
             for month in range(1, 13):
                 month_file = self.data_dir / self.file_pattern.format(month)
                 if month_file.exists() and not verify_geotiff_file(month_file):
-                    logger.warning(f"Extracted CRU-TS file for month {month:02d} failed verification")
-                    raise ValueError(f"Extracted CRU-TS file for month {month:02d} failed verification")
+                    logger.warning(
+                        f"Extracted CRU-TS file for month {month:02d} failed verification"
+                    )
+                    raise ValueError(
+                        f"Extracted CRU-TS file for month {month:02d} failed verification"
+                    )

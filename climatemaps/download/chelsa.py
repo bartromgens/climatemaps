@@ -38,19 +38,19 @@ class CHELSADownloader(DataDownloader):
 
     def _do_download(self, skip_verification: bool = False, month_upper: int = 12) -> None:
         from climatemaps.geotiff import verify_geotiff_file
-        
+
         self.base_dir.mkdir(parents=True, exist_ok=True)
 
         for month in range(1, month_upper + 1):
             destination = self._get_month_filepath(month)
-            
+
             if destination.exists():
                 if skip_verification or verify_geotiff_file(destination):
                     logger.info(f"Month {month:02d} already exists and is valid, skipping...")
                     continue
                 else:
                     logger.warning(f"Month {month:02d} exists but is corrupted, re-downloading...")
-            
+
             logger.info(f"Downloading CHELSA data for month {month:02d}...")
 
             try:

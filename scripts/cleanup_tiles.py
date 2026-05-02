@@ -23,13 +23,11 @@ def main(dry_run: bool = True) -> None:
         logger.info(f"Tiles directory does not exist: {tiles_dir}")
         return
 
-    known_slugs = {cfg.data_type_slug for cfg in HISTORIC_DATA_SETS + FUTURE_DATA_SETS + DIFFERENCE_DATA_SETS}
+    known_slugs = {
+        cfg.data_type_slug for cfg in HISTORIC_DATA_SETS + FUTURE_DATA_SETS + DIFFERENCE_DATA_SETS
+    }
 
-    existing_dirs = [
-        entry.name
-        for entry in os.scandir(tiles_dir)
-        if entry.is_dir()
-    ]
+    existing_dirs = [entry.name for entry in os.scandir(tiles_dir) if entry.is_dir()]
 
     unused = sorted(name for name in existing_dirs if name not in known_slugs)
 

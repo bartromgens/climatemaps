@@ -27,7 +27,7 @@ class TestLandMask:
         transform = from_bounds(-180, -90, 180, 90, width, height)
 
         crs_wgs84 = CRS.from_proj4("+proj=longlat +datum=WGS84 +no_defs")
-        
+
         with rasterio.open(
             mask_path,
             "w",
@@ -141,7 +141,7 @@ class TestLandMaskWindowedReading:
         transform = from_bounds(-180, -90, 180, 90, width, height)
 
         crs_wgs84 = CRS.from_proj4("+proj=longlat +datum=WGS84 +no_defs")
-        
+
         with rasterio.open(
             mask_path,
             "w",
@@ -184,4 +184,3 @@ class TestLandMaskWindowedReading:
         masked_grid = apply_land_mask(geo_grid, create_large_test_mask)
 
         assert np.all(np.isnan(masked_grid.values))
-

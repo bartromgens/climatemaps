@@ -76,7 +76,7 @@ def test_future_url_generation() -> None:
         climate_scenario=ClimateScenario.SSP126,
         format=DataFormat.GEOTIFF_WORLDCLIM_CMIP6,
         filepath="test/path.tif",
-            reader_function=read_geotiff_future,
+        reader_function=read_geotiff_future,
     )
     downloader = WorldClimFutureDownloader(config)
     url = downloader._get_url()
@@ -93,7 +93,7 @@ def test_future_url_generation() -> None:
         climate_scenario=ClimateScenario.SSP585,
         format=DataFormat.GEOTIFF_WORLDCLIM_CMIP6,
         filepath="test/path.tif",
-            reader_function=read_geotiff_future,
+        reader_function=read_geotiff_future,
     )
     downloader = WorldClimFutureDownloader(config)
     url = downloader._get_url()
@@ -126,7 +126,7 @@ def test_unsupported_future_variable_raises_error() -> None:
         climate_scenario=ClimateScenario.SSP126,
         format=DataFormat.GEOTIFF_WORLDCLIM_CMIP6,
         filepath="test/path.tif",
-            reader_function=read_geotiff_future,
+        reader_function=read_geotiff_future,
     )
     downloader = WorldClimFutureDownloader(config)
     with pytest.raises(ValueError):
@@ -369,7 +369,7 @@ def test_chelsa_unsupported_variable() -> None:
             year_range=(1981, 2010),
             format=DataFormat.CHELSA,
             filepath="test/path",
-        reader_function=read_geotiff_chelsa,
+            reader_function=read_geotiff_chelsa,
         )
         CHELSADownloader(config)
 
@@ -382,7 +382,7 @@ def test_cru_ts_unsupported_variable() -> None:
             year_range=(1961, 1990),
             format=DataFormat.CRU_TS,
             filepath="test/path",
-        reader_function=read_geotiff_cru_ts,
+            reader_function=read_geotiff_cru_ts,
         )
         CRUTSDownloader(config)
 
@@ -440,7 +440,7 @@ def test_get_downloader_worldclim_future() -> None:
         climate_scenario=ClimateScenario.SSP126,
         format=DataFormat.GEOTIFF_WORLDCLIM_CMIP6,
         filepath="test/path.tif",
-            reader_function=read_geotiff_future,
+        reader_function=read_geotiff_future,
     )
     downloader = get_downloader(config)
     assert isinstance(downloader, WorldClimFutureDownloader)
@@ -575,8 +575,8 @@ def test_future_downloader_multiple_time_periods() -> None:
             climate_scenario=ClimateScenario.SSP126,
             format=DataFormat.GEOTIFF_WORLDCLIM_CMIP6,
             filepath="test/path.tif",
-        reader_function=read_geotiff_future,
-    )
+            reader_function=read_geotiff_future,
+        )
         downloader = WorldClimFutureDownloader(config)
         url = downloader._get_url()
         assert f"{year_range[0]}-{year_range[1]}" in url
@@ -590,7 +590,7 @@ def test_chelsa_is_available_checks_all_months() -> None:
             year_range=(1981, 2010),
             format=DataFormat.CHELSA,
             filepath=tmpdir,
-        reader_function=read_geotiff_chelsa,
+            reader_function=read_geotiff_chelsa,
         )
         downloader = CHELSADownloader(config)
 
@@ -602,9 +602,7 @@ def test_chelsa_is_available_checks_all_months() -> None:
         assert not downloader.is_available(
             month_upper=2
         ), "Month 2 missing, should return False even though month 1 exists"
-        assert not downloader.is_available(
-            month_upper=6
-        ), "Months 2-6 missing, should return False"
+        assert not downloader.is_available(month_upper=6), "Months 2-6 missing, should return False"
         assert not downloader.is_available(
             month_upper=12
         ), "Months 2-12 missing, should return False"
@@ -630,7 +628,7 @@ def test_worldclim_historical_is_available_checks_all_months() -> None:
             year_range=(1970, 2000),
             format=DataFormat.GEOTIFF_WORLDCLIM_HISTORY,
             filepath=f"{tmpdir}/wc2.1_10m_tmin",
-        reader_function=read_geotiff_history,
+            reader_function=read_geotiff_history,
         )
         downloader = WorldClimHistoricalDownloader(config)
 
@@ -658,7 +656,7 @@ def test_cru_ts_is_available_checks_all_months() -> None:
             year_range=(1961, 1990),
             format=DataFormat.CRU_TS,
             filepath=tmpdir,
-        reader_function=read_geotiff_cru_ts,
+            reader_function=read_geotiff_cru_ts,
         )
         downloader = CRUTSDownloader(config)
 
@@ -679,7 +677,7 @@ def test_chelsa_verify_checks_all_months() -> None:
             year_range=(1981, 2010),
             format=DataFormat.CHELSA,
             filepath=tmpdir,
-        reader_function=read_geotiff_chelsa,
+            reader_function=read_geotiff_chelsa,
         )
         downloader = CHELSADownloader(config)
 
@@ -710,7 +708,7 @@ def test_ensure_data_available_downloads_when_partial_months_exist() -> None:
             year_range=(1981, 2010),
             format=DataFormat.CHELSA,
             filepath=tmpdir,
-        reader_function=read_geotiff_chelsa,
+            reader_function=read_geotiff_chelsa,
         )
 
         downloader = CHELSADownloader(config)
@@ -739,7 +737,7 @@ def test_chelsa_do_download_skips_existing_valid_files() -> None:
             year_range=(1981, 2010),
             format=DataFormat.CHELSA,
             filepath=tmpdir,
-        reader_function=read_geotiff_chelsa,
+            reader_function=read_geotiff_chelsa,
         )
 
         downloader = CHELSADownloader(config)
