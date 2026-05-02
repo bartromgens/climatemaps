@@ -18,6 +18,7 @@
       <app-map-controls
         [controlsData]="controlsData"
         [controlsOptions]="controlsOptions"
+        [hideMonthSelector]="true"
         [showDropDownControls]="true"
         (controlsChange)="onControlsChange($event)"
       ></app-map-controls>
@@ -79,6 +80,7 @@
       <app-map-controls
         [controlsData]="controlsData"
         [controlsOptions]="controlsOptions"
+        [hideMonthSelector]="true"
         [showDropDownControls]="false"
         (controlsChange)="onControlsChange($event)"
       ></app-map-controls>

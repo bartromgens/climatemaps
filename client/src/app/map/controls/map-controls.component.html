@@ -1,6 +1,7 @@
 <div class="row sliders-row">
   <div class="column sliders-container">
     <app-month-slider
+      *ngIf="!hideMonthSelector"
       [value]="controlsData?.selectedMonth || 1"
       (valueChange)="onMonthSelected($event)"
     ></app-month-slider>

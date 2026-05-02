@@ -77,6 +77,7 @@ export class MapControlsComponent implements OnInit {
 
   @Input() controlsData: MapControlsData | undefined;
   @Input() controlsOptions: MapControlsOptions | undefined;
+  @Input() hideMonthSelector = false;
   @Input() hideVariableSelector = false;
   @Input() hideYearRangeSelector = false;
   @Input() showDropDownControls = true;
