@@ -55,27 +55,27 @@
       </mat-option>
     </mat-autocomplete>
   </div>
-  <a mat-menu-item routerLink="/">
+  <a mat-menu-item routerLink="/" routerLinkActive="active-mobile-nav-link" [routerLinkActiveOptions]="{exact: true}">
     <mat-icon>map</mat-icon>
     <span>Map</span>
   </a>
-  <a mat-menu-item routerLink="/seasons">
+  <a mat-menu-item routerLink="/seasons" routerLinkActive="active-mobile-nav-link">
     <mat-icon>calendar_month</mat-icon>
     <span>Seasons</span>
   </a>
-  <a mat-menu-item routerLink="/climate-predictions">
+  <a mat-menu-item routerLink="/climate-predictions" routerLinkActive="active-mobile-nav-link">
     <mat-icon>date_range</mat-icon>
     <span>Climate Predictions</span>
   </a>
-  <a mat-menu-item routerLink="/climate-scenarios">
+  <a mat-menu-item routerLink="/climate-scenarios" routerLinkActive="active-mobile-nav-link">
     <mat-icon>grid_view</mat-icon>
     <span>Climate Scenarios</span>
   </a>
-  <a mat-menu-item routerLink="/climate-matrix">
+  <a mat-menu-item routerLink="/climate-matrix" routerLinkActive="active-mobile-nav-link">
     <mat-icon>table_chart</mat-icon>
     <span>Climate Matrix</span>
   </a>
-  <a mat-menu-item routerLink="/about">
+  <a mat-menu-item routerLink="/about" routerLinkActive="active-mobile-nav-link">
     <mat-icon>info</mat-icon>
     <span>About</span>
   </a>

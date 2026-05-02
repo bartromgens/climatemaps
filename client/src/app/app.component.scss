@@ -36,6 +36,12 @@ mat-toolbar {
   letter-spacing: 0.5px;
 }
 
+.active-nav-link {
+  font-weight: 700 !important;
+  background-color: rgba(21, 101, 192, 0.12) !important;
+  color: #1565c0 !important;
+}
+
 .app-title-link {
   text-decoration: none;
   color: #1565c0;

@@ -62,6 +62,12 @@
       color: #1565c0;
     }
   }
+
+  .active-mobile-nav-link {
+    font-weight: 600;
+    background-color: rgba(21, 101, 192, 0.08);
+    border-left: 3px solid #1565c0;
+  }
 }
 
 .mobile-settings-container {

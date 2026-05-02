@@ -3,15 +3,15 @@
     <span>{{ title }}</span>
   </a>
 
-  <a mat-button routerLink="/">Map</a>
-  <a mat-button routerLink="/seasons">Seasons</a>
-  <a mat-button routerLink="/climate-predictions">Climate Predictions</a>
-  <a mat-button routerLink="/climate-scenarios">Climate Scenarios</a>
-  <a mat-button routerLink="/climate-matrix">Climate Matrix</a>
+  <a mat-button routerLink="/" routerLinkActive="active-nav-link" [routerLinkActiveOptions]="{exact: true}">Map</a>
+  <a mat-button routerLink="/seasons" routerLinkActive="active-nav-link">Seasons</a>
+  <a mat-button routerLink="/climate-predictions" routerLinkActive="active-nav-link">Climate Predictions</a>
+  <a mat-button routerLink="/climate-scenarios" routerLinkActive="active-nav-link">Climate Scenarios</a>
+  <a mat-button routerLink="/climate-matrix" routerLinkActive="active-nav-link">Climate Matrix</a>
 
   <span class="spacer"></span>
 
-  <a mat-button routerLink="/about">About</a>
+  <a mat-button routerLink="/about" routerLinkActive="active-nav-link">About</a>
   <a
     mat-icon-button
     href="https://github.com/bartromgens/climatemaps"

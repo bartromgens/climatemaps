@@ -1,6 +1,6 @@
 import { Component, Input, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { RouterLink, RouterLinkActive } from '@angular/router';
 import { ReactiveFormsModule, FormControl } from '@angular/forms';
 import { MatIconModule, MatIconRegistry } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
@@ -27,6 +27,7 @@ import { PrecipitationUnitSelectorComponent } from '../../core/precipitation-uni
     CommonModule,
     ReactiveFormsModule,
     RouterLink,
+    RouterLinkActive,
     MatIconModule,
     MatButtonModule,
     MatMenuModule,
