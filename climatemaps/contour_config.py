@@ -7,8 +7,7 @@ from pydantic import computed_field
 from pydantic import model_validator
 from pydantic import ConfigDict
 from matplotlib import pyplot as plt
-from matplotlib.colors import SymLogNorm
-from matplotlib.colors import Normalize
+from matplotlib.colors import Normalize, SymLogNorm
 
 
 class ContourPlotConfig(BaseModel):
@@ -18,7 +17,7 @@ class ContourPlotConfig(BaseModel):
     title: str = Field("", description="Plot title")
     unit: str = Field("", description="Unit label for colorbar")
     log_scale: bool = Field(False, description="Use symmetric log scale?")
-    n_contours: int = Field(21, description="Number of contour intervals")
+    n_contours: int = Field(11, description="Number of contour intervals")
     linthresh: float = Field(1.0, description="Linear threshold for SymLogNorm")
 
     # allow matplotlib & numpy types
@@ -41,7 +40,7 @@ class ContourPlotConfig(BaseModel):
 
     @computed_field
     @property
-    def norm(self) -> SymLogNorm | None:
+    def norm(self) -> SymLogNorm | Normalize:
         if self.log_scale:
             return SymLogNorm(
                 linthresh=self.linthresh, vmin=self.level_lower, vmax=self.level_upper

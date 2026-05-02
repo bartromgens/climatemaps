@@ -11,6 +11,7 @@ export interface ClimateMapResource {
   year_range: [number, number];
   variable: ClimateVariableResource;
   resolution: string;
+  resolution_effective: number;
   tiles_url: string;
   colormap_url: string;
   max_zoom_raster: number;
@@ -28,6 +29,7 @@ export class ClimateMap {
     public yearRange: [number, number],
     public variable: ClimateVariable,
     public resolution: string,
+    public resolutionEffective: number,
     public tilesUrl: string,
     public colormapUrl: string,
     public maxZoomRaster: number,
@@ -45,6 +47,7 @@ export class ClimateMap {
       resource.year_range,
       ClimateVariable.fromResource(resource.variable),
       resource.resolution,
+      resource.resolution_effective,
       resource.tiles_url,
       resource.colormap_url,
       resource.max_zoom_raster,

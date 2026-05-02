@@ -28,6 +28,7 @@ import { MapSyncService } from '../services/map-sync.service';
 import { BaseMapComponent } from '../base-map.component';
 import { SeoService } from '../../core/seo.service';
 import { ToastService } from '../../core/toast.service';
+import { SelectedMonthService } from '../../core/selected-month.service';
 
 interface GridCell {
   scenario: ClimateScenario;
@@ -75,6 +76,7 @@ export class ScenarioYearRangeGridComponent extends BaseMapComponent {
     layerFilter: LayerFilterService,
     toastService: ToastService,
     mapSyncService: MapSyncService,
+    selectedMonthService: SelectedMonthService,
     private seoService: SeoService,
   ) {
     super(
@@ -86,6 +88,7 @@ export class ScenarioYearRangeGridComponent extends BaseMapComponent {
       layerFilter,
       toastService,
       mapSyncService,
+      selectedMonthService,
     );
     this.seoService.updateMetaTags({
       title:
@@ -104,6 +107,15 @@ export class ScenarioYearRangeGridComponent extends BaseMapComponent {
   }
 
   protected initializeDefaultSelections(): void {
+    if (!this.controlsData.selectedYearRange && this.yearRanges.length > 0) {
+      const futureYearRange = this.yearRanges.find(
+        (range) => !this.isHistoricalYearRange(range.value),
+      );
+      if (futureYearRange) {
+        this.controlsData.selectedYearRange = futureYearRange;
+      }
+    }
+
     if (!this.controlsData.selectedClimateModel) {
       this.controlsData.selectedClimateModel = this.DEFAULT_MODEL;
     }
@@ -118,8 +130,9 @@ export class ScenarioYearRangeGridComponent extends BaseMapComponent {
     const availableClimateModels = this.getAvailableClimateModels();
 
     if (!availableResolutions.includes(this.controlsData.selectedResolution)) {
+      const highestResolution = this.getHighestAvailableResolution();
       this.controlsData.selectedResolution =
-        availableResolutions[0] || this.DEFAULT_RESOLUTION;
+        highestResolution || this.DEFAULT_RESOLUTION;
     }
 
     if (
@@ -134,8 +147,7 @@ export class ScenarioYearRangeGridComponent extends BaseMapComponent {
   }
 
   private updateFutureYearRanges(): void {
-    const availableYearRanges = this.getAvailableYearRanges();
-    this.futureYearRanges = availableYearRanges.filter(
+    this.futureYearRanges = this.yearRanges.filter(
       (range) => !this.isHistoricalYearRange(range.value),
     );
   }

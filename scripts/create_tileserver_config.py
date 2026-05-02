@@ -1,3 +1,4 @@
+import argparse
 import json
 import os
 import sys
@@ -18,21 +19,27 @@ from climatemaps.logger import logger
 maps_config: ClimateMapsConfig = get_config()
 
 
-def main(data_configs: List[ClimateDataConfig]):
-    config = _create_config(data_configs, dev_mode=False)
+def main(data_configs: List[ClimateDataConfig], dev_only: bool = False):
     config_dev = _create_config(data_configs, dev_mode=True)
-    filename = "tileserver_config.json"
     filename_dev = "tileserver_config_dev.json"
 
-    # write to file
-    with open(filename, "w") as f:
-        json.dump(config, f, indent=2)
     with open(filename_dev, "w") as f:
         json.dump(config_dev, f, indent=2)
 
-    logger.info(
-        f"Tileserver config created for production and dev mode: {filename} ({len(config['data'])} configs) and {filename_dev} ({len(config_dev['data'])} configs)"
-    )
+    if dev_only:
+        logger.info(
+            f"Tileserver config created for dev mode only: {filename_dev} ({len(config_dev['data'])} configs)"
+        )
+    else:
+        config = _create_config(data_configs, dev_mode=False)
+        filename = "tileserver_config.json"
+
+        with open(filename, "w") as f:
+            json.dump(config, f, indent=2)
+
+        logger.info(
+            f"Tileserver config created for production and dev mode: {filename} ({len(config['data'])} configs) and {filename_dev} ({len(config_dev['data'])} configs)"
+        )
 
 
 def _create_config(data_configs, dev_mode: bool = False):
@@ -61,4 +68,12 @@ def _create_config(data_configs, dev_mode: bool = False):
 
 
 if __name__ == "__main__":
-    main(settings.DATA_SETS_API)
+    parser = argparse.ArgumentParser(description="Create tileserver configuration files")
+    parser.add_argument(
+        "--dev-only",
+        action="store_true",
+        help="Only update the dev config file",
+    )
+    args = parser.parse_args()
+
+    main(settings.DATA_SETS_API, dev_only=args.dev_only)

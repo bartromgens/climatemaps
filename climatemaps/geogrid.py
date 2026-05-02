@@ -1,3 +1,4 @@
+import gc
 import logging
 
 import numpy as np
@@ -16,7 +17,7 @@ class GeoGrid(BaseModel):
     lat_range: npt.NDArray[np.floating]
     values: npt.NDArray[np.floating]
 
-    model_config = ConfigDict(arbitrary_types_allowed=True, frozen=True)
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
     @field_validator("lon_range")
     def lon_range_must_increase(cls, v: npt.NDArray[np.floating]) -> npt.NDArray[np.floating]:
@@ -48,10 +49,39 @@ class GeoGrid(BaseModel):
         Increase resolution of the data by using spline interpolation.
         Returns a new zoomed GeoGrid object.
         """
-        values = scipy.ndimage.zoom(self.values, zoom=zoom_factor, order=1)
-        lon_range = scipy.ndimage.zoom(self.lon_range, zoom=zoom_factor, order=1)
-        lat_range = scipy.ndimage.zoom(self.lat_range, zoom=zoom_factor, order=1)
-        return GeoGrid(lon_range=lon_range, lat_range=lat_range, values=values)
+        logger.info(f"Zooming geogrid from {self.resolution_mega_pixel:.1f} megapixels")
+
+        new_lat_size = int(self.lat_range.size * zoom_factor)
+        new_lon_size = int(self.lon_range.size * zoom_factor)
+
+        # Preserve the bounding box when creating new coordinate arrays
+        # The new pixel centers must be positioned so that the outer edges
+        # of the new grid match the outer edges of the original grid
+        new_bin_width_lon = (self.urcrnrlon - self.llcrnrlon) / new_lon_size
+        new_bin_width_lat = (self.urcrnrlat - self.llcrnrlat) / new_lat_size
+
+        new_lon_range = np.linspace(
+            self.llcrnrlon + new_bin_width_lon / 2,
+            self.urcrnrlon - new_bin_width_lon / 2,
+            new_lon_size,
+        )
+        new_lat_range = np.linspace(
+            self.urcrnrlat - new_bin_width_lat / 2,
+            self.llcrnrlat + new_bin_width_lat / 2,
+            new_lat_size,
+        )
+
+        zoom_factors = (new_lat_size / self.lat_range.size, new_lon_size / self.lon_range.size)
+        new_values = scipy.ndimage.zoom(self.values, zoom=zoom_factors, order=1)
+
+        new_geogrid = GeoGrid(lon_range=new_lon_range, lat_range=new_lat_range, values=new_values)
+        logger.info(f"Zoomed geogrid to {new_geogrid.resolution_mega_pixel:.1f} megapixels")
+
+        # Clean up intermediate variables to free memory
+        del new_bin_width_lon, new_bin_width_lat, zoom_factors
+        gc.collect()
+
+        return new_geogrid
 
     def difference(self, other: "GeoGrid") -> "GeoGrid":
         """
@@ -65,6 +95,49 @@ class GeoGrid(BaseModel):
 
         diff_vals = self.values - other.values
         return GeoGrid(lon_range=self.lon_range, lat_range=self.lat_range, values=diff_vals)
+
+    def downsample(self, factor: float = 2) -> "GeoGrid":
+        """
+        Reduce the resolution of the grid by the specified factor.
+        For example, factor=2 will halve the resolution in both dimensions.
+        """
+        if factor < 1:
+            raise ValueError("Downsampling factor must be >= 1")
+
+        if factor == 1:
+            return self
+
+        logger.info(f"Downsampling geogrid from {self.resolution_mega_pixel:.1f} megapixels")
+
+        # Calculate new dimensions
+        new_lat_size = max(1, int(self.lat_range.size / factor))
+        new_lon_size = max(1, int(self.lon_range.size / factor))
+
+        # Preserve the bounding box when creating new coordinate arrays
+        # The new pixel centers must be positioned so that the outer edges
+        # of the new grid match the outer edges of the original grid
+        new_bin_width_lon = (self.urcrnrlon - self.llcrnrlon) / new_lon_size
+        new_bin_width_lat = (self.urcrnrlat - self.llcrnrlat) / new_lat_size
+
+        new_lon_range = np.linspace(
+            self.llcrnrlon + new_bin_width_lon / 2,
+            self.urcrnrlon - new_bin_width_lon / 2,
+            new_lon_size,
+        )
+        new_lat_range = np.linspace(
+            self.urcrnrlat - new_bin_width_lat / 2,
+            self.llcrnrlat + new_bin_width_lat / 2,
+            new_lat_size,
+        )
+
+        # Downsample values using scipy's zoom function
+        zoom_factors = (new_lat_size / self.lat_range.size, new_lon_size / self.lon_range.size)
+        new_values = scipy.ndimage.zoom(self.values, zoom=zoom_factors, order=1)
+
+        new_geogrid = GeoGrid(lon_range=new_lon_range, lat_range=new_lat_range, values=new_values)
+        logger.info(f"Downsampled geogrid to {new_geogrid.resolution_mega_pixel:.1f} megapixels")
+
+        return new_geogrid
 
     @property
     def lat_min(self):
@@ -83,37 +156,51 @@ class GeoGrid(BaseModel):
         return self.lon_range[-1]
 
     @property
-    def bin_width(self):
-        assert self.bin_width_lon == self.bin_width_lat
-        return self.bin_width_lon
-
-    @property
     def bin_width_lon(self):
-        return 360.0 / len(self.lon_range)
+        """Calculate bin width from actual coordinate spacing"""
+        if len(self.lon_range) > 1:
+            return np.mean(np.diff(self.lon_range))
+        return 360.0 / len(self.lon_range) if len(self.lon_range) > 0 else 0
 
     @property
     def bin_width_lat(self):
-        return 180.0 / len(self.lat_range)
+        """Calculate bin width from actual coordinate spacing"""
+        if len(self.lat_range) > 1:
+            return np.mean(np.abs(np.diff(self.lat_range)))
+        return 180.0 / len(self.lat_range) if len(self.lat_range) > 0 else 0
 
     @property
-    def llcrnrlon(self):
+    def llcrnrlon(self) -> float:
         """lower left corner longitude"""
-        return self.lon_min - self.bin_width / 2
+        return self.lon_min - self.bin_width_lon / 2
 
     @property
-    def llcrnrlat(self):
+    def llcrnrlat(self) -> float:
         """lower left corner latitude"""
-        return self.lat_min - self.bin_width / 2
+        return self.lat_min - self.bin_width_lat / 2
 
     @property
-    def urcrnrlon(self):
+    def urcrnrlon(self) -> float:
         """upper right corner longitude"""
-        return self.lon_max + self.bin_width / 2
+        return self.lon_max + self.bin_width_lon / 2
 
     @property
-    def urcrnrlat(self):
+    def urcrnrlat(self) -> float:
         """upper right corner latitude"""
-        return self.lat_max + self.bin_width / 2
+        return self.lat_max + self.bin_width_lat / 2
+
+    @property
+    def resolution_mega_pixel(self) -> float:
+        """Total number of pixels in the grid, expressed in megapixels (millions of pixels)"""
+        total_pixels = self.values.size
+        return total_pixels / 1_000_000
+
+    @property
+    def world_equivalent_pixels(self) -> float:
+        """Calculate total pixels if bounding box covered the complete world at current spatial resolution"""
+        world_pixels_lon = 360.0 / self.bin_width_lon
+        world_pixels_lat = 180.0 / self.bin_width_lat
+        return world_pixels_lon * world_pixels_lat
 
     def get_value_at_coordinate(self, lon: float, lat: float) -> float:
         if lon < self.lon_min or lon > self.lon_max:
@@ -137,3 +224,39 @@ class GeoGrid(BaseModel):
             raise ValueError(f"No data available at coordinates (lat={lat}, lon={lon})")
 
         return value
+
+    def crop_to_lat_range(self, lat_min: float, lat_max: float) -> None:
+        """
+        Crop the grid to a specific latitude range in place.
+
+        This is useful for restricting data to Web Mercator limits (±85.05°) or other constraints.
+        Modifies the object in place to reduce memory consumption.
+        """
+        if lat_min >= lat_max:
+            raise ValueError(f"lat_min ({lat_min}) must be less than lat_max ({lat_max})")
+
+        actual_lat_min = self.lat_min
+        actual_lat_max = self.lat_max
+
+        if lat_min >= actual_lat_max or lat_max <= actual_lat_min:
+            raise ValueError(
+                f"Requested range [{lat_min}, {lat_max}] does not overlap with "
+                f"data range [{actual_lat_min}, {actual_lat_max}]"
+            )
+
+        if lat_min <= actual_lat_min and lat_max >= actual_lat_max:
+            logger.info("No cropping needed, requested range contains entire data range")
+            return
+
+        crop_lat_min = max(lat_min, actual_lat_min)
+        crop_lat_max = min(lat_max, actual_lat_max)
+
+        lat_mask = (self.lat_range >= crop_lat_min) & (self.lat_range <= crop_lat_max)
+
+        self.lat_range = self.lat_range[lat_mask]
+        self.values = self.values[lat_mask, :]
+
+        logger.info(
+            f"Cropped latitude range from [{actual_lat_min:.6f}, {actual_lat_max:.6f}] "
+            f"to [{self.lat_range[-1]:.6f}, {self.lat_range[0]:.6f}]"
+        )

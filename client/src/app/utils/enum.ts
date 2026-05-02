@@ -4,12 +4,14 @@ export enum ClimateVarKey {
   T_MAX = 'T_MAX',
   T_MIN = 'T_MIN',
   CLOUD_COVER = 'CLOUD_COVER',
-  WET_DAYS = 'WET_DAYS',
-  FROST_DAYS = 'FROST_DAYS',
   WIND_SPEED = 'WIND_SPEED',
   RADIATION = 'RADIATION',
   DIURNAL_TEMP_RANGE = 'DIURNAL_TEMP_RANGE',
   VAPOUR_PRESSURE = 'VAPOUR_PRESSURE',
+  RELATIVE_HUMIDITY = 'RELATIVE_HUMIDITY',
+  POTENTIAL_EVAPOTRANSPIRATION = 'POTENTIAL_EVAPOTRANSPIRATION',
+  MOISTURE_INDEX = 'MOISTURE_INDEX',
+  VAPOUR_PRESSURE_DEFICIT = 'VAPOUR_PRESSURE_DEFICIT',
 }
 
 export const CLIMATE_VAR_KEY_TO_NAME: Record<ClimateVarKey, string> = {
@@ -17,12 +19,14 @@ export const CLIMATE_VAR_KEY_TO_NAME: Record<ClimateVarKey, string> = {
   [ClimateVarKey.T_MIN]: 'tmin',
   [ClimateVarKey.PRECIPITATION]: 'precipitation',
   [ClimateVarKey.CLOUD_COVER]: 'cloud_cover',
-  [ClimateVarKey.WET_DAYS]: 'wet_days',
-  [ClimateVarKey.FROST_DAYS]: 'frost_days',
   [ClimateVarKey.WIND_SPEED]: 'wind_speed',
   [ClimateVarKey.RADIATION]: 'radiation',
   [ClimateVarKey.DIURNAL_TEMP_RANGE]: 'diurnal_temp_range',
   [ClimateVarKey.VAPOUR_PRESSURE]: 'vapour_pressure',
+  [ClimateVarKey.RELATIVE_HUMIDITY]: 'relative_humidity',
+  [ClimateVarKey.POTENTIAL_EVAPOTRANSPIRATION]: 'potential_evapotranspiration',
+  [ClimateVarKey.MOISTURE_INDEX]: 'moisture_index',
+  [ClimateVarKey.VAPOUR_PRESSURE_DEFICIT]: 'vapour_pressure_deficit',
 };
 
 export const CLIMATE_VAR_NAME_TO_KEY: Record<string, ClimateVarKey> =
@@ -37,12 +41,14 @@ export const CLIMATE_VAR_DISPLAY_NAMES: Record<ClimateVarKey, string> = {
   [ClimateVarKey.T_MIN]: 'Temperature (Night)',
   [ClimateVarKey.PRECIPITATION]: 'Precipitation',
   [ClimateVarKey.CLOUD_COVER]: 'Cloud Cover',
-  [ClimateVarKey.WET_DAYS]: 'Wet Days',
-  [ClimateVarKey.FROST_DAYS]: 'Frost Days',
   [ClimateVarKey.WIND_SPEED]: 'Wind Speed',
   [ClimateVarKey.RADIATION]: 'Radiation',
   [ClimateVarKey.DIURNAL_TEMP_RANGE]: 'Diurnal Temperature Range',
   [ClimateVarKey.VAPOUR_PRESSURE]: 'Vapour Pressure',
+  [ClimateVarKey.RELATIVE_HUMIDITY]: 'Relative Humidity',
+  [ClimateVarKey.POTENTIAL_EVAPOTRANSPIRATION]: 'Potential Evapotranspiration',
+  [ClimateVarKey.MOISTURE_INDEX]: 'Moisture Index',
+  [ClimateVarKey.VAPOUR_PRESSURE_DEFICIT]: 'Vapour Pressure Deficit',
 };
 
 export const CLIMATE_VAR_UNITS: Record<ClimateVarKey, string> = {
@@ -50,12 +56,14 @@ export const CLIMATE_VAR_UNITS: Record<ClimateVarKey, string> = {
   [ClimateVarKey.T_MIN]: '°C',
   [ClimateVarKey.PRECIPITATION]: 'mm/month',
   [ClimateVarKey.CLOUD_COVER]: '%',
-  [ClimateVarKey.WET_DAYS]: 'days',
-  [ClimateVarKey.FROST_DAYS]: 'days',
   [ClimateVarKey.WIND_SPEED]: 'm/s',
   [ClimateVarKey.RADIATION]: 'W/m²',
   [ClimateVarKey.DIURNAL_TEMP_RANGE]: '°C',
   [ClimateVarKey.VAPOUR_PRESSURE]: 'hPa',
+  [ClimateVarKey.RELATIVE_HUMIDITY]: '%',
+  [ClimateVarKey.POTENTIAL_EVAPOTRANSPIRATION]: 'mm/month',
+  [ClimateVarKey.MOISTURE_INDEX]: 'mm/month',
+  [ClimateVarKey.VAPOUR_PRESSURE_DEFICIT]: 'Pa',
 };
 
 // Spatial Resolution enum matching the backend
@@ -64,6 +72,8 @@ export enum SpatialResolution {
   MIN10 = '10m',
   MIN5 = '5m',
   MIN2_5 = '2.5m',
+  MIN1_5 = '1.5m',
+  MIN0_5 = '0.5m',
 }
 
 // Climate Model enum matching the backend

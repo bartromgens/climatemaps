@@ -1,0 +1,64 @@
+import enum
+
+
+class DataFormat(enum.Enum):
+    GEOTIFF_WORLDCLIM_CMIP6 = "GEOTIFF_WORLDCLIM_CMIP6"
+    GEOTIFF_WORLDCLIM_HISTORY = "GEOTIFF_WORLDCLIM_HISTORY"
+    CRU_TS = "CRU_TS"
+    CHELSA = "CHELSA"
+
+
+class SpatialResolution(enum.Enum):
+    MIN30 = "30m"
+    MIN10 = "10m"
+    MIN5 = "5m"
+    MIN1_5 = "1.5m"
+    MIN2_5 = "2.5m"
+    MIN0_5 = "0.5m"
+
+
+class ClimateVarKey(enum.Enum):
+    PRECIPITATION = "PRECIPITATION"
+    T_MAX = "T_MAX"
+    T_MIN = "T_MIN"
+    CLOUD_COVER = "CLOUD_COVER"
+    WET_DAYS = "WET_DAYS"
+    FROST_DAYS = "FROST_DAYS"
+    WIND_SPEED = "WIND_SPEED"
+    RADIATION = "RADIATION"
+    DIURNAL_TEMP_RANGE = "DIURNAL_TEMP_RANGE"
+    VAPOUR_PRESSURE = "VAPOUR_PRESSURE"
+    RELATIVE_HUMIDITY = "RELATIVE_HUMIDITY"
+    POTENTIAL_EVAPOTRANSPIRATION = "POTENTIAL_EVAPOTRANSPIRATION"
+    MOISTURE_INDEX = "MOISTURE_INDEX"
+    VAPOUR_PRESSURE_DEFICIT = "VAPOUR_PRESSURE_DEFICIT"
+
+
+class ClimateScenario(enum.Enum):
+    SSP126 = "SSP126"
+    SSP245 = "SSP245"
+    SSP370 = "SSP370"
+    SSP585 = "SSP585"
+
+
+class ClimateModel(enum.Enum):
+    ENSEMBLE_MEAN = "ENSEMBLE_MEAN"
+    ENSEMBLE_STD_DEV = "ENSEMBLE_STD_DEV"
+    ACCESS_CM2 = "ACCESS_CM2"
+    BCC_CSM2_MR = "BCC_CSM2_MR"
+    CMCC_ESM2 = "CMCC_ESM2"
+    EC_EARTH3_VEG = "EC_Earth3_Veg"
+    FIO_ESM_2_0 = "FIO_ESM_2_0"
+    GFDL_ESM4 = "GFDL_ESM4"
+    GISS_E2_1_G = "GISS_E2_1_G"
+    HADGEM3_GC31_LL = "HadGEM3_GC31_LL"
+    INM_CM5_0 = "INM_CM5_0"
+    IPSL_CM6A_LR = "IPSL_CM6A_LR"
+    MIROC6 = "MIROC6"
+    MPI_ESM1_2_HR = "MPI_ESM1_2_HR"
+    MRI_ESM2_0 = "MRI_ESM2_0"
+    UKESM1_0_LL = "UKESM1_0_LL"
+
+    @property
+    def filename(self) -> str:
+        return self.value.replace("_", "-")

@@ -27,6 +27,7 @@ import {
 } from './controls/map-controls.component';
 import { MapSyncService, MapViewState } from './services/map-sync.service';
 import { ToastService } from '../core/toast.service';
+import { SelectedMonthService } from '../core/selected-month.service';
 
 @Directive()
 export abstract class BaseMapComponent implements OnInit {
@@ -41,7 +42,7 @@ export abstract class BaseMapComponent implements OnInit {
     selectedClimateModel: null,
     showDifferenceMap: true,
     showContourLines: true,
-    selectedMonth: new Date().getMonth() + 1,
+    selectedMonth: 0,
   };
 
   controlsOptions: MapControlsOptions | undefined;
@@ -70,9 +71,12 @@ export abstract class BaseMapComponent implements OnInit {
     protected layerFilter: LayerFilterService,
     protected toastService: ToastService,
     protected mapSyncService?: MapSyncService,
+    protected selectedMonthService?: SelectedMonthService,
   ) {
     this.isHistoricalYearRange =
       this.metadataService.isHistoricalYearRange.bind(this.metadataService);
+    this.controlsData.selectedMonth =
+      this.selectedMonthService?.getMonth() ?? new Date().getMonth() + 1;
   }
 
   ngOnInit(): void {
@@ -123,6 +127,10 @@ export abstract class BaseMapComponent implements OnInit {
     this.climateVariables =
       this.metadataService.getClimateVariables(climateMaps);
     this.yearRanges = this.metadataService.getYearRanges(climateMaps);
+    console.log(
+      'All year ranges from API:',
+      this.yearRanges.map((yr) => yr.value),
+    );
     this.resolutions = this.metadataService.getResolutions(climateMaps);
     this.climateScenarios =
       this.metadataService.getClimateScenarios(climateMaps);
@@ -160,6 +168,7 @@ export abstract class BaseMapComponent implements OnInit {
   protected handleControlsChange(): void {
     this.setDefaultFutureSelections();
     this.resetInvalidSelections();
+    this.selectedMonthService?.setMonth(this.controlsData.selectedMonth);
     this.onControlsUpdated();
     this.updateUrlWithControls();
   }
@@ -171,12 +180,21 @@ export abstract class BaseMapComponent implements OnInit {
       this.controlsData.selectedYearRange &&
       !this.isHistoricalYearRange(this.controlsData.selectedYearRange.value)
     ) {
+      console.log(
+        'setDefaultFutureSelections - Setting defaults for future data',
+      );
       if (!this.controlsData.selectedClimateScenario) {
+        console.log('  Setting scenario to SSP370');
         this.controlsData.selectedClimateScenario = ClimateScenario.SSP370;
       }
       if (!this.controlsData.selectedClimateModel) {
+        console.log('  Setting model to ENSEMBLE_MEAN');
         this.controlsData.selectedClimateModel = ClimateModel.ENSEMBLE_MEAN;
       }
+      console.log('setDefaultFutureSelections - After setting:', {
+        scenario: this.controlsData.selectedClimateScenario,
+        model: this.controlsData.selectedClimateModel,
+      });
     }
   }
 
@@ -185,6 +203,8 @@ export abstract class BaseMapComponent implements OnInit {
       this.climateMaps,
       this.variableTypes,
       this.climateVariables,
+      this.controlsData.selectedYearRange,
+      this.isHistoricalYearRange,
     );
   }
 
@@ -205,6 +225,33 @@ export abstract class BaseMapComponent implements OnInit {
       this.climateVariables,
       this.isHistoricalYearRange,
     );
+  }
+
+  protected getHighestAvailableResolution(): SpatialResolution | null {
+    const availableResolutions = this.getAvailableResolutions();
+
+    if (availableResolutions.length === 0) {
+      return null;
+    }
+
+    // Order resolutions from highest to lowest resolution
+    const resolutionOrder = [
+      SpatialResolution.MIN0_5,
+      SpatialResolution.MIN2_5,
+      SpatialResolution.MIN5,
+      SpatialResolution.MIN10,
+      SpatialResolution.MIN30,
+    ];
+
+    // Find the highest available resolution
+    for (const resolution of resolutionOrder) {
+      if (availableResolutions.includes(resolution)) {
+        return resolution;
+      }
+    }
+
+    // Fallback to first available if none match the order
+    return availableResolutions[0];
   }
 
   protected getAvailableClimateScenarios(): ClimateScenario[] {

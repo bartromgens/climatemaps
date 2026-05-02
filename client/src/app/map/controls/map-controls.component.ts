@@ -77,7 +77,9 @@ export class MapControlsComponent implements OnInit {
 
   @Input() controlsData: MapControlsData | undefined;
   @Input() controlsOptions: MapControlsOptions | undefined;
+  @Input() hideMonthSelector = false;
   @Input() hideVariableSelector = false;
+  @Input() hideYearRangeSelector = false;
   @Input() showDropDownControls = true;
   @Output() controlsChange = new EventEmitter<MapControlsData>();
   temperatureUnit = TemperatureUnit.CELSIUS;
@@ -207,6 +209,8 @@ export class MapControlsComponent implements OnInit {
         return 'High';
       case SpatialResolution.MIN2_5:
         return 'Very High';
+      case SpatialResolution.MIN0_5:
+        return 'Ultra High';
       default:
         return resolution;
     }

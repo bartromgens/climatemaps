@@ -30,6 +30,7 @@ import { MapSyncService } from '../services/map-sync.service';
 import { BaseMapComponent } from '../base-map.component';
 import { SeoService } from '../../core/seo.service';
 import { ToastService } from '../../core/toast.service';
+import { SelectedMonthService } from '../../core/selected-month.service';
 
 interface YearRangeOption {
   yearRange: YearRange;
@@ -72,6 +73,7 @@ export class YearRangeGridComponent extends BaseMapComponent {
     layerFilter: LayerFilterService,
     toastService: ToastService,
     mapSyncService: MapSyncService,
+    selectedMonthService: SelectedMonthService,
     private seoService: SeoService,
   ) {
     super(
@@ -83,6 +85,7 @@ export class YearRangeGridComponent extends BaseMapComponent {
       layerFilter,
       toastService,
       mapSyncService,
+      selectedMonthService,
     );
     this.controlsData.showDifferenceMap = true;
     this.seoService.updateMetaTags({
@@ -101,6 +104,15 @@ export class YearRangeGridComponent extends BaseMapComponent {
   }
 
   protected initializeDefaultSelections(): void {
+    if (!this.controlsData.selectedYearRange && this.yearRanges.length > 0) {
+      const futureYearRange = this.yearRanges.find(
+        (range) => !this.isHistoricalYearRange(range.value),
+      );
+      if (futureYearRange) {
+        this.controlsData.selectedYearRange = futureYearRange;
+      }
+    }
+
     if (!this.controlsData.selectedClimateScenario) {
       this.controlsData.selectedClimateScenario = this.DEFAULT_SCENARIO;
     }
@@ -120,8 +132,9 @@ export class YearRangeGridComponent extends BaseMapComponent {
     const availableClimateModels = this.getAvailableClimateModels();
 
     if (!availableResolutions.includes(this.controlsData.selectedResolution)) {
+      const highestResolution = this.getHighestAvailableResolution();
       this.controlsData.selectedResolution =
-        availableResolutions[0] || this.DEFAULT_RESOLUTION;
+        highestResolution || this.DEFAULT_RESOLUTION;
     }
 
     if (
@@ -146,12 +159,8 @@ export class YearRangeGridComponent extends BaseMapComponent {
   }
 
   private findMatchingLayers(): void {
-    const availableYearRanges = this.getAvailableYearRanges();
-
-    this.yearRangeOptions = availableYearRanges
-      .filter((yearRange) => {
-        return !(yearRange.value[0] === 1970 && yearRange.value[1] === 2000);
-      })
+    this.yearRangeOptions = this.yearRanges
+      .filter((yearRange) => !this.isHistoricalYearRange(yearRange.value))
       .map((yearRange) => {
         const matchingLayer = this.findLayerForYearRange(yearRange);
         return {

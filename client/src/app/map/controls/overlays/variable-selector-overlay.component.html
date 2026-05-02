@@ -13,7 +13,7 @@
         [src]="variable.icon"
         [alt]="variable.shortName"
       />
-      <span *ngIf="!variable.isSvg">{{ variable.icon }}</span>
+      <mat-icon *ngIf="!variable.isSvg">{{ variable.icon }}</mat-icon>
     </div>
     <div class="variable-name">{{ variable.shortName }}</div>
   </button>

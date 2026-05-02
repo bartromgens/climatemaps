@@ -55,8 +55,10 @@ import { MapSyncService } from './services/map-sync.service';
 import { BaseMapComponent } from './base-map.component';
 import { SeoService } from '../core/seo.service';
 import { ToastService } from '../core/toast.service';
+import { SelectedMonthService } from '../core/selected-month.service';
 import { ClimateVariableHelperService } from '../core/climate-variable-helper.service';
 import { CoordinateUtils } from '../utils/coordinate-utils';
+import { ColorUtils } from '../utils/color-utils';
 import { MatomoTracker } from 'ngx-matomo-client';
 
 @Component({
@@ -91,6 +93,7 @@ export class MapComponent extends BaseMapComponent implements OnInit {
 
   private readonly tracker = inject(MatomoTracker);
   private readonly DEFAULT_RESOLUTION = SpatialResolution.MIN10;
+  private readonly CONTOUR_DARKEN_FACTOR = 0.17;
 
   environment = environment;
 
@@ -173,6 +176,7 @@ export class MapComponent extends BaseMapComponent implements OnInit {
     layerFilter: LayerFilterService,
     toastService: ToastService,
     mapSyncService: MapSyncService,
+    selectedMonthService: SelectedMonthService,
     private tooltipManager: TooltipManagerService,
     private vectorLayerTooltip: VectorLayerTooltipService,
     private mapNavigationService: MapNavigationService,
@@ -190,6 +194,7 @@ export class MapComponent extends BaseMapComponent implements OnInit {
       layerFilter,
       toastService,
       mapSyncService,
+      selectedMonthService,
     );
 
     const initialState = mapSyncService.getInitialViewState();
@@ -295,8 +300,10 @@ export class MapComponent extends BaseMapComponent implements OnInit {
     }
 
     if (!availableResolutions.includes(this.controlsData.selectedResolution)) {
+      // Always select the highest available resolution
+      const highestResolution = this.getHighestAvailableResolution();
       this.controlsData.selectedResolution =
-        availableResolutions[0] || this.DEFAULT_RESOLUTION;
+        highestResolution || this.DEFAULT_RESOLUTION;
     }
 
     const isFutureData =
@@ -304,6 +311,7 @@ export class MapComponent extends BaseMapComponent implements OnInit {
       !this.isHistoricalYearRange(this.controlsData.selectedYearRange.value);
 
     if (isFutureData) {
+      // Validate and set scenario first
       if (
         this.controlsData.selectedClimateScenario &&
         !availableClimateScenarios.includes(
@@ -314,12 +322,37 @@ export class MapComponent extends BaseMapComponent implements OnInit {
           availableClimateScenarios[0] || null;
       }
 
+      // Ensure scenario has a default if still null
+      if (
+        !this.controlsData.selectedClimateScenario &&
+        availableClimateScenarios.length > 0
+      ) {
+        this.controlsData.selectedClimateScenario =
+          availableClimateScenarios[0];
+      }
+
+      // Now get available models AFTER scenario has been validated/set
+      const availableClimateModels = this.getAvailableClimateModels();
+      console.log(
+        'resetInvalidSelections - Available models (after scenario set):',
+        availableClimateModels,
+      );
+
+      // Validate and set model
       if (
         this.controlsData.selectedClimateModel &&
         !availableClimateModels.includes(this.controlsData.selectedClimateModel)
       ) {
         this.controlsData.selectedClimateModel =
           availableClimateModels[0] || null;
+      }
+
+      // Ensure model has a default if still null
+      if (
+        !this.controlsData.selectedClimateModel &&
+        availableClimateModels.length > 0
+      ) {
+        this.controlsData.selectedClimateModel = availableClimateModels[0];
       }
     }
 
@@ -331,6 +364,9 @@ export class MapComponent extends BaseMapComponent implements OnInit {
       variableType: this.controlsData.selectedVariableType,
       yearRange: this.controlsData.selectedYearRange,
       resolution: this.controlsData.selectedResolution,
+      scenario: this.controlsData.selectedClimateScenario,
+      model: this.controlsData.selectedClimateModel,
+      showDifferenceMap: this.controlsData.showDifferenceMap,
     });
 
     const matchingLayer = this.findMatchingLayerOption();
@@ -399,38 +435,14 @@ export class MapComponent extends BaseMapComponent implements OnInit {
         },
       );
 
-      this.vectorLayer = (window as any).L.vectorGrid.protobuf(
-        `${this.selectedOption.vectorUrl}_${this.monthSelected}/{z}/{x}/{y}.pbf`,
-        {
-          vectorTileLayerStyles: {
-            contours: (properties: any) => ({
-              color: properties.stroke,
-              weight: 2,
-              opacity: 1,
-              crossOrigin: 'anonymous',
-            }),
-          },
-          interactive: true,
-          maxNativeZoom: this.selectedOption.vectorMaxZoom,
-          maxZoom: 18,
-        },
-      );
-
-      // Add hover event listeners
-      this.vectorLayer?.on('mouseover', (e: any) => {
-        this.onVectorLayerHover(e);
-      });
-
-      this.vectorLayer?.on('mouseout', () => {
-        this.onVectorLayerMouseOut();
-      });
-
-      // Add new layers to map
+      // Add raster layer to map first
       if (this.rasterLayer) {
         this.map?.addLayer(this.rasterLayer);
-      }
-      if (this.vectorLayer && this.controlsData.showContourLines) {
-        this.map?.addLayer(this.vectorLayer);
+
+        // Wait for raster layer to load before adding vector layer
+        this.rasterLayer.once('load', () => {
+          this.addVectorLayer();
+        });
       }
 
       setTimeout(() => {
@@ -438,6 +450,46 @@ export class MapComponent extends BaseMapComponent implements OnInit {
       }, 0);
     } else {
       console.log('No layer selected - not adding any layers to map');
+    }
+  }
+
+  private addVectorLayer(): void {
+    if (!this.selectedOption || this.vectorLayer) {
+      return;
+    }
+
+    this.vectorLayer = (window as any).L.vectorGrid.protobuf(
+      `${this.selectedOption.vectorUrl}_${this.monthSelected}/{z}/{x}/{y}.pbf`,
+      {
+        vectorTileLayerStyles: {
+          contours: (properties: any) => ({
+            color: ColorUtils.intensifyColor(
+              properties.stroke,
+              this.CONTOUR_DARKEN_FACTOR,
+            ),
+            weight: 1,
+            opacity: 1,
+            crossOrigin: 'anonymous',
+          }),
+        },
+        interactive: true,
+        maxNativeZoom: this.selectedOption.vectorMaxZoom,
+        maxZoom: 18,
+      },
+    );
+
+    // Add hover event listeners
+    this.vectorLayer?.on('mouseover', (e: any) => {
+      this.onVectorLayerHover(e);
+    });
+
+    this.vectorLayer?.on('mouseout', () => {
+      this.onVectorLayerMouseOut();
+    });
+
+    // Add vector layer to map if contour lines are enabled
+    if (this.vectorLayer && this.controlsData.showContourLines) {
+      this.map?.addLayer(this.vectorLayer);
     }
   }
 
@@ -565,7 +617,7 @@ export class MapComponent extends BaseMapComponent implements OnInit {
 
     setTimeout(() => {
       this.map?.invalidateSize();
-      // Set initial resolution based on zoom level
+      // Set initial resolution to highest available
       this.handleZoomBasedResolutionChange();
     }, 0);
   }
@@ -819,8 +871,7 @@ export class MapComponent extends BaseMapComponent implements OnInit {
       return;
     }
 
-    const currentZoom = this.map.getZoom();
-    const targetResolution = this.getResolutionForZoom(currentZoom);
+    const targetResolution = this.getHighestAvailableResolution();
 
     // Only switch resolution if we have a different resolution available and it's different from current
     if (
@@ -831,7 +882,7 @@ export class MapComponent extends BaseMapComponent implements OnInit {
 
       if (availableResolutions.includes(targetResolution)) {
         console.log(
-          `Switching to ${targetResolution} resolution for zoom level ${currentZoom}`,
+          `Switching to highest available resolution: ${targetResolution}`,
         );
         this.controlsData.selectedResolution = targetResolution;
         this.findMatchingLayer();
@@ -839,34 +890,6 @@ export class MapComponent extends BaseMapComponent implements OnInit {
         this.updateUrlWithControls();
       }
     }
-  }
-
-  private getResolutionForZoom(zoom: number): SpatialResolution | null {
-    // Switch to high resolution when zoom >= 6
-    if (zoom >= 6) {
-      // Try to find the highest available resolution
-      const availableResolutions = this.getAvailableResolutions();
-
-      // Order resolutions from highest to lowest resolution
-      const resolutionOrder = [
-        SpatialResolution.MIN2_5,
-        SpatialResolution.MIN5,
-        SpatialResolution.MIN10,
-        SpatialResolution.MIN30,
-      ];
-
-      // Find the highest available resolution
-      for (const resolution of resolutionOrder) {
-        if (availableResolutions.includes(resolution)) {
-          return resolution;
-        }
-      }
-    } else {
-      // For zoom < 6, use the default resolution (10m)
-      return SpatialResolution.MIN10;
-    }
-
-    return null;
   }
 
   shouldDisableYearSlider(): boolean {

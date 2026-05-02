@@ -77,7 +77,7 @@ export class ClimateTimerangePlotComponent
   cityInfo: NearestCityResponse | null = null;
   private currentUnit: TemperatureUnit = TemperatureUnit.CELSIUS;
 
-  private readonly HISTORICAL_RANGE: [number, number] = [1970, 2000];
+  private readonly HISTORICAL_RANGE: [number, number] = [1981, 2010];
   private readonly FUTURE_RANGES: [number, number][] = [
     [2021, 2040],
     [2041, 2060],
@@ -239,7 +239,7 @@ export class ClimateTimerangePlotComponent
     isFuture: boolean,
   ): string {
     const variableName = CLIMATE_VAR_KEY_TO_NAME[variable];
-    const resolution = '10m';
+    const resolution = isFuture ? '10m' : '0_5m';
 
     if (isFuture) {
       const scenario = (

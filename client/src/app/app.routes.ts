@@ -35,8 +35,6 @@ const CLIMATE_VARIABLE_ROUTES: Record<
     path: 'cloud-cover',
     title: 'Cloud Cover Map',
   },
-  [ClimateVarKey.WET_DAYS]: { path: 'wet-days', title: 'Wet Days Map' },
-  [ClimateVarKey.FROST_DAYS]: { path: 'frost-days', title: 'Frost Days Map' },
   [ClimateVarKey.RADIATION]: {
     path: 'radiation',
     title: 'Solar Radiation Map',
@@ -50,6 +48,22 @@ const CLIMATE_VARIABLE_ROUTES: Record<
     title: 'Vapour Pressure Map',
   },
   [ClimateVarKey.WIND_SPEED]: { path: 'wind-speed', title: 'Wind Speed Map' },
+  [ClimateVarKey.RELATIVE_HUMIDITY]: {
+    path: 'relative-humidity',
+    title: 'Relative Humidity Map',
+  },
+  [ClimateVarKey.POTENTIAL_EVAPOTRANSPIRATION]: {
+    path: 'potential-evapotranspiration',
+    title: 'Potential Evapotranspiration Map',
+  },
+  [ClimateVarKey.MOISTURE_INDEX]: {
+    path: 'moisture-index',
+    title: 'Moisture Index Map',
+  },
+  [ClimateVarKey.VAPOUR_PRESSURE_DEFICIT]: {
+    path: 'vapour-pressure-deficit',
+    title: 'Vapour Pressure Deficit Map',
+  },
 };
 
 /**

@@ -1,15 +1,15 @@
-matplotlib>=3.8
-cartopy~=0.24.1
+matplotlib>=3.10.7
+cartopy~=0.25.0
 numpy
 scipy~=1.15.3
-fastapi~=0.115.12
+fastapi~=0.115.14
 geojsoncontour==0.5.1
 # gdal==3.11.0 # Prefer `conda install -c conda-forge gdal==3.11.0` for system dependencies
 #togeojsontiles==0.1.2
 git+https://github.com/bartromgens/togeojsontiles.git@master#egg=togeojsontiles
 rasterio>=1.3.0
-pydantic>=2.5.3
-uvicorn>=0.37.0
+pydantic>=2.12.3
+uvicorn>=0.38.0
 citipy>=0.0.6
 pycountry>=24.6.1
 geopy>=2.4.1

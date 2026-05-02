@@ -20,23 +20,15 @@ logger = logging.getLogger(__name__)
 @dataclass
 class ClimateMapsConfig:
     data_dir_out = "data/tiles"
-    zoom_min = 1
+    zoom_min = 0
 
     @property
     def dev_mode(self) -> bool:
         return False
 
     @property
-    def zoom_max(self) -> int:
+    def zoom_max_vector(self) -> int:
         return 8
-
-    @property
-    def zoom_factor(self) -> Optional[float]:
-        return 2.0
-
-    @property
-    def figure_dpi(self) -> int:
-        return 3000
 
 
 class ClimateMapsConfigDev(ClimateMapsConfig):
@@ -46,16 +38,8 @@ class ClimateMapsConfigDev(ClimateMapsConfig):
         return True
 
     @property
-    def zoom_max(self) -> int:
-        return 7
-
-    @property
-    def zoom_factor(self) -> Optional[float]:
-        return None
-
-    @property
-    def figure_dpi(self) -> int:
-        return 1000
+    def zoom_max_vector(self) -> int:
+        return 8
 
 
 def get_config() -> ClimateMapsConfig:
@@ -67,7 +51,8 @@ class ClimateMap(BaseModel):
     data_type: str
     year_range: Tuple[int, int]
     variable: ClimateVariable
-    resolution: SpatialResolution  # minutes
+    resolution: SpatialResolution
+    resolution_effective: float
     tiles_url: str
     colormap_url: str
     max_zoom_raster: int
@@ -95,15 +80,18 @@ class ClimateMap(BaseModel):
                 climate_model = config.future_config.climate_model
                 climate_scenario = config.future_config.climate_scenario
 
+        resolution_effective = config.resolution_effective
+
         return ClimateMap(
             data_type=config.data_type_slug,
             year_range=config.year_range,
             variable=config.variable,
-            resolution=config.resolution,
+            resolution=config.resolution_input,
+            resolution_effective=resolution_effective,
             tiles_url=f"{settings.TILE_SERVER_URL}/{config.data_type_slug}",
             colormap_url=f"{settings.API_BASE_URL}/colorbar/{config.data_type_slug}",
-            max_zoom_raster=settings.ZOOM_MAX_RASTER,
-            max_zoom_vector=get_config().zoom_max,
+            max_zoom_raster=config.target_max_zoom_raster,
+            max_zoom_vector=get_config().zoom_max_vector,
             source=config.source,
             climate_model=climate_model,
             climate_scenario=climate_scenario,

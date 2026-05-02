@@ -12,7 +12,7 @@ An interactive web application for visualizing global historical climate data an
 
 ### Historic
 
-- CRU TS (Climatic Research Unit Time-Series): https://catalogue.ceda.ac.uk/uuid/ec331e93d21347e6bf5fa4b9c68dbd2c/
+- CHELSA Climatologies at high resolution for the earth’s land surface areas: https://www.chelsa-climate.org/datasets
 - Historic 1970-2000 WorldClim data: https://www.worldclim.org/data/worldclim21.html
 
 ### Projections (predictions)
@@ -21,14 +21,13 @@ An interactive web application for visualizing global historical climate data an
 
 ### Other (not used)
 
-- CHELSA Climatologies at high resolution for the earth’s land surface areas: https://chelsa-climate.org/downloads/
 - https://interactive-atlas.ipcc.ch/
+- CRU TS (Climatic Research Unit Time-Series): https://catalogue.ceda.ac.uk/uuid/ec331e93d21347e6bf5fa4b9c68dbd2c/
 - ERA5 monthly averaged data on single levels from 1940 to present: https://cds.climate.copernicus.eu/datasets/reanalysis-era5-single-levels-monthly-means?tab=overview
 - ERA5 post-processed daily statistics on single levels from 1940 to present: https://cds.climate.copernicus.eu/datasets/derived-era5-single-levels-daily-statistics?tab=overview
 - Copernicus Climate Data Store - CMIP6 climate projections:
   https://cds.climate.copernicus.eu/datasets/projections-cmip6?tab=overview
 - NASA NEX-GDDP-CMIP6 (~25 km resolution): https://registry.opendata.aws/nex-gddp-cmip6/
-- CHELSA (~1km resolution): https://chelsa-climate.org/
 
 ## Development
 
@@ -72,7 +71,7 @@ npm install -g tileserver-gl
 Run:
 
 ```bash
-python scrips/create_contour.py
+python scrips/create_contour.py [--month=1] [-dataset-type=historic]
 ```
 
 to create contour and raster mbtiles.
@@ -97,6 +96,12 @@ uvicorn api.main:app --reload
 tileserver-gl --config tileserver_config_dev.json --port 8080
 ```
 
+Or with auto-restart on config changes (requires nodemon: `npm install -g nodemon`):
+
+```bash
+nodemon --watch tileserver_config_dev.json --exec "tileserver-gl --config tileserver_config_dev.json --port 8080"
+```
+
 #### Run the client (Angular)
 
 In `./client` run:
@@ -110,6 +115,33 @@ Or run against the openclimatemap.org API and tileserver:
 ```
 ng serve --configuration=production-backend
 ```
+
+#### Alternative: Docker Compose (recommended for production-like setup)
+
+Start both the API server and tileserver using Docker Compose:
+
+```bash
+docker compose up -d
+```
+
+This will start:
+
+- **API server** on `localhost:8000`
+- **Tileserver** on `localhost:8080`
+
+To view logs:
+
+```bash
+docker compose logs -f
+```
+
+To stop the services:
+
+```bash
+docker compose down
+```
+
+Note: Make sure you have already created the tiles and tileserver config before starting the services.
 
 ### Tests
 
@@ -143,6 +175,20 @@ bash scripts/deploy_client.sh
 
 ```bash
 bash scripts/deploy_backend.sh
+```
+
+### Logs
+
+View logs for the API (FastAPI):
+
+```bash
+docker compose logs -f api
+```
+
+View logs for the TileServer:
+
+```bash
+docker compose logs -f tileserver
 ```
 
 ### Upload tiles (optional)

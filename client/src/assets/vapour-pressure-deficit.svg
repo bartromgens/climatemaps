@@ -1,0 +1,13 @@
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Saturated Air (Cloud at the top) -->
+  <path d="M18 9C18 6.79 16.21 5 14 5C13.74 5 13.49 5.03 13.25 5.08C12.79 3.28 11.1 2 9 2C6.24 2 4 4.24 4 7C4 7.15 4.01 7.3 4.03 7.45C2.79 7.9 2 9.1 2 10.5C2 12.43 3.57 14 5.5 14H18.5C20.43 14 22 12.43 22 10.5C22 8.57 20.43 7 18.5 7C18.33 7 18.17 7.01 18 7.03V9Z" fill="#ECEFF1" stroke="#424242" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+  
+  <!-- Current Moisture level (Water line at the bottom) -->
+  <path d="M4 22H20" stroke="#4FC3F7" stroke-width="2" stroke-linecap="round"/>
+
+  <!-- The Deficit Gap (Atmospheric Hunger) -->
+  <path d="M12 16.5V19.5" stroke="#E53935" stroke-width="2" stroke-linecap="round"/>
+  <!-- Double-headed arrow indicating the gap -->
+  <path d="M10 17.5L12 15.5L14 17.5" stroke="#E53935" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M10 18.5L12 20.5L14 18.5" stroke="#E53935" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

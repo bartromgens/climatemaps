@@ -204,10 +204,9 @@ __marimo__/
 settings_local.py
 data/raw/*
 !data/raw/.gitkeep
+!data/raw/land_mask_osm.tif
 !data/raw/world_bounding_box.geojson
-data/tiles/*
-!data/tiles/.gitkeep
-!data/tiles/README.md
+data/tiles
 
 out.mbtiles
 tileserver_config_dev.json

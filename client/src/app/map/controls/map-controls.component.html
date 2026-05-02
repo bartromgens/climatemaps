@@ -1,10 +1,12 @@
 <div class="row sliders-row">
   <div class="column sliders-container">
     <app-month-slider
+      *ngIf="!hideMonthSelector"
       [value]="controlsData?.selectedMonth || 1"
       (valueChange)="onMonthSelected($event)"
     ></app-month-slider>
     <app-year-slider
+      *ngIf="!hideYearRangeSelector"
       [value]="controlsData?.selectedYearRange || null"
       [years]="controlsOptions?.yearRanges || []"
       [disabled]="shouldDisableYearSlider()"

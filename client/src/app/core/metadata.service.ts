@@ -27,16 +27,20 @@ export class MetadataService {
     ClimateVarKey.T_MAX,
     ClimateVarKey.T_MIN,
     ClimateVarKey.PRECIPITATION,
-    ClimateVarKey.WET_DAYS,
     ClimateVarKey.CLOUD_COVER,
-    ClimateVarKey.FROST_DAYS,
     ClimateVarKey.DIURNAL_TEMP_RANGE,
     ClimateVarKey.VAPOUR_PRESSURE,
+    ClimateVarKey.VAPOUR_PRESSURE_DEFICIT,
     ClimateVarKey.RADIATION,
     ClimateVarKey.WIND_SPEED,
+    ClimateVarKey.RELATIVE_HUMIDITY,
+    ClimateVarKey.POTENTIAL_EVAPOTRANSPIRATION,
+    ClimateVarKey.MOISTURE_INDEX,
   ];
 
   private readonly RESOLUTION_ORDER: SpatialResolution[] = [
+    SpatialResolution.MIN0_5,
+    SpatialResolution.MIN1_5,
     SpatialResolution.MIN2_5,
     SpatialResolution.MIN5,
     SpatialResolution.MIN10,
@@ -112,30 +116,6 @@ export class MetadataService {
       })
       .sort((a, b) => a.value[0] - b.value[0]);
 
-    const historicalRange1 = ranges.find(
-      (r) => r.value[0] === 1961 && r.value[1] === 1990,
-    );
-    const historicalRange2 = ranges.find(
-      (r) => r.value[0] === 1970 && r.value[1] === 2000,
-    );
-
-    if (historicalRange1 && historicalRange2) {
-      const mergedRange: YearRange = {
-        value: historicalRange2.value,
-        label: '1970-2000',
-        additionalValues: [historicalRange1.value],
-      };
-
-      return ranges
-        .filter(
-          (r) =>
-            !(r.value[0] === 1961 && r.value[1] === 1990) &&
-            !(r.value[0] === 1970 && r.value[1] === 2000),
-        )
-        .concat([mergedRange])
-        .sort((a, b) => a.value[0] - b.value[0]);
-    }
-
     return ranges;
   }
 
@@ -208,20 +188,28 @@ export class MetadataService {
       Tmax: ClimateVarKey.T_MAX,
       Tmin: ClimateVarKey.T_MIN,
       CloudCover: ClimateVarKey.CLOUD_COVER,
-      WetDays: ClimateVarKey.WET_DAYS,
-      FrostDays: ClimateVarKey.FROST_DAYS,
+      WindSpeed: ClimateVarKey.WIND_SPEED,
       Radiation: ClimateVarKey.RADIATION,
       DiurnalTempRange: ClimateVarKey.DIURNAL_TEMP_RANGE,
       VapourPressure: ClimateVarKey.VAPOUR_PRESSURE,
+      VapourPressureDeficit: ClimateVarKey.VAPOUR_PRESSURE_DEFICIT,
+      RelativeHumidity: ClimateVarKey.RELATIVE_HUMIDITY,
+      PotentialEvapotranspiration: ClimateVarKey.POTENTIAL_EVAPOTRANSPIRATION,
+      MoistureIndex: ClimateVarKey.MOISTURE_INDEX,
     };
 
-    return nameToKey[name] || null;
+    const result = nameToKey[name];
+    if (!result) {
+      console.error(
+        `Unknown variable name: ${name}. Available names: ${Object.keys(nameToKey).join(', ')}`,
+      );
+    }
+    return result || null;
   }
 
   private formatYearRangeLabel(start: number, end: number): string {
-    // Show "1970-2000" for all historic date ranges
-    if (start < 2000) {
-      return '1970-2000';
+    if (start === 1981 && end === 2010) {
+      return '1981-2010';
     }
     return `${start}-${end}`;
   }

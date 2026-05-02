@@ -29,6 +29,7 @@ import { MapSyncService } from '../services/map-sync.service';
 import { BaseMapComponent } from '../base-map.component';
 import { SeoService } from '../../core/seo.service';
 import { ToastService } from '../../core/toast.service';
+import { SelectedMonthService } from '../../core/selected-month.service';
 
 interface ScenarioOption {
   scenario: ClimateScenario;
@@ -69,6 +70,7 @@ export class ScenarioGridComponent extends BaseMapComponent {
     layerFilter: LayerFilterService,
     toastService: ToastService,
     mapSyncService: MapSyncService,
+    selectedMonthService: SelectedMonthService,
     private seoService: SeoService,
   ) {
     super(
@@ -80,6 +82,7 @@ export class ScenarioGridComponent extends BaseMapComponent {
       layerFilter,
       toastService,
       mapSyncService,
+      selectedMonthService,
     );
     this.seoService.updateMetaTags({
       title:
@@ -161,8 +164,9 @@ export class ScenarioGridComponent extends BaseMapComponent {
     }
 
     if (!availableResolutions.includes(this.controlsData.selectedResolution)) {
+      const highestResolution = this.getHighestAvailableResolution();
       this.controlsData.selectedResolution =
-        availableResolutions[0] || this.DEFAULT_RESOLUTION;
+        highestResolution || this.DEFAULT_RESOLUTION;
     }
 
     const isFutureData =
