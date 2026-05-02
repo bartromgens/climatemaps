@@ -150,10 +150,12 @@ export class MapComponent extends BaseMapComponent implements OnInit {
 
   Object = Object;
   private baseLayer = tileLayer(
-    'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+    'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
     {
       maxZoom: 20,
       attribution: '...',
+      subdomains: '',
+      crossOrigin: true,
     },
   );
   options: any;

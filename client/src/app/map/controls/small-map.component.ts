@@ -87,10 +87,12 @@ export class SmallMapComponent implements OnInit, OnDestroy, OnChanges {
   private readonly tracker = inject(MatomoTracker);
 
   private baseLayer = tileLayer(
-    'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+    'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
     {
       maxZoom: 20,
       attribution: '...',
+      subdomains: '',
+      crossOrigin: true,
     },
   );
 

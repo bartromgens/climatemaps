@@ -2,7 +2,7 @@ from typing import List, Optional
 import time
 from pathlib import Path
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Response
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from citipy import citipy
@@ -39,7 +39,9 @@ api.add_middleware(RateLimitMiddleware, calls_per_minute=1000)
 
 
 @api.get("/climatemap", response_model=List[ClimateMap])
-def list_climate_map():
+def list_climate_map(response: Response) -> List[ClimateMap]:
+    # Same payload for every visitor; safe to cache briefly in browsers and intermediaries
+    response.headers["Cache-Control"] = "public, max-age=300, stale-while-revalidate=86400"
     return climate_maps
 
 
