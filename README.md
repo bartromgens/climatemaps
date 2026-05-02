@@ -177,6 +177,20 @@ bash scripts/deploy_client.sh
 bash scripts/deploy_backend.sh
 ```
 
+### Logs
+
+View logs for the API (FastAPI):
+
+```bash
+docker compose logs -f api
+```
+
+View logs for the TileServer:
+
+```bash
+docker compose logs -f tileserver
+```
+
 ### Upload tiles (optional)
 
 If you have locally created tiles, upload them to the server with:
