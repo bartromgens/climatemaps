@@ -104,7 +104,6 @@ export class MapComponent extends BaseMapComponent implements OnInit {
   environment = environment;
 
   selectedOption: LayerOption | undefined;
-  private previousVariableType: ClimateVarKey | null = null;
 
   get monthSelected(): number {
     return this.controlsData.selectedMonth;
@@ -122,34 +121,7 @@ export class MapComponent extends BaseMapComponent implements OnInit {
     this.climatePlots?.clearMobileState();
   }
 
-  private checkAndShowFuturePredictionWarning(): void {
-    const currentVariableType = this.controlsData.selectedVariableType;
-
-    // Only show warning if variable has actually changed
-    if (
-      this.previousVariableType !== null &&
-      this.previousVariableType !== currentVariableType
-    ) {
-      if (
-        !this.climateVariableHelper.hasFuturePredictions(currentVariableType)
-      ) {
-        const variableDisplayName =
-          this.climateVariables[currentVariableType]?.displayName ||
-          currentVariableType;
-
-        this.toastService.showInfo(
-          `No future predictions available for ${variableDisplayName}`,
-          6000,
-        );
-      }
-    }
-
-    // Update the previous variable type for next comparison
-    this.previousVariableType = currentVariableType;
-  }
-
   protected onDataLoaded(): void {
-    this.checkAndShowFuturePredictionWarning();
     this.findMatchingLayer();
     this.updateLayers();
   }
@@ -825,7 +797,6 @@ export class MapComponent extends BaseMapComponent implements OnInit {
 
   override onVariableChange(variableType: ClimateVarKey): void {
     this.controlsData.selectedVariableType = variableType;
-    this.checkAndShowFuturePredictionWarning();
     this.onControlsChange(this.controlsData);
 
     const variableName =
