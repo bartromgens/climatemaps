@@ -239,16 +239,18 @@ export class ClimateTimerangePlotComponent
     isFuture: boolean,
   ): string {
     const variableName = CLIMATE_VAR_KEY_TO_NAME[variable];
-    const resolution = isFuture ? '10m' : '0_5m';
 
     if (isFuture) {
       const scenario = (
         this.climateScenario || this.DEFAULT_SCENARIO
       ).toLowerCase();
-      const model = (this.climateModel || this.DEFAULT_MODEL).toLowerCase();
+      const effectiveModel = this.climateModel || this.DEFAULT_MODEL;
+      const model = effectiveModel.toLowerCase();
+      const resolution =
+        effectiveModel === ClimateModel.ENSEMBLE_MEAN ? '5m' : '10m';
       return `${variableName}_${yearRange[0]}_${yearRange[1]}_${resolution}_${scenario}_${model}`;
     } else {
-      return `${variableName}_${yearRange[0]}_${yearRange[1]}_${resolution}`;
+      return `${variableName}_${yearRange[0]}_${yearRange[1]}_0_5m`;
     }
   }
 

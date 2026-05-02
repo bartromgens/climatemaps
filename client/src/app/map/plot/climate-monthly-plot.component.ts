@@ -195,14 +195,15 @@ export class ClimateMonthlyPlotComponent
     const variableName = CLIMATE_VAR_KEY_TO_NAME[variable];
     const [startYear, endYear] = this.yearRange.value;
     const isFuture = startYear >= 2000;
-    const resolution = isFuture ? '10m' : '0_5m';
 
     if (isFuture && this.climateScenario && this.climateModel) {
       const scenario = this.climateScenario.toLowerCase();
       const model = this.climateModel.toLowerCase();
+      const resolution =
+        this.climateModel === ClimateModel.ENSEMBLE_MEAN ? '5m' : '10m';
       return `${variableName}_${startYear}_${endYear}_${resolution}_${scenario}_${model}`;
     } else {
-      return `${variableName}_${startYear}_${endYear}_${resolution}`;
+      return `${variableName}_${startYear}_${endYear}_0_5m`;
     }
   }
 
