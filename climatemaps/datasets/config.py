@@ -37,7 +37,7 @@ CLIMATE_VARIABLES: Dict[ClimateVarKey, ClimateVariable] = {
         name="WindSpeed", display_name="Wind Speed", unit="m/s", filename="wind"
     ),
     ClimateVarKey.RADIATION: ClimateVariable(
-        name="Radiation", display_name="Radiation", unit="W/m^2", filename="radiation"
+        name="Radiation", display_name="Radiation", unit="W/m²", filename="radiation"
     ),
     ClimateVarKey.DIURNAL_TEMP_RANGE: ClimateVariable(
         name="DiurnalTempRange",
@@ -124,7 +124,7 @@ CLIMATE_CONTOUR_CONFIGS: Dict[ClimateVarKey, ContourPlotConfig] = {
         level_upper=320,
         colormap=plt.cm.plasma,
         title="Radiation",
-        unit="W/m^2",
+        unit="W/m²",
         n_contours=16,
     ),
     ClimateVarKey.DIURNAL_TEMP_RANGE: ContourPlotConfig(
