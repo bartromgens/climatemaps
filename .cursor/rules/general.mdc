@@ -1,16 +1,26 @@
 ---
 description: General
-globs:
 alwaysApply: true
 ---
 
-- Active the climatemaps conda environment before running python commands
-- Add mypy type hints
+## Development servers
+
 - The FastAPI dev backend is available at localhost:8000
 - The Angular development server is already running and available at localhost:4200 (don't start it!)
-- Don't add docstrings to functions
-- Don't comment the obvious
-- Don't create readmes unless asked
-- At the end, always review the changes and remove duplicate code
+
+## Documentation
+
+- Do not add docstrings on new code or create README.md documentation unless the code is complex.
+
+## End of Session
+
+- Review changes and remove duplicate code.
+- Extract functions and classes to improve readability and encapsulate logic.
 - Keep your summary of changes concise
-- End your summary with a suggested commit message
+- Suggest a short commit message at the end. Start with a capital letter.
+
+## Formatting
+
+- Formatting: Use Black for Python and Prettier for frontend.
+- Linting: Use Flake8 for style and lint checks.
+- Type hints: Add type hints.
