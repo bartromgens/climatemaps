@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset
+  xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+  xmlns:image="http://www.google.com/schemas/sitemap-image/1.1"
+>
   <url>
     <loc>https://openclimatemap.org/</loc>
     <lastmod>2026-05-02</lastmod>
@@ -41,71 +44,215 @@
     <lastmod>2026-05-02</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/temperature-january.jpg</image:loc><image:title>World Temperature Map – January</image:title></image:image>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/temperature-february.jpg</image:loc><image:title>World Temperature Map – February</image:title></image:image>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/temperature-march.jpg</image:loc><image:title>World Temperature Map – March</image:title></image:image>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/temperature-april.jpg</image:loc><image:title>World Temperature Map – April</image:title></image:image>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/temperature-may.jpg</image:loc><image:title>World Temperature Map – May</image:title></image:image>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/temperature-june.jpg</image:loc><image:title>World Temperature Map – June</image:title></image:image>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/temperature-july.jpg</image:loc><image:title>World Temperature Map – July</image:title></image:image>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/temperature-august.jpg</image:loc><image:title>World Temperature Map – August</image:title></image:image>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/temperature-september.jpg</image:loc><image:title>World Temperature Map – September</image:title></image:image>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/temperature-october.jpg</image:loc><image:title>World Temperature Map – October</image:title></image:image>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/temperature-november.jpg</image:loc><image:title>World Temperature Map – November</image:title></image:image>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/temperature-december.jpg</image:loc><image:title>World Temperature Map – December</image:title></image:image>
   </url>
   <url>
     <loc>https://openclimatemap.org/temperature-min</loc>
     <lastmod>2026-05-02</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/temperature-min-january.jpg</image:loc><image:title>Minimum Temperature Map – January</image:title></image:image>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/temperature-min-february.jpg</image:loc><image:title>Minimum Temperature Map – February</image:title></image:image>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/temperature-min-march.jpg</image:loc><image:title>Minimum Temperature Map – March</image:title></image:image>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/temperature-min-april.jpg</image:loc><image:title>Minimum Temperature Map – April</image:title></image:image>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/temperature-min-may.jpg</image:loc><image:title>Minimum Temperature Map – May</image:title></image:image>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/temperature-min-june.jpg</image:loc><image:title>Minimum Temperature Map – June</image:title></image:image>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/temperature-min-july.jpg</image:loc><image:title>Minimum Temperature Map – July</image:title></image:image>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/temperature-min-august.jpg</image:loc><image:title>Minimum Temperature Map – August</image:title></image:image>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/temperature-min-september.jpg</image:loc><image:title>Minimum Temperature Map – September</image:title></image:image>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/temperature-min-october.jpg</image:loc><image:title>Minimum Temperature Map – October</image:title></image:image>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/temperature-min-november.jpg</image:loc><image:title>Minimum Temperature Map – November</image:title></image:image>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/temperature-min-december.jpg</image:loc><image:title>Minimum Temperature Map – December</image:title></image:image>
   </url>
   <url>
     <loc>https://openclimatemap.org/precipitation</loc>
     <lastmod>2026-05-02</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/precipitation-january.jpg</image:loc><image:title>World Precipitation Map – January</image:title></image:image>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/precipitation-february.jpg</image:loc><image:title>World Precipitation Map – February</image:title></image:image>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/precipitation-march.jpg</image:loc><image:title>World Precipitation Map – March</image:title></image:image>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/precipitation-april.jpg</image:loc><image:title>World Precipitation Map – April</image:title></image:image>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/precipitation-may.jpg</image:loc><image:title>World Precipitation Map – May</image:title></image:image>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/precipitation-june.jpg</image:loc><image:title>World Precipitation Map – June</image:title></image:image>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/precipitation-july.jpg</image:loc><image:title>World Precipitation Map – July</image:title></image:image>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/precipitation-august.jpg</image:loc><image:title>World Precipitation Map – August</image:title></image:image>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/precipitation-september.jpg</image:loc><image:title>World Precipitation Map – September</image:title></image:image>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/precipitation-october.jpg</image:loc><image:title>World Precipitation Map – October</image:title></image:image>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/precipitation-november.jpg</image:loc><image:title>World Precipitation Map – November</image:title></image:image>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/precipitation-december.jpg</image:loc><image:title>World Precipitation Map – December</image:title></image:image>
   </url>
   <url>
     <loc>https://openclimatemap.org/cloud-cover</loc>
     <lastmod>2026-05-02</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/cloud-cover-january.jpg</image:loc><image:title>Cloud Cover Map – January</image:title></image:image>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/cloud-cover-february.jpg</image:loc><image:title>Cloud Cover Map – February</image:title></image:image>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/cloud-cover-march.jpg</image:loc><image:title>Cloud Cover Map – March</image:title></image:image>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/cloud-cover-april.jpg</image:loc><image:title>Cloud Cover Map – April</image:title></image:image>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/cloud-cover-may.jpg</image:loc><image:title>Cloud Cover Map – May</image:title></image:image>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/cloud-cover-june.jpg</image:loc><image:title>Cloud Cover Map – June</image:title></image:image>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/cloud-cover-july.jpg</image:loc><image:title>Cloud Cover Map – July</image:title></image:image>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/cloud-cover-august.jpg</image:loc><image:title>Cloud Cover Map – August</image:title></image:image>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/cloud-cover-september.jpg</image:loc><image:title>Cloud Cover Map – September</image:title></image:image>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/cloud-cover-october.jpg</image:loc><image:title>Cloud Cover Map – October</image:title></image:image>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/cloud-cover-november.jpg</image:loc><image:title>Cloud Cover Map – November</image:title></image:image>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/cloud-cover-december.jpg</image:loc><image:title>Cloud Cover Map – December</image:title></image:image>
   </url>
   <url>
     <loc>https://openclimatemap.org/radiation</loc>
     <lastmod>2026-05-02</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/radiation-january.jpg</image:loc><image:title>Solar Radiation Map – January</image:title></image:image>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/radiation-february.jpg</image:loc><image:title>Solar Radiation Map – February</image:title></image:image>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/radiation-march.jpg</image:loc><image:title>Solar Radiation Map – March</image:title></image:image>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/radiation-april.jpg</image:loc><image:title>Solar Radiation Map – April</image:title></image:image>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/radiation-may.jpg</image:loc><image:title>Solar Radiation Map – May</image:title></image:image>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/radiation-june.jpg</image:loc><image:title>Solar Radiation Map – June</image:title></image:image>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/radiation-july.jpg</image:loc><image:title>Solar Radiation Map – July</image:title></image:image>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/radiation-august.jpg</image:loc><image:title>Solar Radiation Map – August</image:title></image:image>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/radiation-september.jpg</image:loc><image:title>Solar Radiation Map – September</image:title></image:image>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/radiation-october.jpg</image:loc><image:title>Solar Radiation Map – October</image:title></image:image>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/radiation-november.jpg</image:loc><image:title>Solar Radiation Map – November</image:title></image:image>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/radiation-december.jpg</image:loc><image:title>Solar Radiation Map – December</image:title></image:image>
   </url>
   <url>
     <loc>https://openclimatemap.org/diurnal-temperature-range</loc>
     <lastmod>2026-05-02</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/diurnal-temperature-range-january.jpg</image:loc><image:title>Diurnal Temperature Range Map – January</image:title></image:image>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/diurnal-temperature-range-february.jpg</image:loc><image:title>Diurnal Temperature Range Map – February</image:title></image:image>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/diurnal-temperature-range-march.jpg</image:loc><image:title>Diurnal Temperature Range Map – March</image:title></image:image>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/diurnal-temperature-range-april.jpg</image:loc><image:title>Diurnal Temperature Range Map – April</image:title></image:image>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/diurnal-temperature-range-may.jpg</image:loc><image:title>Diurnal Temperature Range Map – May</image:title></image:image>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/diurnal-temperature-range-june.jpg</image:loc><image:title>Diurnal Temperature Range Map – June</image:title></image:image>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/diurnal-temperature-range-july.jpg</image:loc><image:title>Diurnal Temperature Range Map – July</image:title></image:image>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/diurnal-temperature-range-august.jpg</image:loc><image:title>Diurnal Temperature Range Map – August</image:title></image:image>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/diurnal-temperature-range-september.jpg</image:loc><image:title>Diurnal Temperature Range Map – September</image:title></image:image>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/diurnal-temperature-range-october.jpg</image:loc><image:title>Diurnal Temperature Range Map – October</image:title></image:image>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/diurnal-temperature-range-november.jpg</image:loc><image:title>Diurnal Temperature Range Map – November</image:title></image:image>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/diurnal-temperature-range-december.jpg</image:loc><image:title>Diurnal Temperature Range Map – December</image:title></image:image>
   </url>
   <url>
     <loc>https://openclimatemap.org/vapour-pressure</loc>
     <lastmod>2026-05-02</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/vapour-pressure-january.jpg</image:loc><image:title>Vapour Pressure Map – January</image:title></image:image>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/vapour-pressure-february.jpg</image:loc><image:title>Vapour Pressure Map – February</image:title></image:image>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/vapour-pressure-march.jpg</image:loc><image:title>Vapour Pressure Map – March</image:title></image:image>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/vapour-pressure-april.jpg</image:loc><image:title>Vapour Pressure Map – April</image:title></image:image>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/vapour-pressure-may.jpg</image:loc><image:title>Vapour Pressure Map – May</image:title></image:image>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/vapour-pressure-june.jpg</image:loc><image:title>Vapour Pressure Map – June</image:title></image:image>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/vapour-pressure-july.jpg</image:loc><image:title>Vapour Pressure Map – July</image:title></image:image>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/vapour-pressure-august.jpg</image:loc><image:title>Vapour Pressure Map – August</image:title></image:image>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/vapour-pressure-september.jpg</image:loc><image:title>Vapour Pressure Map – September</image:title></image:image>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/vapour-pressure-october.jpg</image:loc><image:title>Vapour Pressure Map – October</image:title></image:image>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/vapour-pressure-november.jpg</image:loc><image:title>Vapour Pressure Map – November</image:title></image:image>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/vapour-pressure-december.jpg</image:loc><image:title>Vapour Pressure Map – December</image:title></image:image>
   </url>
   <url>
     <loc>https://openclimatemap.org/wind-speed</loc>
     <lastmod>2026-05-02</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/wind-speed-january.jpg</image:loc><image:title>Wind Speed Map – January</image:title></image:image>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/wind-speed-february.jpg</image:loc><image:title>Wind Speed Map – February</image:title></image:image>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/wind-speed-march.jpg</image:loc><image:title>Wind Speed Map – March</image:title></image:image>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/wind-speed-april.jpg</image:loc><image:title>Wind Speed Map – April</image:title></image:image>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/wind-speed-may.jpg</image:loc><image:title>Wind Speed Map – May</image:title></image:image>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/wind-speed-june.jpg</image:loc><image:title>Wind Speed Map – June</image:title></image:image>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/wind-speed-july.jpg</image:loc><image:title>Wind Speed Map – July</image:title></image:image>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/wind-speed-august.jpg</image:loc><image:title>Wind Speed Map – August</image:title></image:image>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/wind-speed-september.jpg</image:loc><image:title>Wind Speed Map – September</image:title></image:image>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/wind-speed-october.jpg</image:loc><image:title>Wind Speed Map – October</image:title></image:image>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/wind-speed-november.jpg</image:loc><image:title>Wind Speed Map – November</image:title></image:image>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/wind-speed-december.jpg</image:loc><image:title>Wind Speed Map – December</image:title></image:image>
   </url>
   <url>
     <loc>https://openclimatemap.org/relative-humidity</loc>
     <lastmod>2026-05-02</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/relative-humidity-january.jpg</image:loc><image:title>Relative Humidity Map – January</image:title></image:image>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/relative-humidity-february.jpg</image:loc><image:title>Relative Humidity Map – February</image:title></image:image>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/relative-humidity-march.jpg</image:loc><image:title>Relative Humidity Map – March</image:title></image:image>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/relative-humidity-april.jpg</image:loc><image:title>Relative Humidity Map – April</image:title></image:image>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/relative-humidity-may.jpg</image:loc><image:title>Relative Humidity Map – May</image:title></image:image>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/relative-humidity-june.jpg</image:loc><image:title>Relative Humidity Map – June</image:title></image:image>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/relative-humidity-july.jpg</image:loc><image:title>Relative Humidity Map – July</image:title></image:image>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/relative-humidity-august.jpg</image:loc><image:title>Relative Humidity Map – August</image:title></image:image>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/relative-humidity-september.jpg</image:loc><image:title>Relative Humidity Map – September</image:title></image:image>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/relative-humidity-october.jpg</image:loc><image:title>Relative Humidity Map – October</image:title></image:image>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/relative-humidity-november.jpg</image:loc><image:title>Relative Humidity Map – November</image:title></image:image>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/relative-humidity-december.jpg</image:loc><image:title>Relative Humidity Map – December</image:title></image:image>
   </url>
   <url>
     <loc>https://openclimatemap.org/potential-evapotranspiration</loc>
     <lastmod>2026-05-02</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/potential-evapotranspiration-january.jpg</image:loc><image:title>Potential Evapotranspiration Map – January</image:title></image:image>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/potential-evapotranspiration-february.jpg</image:loc><image:title>Potential Evapotranspiration Map – February</image:title></image:image>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/potential-evapotranspiration-march.jpg</image:loc><image:title>Potential Evapotranspiration Map – March</image:title></image:image>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/potential-evapotranspiration-april.jpg</image:loc><image:title>Potential Evapotranspiration Map – April</image:title></image:image>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/potential-evapotranspiration-may.jpg</image:loc><image:title>Potential Evapotranspiration Map – May</image:title></image:image>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/potential-evapotranspiration-june.jpg</image:loc><image:title>Potential Evapotranspiration Map – June</image:title></image:image>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/potential-evapotranspiration-july.jpg</image:loc><image:title>Potential Evapotranspiration Map – July</image:title></image:image>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/potential-evapotranspiration-august.jpg</image:loc><image:title>Potential Evapotranspiration Map – August</image:title></image:image>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/potential-evapotranspiration-september.jpg</image:loc><image:title>Potential Evapotranspiration Map – September</image:title></image:image>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/potential-evapotranspiration-october.jpg</image:loc><image:title>Potential Evapotranspiration Map – October</image:title></image:image>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/potential-evapotranspiration-november.jpg</image:loc><image:title>Potential Evapotranspiration Map – November</image:title></image:image>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/potential-evapotranspiration-december.jpg</image:loc><image:title>Potential Evapotranspiration Map – December</image:title></image:image>
   </url>
   <url>
     <loc>https://openclimatemap.org/moisture-index</loc>
     <lastmod>2026-05-02</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/moisture-index-january.jpg</image:loc><image:title>Moisture Index Map – January</image:title></image:image>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/moisture-index-february.jpg</image:loc><image:title>Moisture Index Map – February</image:title></image:image>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/moisture-index-march.jpg</image:loc><image:title>Moisture Index Map – March</image:title></image:image>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/moisture-index-april.jpg</image:loc><image:title>Moisture Index Map – April</image:title></image:image>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/moisture-index-may.jpg</image:loc><image:title>Moisture Index Map – May</image:title></image:image>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/moisture-index-june.jpg</image:loc><image:title>Moisture Index Map – June</image:title></image:image>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/moisture-index-july.jpg</image:loc><image:title>Moisture Index Map – July</image:title></image:image>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/moisture-index-august.jpg</image:loc><image:title>Moisture Index Map – August</image:title></image:image>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/moisture-index-september.jpg</image:loc><image:title>Moisture Index Map – September</image:title></image:image>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/moisture-index-october.jpg</image:loc><image:title>Moisture Index Map – October</image:title></image:image>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/moisture-index-november.jpg</image:loc><image:title>Moisture Index Map – November</image:title></image:image>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/moisture-index-december.jpg</image:loc><image:title>Moisture Index Map – December</image:title></image:image>
   </url>
   <url>
     <loc>https://openclimatemap.org/vapour-pressure-deficit</loc>
     <lastmod>2026-05-02</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/vapour-pressure-deficit-january.jpg</image:loc><image:title>Vapour Pressure Deficit Map – January</image:title></image:image>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/vapour-pressure-deficit-february.jpg</image:loc><image:title>Vapour Pressure Deficit Map – February</image:title></image:image>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/vapour-pressure-deficit-march.jpg</image:loc><image:title>Vapour Pressure Deficit Map – March</image:title></image:image>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/vapour-pressure-deficit-april.jpg</image:loc><image:title>Vapour Pressure Deficit Map – April</image:title></image:image>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/vapour-pressure-deficit-may.jpg</image:loc><image:title>Vapour Pressure Deficit Map – May</image:title></image:image>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/vapour-pressure-deficit-june.jpg</image:loc><image:title>Vapour Pressure Deficit Map – June</image:title></image:image>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/vapour-pressure-deficit-july.jpg</image:loc><image:title>Vapour Pressure Deficit Map – July</image:title></image:image>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/vapour-pressure-deficit-august.jpg</image:loc><image:title>Vapour Pressure Deficit Map – August</image:title></image:image>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/vapour-pressure-deficit-september.jpg</image:loc><image:title>Vapour Pressure Deficit Map – September</image:title></image:image>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/vapour-pressure-deficit-october.jpg</image:loc><image:title>Vapour Pressure Deficit Map – October</image:title></image:image>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/vapour-pressure-deficit-november.jpg</image:loc><image:title>Vapour Pressure Deficit Map – November</image:title></image:image>
+    <image:image><image:loc>https://openclimatemap.org/assets/previews/vapour-pressure-deficit-december.jpg</image:loc><image:title>Vapour Pressure Deficit Map – December</image:title></image:image>
   </url>
 </urlset>

@@ -40,4 +40,3 @@ def extract_zip(zip_path: Path, extract_to: Path) -> None:
 
     zip_path.unlink()
     logger.info(f"Removed temporary file {zip_path}")
-

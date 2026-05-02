@@ -126,7 +126,7 @@ const generateClimateVariableRoutes = (): Routes => {
   return Object.entries(CLIMATE_VARIABLE_ROUTES).map(([variable, config]) => ({
     path: config.path,
     component: MapComponent,
-    data: { variable, title: config.title, description: config.description },
+    data: { variable, title: config.title, description: config.description, path: config.path },
   }));
 };
 

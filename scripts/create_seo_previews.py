@@ -109,9 +109,7 @@ def _select_lowest_resolution_dataset(
     variable: ClimateVarKey,
 ) -> ClimateDataConfig | None:
     """Pick the coarsest historic dataset for a variable (fast to render)."""
-    candidates = [
-        cfg for cfg in HISTORIC_DATA_SETS if cfg.variable_type == variable
-    ]
+    candidates = [cfg for cfg in HISTORIC_DATA_SETS if cfg.variable_type == variable]
     if not candidates:
         return None
     return max(candidates, key=lambda cfg: _resolution_minutes(cfg.resolution_input))
@@ -312,9 +310,7 @@ def _process_task(
         _render_preview(variable, month, width_px, height_px, dpi, output_path)
         return f"ok:{variable.value}-{month}"
     except Exception as exc:
-        logger.exception(
-            f"Failed to render preview for {variable.value} month {month}: {exc}"
-        )
+        logger.exception(f"Failed to render preview for {variable.value} month {month}: {exc}")
         return f"fail:{variable.value}-{month}"
 
 
@@ -328,9 +324,7 @@ def main(
     force_recreate: bool,
 ) -> None:
     tasks = [(v.value, m) for v in variables for m in months]
-    logger.info(
-        f"Generating {len(tasks)} preview(s) -> {OUTPUT_DIR.relative_to(REPO_ROOT)}"
-    )
+    logger.info(f"Generating {len(tasks)} preview(s) -> {OUTPUT_DIR.relative_to(REPO_ROOT)}")
 
     if processes <= 1:
         for variable_value, month in tasks:
@@ -409,9 +403,7 @@ if __name__ == "__main__":
     args = _parse_arguments()
 
     selected_variables = (
-        [ClimateVarKey(v) for v in args.variable]
-        if args.variable
-        else list(VARIABLE_PATHS.keys())
+        [ClimateVarKey(v) for v in args.variable] if args.variable else list(VARIABLE_PATHS.keys())
     )
     selected_months = sorted(set(args.month)) if args.month else list(range(1, 13))
 

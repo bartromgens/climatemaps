@@ -99,6 +99,14 @@ export class MapComponent extends BaseMapComponent implements OnInit {
   private readonly DEFAULT_RESOLUTION = SpatialResolution.MIN10;
   private readonly CONTOUR_DARKEN_FACTOR = 0.17;
 
+  routeTitle = '';
+  routeDescription = '';
+  routePath = '';
+  readonly monthNames = [
+    'january', 'february', 'march', 'april', 'may', 'june',
+    'july', 'august', 'september', 'october', 'november', 'december',
+  ];
+
   environment = environment;
 
   selectedOption: LayerOption | undefined;
@@ -220,12 +228,19 @@ export class MapComponent extends BaseMapComponent implements OnInit {
     // Handle route data for variable-specific routes
     this.route.data.subscribe((data) => {
       if (data['variable'] && data['title']) {
+        this.routeTitle = data['title'];
+        this.routeDescription = data['description'] || '';
+        this.routePath = data['path'] || '';
         this.setVariableSpecificSEO(
           data['variable'],
           data['title'],
           data['description'],
+          data['path'],
         );
       } else {
+        this.routeTitle = '';
+        this.routeDescription = '';
+        this.routePath = '';
         this.seoService.setDefaultMetaTags();
       }
     });
@@ -1004,6 +1019,7 @@ export class MapComponent extends BaseMapComponent implements OnInit {
     variable: string,
     title: string,
     description?: string,
+    path?: string,
   ): void {
     const variableKey = variable as ClimateVarKey;
     const variableName =
@@ -1014,12 +1030,16 @@ export class MapComponent extends BaseMapComponent implements OnInit {
       description ||
       `Explore interactive ${title.toLowerCase()} showing ${variableName.toLowerCase()} data. View historical and future climate projections with detailed temperature and precipitation maps.`;
     const keywords = `${title.toLowerCase()}, ${variableName.toLowerCase()}, climate map, temperature map, precipitation map, climate data, climate change, CMIP6, climate visualization`;
+    const image = path
+      ? `https://openclimatemap.org/assets/previews/${path}-january.jpg`
+      : undefined;
 
     this.seoService.updateMetaTags({
       title,
       description: resolvedDescription,
       keywords,
-      url: `/${variable.toLowerCase()}`,
+      url: path ? `/${path}` : `/${variable.toLowerCase()}`,
+      image,
     });
   }
 }
