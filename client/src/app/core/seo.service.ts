@@ -55,12 +55,11 @@ export class SeoService {
 
   setDefaultMetaTags(): void {
     this.updateMetaTags({
-      title:
-        'OpenClimateMap - Interactive Global Climate Maps | Temperature & Precipitation',
+      title: 'Climate Map – World Temperature & Precipitation Map by Month',
       description:
-        'Explore historical and future global climate data, including temperature and precipitation changes based on CMIP6 climate scenarios. Explore interactive maps showing temperature trends and climate projections on a global map.',
+        'Interactive climate map of the world. Explore average temperature and precipitation by month, with historical data and CMIP6 future climate projections across all climate scenarios.',
       keywords:
-        'climate map, temperature map, climate change, climate data, CMIP6, SSP scenarios, WorldClim, temperature projections, climate visualization, global warming',
+        'climate map, temperature map, precipitation map, average temperature map, world temperature map by month, climate change, CMIP6, SSP scenarios, WorldClim, climate visualization',
       url: '/',
     });
   }

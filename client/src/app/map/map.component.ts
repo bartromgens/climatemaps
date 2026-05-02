@@ -214,7 +214,11 @@ export class MapComponent extends BaseMapComponent implements OnInit {
     // Handle route data for variable-specific routes
     this.route.data.subscribe((data) => {
       if (data['variable'] && data['title']) {
-        this.setVariableSpecificSEO(data['variable'], data['title']);
+        this.setVariableSpecificSEO(
+          data['variable'],
+          data['title'],
+          data['description'],
+        );
       } else {
         this.seoService.setDefaultMetaTags();
       }
@@ -990,20 +994,25 @@ export class MapComponent extends BaseMapComponent implements OnInit {
     );
   }
 
-  private setVariableSpecificSEO(variable: string, title: string): void {
+  private setVariableSpecificSEO(
+    variable: string,
+    title: string,
+    description?: string,
+  ): void {
     const variableKey = variable as ClimateVarKey;
     const variableName =
       this.climateVariables?.[variableKey]?.displayName ||
       variable.toLowerCase();
 
-    const seoTitle = `${title} - OpenClimateMap`;
-    const description = `Explore interactive ${title.toLowerCase()} showing ${variableName.toLowerCase()} data. View historical and future climate projections with detailed temperature and precipitation maps.`;
+    const resolvedDescription =
+      description ||
+      `Explore interactive ${title.toLowerCase()} showing ${variableName.toLowerCase()} data. View historical and future climate projections with detailed temperature and precipitation maps.`;
     const keywords = `${title.toLowerCase()}, ${variableName.toLowerCase()}, climate map, temperature map, precipitation map, climate data, climate change, CMIP6, climate visualization`;
 
     this.seoService.updateMetaTags({
-      title: seoTitle,
-      description: description,
-      keywords: keywords,
+      title,
+      description: resolvedDescription,
+      keywords,
       url: `/${variable.toLowerCase()}`,
     });
   }
