@@ -99,14 +99,15 @@
 
     <!-- Kick off the climate map list request in parallel with JS download so the
          first map tiles can be requested as soon as the bundle finishes parsing.
-         This is a same-origin request, so no `crossorigin` attribute is set;
-         that way the browser can reuse the response for Angular's HttpClient. -->
+         crossorigin="anonymous" sets credentials mode to same-origin, matching
+         Angular's HttpClient default so the browser can reuse the response. -->
     <link
       rel="preload"
       as="fetch"
       href="/api/v1/climatemap"
       type="application/json"
       fetchpriority="high"
+      crossorigin="anonymous"
     />
 
     <link
