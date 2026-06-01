@@ -89,7 +89,7 @@
       overflow: visible !important;
     }
 
-    @media (max-width: 768px) {
+    @media (max-width: $mobile-max-width) {
       bottom: 60px !important;
       right: -10px !important;
     }
@@ -103,7 +103,7 @@
   padding: 0;
   position: relative;
 
-  @media (max-width: 768px) {
+  @media (max-width: $mobile-max-width) {
     height: 100vh;
   }
 }
@@ -113,7 +113,7 @@
   mat-sidenav-container {
     height: calc(100vh - $navbar-height);
 
-    @media (max-width: 768px) {
+    @media (max-width: $mobile-max-width) {
       height: calc(100vh - $mobile-slider-height);
     }
   }
@@ -133,7 +133,7 @@
 }
 
 // Common mobile-specific styling
-@media (max-width: 768px) {
+@media (max-width: $mobile-max-width) {
   .mobile-toggle-button {
     display: block;
   }

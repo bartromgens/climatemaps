@@ -15,7 +15,7 @@
     grid-template-rows: repeat(4, 1fr);
   }
 
-  @media (max-width: 768px) {
+  @media (max-width: $mobile-max-width) {
     grid-template-columns: repeat(2, 1fr);
     grid-template-rows: repeat(6, 1fr);
   }

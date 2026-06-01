@@ -6,6 +6,7 @@ import { ScenarioGridComponent } from './map/grid/scenario-grid.component';
 import { YearRangeGridComponent } from './map/grid/yearrange-grid.component';
 import { ScenarioYearRangeGridComponent } from './map/grid/scenario-yearrange-grid.component';
 import { ClimateVarKey } from './utils/enum';
+import { blockOnMobileGuard } from './core/mobile';
 
 /**
  * Mapping of climate variables to their SEO-friendly titles and URL paths.
@@ -144,7 +145,7 @@ export const routes: Routes = [
   { path: 'seasons', component: MonthlyGridComponent },
   { path: 'climate-scenarios', component: ScenarioGridComponent },
   { path: 'climate-predictions', component: YearRangeGridComponent },
-  { path: 'climate-matrix', component: ScenarioYearRangeGridComponent },
+  {path: 'climate-matrix', component: ScenarioYearRangeGridComponent, canActivate: [blockOnMobileGuard] },
   { path: 'about', component: AboutComponent },
   // Climate variable routes for SEO - generated dynamically
   ...generateClimateVariableRoutes(),

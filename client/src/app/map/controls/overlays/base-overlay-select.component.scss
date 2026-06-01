@@ -1,9 +1,10 @@
+@import "../../../../styles/variables";
 :host {
   position: absolute;
   right: 4px;
   z-index: 1000;
 
-  @media (max-width: 768px) {
+  @media (max-width: $mobile-max-width) {
     display: none;
   }
 }

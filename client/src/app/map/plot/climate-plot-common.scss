@@ -1,9 +1,10 @@
+@import "../../../styles/variables";
 .chart-container {
   width: 100%;
   height: 350px;
   position: relative;
 
-  @media (max-width: 768px) {
+  @media (max-width: $mobile-max-width) {
     height: 30vh;
   }
 }

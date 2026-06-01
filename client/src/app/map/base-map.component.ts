@@ -3,6 +3,7 @@ import { Location } from '@angular/common';
 import { ActivatedRoute, ParamMap } from '@angular/router';
 import { ClimateMapService } from '../core/climatemap.service';
 import { ClimateMap } from '../core/climatemap';
+import { isMobileViewport } from '../core/mobile';
 import {
   MetadataService,
   ClimateVariableConfig,
@@ -473,7 +474,7 @@ export abstract class BaseMapComponent implements OnInit {
   }
 
   protected checkMobile(): void {
-    this.isMobile = window.innerWidth <= 768;
+    this.isMobile = isMobileViewport();
     if (this.isMobile) {
       this.sidebarOpened = false;
     }

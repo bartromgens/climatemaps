@@ -12,6 +12,7 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Subscription, combineLatest } from 'rxjs';
+import { MOBILE_MAX_WIDTH } from '../core/mobile';
 import {
   ClimateMapService,
   ColorbarConfigResponse,
@@ -85,7 +86,7 @@ import { getClimateVarKeyFromDataType } from '../utils/enum';
         overflow: visible;
       }
 
-      @media (max-width: 768px) {
+      @media (max-width: ${MOBILE_MAX_WIDTH}px) {
         :host {
           bottom: 95px;
           left: -4px;

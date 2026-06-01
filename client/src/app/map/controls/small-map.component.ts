@@ -13,6 +13,7 @@ import { control, latLng, Layer, Map, tileLayer } from 'leaflet';
 import 'leaflet.vectorgrid';
 import { Subject, takeUntil } from 'rxjs';
 import { MatomoTracker } from 'ngx-matomo-client';
+import { isMobileViewport } from '../../core/mobile';
 
 import {
   MapSyncService,
@@ -148,7 +149,7 @@ export class SmallMapComponent implements OnInit, OnDestroy, OnChanges {
 
   onMapReady(map: Map): void {
     this.map = map;
-    const isMobile = window.innerWidth <= 768;
+    const isMobile = isMobileViewport();
     if (this.showZoomControl && !isMobile) {
       control.zoom({ position: 'bottomleft' }).addTo(map);
     }

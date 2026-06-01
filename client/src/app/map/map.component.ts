@@ -21,6 +21,7 @@ import {
 import 'leaflet.vectorgrid';
 
 import { environment } from '../../environments/environment';
+import { isMobileViewport } from '../core/mobile';
 import { MapControlsComponent } from './controls/map-controls.component';
 import { VariableSelectorOverlayComponent } from './controls/overlays/variable-selector-overlay.component';
 import { MobileDateControlOverlayComponent } from './controls/overlays/mobile-date-control-overlay.component';
@@ -498,7 +499,7 @@ export class MapComponent extends BaseMapComponent implements OnInit {
       return;
     }
 
-    const isMobile = window.innerWidth <= 768;
+    const isMobile = isMobileViewport();
 
     if (!isMobile) {
       new Control.Zoom({ position: 'topleft' }).addTo(this.map);

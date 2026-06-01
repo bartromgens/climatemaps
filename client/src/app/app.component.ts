@@ -10,6 +10,7 @@ import { DomSanitizer } from '@angular/platform-browser';
 import { TemperatureUnitSelectorComponent } from './core/temperature-unit-selector.component';
 import { PrecipitationUnitSelectorComponent } from './core/precipitation-unit-selector.component';
 import { LocationSearchComponent } from './core/location-search.component';
+import { isMobileViewport } from './core/mobile';
 
 @Component({
   selector: 'app-root',
@@ -54,6 +55,6 @@ export class AppComponent implements OnInit {
   }
 
   private checkMobile(): void {
-    this.isMobile = window.innerWidth <= 768;
+    this.isMobile = isMobileViewport();
   }
 }
