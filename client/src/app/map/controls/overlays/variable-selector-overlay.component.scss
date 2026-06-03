@@ -1,3 +1,4 @@
+@import "../../../../styles/variables";
 .variable-selector-overlay {
   position: fixed;
   top: 80px;
@@ -16,7 +17,7 @@
     display: none;
   }
 
-  @media (max-width: 768px) {
+  @media (max-width: $mobile-max-width) {
     top: 80px;
     right: 5px;
     gap: 5px;
@@ -87,7 +88,7 @@
     }
   }
 
-  @media (max-width: 768px) {
+  @media (max-width: $mobile-max-width) {
     width: 40px;
     height: 40px;
     padding-right: 40px;
@@ -135,7 +136,7 @@
     justify-content: center;
   }
 
-  @media (max-width: 768px) {
+  @media (max-width: $mobile-max-width) {
     font-size: 20px;
     width: 40px;
     height: 40px;
@@ -163,7 +164,7 @@
   padding-right: 0;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
-  @media (max-width: 768px) {
+  @media (max-width: $mobile-max-width) {
     font-size: 11px;
     padding-left: 12px;
   }

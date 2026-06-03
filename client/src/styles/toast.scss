@@ -6,7 +6,7 @@
 .success-toast {
   margin-top: 70px !important;
 
-  @media (max-width: 768px) {
+  @media (max-width: $mobile-max-width) {
     margin-top: 60px !important;
   }
 }

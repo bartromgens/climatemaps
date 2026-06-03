@@ -137,7 +137,7 @@
     }
   }
 
-  @media (max-width: 768px) {
+  @media (max-width: $mobile-max-width) {
     top: 10px;
     left: 50%;
     transform: translateX(-50%);
@@ -186,7 +186,7 @@
 }
 
 // Mobile-specific styling
-@media (max-width: 768px) {
+@media (max-width: $mobile-max-width) {
   .desktop-controls {
     display: none;
   }
@@ -203,7 +203,7 @@
   }
 }
 
-@media (max-width: 768px) {
+@media (max-width: $mobile-max-width) {
   ::ng-deep .leaflet-control-zoom {
     display: none !important;
   }

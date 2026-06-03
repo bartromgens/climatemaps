@@ -45,7 +45,7 @@
   border-bottom: 2px solid #ddd;
   background-color: #f8f9fa;
 
-  @media (max-width: 768px) {
+  @media (max-width: $mobile-max-width) {
     grid-template-columns: 80px repeat(2, 1fr);
     height: 30px;
     font-size: 0.75rem;
@@ -87,7 +87,7 @@
     border-bottom: none;
   }
 
-  @media (max-width: 768px) {
+  @media (max-width: $mobile-max-width) {
     grid-template-columns: 80px 1fr;
   }
 }
@@ -103,7 +103,7 @@
   border-right: 2px solid #ddd;
   writing-mode: horizontal-tb;
 
-  @media (max-width: 768px) {
+  @media (max-width: $mobile-max-width) {
     font-size: 0.7rem;
     padding: 4px;
   }
@@ -114,13 +114,13 @@
   grid-template-columns: repeat(4, 1fr);
   gap: 0;
 
-  @media (max-width: 768px) {
+  @media (max-width: $mobile-max-width) {
     grid-template-columns: repeat(2, 1fr);
     grid-template-rows: repeat(2, 1fr);
   }
 }
 
-@media (max-width: 768px) {
+@media (max-width: $mobile-max-width) {
   .column-headers {
     display: none;
   }
@@ -143,7 +143,7 @@
 
 :host ::ng-deep {
   mat-sidenav-container {
-    @media (max-width: 768px) {
+    @media (max-width: $mobile-max-width) {
       height: calc(100vh);
     }
   }

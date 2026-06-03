@@ -4,7 +4,7 @@
   bottom: 288px;
   right: 20px;
 
-  @media (max-width: 768px) {
+  @media (max-width: $mobile-max-width) {
     bottom: 130px;
     right: 10px;
   }

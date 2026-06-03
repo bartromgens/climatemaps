@@ -10,6 +10,7 @@ import {
   ChangeDetectorRef,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { MOBILE_MAX_WIDTH } from '../../core/mobile';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
@@ -298,7 +299,7 @@ export class ClimateMonthlyPlotComponent
         },
         plugins: {
           legend: {
-            display: window.innerWidth >= 768,
+            display: window.innerWidth >= MOBILE_MAX_WIDTH,
             position: 'top',
           },
           title: {

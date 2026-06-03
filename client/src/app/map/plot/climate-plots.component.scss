@@ -23,7 +23,7 @@
     max-height: 350px;
   }
 
-  @media (max-width: 768px) {
+  @media (max-width: $mobile-max-width) {
     top: 80px;
     right: 10px;
     left: 10px;
